@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Ο δικός μου δρόμος</title>
+  <rect width="512" height="512" rx="112" fill="#1d4fa3"/>
+  <!-- δρόμος σε σχήμα δ: πάνω καμπύλη που κατεβαίνει και κλείνει σε κύκλο -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path id="road" d="M352 118 C318 96 232 92 214 140 C198 184 262 206 296 238 C346 284 344 392 256 400 C182 406 146 350 158 304 C168 262 236 228 302 246"
+          stroke="#ffffff" stroke-width="70"/>
+  </g>
+  <!-- βάση: αφετηρία και επιστροφή -->
+  <circle cx="352" cy="118" r="40" fill="#f08a4b" stroke="#ffffff" stroke-width="12"/>
+  <circle cx="352" cy="118" r="13" fill="#ffffff"/>
+</svg>

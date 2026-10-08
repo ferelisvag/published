@@ -3,7 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Δρομολόγια Ιωαννίνων</title>
+<title>Ο δικός μου δρόμος</title>
+<meta name="description" content="Βέλτιστη διαδρομή για έως 30 στάσεις, με αφετηρία και επιστροφή στο ίδιο σημείο. Δωρεάν, χωρίς εγγραφή.">
+<meta name="theme-color" content="#1d4fa3">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Ο δρόμος μου">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&display=swap">
@@ -54,6 +61,8 @@ body { background: var(--bg); color: var(--ink); font: 15px/1.45 var(--font); }
   .panel { border-right: 0; border-top: 1px solid var(--line); order: 2; }
   #map { order: 1; }
 }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand img { width: 40px; height: 40px; border-radius: 9px; flex: none; }
 h1 { font-size: 19px; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
 .sub { color: var(--muted); font-size: 13px; margin: 2px 0 0; }
 h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
@@ -170,7 +179,10 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
 <div class="app">
   <aside class="panel">
     <div>
-      <h1>Δρομολόγια Ιωαννίνων</h1>
+      <div class="brand">
+        <img src="logo.svg" alt="" width="40" height="40">
+        <h1>Ο δικός μου δρόμος</h1>
+      </div>
       <p class="sub">Πάτα στον χάρτη ή ψάξε διεύθυνση για να βάλεις στάσεις (έως 30).</p>
     </div>
 
@@ -320,7 +332,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
   var VALHALLA = 'https://valhalla1.openstreetmap.de';
   var PHOTON = 'https://photon.komoot.io';
   var GR_BBOX = '19.3,34.7,29.7,41.8';
-  var APP_NAME = 'Δρομολόγια Ιωαννίνων';
+  var APP_NAME = 'Ο δικός μου δρόμος';
 
   var S = {
     key: '',

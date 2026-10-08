@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Υπολόγισε τον μισθό σου</title>
+<meta name="description" content="Από μικτά σε καθαρά για μισθωτούς στην Ελλάδα, με Σάββατα, 12ωρα, Κυριακές, υπερεργασία και υπερωρίες. Κλίμακα φόρου 2026.">
+<meta name="theme-color" content="#0f5c45">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Μισθός">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700;800&display=swap">
+<style>
+/* Αριστερά η φόρμα, δεξιά η "απόδειξη πληρωμής" που μένει στη θέση της. Σε κινητό: φόρμα, μετά απόδειξη, και μπάρα με τα καθαρά κάτω. */
+:root {
+  --bg: #eef1ec;
+  --panel: #ffffff;
+  --paper: #fffef9;
+  --ink: #18221d;
+  --muted: #5b6a62;
+  --line: #d9dfd9;
+  --accent: #0f5c45;       /* πράσινο λογιστικού βιβλίου */
+  --accent-ink: #ffffff;
+  --soft: #e3ece6;
+  --minus: #a8372b;
+  --plus: #1d6e4f;
+  --warn: #8f5600;
+  --warn-bg: #fbf0dc;
+  --font: "Commissioner", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1411; --panel: #151d19; --paper: #1a231f; --ink: #e5ece8; --muted: #9aaba2; --line: #2b3832;
+    --accent: #58c39a; --accent-ink: #08130e; --soft: #1f2c26; --minus: #ff8a7a; --plus: #6fd3a8;
+    --warn: #f0b75a; --warn-bg: #2c2414; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1411; --panel: #151d19; --paper: #1a231f; --ink: #e5ece8; --muted: #9aaba2; --line: #2b3832;
+  --accent: #58c39a; --accent-ink: #08130e; --soft: #1f2c26; --minus: #ff8a7a; --plus: #6fd3a8;
+  --warn: #f0b75a; --warn-bg: #2c2414; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font); }
+.wrap { max-width: 1060px; margin: 0 auto; padding: 20px 16px 120px; }
+header.top { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+header.top img { width: 44px; height: 44px; border-radius: 10px; flex: none; }
+h1 { font-size: 22px; margin: 0; font-weight: 800; letter-spacing: -0.015em; }
+.sub { color: var(--muted); font-size: 13.5px; margin: 1px 0 0; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 20px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+/* φόρμα */
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.card + .card { margin-top: 14px; }
+h2 { font-size: 15px; margin: 0 0 4px; font-weight: 700; }
+.lead { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+@media (max-width: 520px) { .fields { grid-template-columns: 1fr; } }
+.f { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.f label { font-size: 13.5px; font-weight: 600; }
+.f small { color: var(--muted); font-size: 12px; line-height: 1.35; }
+.inp { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 9px; background: var(--bg); overflow: hidden; }
+.inp:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.inp input { font: inherit; font-variant-numeric: tabular-nums; color: var(--ink); background: transparent; border: 0; padding: 9px 11px; width: 100%; min-width: 0; outline: none; }
+.inp .unit { display: grid; place-items: center; padding: 0 10px; color: var(--muted); font-size: 13px; }
+.inp button { font: inherit; font-size: 18px; line-height: 1; border: 0; border-left: 1px solid var(--line); background: transparent; color: var(--ink); width: 40px; cursor: pointer; }
+.inp button:first-child { border-left: 0; border-right: 1px solid var(--line); }
+.inp button:hover { background: var(--soft); }
+.inp input.num { text-align: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; margin-bottom: 12px; }
+.seg button { font: inherit; font-size: 14px; border: 0; background: transparent; color: var(--ink); padding: 8px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+details.adv summary { cursor: pointer; font-weight: 700; font-size: 15px; }
+details.adv[open] summary { margin-bottom: 12px; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.btn { font: inherit; font-weight: 600; font-size: 14px; border-radius: 9px; padding: 9px 13px; cursor: pointer; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.btn:hover { border-color: var(--accent); }
+button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* απόδειξη πληρωμής */
+.slip-col { position: sticky; top: 16px; }
+@media (max-width: 860px) { .slip-col { position: static; } }
+.slip {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 4px 4px 0 0; padding: 18px 18px 22px;
+  box-shadow: 0 1px 0 var(--line); position: relative;
+}
+/* οδοντωτή κάτω άκρη, σαν κομμένη απόδειξη */
+.slip::after {
+  content: ""; position: absolute; left: -1px; right: -1px; bottom: -9px; height: 10px;
+  background: linear-gradient(-45deg, transparent 6px, var(--paper) 0) 0 0 / 12px 10px repeat-x,
+              linear-gradient(45deg, transparent 6px, var(--paper) 0) 0 0 / 12px 10px repeat-x;
+}
+.slip-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 6px; }
+.slip-head b { font-size: 15px; }
+.slip-head span { color: var(--muted); font-size: 12.5px; }
+.lines { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.lines td { padding: 5px 0; vertical-align: top; }
+.lines td:last-child { text-align: right; white-space: nowrap; padding-left: 10px; }
+.lines .q { color: var(--muted); font-size: 12.5px; display: block; }
+.lines tr.sum td { border-top: 1px dashed var(--line); font-weight: 700; padding-top: 8px; }
+.lines tr.minus td:last-child { color: var(--minus); }
+.lines tr.plus td:last-child { color: var(--plus); }
+.net { margin-top: 10px; border-top: 2px solid var(--ink); padding-top: 10px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.net span { font-weight: 700; font-size: 15px; }
+.net b { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--accent); }
+.facts { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fact { background: var(--soft); border-radius: 9px; padding: 8px 10px; }
+.fact b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+.fact span { color: var(--muted); font-size: 12px; line-height: 1.35; display: block; }
+.note { margin-top: 12px; font-size: 13px; padding: 9px 11px; border-radius: 9px; background: var(--warn-bg); color: var(--warn); }
+.taxbox { margin-top: 14px; font-size: 13px; }
+.taxbox summary { cursor: pointer; font-weight: 600; }
+.taxbox table { width: 100%; border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.taxbox td, .taxbox th { padding: 4px 0; text-align: right; border-bottom: 1px solid var(--line); font-weight: 400; }
+.taxbox td:first-child, .taxbox th:first-child { text-align: left; }
+.taxbox th { color: var(--muted); font-size: 12px; }
+
+/* μπάρα κινητού */
+.bar { display: none; }
+@media (max-width: 860px) {
+  .bar {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; justify-content: space-between; align-items: center; gap: 10px;
+    background: var(--accent); color: var(--accent-ink); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    border: 0; font: inherit; width: 100%; text-align: left; cursor: pointer;
+  }
+  .bar b { font-size: 22px; font-variant-numeric: tabular-nums; }
+}
+
+/* πηγές, αποποίηση */
+.foot { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 860px) { .foot { grid-template-columns: 1fr; } }
+.foot h2 { margin-bottom: 8px; }
+.foot .card + .card { margin-top: 0; }
+.foot p, .foot li { font-size: 13.5px; color: var(--muted); }
+.foot p { margin: 0 0 8px; }
+.foot ul { margin: 0; padding-left: 18px; }
+.foot li { margin-bottom: 6px; }
+.foot a { color: var(--accent); }
+.ver { color: var(--muted); font-size: 11.5px; margin-top: 18px; text-align: center; }
+@media (prefers-reduced-motion: no-preference) { .net b { transition: color .2s; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <img src="logo.svg" alt="" width="44" height="44">
+    <div>
+      <h1>Υπολόγισε τον μισθό σου</h1>
+      <p class="sub">Από μικτά σε καθαρά για μισθωτούς, με τα Σάββατα, τα 12ωρα και τις υπερωρίες του μήνα.</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <main>
+      <section class="card">
+        <h2>Μισθός</h2>
+        <p class="lead">Βάλε τον μηνιαίο μισθό της σύμβασής σου, σε μικτά ή σε καθαρά.</p>
+        <div class="seg" role="group" aria-label="Τι μισθό ξέρεις">
+          <button type="button" id="modeGross" aria-pressed="true">Ξέρω τα μικτά</button>
+          <button type="button" id="modeNet" aria-pressed="false">Ξέρω τα καθαρά</button>
+        </div>
+        <div class="fields">
+          <div class="f">
+            <label for="salary" id="salaryLabel">Μικτός μηνιαίος μισθός</label>
+            <div class="inp"><input id="salary" inputmode="decimal" autocomplete="off"><span class="unit">€</span></div>
+            <small id="salaryHint">Κατώτατος μισθός από 1/4/2026: 920 € μικτά.</small>
+          </div>
+          <div class="f">
+            <label for="age">Ηλικία</label>
+            <div class="inp"><input id="age" inputmode="numeric" autocomplete="off"><span class="unit">ετών</span></div>
+            <small>Έως 25 και 26–30 ετών ισχύουν μειωμένοι συντελεστές φόρου.</small>
+          </div>
+          <div class="f">
+            <label for="kids">Εξαρτώμενα παιδιά</label>
+            <div class="inp"><button type="button" data-step="kids" data-d="-1" aria-label="Λιγότερα">−</button><input id="kids" class="num" inputmode="numeric" autocomplete="off"><button type="button" data-step="kids" data-d="1" aria-label="Περισσότερα">+</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Επιπλέον δουλειά αυτόν τον μήνα</h2>
+        <p class="lead">Για πλήρη απασχόληση σε πενθήμερο. Άφησε 0 ό,τι δεν έκανες.</p>
+        <div class="fields">
+          <div class="f">
+            <label for="sat">Σάββατα (6η μέρα)</label>
+            <div class="inp"><button type="button" data-step="sat" data-d="-1" aria-label="Λιγότερα">−</button><input id="sat" class="num" inputmode="numeric"><button type="button" data-step="sat" data-d="1" aria-label="Περισσότερα">+</button></div>
+            <small>Ολόκληρες μέρες, με +40%.</small>
+          </div>
+          <div class="f">
+            <label for="d12">12ωρα</label>
+            <div class="inp"><button type="button" data-step="d12" data-d="-1" aria-label="Λιγότερα">−</button><input id="d12" class="num" inputmode="numeric"><button type="button" data-step="d12" data-d="1" aria-label="Περισσότερα">+</button></div>
+            <small>Μέρες που έκατσες 4 ώρες παραπάνω: 1 ώρα υπερεργασία και 3 υπερωρία.</small>
+          </div>
+          <div class="f">
+            <label for="d12p">12ωρα με παράνομη υπερωρία</label>
+            <div class="inp"><button type="button" data-step="d12p" data-d="-1" aria-label="Λιγότερα">−</button><input id="d12p" class="num" inputmode="numeric"><button type="button" data-step="d12p" data-d="1" aria-label="Περισσότερα">+</button></div>
+            <small>Όταν η υπερωρία δεν έχει δηλωθεί ή έχει περάσει το όριο: +120%.</small>
+          </div>
+          <div class="f">
+            <label for="sun">Ώρες Κυριακής ή αργίας</label>
+            <div class="inp"><button type="button" data-step="sun" data-d="-1" aria-label="Λιγότερες">−</button><input id="sun" class="num" inputmode="decimal"><button type="button" data-step="sun" data-d="1" aria-label="Περισσότερες">+</button></div>
+            <small>Ώρες, όχι μέρες. +75%.</small>
+          </div>
+          <div class="f">
+            <label for="ype">Ώρες υπερεργασίας</label>
+            <div class="inp"><button type="button" data-step="ype" data-d="-1" aria-label="Λιγότερες">−</button><input id="ype" class="num" inputmode="decimal"><button type="button" data-step="ype" data-d="1" aria-label="Περισσότερες">+</button></div>
+            <small>Σκόρπιες ώρες από 41 έως 45 την εβδομάδα. +20%.</small>
+          </div>
+          <div class="f">
+            <label for="ypo">Ώρες υπερωρίας</label>
+            <div class="inp"><button type="button" data-step="ypo" data-d="-1" aria-label="Λιγότερες">−</button><input id="ypo" class="num" inputmode="decimal"><button type="button" data-step="ypo" data-d="1" aria-label="Περισσότερες">+</button></div>
+            <small>Σκόρπιες ώρες πάνω από 45 την εβδομάδα. +40%.</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <details class="adv">
+          <summary>Ρυθμίσεις για ειδικές περιπτώσεις</summary>
+          <p class="lead">Οι προεπιλογές ισχύουν για τους περισσότερους μισθωτούς του ιδιωτικού τομέα. Άλλαξέ τες μόνο αν ξέρεις ότι σε αφορά κάτι διαφορετικό, π.χ. βαρέα και ανθυγιεινά ή δημόσιο.</p>
+          <div class="fields">
+            <div class="f"><label for="efka">Εισφορά ΕΦΚΑ εργαζομένου</label><div class="inp"><input id="efka" inputmode="decimal"><span class="unit">%</span></div><small>13,37% για τους περισσότερους. Στα βαρέα είναι μεγαλύτερη.</small></div>
+            <div class="f"><label for="pays">Πληρωμές τον χρόνο</label><div class="inp"><input id="pays" inputmode="numeric"></div><small>14 = 12 μισθοί, 2 δώρα και επίδομα αδείας. Στο δημόσιο 12.</small></div>
+            <div class="f"><label for="pSat">Προσαύξηση Σαββάτου</label><div class="inp"><input id="pSat" inputmode="decimal"><span class="unit">%</span></div><small>Σε εξαήμερο το Σάββατο είναι κανονική μέρα: βάλε 0.</small></div>
+            <div class="f"><label for="hSat">Ώρες ανά Σάββατο</label><div class="inp"><input id="hSat" inputmode="decimal"></div></div>
+            <div class="f"><label for="pYpe">Προσαύξηση υπερεργασίας</label><div class="inp"><input id="pYpe" inputmode="decimal"><span class="unit">%</span></div></div>
+            <div class="f"><label for="pYpo">Προσαύξηση υπερωρίας</label><div class="inp"><input id="pYpo" inputmode="decimal"><span class="unit">%</span></div></div>
+            <div class="f"><label for="pPar">Προσαύξηση παράνομης υπερωρίας</label><div class="inp"><input id="pPar" inputmode="decimal"><span class="unit">%</span></div></div>
+            <div class="f"><label for="pSun">Προσαύξηση Κυριακής</label><div class="inp"><input id="pSun" inputmode="decimal"><span class="unit">%</span></div></div>
+            <div class="f"><label for="h12e">12ωρο: ώρες υπερεργασίας</label><div class="inp"><input id="h12e" inputmode="decimal"></div></div>
+            <div class="f"><label for="h12o">12ωρο: ώρες υπερωρίας</label><div class="inp"><input id="h12o" inputmode="decimal"></div></div>
+            <div class="f"><label for="limit">Όριο νόμιμων υπερωριών τον χρόνο</label><div class="inp"><input id="limit" inputmode="numeric"><span class="unit">ώρες</span></div></div>
+          </div>
+        </details>
+        <div class="row-btns">
+          <button type="button" class="btn" id="shareBtn">Αντιγραφή link με αυτά τα νούμερα</button>
+          <button type="button" class="btn" id="resetBtn">Επαναφορά</button>
+        </div>
+      </section>
+    </main>
+
+    <aside class="slip-col" id="slipCol" aria-live="polite">
+      <div class="slip">
+        <div class="slip-head"><b>Απόδειξη πληρωμής μήνα</b><span>εκτίμηση</span></div>
+        <table class="lines"><tbody id="lines"></tbody></table>
+        <div class="net"><span>Καθαρά στο χέρι</span><b id="netOut">–</b></div>
+        <div class="facts" id="facts"></div>
+        <div id="notes"></div>
+        <details class="taxbox">
+          <summary>Πώς βγήκε ο φόρος</summary>
+          <div id="taxDetail"></div>
+        </details>
+      </div>
+    </aside>
+  </div>
+
+  <footer class="foot">
+    <section class="card">
+      <h2>Πηγές</h2>
+      <ul>
+        <li><a href="https://www.taxheaven.gr/news/71602/oi-nees-analytikes-klimakes-forologias-2026-sygkrish-2025-2026" target="_blank" rel="noopener">Κλίμακες φορολογίας μισθωτών 2026 ανά ηλικία και παιδιά</a> (taxheaven)</li>
+        <li><a href="https://www.taxheaven.gr/law/4172/2013/arthro/16" target="_blank" rel="noopener">Μείωση φόρου μισθωτών, άρθρο 16 ν. 4172/2013</a> (taxheaven)</li>
+        <li><a href="https://www.jobfind.gr/hrcorner/salarycalc/gr/Ypologismos_Katharoy_Misthoy" target="_blank" rel="noopener">Εισφορές ΕΦΚΑ 13,37% και κατώτατος μισθός 920 €</a> (jobfind)</li>
+        <li><a href="https://www.athensvoice.gr/epikairotita/politiki-oikonomia/857308/exaimeri-ergasia-ergazomenoi/amp/" target="_blank" rel="noopener">Εργασία 6ης ημέρας με προσαύξηση 40%, ν. 5053/2023</a> (Athens Voice)</li>
+        <li><a href="https://www.oenet.gr/ergasiaka/eidikotita-ergazomenou/μερικη-απασχοληση-προσθετη-εργασια-υπερεργασια-υπερωρια" target="_blank" rel="noopener">Υπερεργασία, υπερωρία και πρόσθετη εργασία</a> (oenet)</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>Τι πρέπει να ξέρεις</h2>
+      <p>Τα αποτελέσματα είναι ενδεικτικά και δεν αποτελούν λογιστική, φορολογική ή νομική συμβουλή. Δεν φέρουμε καμία ευθύνη για λάθη, παραλείψεις ή αλλαγές στη νομοθεσία, στους συντελεστές και στις κλίμακες μετά την τελευταία ενημέρωση της εφαρμογής (Οκτώβριος 2026), ούτε για αποφάσεις που θα πάρεις με βάση αυτά τα νούμερα. Για την πραγματική σου μισθοδοσία ρώτα τον λογιστή του εργοδότη σου ή έναν λογιστή.</p>
+      <p>Ο φόρος υπολογίζεται όπως στην παρακράτηση της μισθοδοσίας: τα μηνιαία μικτά μετά τον ΕΦΚΑ αναγάγονται σε ετήσια (× 14). Ο τελικός φόρος βγαίνει στη δήλωση με όλα τα εισοδήματα της χρονιάς και μπορεί να διαφέρει, ειδικά αν έχεις και άλλα εισοδήματα. Δεν καλύπτονται ημερομίσθιοι, μερική απασχόληση, αναπηρία και άλλες ειδικές περιπτώσεις.</p>
+      <p>Ό,τι γράφεις μένει στη συσκευή σου. Δεν στέλνεται πουθενά.</p>
+    </section>
+  </footer>
+  <p class="ver">Έκδοση 9.10 · 01:05</p>
+</div>
+
+<button type="button" class="bar" id="bar" aria-label="Δες την ανάλυση"><span>Καθαρά στο χέρι</span><b id="barNet">–</b></button>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var STORE = 'misthos.v1';
+
+  // Κλίμακα μισθωτών 2026 (ν. 5246/2025). Κλιμάκια σε €, συντελεστές ανά ομάδα ηλικίας και παιδιά (0..6).
+  var EDGES = [0, 10000, 20000, 30000, 40000, 60000, Infinity];
+  var THIRD = [26, 24, 22, 20, 18, 16, 14];
+  function rates(age, kids) {
+    var k = Math.min(Math.max(kids, 0), 6), a, b;
+    if (age <= 25) { a = 0; b = 0; }
+    else if (age <= 30) { a = k <= 3 ? 9 : 0; b = a; }
+    else { var t = [[9, 20], [9, 18], [9, 16], [9, 9], [0, 0], [0, 0], [0, 0]][k]; a = t[0]; b = t[1]; }
+    return [a, b, THIRD[k], 34, 39, 44].map(function (x) { return x / 100; });
+  }
+  // Μείωση φόρου (άρθρο 16 ΚΦΕ): 777/900/1120/1340/1580, 5 παιδιά 1780, +220 για κάθε επιπλέον.
+  // Πάνω από 12.000 € μειώνεται 20 € ανά 1.000 €, εκτός αν έχεις 5+ παιδιά.
+  function reduction(income, kids) {
+    var base = kids <= 4 ? [777, 900, 1120, 1340, 1580][Math.max(kids, 0)] : 1780 + (kids - 5) * 220;
+    if (kids <= 4 && income > 12000) base -= (income - 12000) / 1000 * 20;
+    return Math.max(0, base);
+  }
+  function annualTax(income, age, kids) {
+    var r = rates(age, kids), bands = [], tax = 0;
+    for (var i = 0; i < 6; i++) {
+      var lo = EDGES[i], hi = EDGES[i + 1];
+      var part = Math.max(0, Math.min(income, hi) - lo);
+      bands.push({ lo: lo, hi: hi, rate: r[i], part: part, tax: part * r[i] });
+      tax += part * r[i];
+    }
+    var red = reduction(income, kids);
+    return { bands: bands, gross: tax, red: red, net: Math.max(0, tax - red) };
+  }
+
+  var DEF = { mode: 'gross', salary: 920, age: 31, kids: 0, sat: 0, d12: 0, d12p: 0, sun: 0, ype: 0, ypo: 0,
+    efka: 13.37, pays: 14, pSat: 40, hSat: 8, pYpe: 20, pYpo: 40, pPar: 120, pSun: 75, h12e: 1, h12o: 3, limit: 150 };
+  var KEYS = Object.keys(DEF).filter(function (k) { return k !== 'mode'; });
+  var st = {};
+
+  function num(v) {
+    if (typeof v === 'number') return v;
+    var s = String(v == null ? '' : v).trim().replace(/\s/g, '');
+    if (s.indexOf(',') >= 0) s = s.replace(/\./g, '').replace(',', '.');
+    var n = parseFloat(s);
+    return isFinite(n) ? n : 0;
+  }
+  var fmtE = new Intl.NumberFormat('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var fmtN = new Intl.NumberFormat('el-GR', { maximumFractionDigits: 2 });
+  var eur = function (x) { return fmtE.format(x) + ' €'; };
+  var fmtIn = function (x) { return fmtN.format(x).replace(/\./g, ''); };  // χωρίς τελείες χιλιάδων στα πεδία
+
+  // Υπολογισμός ενός μήνα από μικτό βασικό μισθό
+  function calc(base, s) {
+    var hr = base / 25 * 6 / 40;
+    var items = [
+      { t: 'Σάββατα', q: s.sat + ' × ' + fmtN.format(s.hSat) + ' ώρες, +' + fmtN.format(s.pSat) + '%', v: s.sat * hr * (1 + s.pSat / 100) * s.hSat, n: s.sat },
+      { t: '12ωρα', q: s.d12 + ' μέρες: ' + fmtN.format(s.h12e) + ' ώρα υπερεργασία, ' + fmtN.format(s.h12o) + ' υπερωρία', v: s.d12 * (hr * (1 + s.pYpe / 100) * s.h12e + hr * (1 + s.pYpo / 100) * s.h12o), n: s.d12 },
+      { t: '12ωρα με παράνομη υπερωρία', q: s.d12p + ' μέρες, υπερωρία +' + fmtN.format(s.pPar) + '%', v: s.d12p * (hr * (1 + s.pYpe / 100) * s.h12e + hr * (1 + s.pPar / 100) * s.h12o), n: s.d12p },
+      { t: 'Κυριακή / αργία', q: fmtN.format(s.sun) + ' ώρες, +' + fmtN.format(s.pSun) + '%', v: s.sun * hr * (1 + s.pSun / 100), n: s.sun },
+      { t: 'Υπερεργασία', q: fmtN.format(s.ype) + ' ώρες, +' + fmtN.format(s.pYpe) + '%', v: s.ype * hr * (1 + s.pYpe / 100), n: s.ype },
+      { t: 'Υπερωρία', q: fmtN.format(s.ypo) + ' ώρες, +' + fmtN.format(s.pYpo) + '%', v: s.ypo * hr * (1 + s.pYpo / 100), n: s.ypo }
+    ];
+    var extra = items.reduce(function (a, i) { return a + i.v; }, 0);
+    var gross = base + extra;
+    var efka = gross * s.efka / 100;
+    var pays = Math.max(1, s.pays);
+    var annual = (gross - efka) * pays;
+    var tx = annualTax(annual, s.age, Math.round(s.kids));
+    var tax = tx.net / pays;
+    return { hr: hr, items: items, extra: extra, gross: gross, efka: efka, annual: annual, tx: tx, tax: tax, net: gross - efka - tax, base: base };
+  }
+  // Από καθαρά σε μικτά: αναζήτηση του μικτού βασικού που δίνει τα καθαρά χωρίς επιπλέον δουλειά
+  function grossFromNet(target, s) {
+    var plain = {}; for (var k in s) plain[k] = s[k];
+    plain.sat = plain.d12 = plain.d12p = plain.sun = plain.ype = plain.ypo = 0;
+    var lo = 0, hi = Math.max(1000, target * 3);
+    for (var i = 0; i < 80; i++) { var mid = (lo + hi) / 2; if (calc(mid, plain).net < target) lo = mid; else hi = mid; }
+    return Math.round(hi * 100) / 100;
+  }
+
+  function read() {
+    KEYS.forEach(function (k) { st[k] = num($(k).value); });
+  }
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(st)); } catch (e) {} }
+  function fill() {
+    KEYS.forEach(function (k) { if (document.activeElement !== $(k)) $(k).value = fmtIn(st[k]); });
+    var g = st.mode === 'gross';
+    $('modeGross').setAttribute('aria-pressed', g); $('modeNet').setAttribute('aria-pressed', !g);
+    $('salaryLabel').textContent = g ? 'Μικτός μηνιαίος μισθός' : 'Καθαρός μηνιαίος μισθός (χωρίς επιπλέον ώρες)';
+  }
+
+  function render() {
+    var base = st.mode === 'gross' ? st.salary : grossFromNet(st.salary, st);
+    $('salaryHint').textContent = st.mode === 'gross'
+      ? 'Κατώτατος μισθός από 1/4/2026: 920 € μικτά.'
+      : 'Αντιστοιχεί σε περίπου ' + eur(base) + ' μικτά τον μήνα.';
+    var r = calc(base, st);
+    var plain = calc(base, Object.assign({}, st, { sat: 0, d12: 0, d12p: 0, sun: 0, ype: 0, ypo: 0 }));
+
+    var h = '<tr><td>Βασικός μισθός<span class="q">ωρομίσθιο ' + eur(r.hr) + '</span></td><td>' + eur(base) + '</td></tr>';
+    r.items.forEach(function (i) { if (i.n > 0) h += '<tr class="plus"><td>' + i.t + '<span class="q">' + i.q + '</span></td><td>+ ' + eur(i.v) + '</td></tr>'; });
+    h += '<tr class="sum"><td>Σύνολο μικτά</td><td>' + eur(r.gross) + '</td></tr>';
+    h += '<tr class="minus"><td>ΕΦΚΑ εργαζομένου<span class="q">' + fmtN.format(st.efka) + '% στα μικτά</span></td><td>− ' + eur(r.efka) + '</td></tr>';
+    h += '<tr class="minus"><td>Φόρος εισοδήματος<span class="q">παρακράτηση μήνα</span></td><td>− ' + eur(r.tax) + '</td></tr>';
+    $('lines').innerHTML = h;
+    $('netOut').textContent = eur(r.net);
+    $('barNet').textContent = eur(r.net);
+
+    var f = '';
+    if (r.extra > 0) {
+      var gain = r.net - plain.net;
+      f += '<div class="fact"><b>+ ' + eur(gain) + '</b><span>καθαρά από τις επιπλέον ώρες (' + Math.round(gain / r.extra * 100) + '% του μικτού τους)</span></div>';
+      f += '<div class="fact"><b>' + eur(plain.net) + '</b><span>καθαρά χωρίς επιπλέον ώρες</span></div>';
+    }
+    var ded = r.gross > 0 ? (r.efka + r.tax) / r.gross * 100 : 0;
+    f += '<div class="fact"><b>' + fmtN.format(Math.round(ded * 10) / 10) + '%</b><span>κρατήσεις συνολικά (ΕΦΚΑ και φόρος)</span></div>';
+    f += '<div class="fact"><b>' + eur(plain.net * st.pays) + '</b><span>καθαρά τον χρόνο από τον βασικό (× ' + fmtN.format(st.pays) + ')</span></div>';
+    $('facts').innerHTML = f;
+
+    // υπερωρίες και ετήσιο όριο
+    var otHours = st.d12 * st.h12o + st.ypo, n = '';
+    if (otHours > 0 && st.limit > 0) {
+      var months = st.limit / otHours;
+      n = '<div class="note">' + fmtN.format(otHours) + ' ώρες νόμιμης υπερωρίας αυτόν τον μήνα. Αν συνεχίσεις έτσι, φτάνεις το ετήσιο όριο των ' + fmtN.format(st.limit) +
+        ' ωρών σε ' + (months >= 12 ? 'περισσότερο από χρόνο' : 'περίπου ' + fmtN.format(Math.round(months * 10) / 10) + ' μήνες') +
+        '. Από εκεί και πέρα η υπερωρία λογίζεται παράνομη και πληρώνεται +' + fmtN.format(st.pPar) + '%.</div>';
+    }
+    $('notes').innerHTML = n;
+
+    var t = '<p class="sub" style="margin-top:8px">(μικτά ' + eur(r.gross) + ' − ΕΦΚΑ ' + eur(r.efka) + ') × ' + fmtN.format(st.pays) + ' = <b>' + eur(r.annual) + '</b> ετήσιο φορολογητέο.</p>';
+    t += '<table><tr><th>Κλιμάκιο</th><th>Συντελεστής</th><th>Φόρος</th></tr>';
+    r.tx.bands.forEach(function (b) {
+      if (b.lo > r.annual && b.lo > 0) return;
+      var lab = b.hi === Infinity ? 'πάνω από ' + fmtN.format(b.lo) : fmtN.format(b.lo) + ' – ' + fmtN.format(b.hi);
+      t += '<tr><td>' + lab + '</td><td>' + Math.round(b.rate * 100) + '%</td><td>' + eur(b.tax) + '</td></tr>';
+    });
+    t += '<tr><td>Φόρος κλίμακας</td><td></td><td>' + eur(r.tx.gross) + '</td></tr>';
+    t += '<tr><td>Μείωση φόρου</td><td></td><td>− ' + eur(r.tx.red) + '</td></tr>';
+    t += '<tr><td><b>Φόρος έτους</b></td><td></td><td><b>' + eur(r.tx.net) + '</b></td></tr>';
+    t += '<tr><td><b>Ανά πληρωμή (÷ ' + fmtN.format(st.pays) + ')</b></td><td></td><td><b>' + eur(r.tax) + '</b></td></tr></table>';
+    $('taxDetail').innerHTML = t;
+  }
+
+  function update() { read(); save(); render(); }
+
+  // αρχικές τιμές: link > αποθηκευμένα > προεπιλογές
+  function load() {
+    var s = {}; for (var k in DEF) s[k] = DEF[k];
+    try { var saved = JSON.parse(localStorage.getItem(STORE) || 'null'); if (saved) for (var k2 in saved) if (k2 in DEF) s[k2] = saved[k2]; } catch (e) {}
+    var q = new URLSearchParams(location.search);
+    if ([].some.call(Object.keys(DEF), function (k) { return q.has(k); })) {
+      for (var k3 in DEF) if (q.has(k3)) s[k3] = k3 === 'mode' ? (q.get(k3) === 'net' ? 'net' : 'gross') : num(q.get(k3));
+    }
+    st = s;
+  }
+
+  load(); fill(); render();
+
+  KEYS.forEach(function (k) {
+    $(k).addEventListener('input', update);
+    $(k).addEventListener('blur', function () { fill(); });
+  });
+  document.querySelectorAll('[data-step]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = b.getAttribute('data-step');
+      st[k] = Math.max(0, num($(k).value) + Number(b.getAttribute('data-d')));
+      $(k).value = fmtIn(st[k]); update();
+    });
+  });
+  function setMode(m) {
+    if (st.mode === m) return;
+    // κράτα τον ίδιο μισθό, μετατρεμμένο στο άλλο είδος
+    var base = st.mode === 'gross' ? st.salary : grossFromNet(st.salary, st);
+    st.mode = m;
+    st.salary = m === 'gross' ? base : Math.round(calc(base, Object.assign({}, st, { sat: 0, d12: 0, d12p: 0, sun: 0, ype: 0, ypo: 0 })).net * 100) / 100;
+    fill(); save(); render();
+  }
+  $('modeGross').onclick = function () { setMode('gross'); };
+  $('modeNet').onclick = function () { setMode('net'); };
+  $('resetBtn').onclick = function () {
+    for (var k in DEF) st[k] = DEF[k];
+    try { localStorage.removeItem(STORE); } catch (e) {}
+    history.replaceState(null, '', location.pathname);
+    fill(); render();
+  };
+  $('shareBtn').onclick = function () {
+    var q = new URLSearchParams();
+    for (var k in DEF) if (st[k] !== DEF[k]) q.set(k, st[k]);
+    var url = location.origin + location.pathname + (q.toString() ? '?' + q : '');
+    var btn = $('shareBtn'), txt = btn.textContent;
+    var done = function () { btn.textContent = 'Αντιγράφηκε'; setTimeout(function () { btn.textContent = txt; }, 2000); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, function () { prompt('Αντέγραψε το link:', url); });
+    else prompt('Αντέγραψε το link:', url);
+  };
+  $('bar').onclick = function () { $('slipCol').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+
+  // για έλεγχο από την κονσόλα / tests
+  window.__misthos = { calc: calc, annualTax: annualTax, grossFromNet: grossFromNet, DEF: DEF };
+})();
+</script>
+</body>
+</html>

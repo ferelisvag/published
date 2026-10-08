@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Υπολόγισε τον μισθό σου</title>
+  <rect width="512" height="512" rx="112" fill="#0f5c45"/>
+  <!-- απόδειξη πληρωμής με κομμένη κάτω άκρη -->
+  <path d="M136 92 H376 V392 L352 416 L328 392 L304 416 L280 392 L256 416 L232 392 L208 416 L184 392 L160 416 L136 392 Z" fill="#fffef9"/>
+  <g stroke="#9fb8ad" stroke-width="18" stroke-linecap="round">
+    <line x1="176" y1="150" x2="336" y2="150"/>
+    <line x1="176" y1="200" x2="296" y2="200"/>
+    <line x1="176" y1="250" x2="316" y2="250"/>
+  </g>
+  <line x1="176" y1="306" x2="336" y2="306" stroke="#18221d" stroke-width="10" stroke-linecap="round"/>
+  <!-- νόμισμα -->
+  <circle cx="356" cy="356" r="78" fill="#f2c14e" stroke="#0f5c45" stroke-width="14"/>
+  <path d="M384 318 A44 44 0 1 0 384 394" fill="none" stroke="#0f5c45" stroke-width="16" stroke-linecap="round"/>
+  <g stroke="#0f5c45" stroke-width="12" stroke-linecap="round"><line x1="312" y1="344" x2="364" y2="344"/><line x1="312" y1="368" x2="358" y2="368"/></g>
+</svg>

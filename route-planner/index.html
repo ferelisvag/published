@@ -172,19 +172,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
 .cost-list li { display: grid; grid-template-columns: 1fr 80px 120px auto; gap: 6px; align-items: center; }
 .cost-list input, .cost-list select { width: 100%; flex: none; padding: 6px 8px; font-size: 13.5px; }
 @media (max-width: 420px) { .cost-list li { grid-template-columns: 1fr 70px; } .cost-list li select { grid-column: 1; } }
-.onboard { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 16px;
-  padding-top: calc(16px + env(safe-area-inset-top, 0px)); padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-  background: rgba(20, 30, 50, .35);
-  background: color-mix(in srgb, var(--bg) 55%, transparent); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
-.onboard-card { width: 100%; max-width: 440px; max-height: 100%; overflow-y: auto; background: var(--panel); border: 1px solid var(--line);
-  border-radius: 16px; padding: 22px 20px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 12px 40px rgba(10, 20, 40, .22); }
-.onboard-card img { width: 56px; height: 56px; border-radius: 13px; }
-.onboard-card h2 { font-size: 20px; text-transform: none; letter-spacing: -0.01em; color: var(--ink); margin: 0; font-weight: 700; text-wrap: balance; }
-.onboard-card p { margin: 0; color: var(--muted); }
-.onboard-card .or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
-.onboard-card .or::before, .onboard-card .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.onboard-card .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.base-card.unset { border-style: dashed; border-color: var(--base); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -330,26 +317,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
   </aside>
   <div class="map-wrap">
     <div id="map"></div>
-    <div class="mode-banner" id="modeBanner" hidden>Πάτα στον χάρτη για να ορίσεις τη βάση</div>
-  </div>
-</div>
-
-<div class="onboard" id="onboard" role="dialog" aria-modal="true" aria-labelledby="obTitle" hidden>
-  <div class="onboard-card">
-    <img src="logo.svg" alt="">
-    <h2 id="obTitle">Από πού ξεκινάς;</h2>
-    <p>Η βάση σου είναι η αφετηρία και η επιστροφή κάθε δρομολογίου: η αποθήκη, το μαγαζί ή το σπίτι σου. Την αλλάζεις όποτε θες.</p>
-    <form id="obForm" class="row">
-      <input id="obInput" type="text" placeholder="Διεύθυνση ή πόλη, π.χ. Ιωάννινα" autocomplete="off" aria-label="Διεύθυνση βάσης">
-      <button type="submit" class="primary">Βρες</button>
-    </form>
-    <div id="obResults" class="results" hidden></div>
-    <div class="or">ή</div>
-    <div class="actions">
-      <button id="obGeo">Η τοποθεσία μου</button>
-      <button id="obMap">Επιλογή στον χάρτη</button>
-    </div>
-    <div id="obStatus" class="status" hidden></div>
+    <div class="mode-banner" id="modeBanner" hidden>Πάτα στον χάρτη για νέα αφετηρία</div>
   </div>
 </div>
 
@@ -375,8 +343,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     time: { depart: '08:00', svc: 5 },
     cost: { cons: 8, price: 1.8, tolls: 0, extra: [] },
     firstId: null,
-    lastId: null,
-    baseSet: false
+    lastId: null
   };
   var DEFAULTS = JSON.parse(JSON.stringify({ time: S.time, cost: S.cost }));
   var openId = null;   // στάση με ανοιχτές ρυθμίσεις
@@ -393,7 +360,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
         var d = JSON.parse(raw);
         Object.keys(S).forEach(function (k) { if (d[k] !== undefined) S[k] = d[k]; });
         old = d;
-        if (d.baseSet === undefined) S.baseSet = true;   // χρήστες της προηγούμενης έκδοσης έχουν ήδη βάση
       }
     } catch (e) {}
     // μετάβαση από την παλιά έκδοση
@@ -675,7 +641,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
 
   function optimize() {
     if (!S.stops.length) return;
-    if (!S.baseSet) { openOnboard(); return; }
     var btn = $('optBtn');
     btn.disabled = true;
     var o = normOpt(S.opt);
@@ -702,8 +667,8 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     return L.divIcon({ className: '', html: '<div class="mk ' + cls + '">' + label + '</div>', iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
   }
   function drawMarkers() {
-    if (baseMarker) { baseMarker.remove(); baseMarker = null; }
-    if (S.baseSet) baseMarker = L.marker([S.base.lat, S.base.lng], { icon: icon('b', 'Β'), zIndexOffset: 1000 }).addTo(map).bindTooltip(esc(S.base.name));
+    if (baseMarker) baseMarker.remove();
+    baseMarker = L.marker([S.base.lat, S.base.lng], { icon: icon('b', 'Β'), zIndexOffset: 1000 }).addTo(map).bindTooltip(esc(S.base.name));
     Object.keys(stopMarkers).forEach(function (k) { stopMarkers[k].remove(); });
     stopMarkers = {};
     S.stops.forEach(function (s, i) {
@@ -727,7 +692,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
   }
   function fitAll() {
     if (!S.stops.length) return;
-    var b = L.latLngBounds(S.stops.map(function (s) { return [s.lat, s.lng]; }).concat(S.baseSet ? [[S.base.lat, S.base.lng]] : []));
+    var b = L.latLngBounds(S.stops.map(function (s) { return [s.lat, s.lng]; }).concat([[S.base.lat, S.base.lng]]));
     map.fitBounds(b, { padding: [30, 30] });
   }
   map.on('click', function (e) {
@@ -758,21 +723,10 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     invalidate(); render();
   }
   function setBase(lat, lng, name) {
-    var first = !S.baseSet;
     S.base = { lat: lat, lng: lng, name: name || ('Σημείο ' + fmtCoord({ lat: lat, lng: lng })) };
-    S.baseSet = true;
-    closeOnboard();
-    if (first && !S.stops.length) map.setView([lat, lng], 11);
     baseMode = false; $('modeBanner').hidden = true; $('baseBtn').textContent = 'Αλλαγή';
     invalidate(); render();
     if (!name) reverseName(S.base);
-  }
-  function openOnboard() { $('onboard').hidden = false; setTimeout(function () { try { $('obInput').focus(); } catch (e) {} }, 50); }
-  function closeOnboard() { $('onboard').hidden = true; }
-  function obStatus(msg, kind) {
-    var el = $('obStatus');
-    if (!msg) { el.hidden = true; return; }
-    el.hidden = false; el.className = 'status' + (kind ? ' ' + kind : ''); el.textContent = msg;
   }
   function same(a, b) { return Math.abs(a.lat - b.lat) < 1e-5 && Math.abs(a.lng - b.lng) < 1e-5; }
   function isFav(s) { return S.favs.some(function (f) { return same(f, s); }); }
@@ -865,10 +819,8 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     if (result) { showResult(); render(); }
   }
   function render() {
-    $('baseName').textContent = S.baseSet ? S.base.name : 'Δεν έχει οριστεί ακόμα';
-    $('baseCoords').textContent = S.baseSet ? fmtCoord(S.base) : 'Πάτα «Ορισμός» για να διαλέξεις βάση';
-    $('baseName').parentNode.parentNode.classList.toggle('unset', !S.baseSet);
-    if (!baseMode) $('baseBtn').textContent = S.baseSet ? 'Αλλαγή' : 'Ορισμός';
+    $('baseName').textContent = S.base.name;
+    $('baseCoords').textContent = fmtCoord(S.base);
     $('count').textContent = S.stops.length + '/' + MAX;
     $('emptyHint').hidden = S.stops.length > 0;
     $('optBtn').disabled = S.stops.length === 0;
@@ -1092,7 +1044,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
   function loadState(data) {
     if (!data || !data.b || !data.s) throw new Error('bad');
     S.base = { lat: +data.b[0], lng: +data.b[1], name: String(data.b[2] || 'Αφετηρία') };
-    S.baseSet = true;
     S.stops = [];
     data.s.slice(0, MAX).forEach(function (p) {
       S.stops.push({ id: nextId++, lat: +p[0], lng: +p[1], name: String(p[2] || 'Στάση'), svc: p[3] != null ? num(p[3], null, 0, 600) : null });
@@ -1119,7 +1070,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
       if (isNaN(p.lat) || isNaN(p.lng)) return;
       if (!base && typeEl && typeEl.textContent === 'base') base = p; else stops.push(p);
     });
-    if (base) { S.base = base; S.baseSet = true; }
+    if (base) S.base = base;
     S.stops = []; S.firstId = S.lastId = null;
     stops.slice(0, MAX).forEach(function (p) { S.stops.push({ id: nextId++, lat: p.lat, lng: p.lng, name: p.name }); });
     return stops.length;
@@ -1129,7 +1080,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
   $('optBtn').onclick = optimize;
   $('clearBtn').onclick = function () { S.stops = []; S.firstId = S.lastId = null; openId = null; invalidate(); status(''); render(); };
   $('baseBtn').onclick = function () {
-    if (!S.baseSet && !baseMode) { openOnboard(); return; }
     baseMode = !baseMode;
     $('modeBanner').hidden = !baseMode;
     $('baseBtn').textContent = baseMode ? 'Άκυρο' : 'Αλλαγή';
@@ -1162,45 +1112,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     settingsChanged(true);
     var inp = $('cost-l-' + (S.cost.extra.length - 1)); if (inp) inp.focus();
   };
-  $('obForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-    var q = $('obInput').value.trim(), box = $('obResults');
-    if (!q) return;
-    obStatus('');
-    box.hidden = false; box.innerHTML = '<button type="button" disabled>Αναζήτηση…</button>';
-    geocode(q).then(function (items) {
-      box.innerHTML = '';
-      if (!items.length) { box.innerHTML = '<button type="button" disabled>Δεν βρέθηκε. Δοκίμασε με πόλη ή ΤΚ.</button>'; return; }
-      items.forEach(function (it) {
-        var b = document.createElement('button');
-        b.type = 'button'; b.textContent = it.label;
-        b.onclick = function () { setBase(it.lat, it.lng, it.label); };
-        box.appendChild(b);
-      });
-    }).catch(function (err) { box.hidden = true; obStatus(err.message, 'err'); });
-  });
-  $('obGeo').onclick = function () {
-    if (!navigator.geolocation) { obStatus('Η συσκευή δεν δίνει τοποθεσία. Ψάξε τη διεύθυνση ή διάλεξε στον χάρτη.', 'err'); return; }
-    obStatus('Εντοπισμός τοποθεσίας…');
-    navigator.geolocation.getCurrentPosition(function (pos) {
-      obStatus('');
-      setBase(pos.coords.latitude, pos.coords.longitude);
-    }, function (err) {
-      obStatus(err && err.code === 1
-        ? 'Δεν δόθηκε άδεια για την τοποθεσία. Ψάξε τη διεύθυνση ή διάλεξε στον χάρτη.'
-        : 'Δεν βρέθηκε η τοποθεσία. Ψάξε τη διεύθυνση ή διάλεξε στον χάρτη.', 'err');
-    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
-  };
-  $('obMap').onclick = function () {
-    closeOnboard();
-    baseMode = true;
-    $('modeBanner').hidden = false;
-    $('baseBtn').textContent = 'Άκυρο';
-  };
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !$('onboard').hidden && S.baseSet) closeOnboard();
-  });
-
   $('addAllBtn').onclick = function () {
     var added = 0, full = false;
     S.favs.forEach(function (f) {
@@ -1273,8 +1184,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
   }
   render();
-  if (S.baseSet) { if (S.stops.length) fitAll(); else map.setView([S.base.lat, S.base.lng], 10); }
-  else { map.setView([38.6, 23.6], 6); openOnboard(); }
+  fitAll();
   if (fromLink && S.stops.length) optimize();
 
   // για δοκιμές

@@ -151,13 +151,8 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
 .tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: var(--soft); color: var(--accent); vertical-align: 1px; }
 .eta { color: var(--ink); font-weight: 600; }
 .box { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
-.box.test { border-style: dashed; border-color: var(--warn); }
 .box-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .box-head b { font-size: 14px; }
-.tag.warn { background: transparent; color: var(--warn); border: 1px solid var(--warn); }
-.speeds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.speeds label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
-.speeds input { width: 100%; padding: 6px 8px; }
 .lines { display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-variant-numeric: tabular-nums; }
 .lines div { display: flex; justify-content: space-between; gap: 10px; }
 .lines div span:first-child { color: var(--muted); min-width: 0; }
@@ -268,16 +263,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
         <div class="stat"><b id="sumBack">–</b><span>επιστροφή</span></div>
       </div>
 
-      <div class="box test">
-        <div class="box-head"><b>Δοκιμαστικός χρόνος οδήγησης</b><span class="tag warn">δοκιμή</span></div>
-        <div class="speeds">
-          <label for="spMw">Αυτοκινητόδρομος<input type="number" id="spMw" min="10" max="200" inputmode="numeric"></label>
-          <label for="spRural">Επαρχιακό<input type="number" id="spRural" min="10" max="200" inputmode="numeric"></label>
-          <label for="spCity">Πόλη<input type="number" id="spCity" min="10" max="200" inputmode="numeric"></label>
-        </div>
-        <div id="testOut"></div>
-      </div>
-
       <div class="box">
         <div class="box-head"><b>Κόστος δρομολογίου</b><span class="big-num" id="costTotal">–</span></div>
         <div class="lines" id="costOut"></div>
@@ -345,11 +330,10 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     opt: { target: 'time', hw: false, toll: false, ferry: false, unpaved: false, vehicle: 'car' },
     time: { depart: '08:00', svc: 5 },
     cost: { cons: 8, price: 1.8, tolls: 0, extra: [] },
-    speeds: { mw: 110, rural: 90, city: 50 },
     firstId: null,
     lastId: null
   };
-  var DEFAULTS = JSON.parse(JSON.stringify({ time: S.time, cost: S.cost, speeds: S.speeds }));
+  var DEFAULTS = JSON.parse(JSON.stringify({ time: S.time, cost: S.cost }));
   var openId = null;   // στάση με ανοιχτές ρυθμίσεις
   var result = null;   // { order, legs, km, sec, geom:[[lng,lat]...], mode, approx }
   var baseMode = false;
@@ -388,13 +372,12 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
   }
   var UNITS = { km: '€/km', hour: '€/ώρα', stop: '€/στάση', route: '€/δρομολόγιο' };
   function normSettings() {
-    var t = S.time || {}, c = S.cost || {}, sp = S.speeds || {};
+    var t = S.time || {}, c = S.cost || {};
     S.time = { depart: /^\d{1,2}:\d{2}$/.test(t.depart || '') ? t.depart : DEFAULTS.time.depart, svc: num(t.svc, DEFAULTS.time.svc, 0, 600) };
     S.cost = { cons: num(c.cons, DEFAULTS.cost.cons, 0, 100), price: num(c.price, DEFAULTS.cost.price, 0, 20), tolls: num(c.tolls, 0, 0, 10000),
       extra: (Array.isArray(c.extra) ? c.extra : []).map(function (x) {
         return { label: String(x.label || ''), amount: num(x.amount, 0, 0, 1e6), unit: UNITS[x.unit] ? x.unit : 'route' };
       }) };
-    S.speeds = { mw: num(sp.mw, 110, 10, 200), rural: num(sp.rural, 90, 10, 200), city: num(sp.city, 50, 10, 200) };
     var ids = S.stops.map(function (x) { return x.id; });
     if (ids.indexOf(S.firstId) < 0) S.firstId = null;
     if (ids.indexOf(S.lastId) < 0) S.lastId = null;
@@ -563,22 +546,13 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
   }
 
   // ---------- χάραξη διαδρομής ----------
-  // Κατηγορία δρόμου από τη μέση ταχύτητα της υπηρεσίας (km/h): για τον δοκιμαστικό χρόνο
-  function roadClass(kmh) { return kmh >= 80 ? 'mw' : (kmh >= 45 ? 'rural' : 'city'); }
-  function addClass(cls, meters, kmh) { if (meters > 0 && isFinite(kmh)) cls[roadClass(kmh)] += meters; }
   function osrmRoute(pts) {
     var cs = osrmCoords(pts);
-    return tryHosts(OSRM_HOSTS, function (h) { return h + '/route/v1/driving/' + cs + '?overview=full&geometries=geojson&steps=false&annotations=distance,speed'; })
+    return tryHosts(OSRM_HOSTS, function (h) { return h + '/route/v1/driving/' + cs + '?overview=full&geometries=geojson&steps=false'; })
       .then(function (d) {
-        var r = d.routes[0], cls = { mw: 0, rural: 0, city: 0 };
-        r.legs.forEach(function (l) {
-          var a = l.annotation;
-          if (a && a.distance && a.speed) {
-            for (var i = 0; i < a.distance.length; i++) addClass(cls, a.distance[i], a.speed[i] * 3.6);
-          } else if (l.duration > 0) addClass(cls, l.distance, l.distance / l.duration * 3.6);
-        });
+        var r = d.routes[0];
         return { geom: r.geometry.coordinates, legs: r.legs.map(function (l) { return { distance: l.distance, duration: l.duration }; }),
-          km: r.distance, sec: r.duration, classes: cls };
+          km: r.distance, sec: r.duration };
       });
   }
   function decodePolyline(str, precision) {
@@ -601,22 +575,19 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     return chunks.reduce(function (acc, part) {
       return acc.then(function (sum) {
         var req = { locations: part.map(function (p) { return { lat: +p.lat.toFixed(6), lon: +p.lng.toFixed(6) }; }),
-          costing: co.costing, costing_options: co.costing_options, units: 'kilometers', directions_type: 'maneuvers' };
+          costing: co.costing, costing_options: co.costing_options, units: 'kilometers', directions_type: 'none' };
         return getJSON(VALHALLA + '/route?json=' + encodeURIComponent(JSON.stringify(req)), 40000).then(function (d) {
           var trip = d && d.trip;
           if (!trip) throw new Error('Μη έγκυρη απάντηση');
           trip.legs.forEach(function (l) {
             sum.legs.push({ distance: l.summary.length * 1000, duration: l.summary.time });
-            if (l.maneuvers && l.maneuvers.length) {
-              l.maneuvers.forEach(function (m) { if (m.time > 0) addClass(sum.classes, m.length * 1000, m.length / (m.time / 3600)); });
-            } else if (l.summary.time > 0) addClass(sum.classes, l.summary.length * 1000, l.summary.length / (l.summary.time / 3600));
             sum.geom = sum.geom.concat(decodePolyline(l.shape, 6));
           });
           sum.km += trip.summary.length * 1000; sum.sec += trip.summary.time;
           return sum;
         });
       });
-    }, Promise.resolve({ geom: [], legs: [], km: 0, sec: 0, classes: { mw: 0, rural: 0, city: 0 } }));
+    }, Promise.resolve({ geom: [], legs: [], km: 0, sec: 0 }));
   }
 
   // ---------- βελτιστοποίηση ----------
@@ -845,7 +816,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     ['tTime', 'tDist'].forEach(function (id) { $(id).setAttribute('aria-checked', String($(id).dataset.t === S.opt.target)); });
     setVal('departAt', S.time.depart); setVal('svcDefault', S.time.svc);
     setVal('cCons', S.cost.cons); setVal('cPrice', S.cost.price); setVal('cTolls', S.cost.tolls || '');
-    setVal('spMw', S.speeds.mw); setVal('spRural', S.speeds.rural); setVal('spCity', S.speeds.city);
     renderCosts();
     $('avHw').checked = S.opt.hw; $('avToll').checked = S.opt.toll; $('avFerry').checked = S.opt.ferry; $('avUnpaved').checked = S.opt.unpaved;
 
@@ -911,11 +881,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     var end = t + (back ? back.duration : 0);
     return { stops: stops, start: depSec(), end: end, service: service, total: end - depSec() };
   }
-  function testEstimate() {
-    var c = result.classes || { mw: 0, rural: 0, city: 0 }, sp = S.speeds;
-    var sec = c.mw / 1000 / sp.mw * 3600 + c.rural / 1000 / sp.rural * 3600 + c.city / 1000 / sp.city * 3600;
-    return { sec: sec, classes: c };
-  }
   function costBreakdown(sch) {
     var km = result.km / 1000, hours = sch.total / 3600, n = result.order.length, C = S.cost;
     var litres = km * C.cons / 100;
@@ -960,17 +925,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     $('sumTotal').textContent = fmtTime(sch.total);
     $('sumBack').textContent = hhmm(sch.end);
     $('resultMode').textContent = '· ' + result.order.length + ' στάσεις · ' + optLabel(result.opt);
-
-    var est = testEstimate(), c = est.classes, diff = est.sec - result.sec;
-    var to = $('testOut');
-    to.innerHTML = '<div class="lines">' +
-      '<div class="total"><span>Με ' + S.speeds.mw + ' / ' + S.speeds.rural + ' / ' + S.speeds.city + ' km/h</span><span>' + fmtTime(est.sec) + '</span></div>' +
-      '<div><span>Υπηρεσία δρομολόγησης</span><span>' + fmtTime(result.sec) + '</span></div>' +
-      '<div><span>Διαφορά</span><span>' + (diff >= 0 ? '+' : '−') + fmtTime(Math.abs(diff)) + '</span></div>' +
-      '<div><span>Αυτοκινητόδρομος</span><span>' + fmtKm(c.mw) + ' km</span></div>' +
-      '<div><span>Επαρχιακό</span><span>' + fmtKm(c.rural) + ' km</span></div>' +
-      '<div><span>Πόλη</span><span>' + fmtKm(c.city) + ' km</span></div>' +
-      '</div><p class="hint" style="margin-top:6px">Η κατηγορία κάθε κομματιού βγαίνει από την ταχύτητα που του δίνει η υπηρεσία: πάνω από 80 km/h αυτοκινητόδρομος, 45–80 επαρχιακό, κάτω από 45 πόλη. Δεν μετράει στροφές, φανάρια και στάσεις.</p>';
 
     var cb = costBreakdown(sch);
     $('costTotal').textContent = eur(cb.total);
@@ -1141,9 +1095,6 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
   $('cCons').onchange = function (e) { S.cost.cons = num(e.target.value, DEFAULTS.cost.cons, 0, 100); settingsChanged(); };
   $('cPrice').onchange = function (e) { S.cost.price = num(e.target.value, DEFAULTS.cost.price, 0, 20); settingsChanged(); };
   $('cTolls').onchange = function (e) { S.cost.tolls = num(e.target.value, 0, 0, 10000); settingsChanged(); };
-  [['spMw', 'mw'], ['spRural', 'rural'], ['spCity', 'city']].forEach(function (p) {
-    $(p[0]).onchange = function (e) { S.speeds[p[1]] = num(e.target.value, 50, 10, 200); settingsChanged(); };
-  });
   $('addCostBtn').onclick = function () {
     S.cost.extra.push({ label: '', amount: 0, unit: 'km' });
     settingsChanged(true);

@@ -314,6 +314,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
       </div>
     </section>
 
+    <p class="hint" style="margin-top:auto;font-size:11.5px">Έκδοση 9.10 · 00:20</p>
   </aside>
   <div class="map-wrap">
     <div id="map"></div>
@@ -565,7 +566,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
       .then(function (d) {
         var r = d.routes[0];
         return { geom: r.geometry.coordinates, legs: r.legs.map(function (l) { return { distance: l.distance, duration: l.duration }; }),
-          km: r.distance, sec: r.duration };
+          km: r.distance, sec: r.duration, engine: 'osrm' };
       });
   }
   function decodePolyline(str, precision) {
@@ -597,10 +598,11 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
             sum.geom = sum.geom.concat(decodePolyline(l.shape, 6));
           });
           sum.km += trip.summary.length * 1000; sum.sec += trip.summary.time;
+          sum.engine = 'valhalla'; if (trip.summary.has_toll) sum.hasToll = true;
           return sum;
         });
       });
-    }, Promise.resolve({ geom: [], legs: [], km: 0, sec: 0 }));
+    }, Promise.resolve({ geom: [], legs: [], km: 0, sec: 0, hasToll: false }));
   }
 
   // ---------- βελτιστοποίηση ----------
@@ -657,6 +659,8 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
       if (r.tollNote && !r.approx) status('Έτοιμο. Δεν υπάρχει διαδρομή εντελώς χωρίς διόδια για αυτές τις στάσεις, οπότε περνάει από όσο λιγότερα γίνεται.', 'err');
       else if (r.approx) status('Έτοιμο, αλλά χωρίς όλα τα κριτήρια: η υπηρεσία δεν απάντησε και χρησιμοποιήθηκε η εφεδρική. Δοκίμασε ξανά σε λίγο.', 'err');
       else status('Η διαδρομή είναι έτοιμη.', 'ok');
+      var el = $('status');
+      el.textContent += ' Υπηρεσία: ' + (r.engine === 'valhalla' ? 'Valhalla · διόδια στη διαδρομή: ' + (r.hasToll ? 'ναι' : 'όχι') : 'OSRM (δεν αποφεύγει διόδια)') + '.';
     }).catch(function (err) { status(err.message || 'Κάτι πήγε στραβά. Δοκίμασε ξανά.', 'err'); })
       .then(function () { btn.disabled = S.stops.length === 0; render(); });
   }

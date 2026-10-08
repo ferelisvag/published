@@ -540,6 +540,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
       use_ferry: o.ferry ? 0 : 0.5
     };
     if (o.unpaved) opts.exclude_unpaved = true;
+    if (o.toll && !o.softToll) opts.exclude_tolls = true;   // αυστηρά χωρίς διόδια
     var co = {}; co[c] = opts;
     return { costing: c, costing_options: co };
   }
@@ -633,7 +634,11 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
       return viaOSRM(pts, o).catch(function () { return viaValhalla(pts, o); });
     }
     // Όλα τα υπόλοιπα κριτήρια: Valhalla, εφεδρεία OSRM χωρίς τις αποφυγές.
-    return viaValhalla(pts, o).catch(function () {
+    return viaValhalla(pts, o).catch(function (e) {
+      if (!o.toll) throw e;
+      // δεν βρέθηκε διαδρομή εντελώς χωρίς διόδια: ξανά με απλή αποφυγή
+      return viaValhalla(pts, Object.assign({}, o, { softToll: true })).then(function (r) { r.tollNote = true; return r; });
+    }).catch(function () {
       status('Η υπηρεσία με τα κριτήρια δεν απάντησε, χρήση εφεδρικής…');
       return viaOSRM(pts, o).then(function (r) { r.approx = true; return r; });
     });
@@ -649,7 +654,8 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
       result = r;
       drawRoute();
       showResult();
-      if (r.approx) status('Έτοιμο, αλλά χωρίς όλα τα κριτήρια: η υπηρεσία δεν απάντησε και χρησιμοποιήθηκε η εφεδρική. Δοκίμασε ξανά σε λίγο.', 'err');
+      if (r.tollNote && !r.approx) status('Έτοιμο. Δεν υπάρχει διαδρομή εντελώς χωρίς διόδια για αυτές τις στάσεις, οπότε περνάει από όσο λιγότερα γίνεται.', 'err');
+      else if (r.approx) status('Έτοιμο, αλλά χωρίς όλα τα κριτήρια: η υπηρεσία δεν απάντησε και χρησιμοποιήθηκε η εφεδρική. Δοκίμασε ξανά σε λίγο.', 'err');
       else status('Η διαδρομή είναι έτοιμη.', 'ok');
     }).catch(function (err) { status(err.message || 'Κάτι πήγε στραβά. Δοκίμασε ξανά.', 'err'); })
       .then(function () { btn.disabled = S.stops.length === 0; render(); });

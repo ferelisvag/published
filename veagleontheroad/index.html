@@ -498,6 +498,7 @@ details[open] summary { margin-bottom: 8px; }
   function valhallaOptions(pr) {
     var o = { use_highways: { curvy: 0, balanced: 0.4, fast: 1 }[pr.style], use_tolls: pr.toll ? 0 : 0.5, use_ferry: pr.ferry ? 0 : 0.5, use_trails: 0 };
     if (pr.unpaved) o.exclude_unpaved = true;
+    if (pr.toll && !pr.softToll) o.exclude_tolls = true;   // αυστηρά χωρίς διόδια
     return { costing: 'motorcycle', costing_options: { motorcycle: o } };
   }
   function valhallaRoute(pts, pr) {
@@ -527,7 +528,11 @@ details[open] summary { margin-bottom: 8px; }
   }
   function computeRoute(r) {
     var pts = routePoints(r);
-    return valhallaRoute(pts, r.prefs).catch(function () { return osrmRoute(pts); });
+    return valhallaRoute(pts, r.prefs).catch(function (e) {
+      if (!r.prefs.toll) throw e;
+      // δεν βρέθηκε διαδρομή εντελώς χωρίς διόδια: ξανά με απλή αποφυγή
+      return valhallaRoute(pts, Object.assign({}, r.prefs, { softToll: true })).then(function (res) { res.tollNote = true; return res; });
+    }).catch(function () { return osrmRoute(pts); });
   }
   // Χωρισμός σε μέρες με βάση τις διανυκτερεύσεις
   function splitDays(r, legs) {
@@ -635,6 +640,7 @@ details[open] summary { margin-bottom: 8px; }
         return '<div><span><b>Μέρα ' + (i + 1) + '</b> · ' + esc(d.from) + ' → ' + esc(d.to) + '</span><span>' + fmtKm(d.km) + ' km · ' + fmtTime(d.sec) + '</span></div>';
       }).join('') + '</div>';
     }
+    if (res.tollNote && !res.approx) h += '<p class="hint">Δεν υπάρχει διαδρομή εντελώς χωρίς διόδια ανάμεσα σε αυτά τα σημεία, οπότε περνάει από όσο λιγότερα γίνεται.</p>';
     if (res.approx) h += '<p class="hint">Η υπηρεσία για μηχανή δεν απάντησε, οπότε η διαδρομή βγήκε με το απλό προφίλ αυτοκινήτου. Δοκίμασε ξανά σε λίγο.</p>';
     h += '<div class="row"><button class="small" data-act="share">Κοινή χρήση link</button><button class="small" data-act="gpx">Αρχείο GPX</button></div>' +
       '<div class="row" data-share hidden><input type="text" readonly aria-label="Link διαδρομής"><button class="small" data-act="copy">Αντιγραφή</button></div>' +

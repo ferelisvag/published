@@ -122,6 +122,34 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
 .taxbox td:first-child, .taxbox th:first-child { text-align: left; }
 .taxbox th { color: var(--muted); font-size: 12px; }
 
+/* δώρα */
+.bonus { margin-top: 20px; }
+.bonus-head { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; }
+.bonus-head .hire { width: 260px; max-width: 100%; }
+.btable-wrap { overflow-x: auto; margin-top: 8px; }
+.bcards { display: none; }
+@media (max-width: 600px) {
+  .btable-wrap { display: none; }
+  .bcards { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+  .bc { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .bc h3 { margin: 0; font-size: 15px; }
+  .bc .q { color: var(--muted); font-size: 12px; margin: 0 0 6px; }
+  .bc dl { display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; margin: 0; font-variant-numeric: tabular-nums; font-size: 14px; }
+  .bc dt { color: var(--muted); } .bc dd { margin: 0; text-align: right; }
+  .bc dd.m { color: var(--minus); } .bc .n { font-weight: 800; color: var(--accent); font-size: 16px; }
+}
+.btable { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; min-width: 460px; }
+.btable th, .btable td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); vertical-align: top; }
+.btable th:first-child, .btable td:first-child { text-align: left; padding-left: 0; color: var(--muted); font-weight: 500; }
+.btable thead th { font-weight: 700; color: var(--ink); border-bottom: 2px solid var(--ink); }
+.btable tr.minus td:not(:first-child) { color: var(--minus); }
+.btable tr.netrow td { font-weight: 800; font-size: 17px; color: var(--accent); border-bottom: 0; }
+.btable tr.netrow td:first-child { color: var(--ink); font-size: 15px; }
+.btable .q { display: block; color: var(--muted); font-size: 12px; font-weight: 400; }
+.bonus-total { margin: 14px 0 0; padding: 10px 12px; background: var(--soft); border-radius: 9px; font-size: 14.5px; }
+.bonus-total b { font-variant-numeric: tabular-nums; }
+.hint-s { color: var(--muted); font-size: 12.5px; margin: 10px 0 0; }
+
 /* μπάρα κινητού */
 .bar { display: none; }
 @media (max-width: 860px) {
@@ -261,6 +289,24 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
     </aside>
   </div>
 
+  <section class="card bonus" aria-live="polite">
+    <div class="bonus-head">
+      <div>
+        <h2>Δώρα και επίδομα αδείας <span id="bYear"></span></h2>
+        <p class="lead">Υπολογίζονται από τον βασικό μισθό. Αν ξεκίνησες φέτος, βάλε πότε, για να βγουν αναλογικά.</p>
+      </div>
+      <div class="f hire">
+        <label for="hire">Ξεκίνησα σε αυτόν τον εργοδότη</label>
+        <div class="inp"><input id="hire" type="date"></div>
+        <small>Άφησέ το κενό αν δουλεύεις εκεί από πέρσι ή νωρίτερα.</small>
+      </div>
+    </div>
+    <div class="btable-wrap"><table class="btable" id="bTable"></table></div>
+    <div class="bcards" id="bCards"></div>
+    <p class="bonus-total" id="bTotal"></p>
+    <p class="hint-s">Το Δώρο Πάσχα και το Δώρο Χριστουγέννων περιλαμβάνουν την προσαύξηση 4,166% που ορίζει ο νόμος. Ο φόρος τους υπολογίζεται με τον ίδιο μέσο συντελεστή με τον μισθό. Αν παίρνεις σταθερά υπερωρίες ή επιδόματα κάθε μήνα, τα δώρα μπορεί να βγουν μεγαλύτερα.</p>
+  </section>
+
   <footer class="foot">
     <section class="card">
       <h2>Πηγές</h2>
@@ -271,6 +317,8 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
         <li><a href="https://www.athensvoice.gr/epikairotita/politiki-oikonomia/857308/exaimeri-ergasia-ergazomenoi/amp/" target="_blank" rel="noopener">Εργασία 6ης ημέρας με προσαύξηση 40%, ν. 5053/2023</a> (Athens Voice)</li>
         <li><a href="https://katharosmisthos.gr/blog/pos-plironontai-yperories-nychterina-kyriakes-argies" target="_blank" rel="noopener">6η μέρα σε πενθήμερο +30%, υπερωρίες, Κυριακές</a> (katharosmisthos)</li>
         <li><a href="https://www.oenet.gr/ergasiaka/eidikotita-ergazomenou/μερικη-απασχοληση-προσθετη-εργασια-υπερεργασια-υπερωρια" target="_blank" rel="noopener">Υπερεργασία, υπερωρία και πρόσθετη εργασία</a> (oenet)</li>
+        <li><a href="https://www.hli.gov.gr/ergasiakes-scheseis/nomothesia-ergasiakes-scheseis/amoivi/doro-christougennon/dikaiouchoi-chronos-katavolis-2/" target="_blank" rel="noopener">Δώρο Χριστουγέννων: δικαιούχοι και χρόνος καταβολής</a> (Επιθεώρηση Εργασίας)</li>
+        <li><a href="https://kb.epsilonnet.gr/hrm/ypologismos-doroy-christoygennon-2/" target="_blank" rel="noopener">Υπολογισμός δώρου: μέρες × 2 / 19, μισθός / 25 × 1,04166</a> (Epsilon Net)</li>
       </ul>
     </section>
     <section class="card">
@@ -280,7 +328,7 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
       <p>Ό,τι γράφεις μένει στη συσκευή σου. Δεν στέλνεται πουθενά.</p>
     </section>
   </footer>
-  <p class="ver">Έκδοση 9.10 · 01:48</p>
+  <p class="ver">Έκδοση 9.10 · 01:57</p>
 </div>
 
 <button type="button" class="bar" id="bar" aria-label="Δες την ανάλυση"><span>Καθαρά στο χέρι</span><b id="barNet">–</b></button>
@@ -321,8 +369,8 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
   }
 
   var DEF = { mode: 'gross', salary: 920, age: 31, kids: 0, sat: 0, d12: 0, d12p: 0, sun: 0, ype: 0, ypo: 0,
-    efka: 13.37, pays: 14, pSat: 30, hSat: 8, pYpe: 20, pYpo: 40, pPar: 120, pSun: 75, h12e: 1, h12o: 3, limit: 150 };
-  var KEYS = Object.keys(DEF).filter(function (k) { return k !== 'mode'; });
+    efka: 13.37, pays: 14, pSat: 30, hSat: 8, pYpe: 20, pYpo: 40, pPar: 120, pSun: 75, h12e: 1, h12o: 3, limit: 150, hire: '' };
+  var KEYS = Object.keys(DEF).filter(function (k) { return k !== 'mode' && k !== 'hire'; });
   var st = {};
 
   function num(v) {
@@ -368,10 +416,12 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
 
   function read() {
     KEYS.forEach(function (k) { st[k] = num($(k).value); });
+    st.hire = /^\d{4}-\d{2}-\d{2}$/.test($('hire').value) ? $('hire').value : '';
   }
   function save() { try { localStorage.setItem(STORE, JSON.stringify(st)); } catch (e) {} }
   function fill() {
     KEYS.forEach(function (k) { if (document.activeElement !== $(k)) $(k).value = fmtIn(st[k]); });
+    $('hire').value = st.hire || '';
     var g = st.mode === 'gross';
     $('modeGross').setAttribute('aria-pressed', g); $('modeNet').setAttribute('aria-pressed', !g);
     $('salaryLabel').textContent = g ? 'Μικτός μηνιαίος μισθός' : 'Καθαρός μηνιαίος μισθός (χωρίς επιπλέον ώρες)';
@@ -427,6 +477,71 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
     t += '<tr><td><b>Φόρος έτους</b></td><td></td><td><b>' + eur(r.tx.net) + '</b></td></tr>';
     t += '<tr><td><b>Ανά πληρωμή (÷ ' + fmtN.format(st.pays) + ')</b></td><td></td><td><b>' + eur(r.tax) + '</b></td></tr></table>';
     $('taxDetail').innerHTML = t;
+    renderBonus(base, plain);
+  }
+
+  // ---- Δώρα και επίδομα αδείας (έμμισθοι, πλήρης απασχόληση) ----
+  // Πάσχα: 1/1–30/4, μισός μισθός, 1/15 του μισού ανά 8 μέρες, + 4,166%.
+  // Χριστούγεννα: 1/5–31/12, ένας μισθός, 2/25 ανά 19 μέρες, + 4,166%.
+  // Επίδομα αδείας: μισός μισθός, ή οι αποδοχές των ημερών άδειας αν είναι λιγότερες (πρώτος χρόνος).
+  var DAY = 864e5;
+  function utc(y, m, d) { return Date.UTC(y, m - 1, d); }
+  function daysIn(from, to, hire) {   // ημερολογιακές μέρες απασχόλησης στο [from, to]
+    var start = Math.max(from, hire == null ? from : hire);
+    return start > to ? 0 : Math.round((to - start) / DAY) + 1;
+  }
+  function orthodoxEaster(y) {        // αλγόριθμος Meeus, ιουλιανό → γρηγοριανό
+    var a = y % 4, b = y % 7, c = y % 19, d = (19 * c + 15) % 30, e = (2 * a + 4 * b - d + 34) % 7;
+    var month = Math.floor((d + e + 114) / 31), day = ((d + e + 114) % 31) + 1;
+    return utc(y, month, day) + 13 * DAY;
+  }
+  function bonuses(base, s, year) {
+    var hire = null;
+    if (s.hire) { var p = s.hire.split('-').map(Number); hire = utc(p[0], p[1], p[2]); }
+    var BONUS = 1.04166;
+    var eDays = daysIn(utc(year, 1, 1), utc(year, 4, 30), hire), eFull = Math.round((utc(year, 4, 30) - utc(year, 1, 1)) / DAY) + 1;
+    var easter = base / 2 * Math.min(1, eDays / eFull) * BONUS;
+    var cDays = daysIn(utc(year, 5, 1), utc(year, 12, 31), hire);
+    var xmas = base / 25 * Math.min(25, cDays * 2 / 19) * BONUS;
+    // επίδομα αδείας: αν δουλεύεις από πέρσι, μισός μισθός. Αλλιώς αναλογικά με τις μέρες άδειας του πρώτου χρόνου
+    // (20 εργάσιμες σε πενθήμερο ανά 12 μήνες = 24 μέρες εξαημέρου, πληρωμένες με 1/25 του μισθού, ως μισό μισθό).
+    var yDays = daysIn(utc(year, 1, 1), utc(year, 12, 31), hire), yFull = Math.round((utc(year, 12, 31) - utc(year, 1, 1)) / DAY) + 1;
+    var firstYear = hire != null && hire > utc(year - 1, 12, 31);
+    var leave = firstYear ? Math.min(base / 2, base / 25 * 24 * yDays / yFull) : base / 2;
+    if (hire != null && hire > utc(year, 12, 31)) leave = 0;
+    var holyWed = new Date(orthodoxEaster(year) - 4 * DAY);
+    return { year: year, firstYear: firstYear, items: [
+      { k: 'Δώρο Πάσχα', when: 'έως Μ. Τετάρτη ' + holyWed.getUTCDate() + '/' + (holyWed.getUTCMonth() + 1), period: '1/1 – 30/4', days: eDays, full: eFull, g: easter },
+      { k: 'Επίδομα αδείας', when: 'μαζί με την άδεια', period: firstYear ? 'αναλογικά, πρώτος χρόνος' : 'μισός μισθός', days: yDays, full: yFull, g: leave },
+      { k: 'Δώρο Χριστουγέννων', when: 'έως 21/12', period: '1/5 – 31/12', days: cDays, full: 245, g: xmas }
+    ] };
+  }
+  function renderBonus(base, plain) {
+    var year = new Date().getFullYear();
+    var b = bonuses(base, st, year);
+    // ίδιος μέσος συντελεστής φόρου με τον βασικό μισθό
+    var taxable = plain.gross - plain.efka, rate = taxable > 0 ? plain.tax / taxable : 0;
+    var rows = { g: [], e: [], t: [], n: [] }, tot = 0;
+    b.items.forEach(function (i) {
+      i.e = i.g * st.efka / 100; i.t = (i.g - i.e) * rate; i.n = i.g - i.e - i.t; tot += i.n;
+    });
+    var cell = function (f) { return b.items.map(function (i) { return '<td>' + f(i) + '</td>'; }).join(''); };
+    var h = '<thead><tr><th></th>' + b.items.map(function (i) { return '<th>' + i.k + '<span class="q">' + i.when + '</span></th>'; }).join('') + '</tr></thead><tbody>';
+    h += '<tr><td>Περίοδος</td>' + cell(function (i) { return i.period + (i.days < i.full ? '<span class="q">' + i.days + ' από ' + i.full + ' μέρες</span>' : ''); }) + '</tr>';
+    h += '<tr><td>Μικτά</td>' + cell(function (i) { return eur(i.g); }) + '</tr>';
+    h += '<tr class="minus"><td>ΕΦΚΑ</td>' + cell(function (i) { return '− ' + eur(i.e); }) + '</tr>';
+    h += '<tr class="minus"><td>Φόρος</td>' + cell(function (i) { return '− ' + eur(i.t); }) + '</tr>';
+    h += '<tr class="netrow"><td>Καθαρά</td>' + cell(function (i) { return eur(i.n); }) + '</tr></tbody>';
+    $('bTable').innerHTML = h;
+    $('bCards').innerHTML = b.items.map(function (i) {
+      return '<div class="bc"><h3>' + i.k + '</h3><p class="q">' + i.when + ' · ' + i.period + (i.days < i.full ? ', ' + i.days + ' από ' + i.full + ' μέρες' : '') + '</p><dl>' +
+        '<dt>Μικτά</dt><dd>' + eur(i.g) + '</dd><dt>ΕΦΚΑ</dt><dd class="m">− ' + eur(i.e) + '</dd><dt>Φόρος</dt><dd class="m">− ' + eur(i.t) + '</dd>' +
+        '<dt class="n">Καθαρά</dt><dd class="n">' + eur(i.n) + '</dd></dl></div>';
+    }).join('');
+    $('bYear').textContent = year;
+    var months = 12;
+    if (st.hire) { var p = st.hire.split('-').map(Number); if (p[0] === year) months = Math.max(0, 13 - p[1] - (p[2] > 1 ? 1 : 0)); else if (p[0] > year) months = 0; }
+    $('bTotal').innerHTML = 'Καθαρά της χρονιάς από τον βασικό: <b>' + eur(plain.net * months) + '</b> (' + months + ' μισθοί) + <b>' + eur(tot) + '</b> δώρα = <b>' + eur(plain.net * months + tot) + '</b>. Χωρίς τις επιπλέον ώρες.';
   }
 
   function update() { read(); save(); render(); }
@@ -437,13 +552,15 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
     try { var saved = JSON.parse(localStorage.getItem(STORE) || 'null'); if (saved) for (var k2 in saved) if (k2 in DEF) s[k2] = saved[k2]; } catch (e) {}
     var q = new URLSearchParams(location.search);
     if ([].some.call(Object.keys(DEF), function (k) { return q.has(k); })) {
-      for (var k3 in DEF) if (q.has(k3)) s[k3] = k3 === 'mode' ? (q.get(k3) === 'net' ? 'net' : 'gross') : num(q.get(k3));
+      for (var k3 in DEF) if (q.has(k3)) s[k3] = k3 === 'mode' ? (q.get(k3) === 'net' ? 'net' : 'gross') : k3 === 'hire' ? (/^\d{4}-\d{2}-\d{2}$/.test(q.get(k3)) ? q.get(k3) : '') : num(q.get(k3));
     }
     st = s;
   }
 
   load(); fill(); render();
 
+  $('hire').addEventListener('change', update);
+  $('hire').addEventListener('input', update);
   KEYS.forEach(function (k) {
     $(k).addEventListener('input', update);
     $(k).addEventListener('blur', function () { fill(); });
@@ -483,7 +600,7 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
   $('bar').onclick = function () { $('slipCol').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
   // για έλεγχο από την κονσόλα / tests
-  window.__misthos = { calc: calc, annualTax: annualTax, grossFromNet: grossFromNet, DEF: DEF };
+  window.__misthos = { bonuses: bonuses, calc: calc, annualTax: annualTax, grossFromNet: grossFromNet, DEF: DEF };
 })();
 </script>
 </body>

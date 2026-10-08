@@ -138,6 +138,36 @@ button:disabled:hover { border-color: var(--line); }
 .share-box input { font-size: 13px; }
 .file-btn { font-weight: 600; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; padding: 4px 9px; cursor: pointer; background: var(--panel); }
 .file-btn:hover { border-color: var(--accent); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.fld { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.fld input, .fld select { flex: none; width: 100%; color: var(--ink); }
+.summary { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 1100px) { .summary { grid-template-columns: repeat(4, 1fr); } }
+ol.stops li { flex-wrap: wrap; }
+.stop-edit { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 0 2px 36px; }
+.stop-edit label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.stop-edit input { width: 70px; flex: none; padding: 5px 8px; }
+button.small[aria-pressed="true"] { background: var(--soft); border-color: var(--accent); color: var(--accent); }
+.tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; background: var(--soft); color: var(--accent); vertical-align: 1px; }
+.eta { color: var(--ink); font-weight: 600; }
+.box { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.box.test { border-style: dashed; border-color: var(--warn); }
+.box-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.box-head b { font-size: 14px; }
+.tag.warn { background: transparent; color: var(--warn); border: 1px solid var(--warn); }
+.speeds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.speeds label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+.speeds input { width: 100%; padding: 6px 8px; }
+.lines { display: flex; flex-direction: column; gap: 3px; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.lines div { display: flex; justify-content: space-between; gap: 10px; }
+.lines div span:first-child { color: var(--muted); min-width: 0; }
+.lines .total { border-top: 1px solid var(--line); padding-top: 5px; margin-top: 2px; font-weight: 700; }
+.lines .total span:first-child { color: var(--ink); }
+.big-num { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cost-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.cost-list li { display: grid; grid-template-columns: 1fr 80px 120px auto; gap: 6px; align-items: center; }
+.cost-list input, .cost-list select { width: 100%; flex: none; padding: 6px 8px; font-size: 13.5px; }
+@media (max-width: 420px) { .cost-list li { grid-template-columns: 1fr 70px; } .cost-list li select { grid-column: 1; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -197,6 +227,28 @@ button:disabled:hover { border-color: var(--line); }
     </section>
 
     <section>
+      <h2>Χρόνοι</h2>
+      <div class="grid2">
+        <label class="fld" for="departAt">Ώρα αναχώρησης<input type="time" id="departAt"></label>
+        <label class="fld" for="svcDefault">Χρόνος ανά στάση (λεπτά)<input type="number" id="svcDefault" min="0" max="240" step="1" inputmode="numeric"></label>
+      </div>
+      <p class="hint">Για διαφορετικό χρόνο σε έναν πελάτη ή για σταθερή πρώτη/τελευταία στάση, πάτα πάνω στη στάση.</p>
+    </section>
+
+    <section>
+      <h2>Κόστος</h2>
+      <div class="grid2">
+        <label class="fld" for="cCons">Κατανάλωση (λίτρα/100 km)<input type="number" id="cCons" min="0" step="0.1" inputmode="decimal"></label>
+        <label class="fld" for="cPrice">Τιμή καυσίμου (€/λίτρο)<input type="number" id="cPrice" min="0" step="0.01" inputmode="decimal"></label>
+        <label class="fld" for="cTolls">Διόδια δρομολογίου (€)<input type="number" id="cTolls" min="0" step="0.1" inputmode="decimal"></label>
+      </div>
+      <div class="field-label">Επιπλέον κόστη</div>
+      <ol class="cost-list" id="costList"></ol>
+      <div class="row"><button id="addCostBtn" class="small">+ Προσθήκη κόστους</button></div>
+      <p class="hint">π.χ. Οδηγός 10 €/ώρα, Φθορές ελαστικών 0,05 €/km, Ασφάλιση 12 €/δρομολόγιο, Συσκευασία 0,30 €/στάση.</p>
+    </section>
+
+    <section>
       <div class="row" style="justify-content:space-between">
         <h2 style="margin:0">Στάσεις <span class="count" id="count">0/30</span></h2>
         <button id="clearBtn" class="small ghost">Καθαρισμός</button>
@@ -212,7 +264,23 @@ button:disabled:hover { border-color: var(--line); }
       <div class="summary">
         <div class="stat"><b id="sumKm">–</b><span>χιλιόμετρα</span></div>
         <div class="stat"><b id="sumTime">–</b><span>οδήγηση</span></div>
-        <div class="stat"><b id="sumStops">–</b><span>στάσεις</span></div>
+        <div class="stat"><b id="sumTotal">–</b><span>με τις στάσεις</span></div>
+        <div class="stat"><b id="sumBack">–</b><span>επιστροφή</span></div>
+      </div>
+
+      <div class="box test">
+        <div class="box-head"><b>Δοκιμαστικός χρόνος οδήγησης</b><span class="tag warn">δοκιμή</span></div>
+        <div class="speeds">
+          <label for="spMw">Αυτοκινητόδρομος<input type="number" id="spMw" min="10" max="200" inputmode="numeric"></label>
+          <label for="spRural">Επαρχιακό<input type="number" id="spRural" min="10" max="200" inputmode="numeric"></label>
+          <label for="spCity">Πόλη<input type="number" id="spCity" min="10" max="200" inputmode="numeric"></label>
+        </div>
+        <div id="testOut"></div>
+      </div>
+
+      <div class="box">
+        <div class="box-head"><b>Κόστος δρομολογίου</b><span class="big-num" id="costTotal">–</span></div>
+        <div class="lines" id="costOut"></div>
       </div>
 
       <h2 style="margin-top:8px">Αποθήκευση και κοινή χρήση</h2>
@@ -274,8 +342,15 @@ button:disabled:hover { border-color: var(--line); }
     base: { lat: 39.6650, lng: 20.8537, name: 'Ιωάννινα' },
     stops: [],
     favs: [],
-    opt: { target: 'time', hw: false, toll: false, ferry: false, unpaved: false, vehicle: 'car' }
+    opt: { target: 'time', hw: false, toll: false, ferry: false, unpaved: false, vehicle: 'car' },
+    time: { depart: '08:00', svc: 5 },
+    cost: { cons: 8, price: 1.8, tolls: 0, extra: [] },
+    speeds: { mw: 110, rural: 90, city: 50 },
+    firstId: null,
+    lastId: null
   };
+  var DEFAULTS = JSON.parse(JSON.stringify({ time: S.time, cost: S.cost, speeds: S.speeds }));
+  var openId = null;   // στάση με ανοιχτές ρυθμίσεις
   var result = null;   // { order, legs, km, sec, geom:[[lng,lat]...], mode, approx }
   var baseMode = false;
   var nextId = 1;
@@ -296,12 +371,34 @@ button:disabled:hover { border-color: var(--line); }
     if (!old.opt && old.mode === 'local') { S.opt.target = 'distance'; S.opt.hw = true; S.opt.toll = true; }
     if (!old.opt && old.profile === 'driving-hgv') S.opt.vehicle = 'truck';
     S.opt = normOpt(S.opt);
+    normSettings();
     S.stops.forEach(function (s) { if (s.id >= nextId) nextId = s.id + 1; });
   }
   function normOpt(o) {
     o = o || {};
     return { target: o.target === 'distance' ? 'distance' : 'time', hw: !!o.hw, toll: !!o.toll, ferry: !!o.ferry, unpaved: !!o.unpaved,
       vehicle: o.vehicle === 'truck' ? 'truck' : 'car' };
+  }
+  function num(v, def, min, max) {
+    var n = typeof v === 'number' ? v : parseFloat(String(v).replace(',', '.'));
+    if (!isFinite(n)) return def;
+    if (min != null && n < min) n = min;
+    if (max != null && n > max) n = max;
+    return n;
+  }
+  var UNITS = { km: '€/km', hour: '€/ώρα', stop: '€/στάση', route: '€/δρομολόγιο' };
+  function normSettings() {
+    var t = S.time || {}, c = S.cost || {}, sp = S.speeds || {};
+    S.time = { depart: /^\d{1,2}:\d{2}$/.test(t.depart || '') ? t.depart : DEFAULTS.time.depart, svc: num(t.svc, DEFAULTS.time.svc, 0, 600) };
+    S.cost = { cons: num(c.cons, DEFAULTS.cost.cons, 0, 100), price: num(c.price, DEFAULTS.cost.price, 0, 20), tolls: num(c.tolls, 0, 0, 10000),
+      extra: (Array.isArray(c.extra) ? c.extra : []).map(function (x) {
+        return { label: String(x.label || ''), amount: num(x.amount, 0, 0, 1e6), unit: UNITS[x.unit] ? x.unit : 'route' };
+      }) };
+    S.speeds = { mw: num(sp.mw, 110, 10, 200), rural: num(sp.rural, 90, 10, 200), city: num(sp.city, 50, 10, 200) };
+    var ids = S.stops.map(function (x) { return x.id; });
+    if (ids.indexOf(S.firstId) < 0) S.firstId = null;
+    if (ids.indexOf(S.lastId) < 0) S.lastId = null;
+    if (S.firstId != null && S.firstId === S.lastId) S.lastId = null;
   }
   function anyAvoid(o) { return o.hw || o.toll || o.ferry || o.unpaved; }
   function optLabel(o) {
@@ -375,20 +472,27 @@ button:disabled:hover { border-color: var(--line); }
 
   // ---------- βέλτιστη σειρά (υπολογίζεται τοπικά) ----------
   // C: πίνακας κόστους n×n, κόμβος 0 = αφετηρία/επιστροφή. Επιστρέφει τη σειρά των κόμβων 1..n-1.
-  function solveTSP(C) {
+  // C: πίνακας κόστους n×n, κόμβος 0 = αφετηρία/επιστροφή.
+  // ff / fl: κόμβος που πρέπει να είναι πρώτος / τελευταίος (ή -1).
+  // Επιστρέφει τη σειρά των κόμβων 1..n-1.
+  function solveTSP(C, ff, fl) {
     var n = C.length;
-    var nodes = []; for (var k = 1; k < n; k++) nodes.push(k);
-    if (nodes.length <= 1) return nodes;
+    ff = ff == null ? -1 : ff; fl = fl == null ? -1 : fl;
+    var nodes = []; for (var k = 1; k < n; k++) if (k !== ff && k !== fl) nodes.push(k);
+    var head = ff > 0 ? ff : 0, tail = fl > 0 ? fl : 0;
+    function wrap(t) { return (ff > 0 ? [ff] : []).concat(t, fl > 0 ? [fl] : []); }
     function cost(t) {
-      var c = C[0][t[0]];
-      for (var i = 0; i < t.length - 1; i++) c += C[t[i]][t[i + 1]];
-      return c + C[t[t.length - 1]][0];
+      var c = (ff > 0 ? C[0][ff] : 0), prev = head;
+      for (var i = 0; i < t.length; i++) { c += C[prev][t[i]]; prev = t[i]; }
+      c += C[prev][tail];
+      if (fl > 0) c += C[fl][0];
+      return c;
     }
+    if (nodes.length <= 1) return wrap(nodes);
     function improve(t) {
       var best = cost(t), improved = true, guard = 0;
       while (improved && guard++ < 200) {
         improved = false;
-        // 2-opt: αντιστροφή τμήματος
         for (var i = 0; i < t.length - 1; i++) {
           for (var j = i + 1; j < t.length; j++) {
             var cand = t.slice(0, i).concat(t.slice(i, j + 1).reverse(), t.slice(j + 1));
@@ -396,7 +500,6 @@ button:disabled:hover { border-color: var(--line); }
             if (c < best - 1e-9) { t = cand; best = c; improved = true; }
           }
         }
-        // or-opt: μετακίνηση 1–3 διαδοχικών στάσεων σε άλλη θέση
         for (var len = 1; len <= 3; len++) {
           for (var a = 0; a + len <= t.length; a++) {
             var seg = t.slice(a, a + len), rest = t.slice(0, a).concat(t.slice(a + len));
@@ -412,7 +515,6 @@ button:disabled:hover { border-color: var(--line); }
       return { t: t, c: best };
     }
     var bestTour = null;
-    // πολλαπλές αφετηρίες "πλησιέστερου γείτονα" και βελτίωση
     nodes.forEach(function (first) {
       var tour = [first], left = nodes.filter(function (x) { return x !== first; });
       while (left.length) {
@@ -423,7 +525,7 @@ button:disabled:hover { border-color: var(--line); }
       var r = improve(tour);
       if (!bestTour || r.c < bestTour.c) bestTour = r;
     });
-    return bestTour.t;
+    return wrap(bestTour.t);
   }
 
   // ---------- πίνακες αποστάσεων ----------
@@ -461,12 +563,22 @@ button:disabled:hover { border-color: var(--line); }
   }
 
   // ---------- χάραξη διαδρομής ----------
+  // Κατηγορία δρόμου από τη μέση ταχύτητα της υπηρεσίας (km/h): για τον δοκιμαστικό χρόνο
+  function roadClass(kmh) { return kmh >= 80 ? 'mw' : (kmh >= 45 ? 'rural' : 'city'); }
+  function addClass(cls, meters, kmh) { if (meters > 0 && isFinite(kmh)) cls[roadClass(kmh)] += meters; }
   function osrmRoute(pts) {
     var cs = osrmCoords(pts);
-    return tryHosts(OSRM_HOSTS, function (h) { return h + '/route/v1/driving/' + cs + '?overview=full&geometries=geojson&steps=false'; })
+    return tryHosts(OSRM_HOSTS, function (h) { return h + '/route/v1/driving/' + cs + '?overview=full&geometries=geojson&steps=false&annotations=distance,speed'; })
       .then(function (d) {
-        var r = d.routes[0];
-        return { geom: r.geometry.coordinates, legs: r.legs.map(function (l) { return { distance: l.distance, duration: l.duration }; }), km: r.distance, sec: r.duration };
+        var r = d.routes[0], cls = { mw: 0, rural: 0, city: 0 };
+        r.legs.forEach(function (l) {
+          var a = l.annotation;
+          if (a && a.distance && a.speed) {
+            for (var i = 0; i < a.distance.length; i++) addClass(cls, a.distance[i], a.speed[i] * 3.6);
+          } else if (l.duration > 0) addClass(cls, l.distance, l.distance / l.duration * 3.6);
+        });
+        return { geom: r.geometry.coordinates, legs: r.legs.map(function (l) { return { distance: l.distance, duration: l.duration }; }),
+          km: r.distance, sec: r.duration, classes: cls };
       });
   }
   function decodePolyline(str, precision) {
@@ -489,19 +601,22 @@ button:disabled:hover { border-color: var(--line); }
     return chunks.reduce(function (acc, part) {
       return acc.then(function (sum) {
         var req = { locations: part.map(function (p) { return { lat: +p.lat.toFixed(6), lon: +p.lng.toFixed(6) }; }),
-          costing: co.costing, costing_options: co.costing_options, units: 'kilometers', directions_type: 'none' };
+          costing: co.costing, costing_options: co.costing_options, units: 'kilometers', directions_type: 'maneuvers' };
         return getJSON(VALHALLA + '/route?json=' + encodeURIComponent(JSON.stringify(req)), 40000).then(function (d) {
           var trip = d && d.trip;
           if (!trip) throw new Error('Μη έγκυρη απάντηση');
           trip.legs.forEach(function (l) {
             sum.legs.push({ distance: l.summary.length * 1000, duration: l.summary.time });
+            if (l.maneuvers && l.maneuvers.length) {
+              l.maneuvers.forEach(function (m) { if (m.time > 0) addClass(sum.classes, m.length * 1000, m.length / (m.time / 3600)); });
+            } else if (l.summary.time > 0) addClass(sum.classes, l.summary.length * 1000, l.summary.length / (l.summary.time / 3600));
             sum.geom = sum.geom.concat(decodePolyline(l.shape, 6));
           });
           sum.km += trip.summary.length * 1000; sum.sec += trip.summary.time;
           return sum;
         });
       });
-    }, Promise.resolve({ geom: [], legs: [], km: 0, sec: 0 }));
+    }, Promise.resolve({ geom: [], legs: [], km: 0, sec: 0, classes: { mw: 0, rural: 0, city: 0 } }));
   }
 
   // ---------- βελτιστοποίηση ----------
@@ -510,14 +625,21 @@ button:disabled:hover { border-color: var(--line); }
     status('Σχεδίαση διαδρομής…');
     return routeFn(ordered).then(function (r) { r.order = order.map(function (i) { return pts[i].id; }); return r; });
   }
+  function fixedIdx(pts) {
+    var f = -1, l = -1;
+    pts.forEach(function (p, i) { if (i > 0 && p.id === S.firstId) f = i; if (i > 0 && p.id === S.lastId) l = i; });
+    return [f, l];
+  }
   function viaOSRM(pts, o) {
     return osrmMatrix(pts, o.target === 'distance' ? 'distances' : 'durations').then(function (C) {
-      return withOrder(pts, solveTSP(C), osrmRoute);
+      var fx = fixedIdx(pts);
+      return withOrder(pts, solveTSP(C, fx[0], fx[1]), osrmRoute);
     });
   }
   function viaValhalla(pts, o) {
     return valhallaMatrix(pts, o).then(function (C) {
-      return withOrder(pts, solveTSP(C), function (ordered) { return valhallaRoute(ordered, o); });
+      var fx = fixedIdx(pts);
+      return withOrder(pts, solveTSP(C, fx[0], fx[1]), function (ordered) { return valhallaRoute(ordered, o); });
     });
   }
   function compute(o) {
@@ -580,8 +702,10 @@ button:disabled:hover { border-color: var(--line); }
     if (routeLine) { routeLine.remove(); routeLine = null; }
     if (!result || !result.geom || !result.geom.length) return;
     var color = getComputedStyle(document.documentElement).getPropertyValue('--route').trim() || '#1d4fa3';
-    routeLine = L.polyline(result.geom.map(function (c) { return [c[1], c[0]]; }), { color: color, weight: 5, opacity: 0.85 }).addTo(map);
-    map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+    try {
+      routeLine = L.polyline(result.geom.map(function (c) { return [c[1], c[0]]; }), { color: color, weight: 5, opacity: 0.85 }).addTo(map);
+      map.fitBounds(routeLine.getBounds(), { padding: [30, 30] });
+    } catch (e) { routeLine = null; }
   }
   function fitAll() {
     if (!S.stops.length) return;
@@ -600,9 +724,9 @@ button:disabled:hover { border-color: var(--line); }
     $('resultBox').hidden = true;
     $('shareBox').hidden = true;
   }
-  function addStop(lat, lng, name, silent) {
+  function addStop(lat, lng, name, silent, svc) {
     if (S.stops.length >= MAX) { status('Έφτασες το όριο των ' + MAX + ' στάσεων.', 'err'); return false; }
-    var s = { id: nextId++, lat: lat, lng: lng, name: name || ('Σημείο ' + fmtCoord({ lat: lat, lng: lng })) };
+    var s = { id: nextId++, lat: lat, lng: lng, name: name || ('Σημείο ' + fmtCoord({ lat: lat, lng: lng })), svc: svc != null ? svc : null };
     S.stops.push(s);
     if (!silent) { invalidate(); status(''); render(); }
     if (!name) reverseName(s);
@@ -610,6 +734,9 @@ button:disabled:hover { border-color: var(--line); }
   }
   function removeStop(id) {
     S.stops = S.stops.filter(function (s) { return s.id !== id; });
+    if (S.firstId === id) S.firstId = null;
+    if (S.lastId === id) S.lastId = null;
+    if (openId === id) openId = null;
     invalidate(); render();
   }
   function setBase(lat, lng, name) {
@@ -623,28 +750,91 @@ button:disabled:hover { border-color: var(--line); }
   function isStop(f) { return S.stops.some(function (s) { return same(f, s); }); }
   function toggleFav(s) {
     if (isFav(s)) S.favs = S.favs.filter(function (f) { return !same(f, s); });
-    else S.favs.push({ name: s.name, lat: s.lat, lng: s.lng });
+    else S.favs.push({ name: s.name, lat: s.lat, lng: s.lng, svc: s.svc != null ? s.svc : null });
     render();
   }
 
   // ---------- εμφάνιση ----------
-  function stopRow(s, num, leg) {
+  function stopRow(s, pos, leg, slot) {
     var li = document.createElement('li');
     li.innerHTML =
-      '<div class="pin ' + (result ? 's' : 'u') + '">' + num + '</div>' +
+      '<div class="pin ' + (result ? 's' : 'u') + '">' + pos + '</div>' +
       '<div class="grow"><div class="name"></div><div class="meta"></div></div>' +
       '<button class="small ghost fav" title="Αποθήκευση πελάτη" aria-label="Αποθήκευση πελάτη">' + (isFav(s) ? '★' : '☆') + '</button>' +
       '<button class="small ghost del" title="Αφαίρεση" aria-label="Αφαίρεση στάσης">✕</button>';
     li.querySelector('.name').textContent = s.name;
-    li.querySelector('.meta').textContent = leg ? ('+' + fmtKm(leg.distance) + ' km · ' + fmtTime(leg.duration)) : fmtCoord(s);
+    var meta = li.querySelector('.meta');
+    var bits = [];
+    if (slot) bits.push('<span class="eta">' + hhmm(slot.arr) + '</span>');
+    bits.push(esc(leg ? ('+' + fmtKm(leg.distance) + ' km · ' + fmtTime(leg.duration)) : fmtCoord(s)));
+    if (s.svc != null && s.svc !== '') bits.push(esc('στάση ' + svcOf(s) + 'λ'));
+    meta.innerHTML = bits.join(' · ') +
+      (S.firstId === s.id ? ' <span class="tag">πρώτη</span>' : '') + (S.lastId === s.id ? ' <span class="tag">τελευταία</span>' : '');
     li.querySelector('.fav').onclick = function () { toggleFav(s); };
     li.querySelector('.del').onclick = function () { removeStop(s.id); };
     var g = li.querySelector('.grow');
     g.style.cursor = 'pointer';
-    g.onclick = function () { map.setView([s.lat, s.lng], Math.max(map.getZoom(), 13)); };
+    g.onclick = function () {
+      openId = openId === s.id ? null : s.id;
+      map.setView([s.lat, s.lng], Math.max(map.getZoom(), 13));
+      render();
+    };
+    if (openId === s.id) {
+      var ed = document.createElement('div');
+      ed.className = 'stop-edit';
+      ed.innerHTML = '<label>Χρόνος στάσης <input type="number" min="0" max="600" step="1" inputmode="numeric" aria-label="Χρόνος στάσης σε λεπτά"> λεπτά</label>' +
+        '<button class="small first" aria-pressed="' + (S.firstId === s.id) + '">Πρώτη στάση</button>' +
+        '<button class="small last" aria-pressed="' + (S.lastId === s.id) + '">Τελευταία στάση</button>';
+      var inp = ed.querySelector('input');
+      inp.placeholder = String(S.time.svc);
+      inp.value = s.svc != null && s.svc !== '' ? s.svc : '';
+      inp.onchange = function () {
+        s.svc = inp.value === '' ? null : num(inp.value, S.time.svc, 0, 600);
+        S.favs.forEach(function (f) { if (same(f, s)) f.svc = s.svc; });
+        render(); if (result) showResult();
+      };
+      ed.querySelector('.first').onclick = function () {
+        S.firstId = S.firstId === s.id ? null : s.id;
+        if (S.lastId === S.firstId) S.lastId = null;
+        var had = !!result; invalidate(); render(); if (had) optimize();
+      };
+      ed.querySelector('.last').onclick = function () {
+        S.lastId = S.lastId === s.id ? null : s.id;
+        if (S.firstId === S.lastId) S.firstId = null;
+        var had = !!result; invalidate(); render(); if (had) optimize();
+      };
+      li.appendChild(ed);
+    }
     return li;
   }
 
+  function setVal(id, v) { var el = $(id); if (document.activeElement !== el) el.value = v; }
+  function renderCosts() {
+    var ol = $('costList');
+    if (ol.contains(document.activeElement)) return;
+    ol.innerHTML = '';
+    S.cost.extra.forEach(function (x, i) {
+      var li = document.createElement('li');
+      li.innerHTML = '<input type="text" class="cl" placeholder="Περιγραφή" aria-label="Περιγραφή κόστους">' +
+        '<input type="number" class="ca" min="0" step="0.01" inputmode="decimal" aria-label="Ποσό">' +
+        '<select class="cu" aria-label="Μονάδα">' + Object.keys(UNITS).map(function (u) { return '<option value="' + u + '">' + UNITS[u] + '</option>'; }).join('') + '</select>' +
+        '<button class="small ghost del" aria-label="Διαγραφή κόστους">✕</button>';
+      li.querySelector('.cl').id = 'cost-l-' + i; li.querySelector('.ca').id = 'cost-a-' + i; li.querySelector('.cu').id = 'cost-u-' + i;
+      li.querySelector('.cl').value = x.label;
+      li.querySelector('.ca').value = x.amount || '';
+      li.querySelector('.cu').value = x.unit;
+      li.querySelector('.cl').onchange = function (e) { S.cost.extra[i].label = e.target.value; settingsChanged(); };
+      li.querySelector('.ca').onchange = function (e) { S.cost.extra[i].amount = num(e.target.value, 0, 0, 1e6); settingsChanged(); };
+      li.querySelector('.cu').onchange = function (e) { S.cost.extra[i].unit = e.target.value; settingsChanged(); };
+      li.querySelector('.del').onclick = function () { S.cost.extra.splice(i, 1); settingsChanged(true); };
+      ol.appendChild(li);
+    });
+  }
+  function settingsChanged(rerenderCosts) {
+    normSettings(); save();
+    if (rerenderCosts) { $('costList').innerHTML = ''; renderCosts(); }
+    if (result) { showResult(); render(); }
+  }
   function render() {
     $('baseName').textContent = S.base.name;
     $('baseCoords').textContent = fmtCoord(S.base);
@@ -653,18 +843,28 @@ button:disabled:hover { border-color: var(--line); }
     $('optBtn').disabled = S.stops.length === 0;
     ['pCar', 'pHgv'].forEach(function (id) { $(id).setAttribute('aria-checked', String($(id).dataset.p === S.opt.vehicle)); });
     ['tTime', 'tDist'].forEach(function (id) { $(id).setAttribute('aria-checked', String($(id).dataset.t === S.opt.target)); });
+    setVal('departAt', S.time.depart); setVal('svcDefault', S.time.svc);
+    setVal('cCons', S.cost.cons); setVal('cPrice', S.cost.price); setVal('cTolls', S.cost.tolls || '');
+    setVal('spMw', S.speeds.mw); setVal('spRural', S.speeds.rural); setVal('spCity', S.speeds.city);
+    renderCosts();
     $('avHw').checked = S.opt.hw; $('avToll').checked = S.opt.toll; $('avFerry').checked = S.opt.ferry; $('avUnpaved').checked = S.opt.unpaved;
 
     var list = $('stopList'); list.innerHTML = '';
     var byId = byIdMap();
     if (result) {
-      result.order.forEach(function (id, i) { if (byId[id]) list.appendChild(stopRow(byId[id], i + 1, result.legs[i])); });
+      var sch = schedule();
+      var start = document.createElement('li');
+      start.innerHTML = '<div class="pin b">Β</div><div class="grow"><div class="name"></div><div class="meta"></div></div>';
+      start.querySelector('.name').textContent = 'Αναχώρηση: ' + S.base.name;
+      start.querySelector('.meta').innerHTML = '<span class="eta">' + hhmm(sch.start) + '</span>';
+      list.appendChild(start);
+      result.order.forEach(function (id, i) { if (byId[id]) list.appendChild(stopRow(byId[id], i + 1, result.legs[i], sch.stops[i])); });
       var back = result.legs[result.order.length];
       if (back) {
         var li = document.createElement('li');
         li.innerHTML = '<div class="pin b">Β</div><div class="grow"><div class="name"></div><div class="meta"></div></div>';
         li.querySelector('.name').textContent = 'Επιστροφή: ' + S.base.name;
-        li.querySelector('.meta').textContent = '+' + fmtKm(back.distance) + ' km · ' + fmtTime(back.duration);
+        li.querySelector('.meta').innerHTML = '<span class="eta">' + hhmm(sch.end) + '</span> · ' + esc('+' + fmtKm(back.distance) + ' km · ' + fmtTime(back.duration));
         list.appendChild(li);
       }
     } else {
@@ -682,7 +882,7 @@ button:disabled:hover { border-color: var(--line); }
         '<button class="small add"' + (inRoute ? ' disabled' : '') + '>' + (inRoute ? '✓ Στάση' : '+ Στάση') + '</button>' +
         '<button class="small ghost del" aria-label="Διαγραφή πελάτη">✕</button>';
       li.querySelector('.name').textContent = f.name;
-      li.querySelector('.add').onclick = function () { addStop(f.lat, f.lng, f.name); };
+      li.querySelector('.add').onclick = function () { addStop(f.lat, f.lng, f.name, false, f.svc); };
       li.querySelector('.del').onclick = function () { S.favs.splice(i, 1); render(); };
       fl.appendChild(li);
     });
@@ -690,6 +890,45 @@ button:disabled:hover { border-color: var(--line); }
     drawMarkers();
     save();
   }
+
+  function svcOf(s) { return s && s.svc != null && s.svc !== '' ? num(s.svc, S.time.svc, 0, 600) : S.time.svc; }
+  function depSec() { var p = S.time.depart.split(':'); return (+p[0]) * 3600 + (+p[1]) * 60; }
+  function hhmm(sec) {
+    var m = Math.round(sec / 60), d = Math.floor(m / 1440); m = m % 1440;
+    return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0') + (d ? ' (+' + d + 'μ)' : '');
+  }
+  // Ώρες άφιξης/αναχώρησης ανά στάση, με βάση τη σειρά και τον χρόνο ανά στάση
+  function schedule() {
+    var byId = byIdMap(), t = depSec(), stops = [], service = 0;
+    result.order.forEach(function (id, i) {
+      var s = byId[id], leg = result.legs[i] || { duration: 0 };
+      var arr = t + leg.duration, sv = svcOf(s) * 60;
+      service += sv;
+      stops.push({ id: id, arr: arr, dep: arr + sv, svc: sv });
+      t = arr + sv;
+    });
+    var back = result.legs[result.order.length];
+    var end = t + (back ? back.duration : 0);
+    return { stops: stops, start: depSec(), end: end, service: service, total: end - depSec() };
+  }
+  function testEstimate() {
+    var c = result.classes || { mw: 0, rural: 0, city: 0 }, sp = S.speeds;
+    var sec = c.mw / 1000 / sp.mw * 3600 + c.rural / 1000 / sp.rural * 3600 + c.city / 1000 / sp.city * 3600;
+    return { sec: sec, classes: c };
+  }
+  function costBreakdown(sch) {
+    var km = result.km / 1000, hours = sch.total / 3600, n = result.order.length, C = S.cost;
+    var litres = km * C.cons / 100;
+    var lines = [{ label: 'Καύσιμο (' + litres.toLocaleString('el-GR', { maximumFractionDigits: 1 }) + ' λίτρα)', v: litres * C.price }];
+    if (C.tolls > 0) lines.push({ label: 'Διόδια', v: C.tolls });
+    C.extra.forEach(function (x) {
+      var mult = x.unit === 'km' ? km : x.unit === 'hour' ? hours : x.unit === 'stop' ? n : 1;
+      if (x.amount > 0) lines.push({ label: (x.label || 'Άλλο κόστος') + ' (' + String(x.amount).replace('.', ',') + ' ' + UNITS[x.unit] + ')', v: x.amount * mult });
+    });
+    var total = lines.reduce(function (a, l) { return a + l.v; }, 0);
+    return { lines: lines, total: total, perKm: km ? total / km : 0, perStop: n ? total / n : 0 };
+  }
+  function eur(v) { return v.toLocaleString('el-GR', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
   function orderedPoints() {
     var byId = byIdMap();
@@ -715,10 +954,30 @@ button:disabled:hover { border-color: var(--line); }
 
   function showResult() {
     $('resultBox').hidden = false;
-    $('resultMode').textContent = '· ' + optLabel(result.opt);
     $('sumKm').textContent = fmtKm(result.km);
     $('sumTime').textContent = fmtTime(result.sec);
-    $('sumStops').textContent = result.order.length;
+    var sch = schedule();
+    $('sumTotal').textContent = fmtTime(sch.total);
+    $('sumBack').textContent = hhmm(sch.end);
+    $('resultMode').textContent = '· ' + result.order.length + ' στάσεις · ' + optLabel(result.opt);
+
+    var est = testEstimate(), c = est.classes, diff = est.sec - result.sec;
+    var to = $('testOut');
+    to.innerHTML = '<div class="lines">' +
+      '<div class="total"><span>Με ' + S.speeds.mw + ' / ' + S.speeds.rural + ' / ' + S.speeds.city + ' km/h</span><span>' + fmtTime(est.sec) + '</span></div>' +
+      '<div><span>Υπηρεσία δρομολόγησης</span><span>' + fmtTime(result.sec) + '</span></div>' +
+      '<div><span>Διαφορά</span><span>' + (diff >= 0 ? '+' : '−') + fmtTime(Math.abs(diff)) + '</span></div>' +
+      '<div><span>Αυτοκινητόδρομος</span><span>' + fmtKm(c.mw) + ' km</span></div>' +
+      '<div><span>Επαρχιακό</span><span>' + fmtKm(c.rural) + ' km</span></div>' +
+      '<div><span>Πόλη</span><span>' + fmtKm(c.city) + ' km</span></div>' +
+      '</div><p class="hint" style="margin-top:6px">Η κατηγορία κάθε κομματιού βγαίνει από την ταχύτητα που του δίνει η υπηρεσία: πάνω από 80 km/h αυτοκινητόδρομος, 45–80 επαρχιακό, κάτω από 45 πόλη. Δεν μετράει στροφές, φανάρια και στάσεις.</p>';
+
+    var cb = costBreakdown(sch);
+    $('costTotal').textContent = eur(cb.total);
+    $('costOut').innerHTML = cb.lines.map(function (l) { return '<div><span>' + esc(l.label) + '</span><span>' + eur(l.v) + '</span></div>'; }).join('') +
+      '<div class="total"><span>Σύνολο</span><span>' + eur(cb.total) + '</span></div>' +
+      '<div><span>Ανά km</span><span>' + eur(cb.perKm) + '</span></div>' +
+      '<div><span>Ανά στάση</span><span>' + eur(cb.perStop) + '</span></div>';
     $('navHint').textContent = 'Το Google Maps δέχεται περιορισμένες στάσεις ανά διαδρομή, οπότε η διαδρομή χωρίζεται σε κομμάτια. Άνοιξε το επόμενο όταν τελειώσεις το προηγούμενο.' +
       (anyAvoid(result.opt) ? ' Το Google Maps χαράζει μόνο του τον δρόμο: για να κρατήσεις τις αποφυγές, πάτα εκεί ⋯ → Επιλογές διαδρομής και ενεργοποίησε τις ίδιες αποφυγές.' : '');
     var nl = $('navLinks'); nl.innerHTML = '';
@@ -738,7 +997,13 @@ button:disabled:hover { border-color: var(--line); }
   function r5(x) { return Math.round(x * 1e5) / 1e5; }
   function shareLink() {
     var pts = result ? orderedPoints().slice(1, -1) : S.stops;
-    var data = { b: [r5(S.base.lat), r5(S.base.lng), S.base.name], s: pts.map(function (p) { return [r5(p.lat), r5(p.lng), p.name]; }), o: S.opt };
+    var data = {
+      b: [r5(S.base.lat), r5(S.base.lng), S.base.name],
+      s: pts.map(function (p) { return [r5(p.lat), r5(p.lng), p.name, p.svc != null ? p.svc : null]; }),
+      f: pts.map(function (p) { return p.id; }).indexOf(S.firstId),
+      l: pts.map(function (p) { return p.id; }).indexOf(S.lastId),
+      o: S.opt, t: S.time, c: S.cost
+    };
     return location.origin + location.pathname + '#r=' + b64encode(JSON.stringify(data));
   }
   function fileStamp() {
@@ -767,9 +1032,12 @@ button:disabled:hover { border-color: var(--line); }
     var out = ['<?xml version="1.0" encoding="UTF-8"?>',
       '<gpx version="1.1" creator="' + xmlEsc(APP_NAME) + '" xmlns="http://www.topografix.com/GPX/1/1">',
       '<metadata><name>' + xmlEsc(title) + '</name></metadata>'];
+    var sch = schedule();
     pts.forEach(function (p, i) {
+      var desc = i === 0 ? 'Αναχώρηση ' + hhmm(sch.start) : 'Άφιξη ' + hhmm(sch.stops[i - 1].arr) + ', στάση ' + Math.round(sch.stops[i - 1].svc / 60) + ' λεπτά';
       out.push('<wpt lat="' + p.lat.toFixed(6) + '" lon="' + p.lng.toFixed(6) + '"><name>' +
-        xmlEsc(i === 0 ? 'Αφετηρία: ' + p.name : i + '. ' + p.name) + '</name>' + (i === 0 ? '<type>base</type>' : '<type>stop</type>') + '</wpt>');
+        xmlEsc(i === 0 ? 'Αφετηρία: ' + p.name : i + '. ' + p.name) + '</name><desc>' + xmlEsc(desc) + '</desc>' +
+        (i === 0 ? '<type>base</type>' : '<type>stop</type>') + '</wpt>');
     });
     out.push('<trk><name>' + xmlEsc(title) + '</name><trkseg>');
     (result.geom || []).forEach(function (c) { out.push('<trkpt lat="' + c[1].toFixed(6) + '" lon="' + c[0].toFixed(6) + '"/>'); });
@@ -778,15 +1046,19 @@ button:disabled:hover { border-color: var(--line); }
   }
   function csvCell(v) { v = String(v); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
   function buildCSV() {
-    var pts = orderedPoints();
-    var rows = [['Σειρά', 'Στάση', 'km από προηγούμενη', 'Χρόνος από προηγούμενη', 'Σύνολο km', 'Πλάτος', 'Μήκος', 'Google Maps']];
+    var pts = orderedPoints(), sch = schedule();
+    var rows = [['Σειρά', 'Στάση', 'Άφιξη', 'Αναχώρηση', 'Χρόνος στάσης (λεπτά)', 'km από προηγούμενη', 'Οδήγηση από προηγούμενη', 'Σύνολο km', 'Πλάτος', 'Μήκος', 'Google Maps']];
     var tot = 0;
     pts.forEach(function (p, i) {
-      var leg = i > 0 ? result.legs[i - 1] : null;
+      var leg = i > 0 ? result.legs[i - 1] : null, last = i === pts.length - 1;
+      var slot = i > 0 && !last ? sch.stops[i - 1] : null;
       if (leg) tot += leg.distance;
       rows.push([
-        i === 0 ? 'Αφετηρία' : (i === pts.length - 1 ? 'Επιστροφή' : i),
+        i === 0 ? 'Αφετηρία' : (last ? 'Επιστροφή' : i),
         p.name,
+        i === 0 ? '' : (last ? hhmm(sch.end) : hhmm(slot.arr)),
+        i === 0 ? hhmm(sch.start) : (last ? '' : hhmm(slot.dep)),
+        slot ? Math.round(slot.svc / 60) : '',
         leg ? fmtKm(leg.distance) : '',
         leg ? fmtTime(leg.duration) : '',
         leg ? fmtKm(tot) : '0',
@@ -794,15 +1066,29 @@ button:disabled:hover { border-color: var(--line); }
         'https://www.google.com/maps/search/?api=1&query=' + p.lat.toFixed(6) + ',' + p.lng.toFixed(6)
       ]);
     });
-    return '﻿' + rows.map(function (r) { return r.map(csvCell).join(';'); }).join('\r\n');
+    var cb = costBreakdown(sch);
+    rows.push([]);
+    rows.push(['', 'Σύνολο km', fmtKm(result.km)]);
+    rows.push(['', 'Οδήγηση', fmtTime(result.sec)]);
+    rows.push(['', 'Με τις στάσεις', fmtTime(sch.total)]);
+    cb.lines.forEach(function (l) { rows.push(['', l.label, l.v.toFixed(2).replace('.', ',') + ' €']); });
+    rows.push(['', 'Κόστος σύνολο', cb.total.toFixed(2).replace('.', ',') + ' €']);
+    return '\ufeff' + rows.map(function (r) { return r.map(csvCell).join(';'); }).join('\r\n');
   }
   function loadState(data) {
     if (!data || !data.b || !data.s) throw new Error('bad');
     S.base = { lat: +data.b[0], lng: +data.b[1], name: String(data.b[2] || 'Αφετηρία') };
     S.stops = [];
-    data.s.slice(0, MAX).forEach(function (p) { S.stops.push({ id: nextId++, lat: +p[0], lng: +p[1], name: String(p[2] || 'Στάση') }); });
+    data.s.slice(0, MAX).forEach(function (p) {
+      S.stops.push({ id: nextId++, lat: +p[0], lng: +p[1], name: String(p[2] || 'Στάση'), svc: p[3] != null ? num(p[3], null, 0, 600) : null });
+    });
+    S.firstId = data.f >= 0 && S.stops[data.f] ? S.stops[data.f].id : null;
+    S.lastId = data.l >= 0 && S.stops[data.l] ? S.stops[data.l].id : null;
     if (data.o) S.opt = normOpt(data.o);
     else if (data.m === 'local') S.opt = normOpt({ target: 'distance', hw: true, toll: true });
+    if (data.t) S.time = data.t;
+    if (data.c) S.cost = data.c;
+    normSettings();
   }
   function importGPX(text) {
     var doc = new DOMParser().parseFromString(text, 'application/xml');
@@ -819,14 +1105,14 @@ button:disabled:hover { border-color: var(--line); }
       if (!base && typeEl && typeEl.textContent === 'base') base = p; else stops.push(p);
     });
     if (base) S.base = base;
-    S.stops = [];
+    S.stops = []; S.firstId = S.lastId = null;
     stops.slice(0, MAX).forEach(function (p) { S.stops.push({ id: nextId++, lat: p.lat, lng: p.lng, name: p.name }); });
     return stops.length;
   }
 
   // ---------- κουμπιά ----------
   $('optBtn').onclick = optimize;
-  $('clearBtn').onclick = function () { S.stops = []; invalidate(); status(''); render(); };
+  $('clearBtn').onclick = function () { S.stops = []; S.firstId = S.lastId = null; openId = null; invalidate(); status(''); render(); };
   $('baseBtn').onclick = function () {
     baseMode = !baseMode;
     $('modeBanner').hidden = !baseMode;
@@ -850,12 +1136,25 @@ button:disabled:hover { border-color: var(--line); }
       else changeOpt({ target: 'distance', hw: true, toll: true, ferry: false, unpaved: false });
     };
   });
+  $('departAt').onchange = function (e) { S.time.depart = e.target.value || DEFAULTS.time.depart; settingsChanged(); };
+  $('svcDefault').onchange = function (e) { S.time.svc = num(e.target.value, DEFAULTS.time.svc, 0, 600); settingsChanged(); };
+  $('cCons').onchange = function (e) { S.cost.cons = num(e.target.value, DEFAULTS.cost.cons, 0, 100); settingsChanged(); };
+  $('cPrice').onchange = function (e) { S.cost.price = num(e.target.value, DEFAULTS.cost.price, 0, 20); settingsChanged(); };
+  $('cTolls').onchange = function (e) { S.cost.tolls = num(e.target.value, 0, 0, 10000); settingsChanged(); };
+  [['spMw', 'mw'], ['spRural', 'rural'], ['spCity', 'city']].forEach(function (p) {
+    $(p[0]).onchange = function (e) { S.speeds[p[1]] = num(e.target.value, 50, 10, 200); settingsChanged(); };
+  });
+  $('addCostBtn').onclick = function () {
+    S.cost.extra.push({ label: '', amount: 0, unit: 'km' });
+    settingsChanged(true);
+    var inp = $('cost-l-' + (S.cost.extra.length - 1)); if (inp) inp.focus();
+  };
   $('addAllBtn').onclick = function () {
     var added = 0, full = false;
     S.favs.forEach(function (f) {
       if (isStop(f) || full) return;
       if (S.stops.length >= MAX) { full = true; return; }
-      addStop(f.lat, f.lng, f.name, true); added++;
+      addStop(f.lat, f.lng, f.name, true, f.svc); added++;
     });
     invalidate(); render(); fitAll();
     status(full ? 'Προστέθηκαν ' + added + ' πελάτες. Έφτασες το όριο των ' + MAX + ' στάσεων.' : 'Προστέθηκαν ' + added + ' πελάτες.', full ? 'err' : 'ok');

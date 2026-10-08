@@ -126,6 +126,14 @@ details[open] summary { margin-bottom: 8px; }
 .mode[aria-checked="true"] b { color: var(--accent); }
 button:disabled { opacity: .55; cursor: default; }
 button:disabled:hover { border-color: var(--line); }
+.field-label { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.seg.wide { display: grid; grid-template-columns: 1fr 1fr; }
+.seg button[aria-checked="true"] { background: var(--soft); color: var(--accent); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; font-size: 13.5px; cursor: pointer; }
+.chip:has(input:checked) { border-color: var(--accent); background: var(--soft); color: var(--accent); font-weight: 600; }
+.chip input { margin: 0; accent-color: var(--accent); }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .share-box { display: flex; gap: 8px; }
 .share-box input { font-size: 13px; }
 .file-btn { font-weight: 600; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; padding: 4px 9px; cursor: pointer; background: var(--panel); }
@@ -163,20 +171,28 @@ button:disabled:hover { border-color: var(--line); }
     </section>
 
     <section>
-      <h2>Κριτήριο διαδρομής</h2>
-      <div class="modes" role="radiogroup" aria-label="Κριτήριο διαδρομής">
-        <button id="mFast" class="mode" data-m="fast" role="radio" aria-checked="true">
-          <b>Γρηγορότερη</b><span>Λιγότερος χρόνος, με εθνικές και διόδια</span>
-        </button>
-        <button id="mLocal" class="mode" data-m="local" role="radio" aria-checked="false">
-          <b>Λιγότερα km</b><span>Τοπικοί δρόμοι, χωρίς εθνικές και διόδια</span>
-        </button>
+      <h2>Κριτήρια διαδρομής</h2>
+      <div class="field-label">Ελαχιστοποίηση</div>
+      <div class="seg wide" role="radiogroup" aria-label="Ελαχιστοποίηση">
+        <button id="tTime" data-t="time" role="radio" aria-checked="true">Χρόνου</button>
+        <button id="tDist" data-t="distance" role="radio" aria-checked="false">Χιλιομέτρων</button>
       </div>
-      <div class="row" id="vehicleRow" hidden>
-        <div class="seg" role="group" aria-label="Όχημα">
-          <button id="pCar" data-p="driving-car" aria-pressed="true">Αυτοκίνητο / βαν</button>
-          <button id="pHgv" data-p="driving-hgv" aria-pressed="false">Φορτηγό</button>
-        </div>
+      <div class="field-label">Αποφυγή</div>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="avHw"> Αυτοκινητόδρομοι</label>
+        <label class="chip"><input type="checkbox" id="avToll"> Διόδια</label>
+        <label class="chip"><input type="checkbox" id="avFerry"> Πορθμεία</label>
+        <label class="chip"><input type="checkbox" id="avUnpaved"> Χωματόδρομοι</label>
+      </div>
+      <div class="field-label">Όχημα</div>
+      <div class="seg wide" role="radiogroup" aria-label="Όχημα">
+        <button id="pCar" data-p="car" role="radio" aria-checked="true">Αυτοκίνητο / βαν</button>
+        <button id="pHgv" data-p="truck" role="radio" aria-checked="false">Φορτηγό</button>
+      </div>
+      <div class="presets">
+        <span class="hint">Γρήγορα:</span>
+        <button class="small" data-preset="fast">Γρηγορότερη</button>
+        <button class="small" data-preset="local">Λιγότερα km από τοπικούς</button>
       </div>
     </section>
 
@@ -233,18 +249,6 @@ button:disabled:hover { border-color: var(--line); }
       </div>
     </section>
 
-    <details>
-      <summary>Ρυθμίσεις</summary>
-      <section>
-        <p class="hint" id="engineInfo"></p>
-        <p class="hint">Προαιρετικά: με δωρεάν κλειδί από το openrouteservice.org εμφανίζεται η επιλογή για φορτηγό. Χωρίς κλειδί η εφαρμογή δουλεύει κανονικά.</p>
-        <div class="row">
-          <input id="keyInput" type="password" placeholder="Κλειδί openrouteservice (προαιρετικό)" autocomplete="off">
-          <button id="keySave" class="small">Αποθήκευση</button>
-          <button id="keyChange" class="small ghost">Αφαίρεση</button>
-        </div>
-      </section>
-    </details>
   </aside>
   <div class="map-wrap">
     <div id="map"></div>
@@ -258,7 +262,6 @@ button:disabled:hover { border-color: var(--line); }
   'use strict';
   var MAX = 30;
   var STORE = 'routeplanner.v1';
-  var ORS = 'https://api.openrouteservice.org';
   // Δωρεάν servers χωρίς κλειδί (με σειρά προτίμησης)
   var OSRM_HOSTS = ['https://routing.openstreetmap.de/routed-car', 'https://router.project-osrm.org'];
   var VALHALLA = 'https://valhalla1.openstreetmap.de';
@@ -271,8 +274,7 @@ button:disabled:hover { border-color: var(--line); }
     base: { lat: 39.6650, lng: 20.8537, name: 'Ιωάννινα' },
     stops: [],
     favs: [],
-    profile: 'driving-car',
-    mode: 'fast'
+    opt: { target: 'time', hw: false, toll: false, ferry: false, unpaved: false, vehicle: 'car' }
   };
   var result = null;   // { order, legs, km, sec, geom:[[lng,lat]...], mode, approx }
   var baseMode = false;
@@ -280,15 +282,36 @@ button:disabled:hover { border-color: var(--line); }
 
   // ---------- αποθήκευση στη συσκευή ----------
   function load() {
+    var old = {};
     try {
       var raw = localStorage.getItem(STORE);
       if (raw) {
         var d = JSON.parse(raw);
         Object.keys(S).forEach(function (k) { if (d[k] !== undefined) S[k] = d[k]; });
+        old = d;
       }
     } catch (e) {}
-    if (S.mode !== 'fast' && S.mode !== 'local') S.mode = 'fast';
+    // μετάβαση από την παλιά έκδοση
+    if (!S.opt || typeof S.opt !== 'object') S.opt = {};
+    if (!old.opt && old.mode === 'local') { S.opt.target = 'distance'; S.opt.hw = true; S.opt.toll = true; }
+    if (!old.opt && old.profile === 'driving-hgv') S.opt.vehicle = 'truck';
+    S.opt = normOpt(S.opt);
     S.stops.forEach(function (s) { if (s.id >= nextId) nextId = s.id + 1; });
+  }
+  function normOpt(o) {
+    o = o || {};
+    return { target: o.target === 'distance' ? 'distance' : 'time', hw: !!o.hw, toll: !!o.toll, ferry: !!o.ferry, unpaved: !!o.unpaved,
+      vehicle: o.vehicle === 'truck' ? 'truck' : 'car' };
+  }
+  function anyAvoid(o) { return o.hw || o.toll || o.ferry || o.unpaved; }
+  function optLabel(o) {
+    var parts = [o.target === 'distance' ? 'Λιγότερα km' : 'Γρηγορότερη'];
+    var av = [];
+    if (o.hw) av.push('αυτοκινητόδρομους'); if (o.toll) av.push('διόδια');
+    if (o.ferry) av.push('πορθμεία'); if (o.unpaved) av.push('χωματόδρομους');
+    if (av.length) parts.push('χωρίς ' + av.join(', '));
+    if (o.vehicle === 'truck') parts.push('φορτηγό');
+    return parts.join(' · ');
   }
   function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
 
@@ -332,21 +355,6 @@ button:disabled:hover { border-color: var(--line); }
       }).catch(function (e) { lastErr = e; return next(); });
     }
     return next();
-  }
-
-  function apiORS(path, opts) {
-    opts = opts || {};
-    var headers = { 'Authorization': S.key };
-    if (opts.body) headers['Content-Type'] = 'application/json';
-    return fetch(ORS + path, { method: opts.body ? 'POST' : 'GET', headers: headers, body: opts.body ? JSON.stringify(opts.body) : undefined })
-      .then(function (res) {
-        return res.json().catch(function () { return null; }).then(function (body) {
-          if (res.status === 401 || res.status === 403) throw new Error('Το κλειδί δεν έγινε δεκτό. Έλεγξέ το στις Ρυθμίσεις.');
-          if (res.status === 429) throw new Error('Ξεπεράστηκε το ημερήσιο όριο του κλειδιού.');
-          if (!res.ok) throw new Error('Σφάλμα υπηρεσίας (' + res.status + ')');
-          return body;
-        });
-      }, function () { throw new Error('Δεν υπάρχει σύνδεση με την υπηρεσία δρομολόγησης.'); });
   }
 
   // ---------- διευθύνσεις (Photon) ----------
@@ -426,19 +434,29 @@ button:disabled:hover { border-color: var(--line); }
     return tryHosts(OSRM_HOSTS, function (h) { return h + '/table/v1/driving/' + cs + '?annotations=duration,distance'; })
       .then(function (d) { return d[key].map(function (row) { return row.map(function (v) { return v == null ? BIG : v; }); }); });
   }
-  function valhallaCostingOptions() {
-    var c = S.profile === 'driving-hgv' ? 'truck' : 'auto';
-    var o = {}; o[c] = { shortest: true, use_highways: 0, use_tolls: 0 };
-    return { costing: c, costing_options: o };
+  function valhallaCostingOptions(o) {
+    var c = o.vehicle === 'truck' ? 'truck' : 'auto';
+    var opts = {
+      shortest: o.target === 'distance',
+      use_highways: o.hw ? 0 : 1,
+      use_tolls: o.toll ? 0 : 0.5,
+      use_ferry: o.ferry ? 0 : 0.5
+    };
+    if (o.unpaved) opts.exclude_unpaved = true;
+    var co = {}; co[c] = opts;
+    return { costing: c, costing_options: co };
   }
-  function valhallaMatrix(pts) {
-    var co = valhallaCostingOptions();
+  function valhallaMatrix(pts, o) {
+    var co = valhallaCostingOptions(o);
     var locs = pts.map(function (p) { return { lat: +p.lat.toFixed(6), lon: +p.lng.toFixed(6) }; });
     var req = { sources: locs, targets: locs, costing: co.costing, costing_options: co.costing_options, units: 'kilometers' };
     return getJSON(VALHALLA + '/sources_to_targets?json=' + encodeURIComponent(JSON.stringify(req)), 40000).then(function (d) {
       var m = d && d.sources_to_targets;
       if (!m) throw new Error('Μη έγκυρη απάντηση');
-      return m.map(function (row) { return row.map(function (c) { return c && c.distance != null ? c.distance * 1000 : BIG; }); });
+      return m.map(function (row) { return row.map(function (c) {
+        if (!c || c.distance == null) return BIG;
+        return o.target === 'distance' ? c.distance * 1000 : c.time;
+      }); });
     });
   }
 
@@ -464,8 +482,8 @@ button:disabled:hover { border-color: var(--line); }
     }
     return out;
   }
-  function valhallaRoute(pts) {
-    var co = valhallaCostingOptions();
+  function valhallaRoute(pts, o) {
+    var co = valhallaCostingOptions(o);
     var CH = 20, chunks = [];
     for (var i = 0; i < pts.length - 1; i += CH - 1) chunks.push(pts.slice(i, i + CH));
     return chunks.reduce(function (acc, part) {
@@ -487,55 +505,32 @@ button:disabled:hover { border-color: var(--line); }
   }
 
   // ---------- βελτιστοποίηση ----------
-  function computeFree() {
-    var pts = [S.base].concat(S.stops);
-    if (S.mode === 'local') {
-      status('Υπολογισμός με τοπικούς δρόμους…');
-      return valhallaMatrix(pts).then(function (C) {
-        var order = solveTSP(C);
-        var ordered = [S.base].concat(order.map(function (i) { return pts[i]; }), [S.base]);
-        status('Σχεδίαση διαδρομής…');
-        return valhallaRoute(ordered).then(function (r) { r.order = order.map(function (i) { return pts[i].id; }); return r; });
-      }).catch(function () {
-        // εφεδρεία: σειρά με βάση τα km, χάραξη από OSRM
-        status('Η υπηρεσία τοπικών δρόμων δεν απάντησε, χρήση εφεδρικής…');
-        return osrmMatrix(pts, 'distances').then(function (C) {
-          var order = solveTSP(C);
-          var ordered = [S.base].concat(order.map(function (i) { return pts[i]; }), [S.base]);
-          return osrmRoute(ordered).then(function (r) { r.order = order.map(function (i) { return pts[i].id; }); r.approx = true; return r; });
-        });
-      });
-    }
-    status('Υπολογισμός γρηγορότερης διαδρομής…');
-    return osrmMatrix(pts, 'durations').then(function (C) {
-      var order = solveTSP(C);
-      var ordered = [S.base].concat(order.map(function (i) { return pts[i]; }), [S.base]);
-      status('Σχεδίαση διαδρομής…');
-      return osrmRoute(ordered).then(function (r) { r.order = order.map(function (i) { return pts[i].id; }); return r; });
+  function withOrder(pts, order, routeFn) {
+    var ordered = [S.base].concat(order.map(function (i) { return pts[i]; }), [S.base]);
+    status('Σχεδίαση διαδρομής…');
+    return routeFn(ordered).then(function (r) { r.order = order.map(function (i) { return pts[i].id; }); return r; });
+  }
+  function viaOSRM(pts, o) {
+    return osrmMatrix(pts, o.target === 'distance' ? 'distances' : 'durations').then(function (C) {
+      return withOrder(pts, solveTSP(C), osrmRoute);
     });
   }
-
-  function computeORS() { // μόνο για γρηγορότερη διαδρομή με κλειδί (υποστηρίζει φορτηγό)
-    var home = [S.base.lng, S.base.lat];
-    var body = {
-      jobs: S.stops.map(function (s) { return { id: s.id, location: [s.lng, s.lat] }; }),
-      vehicles: [{ id: 1, profile: S.profile, start: home, end: home }]
-    };
-    status('Υπολογισμός γρηγορότερης διαδρομής…');
-    var p = S.stops.length === 1 ? Promise.resolve([S.stops[0].id]) : apiORS('/optimization', { body: body }).then(function (d) {
-      var route = d.routes && d.routes[0];
-      if (!route) throw new Error('Δεν βρέθηκε διαδρομή για αυτές τις στάσεις.');
-      return route.steps.filter(function (st) { return st.type === 'job'; }).map(function (st) { return st.job !== undefined ? st.job : st.id; });
+  function viaValhalla(pts, o) {
+    return valhallaMatrix(pts, o).then(function (C) {
+      return withOrder(pts, solveTSP(C), function (ordered) { return valhallaRoute(ordered, o); });
     });
-    return p.then(function (order) {
-      var byId = byIdMap();
-      var coords = [home].concat(order.map(function (id) { return [byId[id].lng, byId[id].lat]; }), [home]);
-      return apiORS('/v2/directions/' + S.profile + '/geojson', { body: { coordinates: coords, instructions: false, radiuses: coords.map(function () { return 2000; }) } })
-        .then(function (g) {
-          var f = g.features[0];
-          return { order: order, geom: f.geometry.coordinates, km: f.properties.summary.distance, sec: f.properties.summary.duration,
-            legs: f.properties.segments.map(function (sg) { return { distance: sg.distance, duration: sg.duration }; }) };
-        });
+  }
+  function compute(o) {
+    var pts = [S.base].concat(S.stops);
+    status('Υπολογισμός διαδρομής…');
+    // Απλή γρηγορότερη με αυτοκίνητο: OSRM (γρήγορο), εφεδρεία Valhalla.
+    if (o.target === 'time' && !anyAvoid(o) && o.vehicle === 'car') {
+      return viaOSRM(pts, o).catch(function () { return viaValhalla(pts, o); });
+    }
+    // Όλα τα υπόλοιπα κριτήρια: Valhalla, εφεδρεία OSRM χωρίς τις αποφυγές.
+    return viaValhalla(pts, o).catch(function () {
+      status('Η υπηρεσία με τα κριτήρια δεν απάντησε, χρήση εφεδρικής…');
+      return viaOSRM(pts, o).then(function (r) { r.approx = true; return r; });
     });
   }
 
@@ -543,13 +538,13 @@ button:disabled:hover { border-color: var(--line); }
     if (!S.stops.length) return;
     var btn = $('optBtn');
     btn.disabled = true;
-    var useORS = S.key && S.mode === 'fast';
-    (useORS ? computeORS() : computeFree()).then(function (r) {
-      r.mode = S.mode;
+    var o = normOpt(S.opt);
+    compute(o).then(function (r) {
+      r.opt = o;
       result = r;
       drawRoute();
       showResult();
-      if (r.approx) status('Έτοιμο. Η σειρά βγήκε με βάση τα km, αλλά η υπηρεσία τοπικών δρόμων δεν απάντησε, οπότε η χάραξη μπορεί να περνάει από εθνική.', 'err');
+      if (r.approx) status('Έτοιμο, αλλά χωρίς όλα τα κριτήρια: η υπηρεσία δεν απάντησε και χρησιμοποιήθηκε η εφεδρική. Δοκίμασε ξανά σε λίγο.', 'err');
       else status('Η διαδρομή είναι έτοιμη.', 'ok');
     }).catch(function (err) { status(err.message || 'Κάτι πήγε στραβά. Δοκίμασε ξανά.', 'err'); })
       .then(function () { btn.disabled = S.stops.length === 0; render(); });
@@ -651,16 +646,14 @@ button:disabled:hover { border-color: var(--line); }
   }
 
   function render() {
-    if (!S.key && S.profile === 'driving-hgv') S.profile = 'driving-car';
     $('baseName').textContent = S.base.name;
     $('baseCoords').textContent = fmtCoord(S.base);
     $('count').textContent = S.stops.length + '/' + MAX;
     $('emptyHint').hidden = S.stops.length > 0;
     $('optBtn').disabled = S.stops.length === 0;
-    $('vehicleRow').hidden = !S.key;
-    $('engineInfo').textContent = S.key ? 'Κλειδί openrouteservice: ενεργό.' : 'Λειτουργία χωρίς κλειδί (δωρεάν servers OpenStreetMap).';
-    ['pCar', 'pHgv'].forEach(function (id) { $(id).setAttribute('aria-pressed', String($(id).dataset.p === S.profile)); });
-    ['mFast', 'mLocal'].forEach(function (id) { $(id).setAttribute('aria-checked', String($(id).dataset.m === S.mode)); });
+    ['pCar', 'pHgv'].forEach(function (id) { $(id).setAttribute('aria-checked', String($(id).dataset.p === S.opt.vehicle)); });
+    ['tTime', 'tDist'].forEach(function (id) { $(id).setAttribute('aria-checked', String($(id).dataset.t === S.opt.target)); });
+    $('avHw').checked = S.opt.hw; $('avToll').checked = S.opt.toll; $('avFerry').checked = S.opt.ferry; $('avUnpaved').checked = S.opt.unpaved;
 
     var list = $('stopList'); list.innerHTML = '';
     var byId = byIdMap();
@@ -722,12 +715,12 @@ button:disabled:hover { border-color: var(--line); }
 
   function showResult() {
     $('resultBox').hidden = false;
-    $('resultMode').textContent = result.mode === 'local' ? '· Λιγότερα km' : '· Γρηγορότερη';
+    $('resultMode').textContent = '· ' + optLabel(result.opt);
     $('sumKm').textContent = fmtKm(result.km);
     $('sumTime').textContent = fmtTime(result.sec);
     $('sumStops').textContent = result.order.length;
     $('navHint').textContent = 'Το Google Maps δέχεται περιορισμένες στάσεις ανά διαδρομή, οπότε η διαδρομή χωρίζεται σε κομμάτια. Άνοιξε το επόμενο όταν τελειώσεις το προηγούμενο.' +
-      (result.mode === 'local' ? ' Για τοπικούς δρόμους, στο Google Maps πάτα ⋯ → Επιλογές διαδρομής → Αποφυγή αυτοκινητοδρόμων και διοδίων.' : '');
+      (anyAvoid(result.opt) ? ' Το Google Maps χαράζει μόνο του τον δρόμο: για να κρατήσεις τις αποφυγές, πάτα εκεί ⋯ → Επιλογές διαδρομής και ενεργοποίησε τις ίδιες αποφυγές.' : '');
     var nl = $('navLinks'); nl.innerHTML = '';
     gmapsLinks().forEach(function (l) {
       var a = document.createElement('a');
@@ -745,7 +738,7 @@ button:disabled:hover { border-color: var(--line); }
   function r5(x) { return Math.round(x * 1e5) / 1e5; }
   function shareLink() {
     var pts = result ? orderedPoints().slice(1, -1) : S.stops;
-    var data = { b: [r5(S.base.lat), r5(S.base.lng), S.base.name], s: pts.map(function (p) { return [r5(p.lat), r5(p.lng), p.name]; }), m: S.mode };
+    var data = { b: [r5(S.base.lat), r5(S.base.lng), S.base.name], s: pts.map(function (p) { return [r5(p.lat), r5(p.lng), p.name]; }), o: S.opt };
     return location.origin + location.pathname + '#r=' + b64encode(JSON.stringify(data));
   }
   function fileStamp() {
@@ -808,7 +801,8 @@ button:disabled:hover { border-color: var(--line); }
     S.base = { lat: +data.b[0], lng: +data.b[1], name: String(data.b[2] || 'Αφετηρία') };
     S.stops = [];
     data.s.slice(0, MAX).forEach(function (p) { S.stops.push({ id: nextId++, lat: +p[0], lng: +p[1], name: String(p[2] || 'Στάση') }); });
-    if (data.m === 'fast' || data.m === 'local') S.mode = data.m;
+    if (data.o) S.opt = normOpt(data.o);
+    else if (data.m === 'local') S.opt = normOpt({ target: 'distance', hw: true, toll: true });
   }
   function importGPX(text) {
     var doc = new DOMParser().parseFromString(text, 'application/xml');
@@ -838,13 +832,22 @@ button:disabled:hover { border-color: var(--line); }
     $('modeBanner').hidden = !baseMode;
     $('baseBtn').textContent = baseMode ? 'Άκυρο' : 'Αλλαγή';
   };
-  ['pCar', 'pHgv'].forEach(function (id) { $(id).onclick = function () { S.profile = $(id).dataset.p; invalidate(); render(); }; });
-  ['mFast', 'mLocal'].forEach(function (id) {
-    $(id).onclick = function () {
-      if (S.mode === $(id).dataset.m) return;
-      var had = !!result;
-      S.mode = $(id).dataset.m; invalidate(); render();
-      if (had) optimize();
+  function changeOpt(patch) {
+    var had = !!result;
+    Object.keys(patch).forEach(function (k) { S.opt[k] = patch[k]; });
+    S.opt = normOpt(S.opt);
+    invalidate(); render();
+    if (had) optimize();
+  }
+  ['pCar', 'pHgv'].forEach(function (id) { $(id).onclick = function () { if (S.opt.vehicle !== $(id).dataset.p) changeOpt({ vehicle: $(id).dataset.p }); }; });
+  ['tTime', 'tDist'].forEach(function (id) { $(id).onclick = function () { if (S.opt.target !== $(id).dataset.t) changeOpt({ target: $(id).dataset.t }); }; });
+  [['avHw', 'hw'], ['avToll', 'toll'], ['avFerry', 'ferry'], ['avUnpaved', 'unpaved']].forEach(function (p) {
+    $(p[0]).onchange = function (e) { var o = {}; o[p[1]] = e.target.checked; changeOpt(o); };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-preset]'), function (b) {
+    b.onclick = function () {
+      if (b.dataset.preset === 'fast') changeOpt({ target: 'time', hw: false, toll: false, ferry: false, unpaved: false });
+      else changeOpt({ target: 'distance', hw: true, toll: true, ferry: false, unpaved: false });
     };
   });
   $('addAllBtn').onclick = function () {
@@ -908,13 +911,6 @@ button:disabled:hover { border-color: var(--line); }
     };
     rd.readAsText(f);
   };
-
-  $('keySave').onclick = function () {
-    var k = $('keyInput').value.trim();
-    if (!k) return;
-    S.key = k; $('keyInput').value = ''; invalidate(); status('Το κλειδί αποθηκεύτηκε.', 'ok'); render();
-  };
-  $('keyChange').onclick = function () { S.key = ''; invalidate(); status('Το κλειδί αφαιρέθηκε.', 'ok'); render(); };
 
   // ---------- εκκίνηση ----------
   load();

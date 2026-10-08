@@ -191,7 +191,7 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
           <div class="f">
             <label for="sat">Σάββατα (6η μέρα)</label>
             <div class="inp"><button type="button" data-step="sat" data-d="-1" aria-label="Λιγότερα">−</button><input id="sat" class="num" inputmode="numeric"><button type="button" data-step="sat" data-d="1" aria-label="Περισσότερα">+</button></div>
-            <small>Ολόκληρες μέρες, με +40%.</small>
+            <small>Ολόκληρες μέρες των 8 ωρών, με +30%. Σε επιχείρηση συνεχούς λειτουργίας είναι +40%: άλλαξέ το στις ρυθμίσεις.</small>
           </div>
           <div class="f">
             <label for="d12">12ωρα</label>
@@ -228,7 +228,7 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
           <div class="fields">
             <div class="f"><label for="efka">Εισφορά ΕΦΚΑ εργαζομένου</label><div class="inp"><input id="efka" inputmode="decimal"><span class="unit">%</span></div><small>13,37% για τους περισσότερους. Στα βαρέα είναι μεγαλύτερη.</small></div>
             <div class="f"><label for="pays">Πληρωμές τον χρόνο</label><div class="inp"><input id="pays" inputmode="numeric"></div><small>14 = 12 μισθοί, 2 δώρα και επίδομα αδείας. Στο δημόσιο 12.</small></div>
-            <div class="f"><label for="pSat">Προσαύξηση Σαββάτου</label><div class="inp"><input id="pSat" inputmode="decimal"><span class="unit">%</span></div><small>Σε εξαήμερο το Σάββατο είναι κανονική μέρα: βάλε 0.</small></div>
+            <div class="f"><label for="pSat">Προσαύξηση Σαββάτου</label><div class="inp"><input id="pSat" inputmode="decimal"><span class="unit">%</span></div><small>30% σε επιχείρηση με πενθήμερο, 40% σε επιχείρηση συνεχούς λειτουργίας (ν. 5053/2023). Σε εξαήμερο το Σάββατο είναι κανονική μέρα: βάλε 0.</small></div>
             <div class="f"><label for="hSat">Ώρες ανά Σάββατο</label><div class="inp"><input id="hSat" inputmode="decimal"></div></div>
             <div class="f"><label for="pYpe">Προσαύξηση υπερεργασίας</label><div class="inp"><input id="pYpe" inputmode="decimal"><span class="unit">%</span></div></div>
             <div class="f"><label for="pYpo">Προσαύξηση υπερωρίας</label><div class="inp"><input id="pYpo" inputmode="decimal"><span class="unit">%</span></div></div>
@@ -269,6 +269,7 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
         <li><a href="https://www.taxheaven.gr/law/4172/2013/arthro/16" target="_blank" rel="noopener">Μείωση φόρου μισθωτών, άρθρο 16 ν. 4172/2013</a> (taxheaven)</li>
         <li><a href="https://www.jobfind.gr/hrcorner/salarycalc/gr/Ypologismos_Katharoy_Misthoy" target="_blank" rel="noopener">Εισφορές ΕΦΚΑ 13,37% και κατώτατος μισθός 920 €</a> (jobfind)</li>
         <li><a href="https://www.athensvoice.gr/epikairotita/politiki-oikonomia/857308/exaimeri-ergasia-ergazomenoi/amp/" target="_blank" rel="noopener">Εργασία 6ης ημέρας με προσαύξηση 40%, ν. 5053/2023</a> (Athens Voice)</li>
+        <li><a href="https://katharosmisthos.gr/blog/pos-plironontai-yperories-nychterina-kyriakes-argies" target="_blank" rel="noopener">6η μέρα σε πενθήμερο +30%, υπερωρίες, Κυριακές</a> (katharosmisthos)</li>
         <li><a href="https://www.oenet.gr/ergasiaka/eidikotita-ergazomenou/μερικη-απασχοληση-προσθετη-εργασια-υπερεργασια-υπερωρια" target="_blank" rel="noopener">Υπερεργασία, υπερωρία και πρόσθετη εργασία</a> (oenet)</li>
       </ul>
     </section>
@@ -279,7 +280,7 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
       <p>Ό,τι γράφεις μένει στη συσκευή σου. Δεν στέλνεται πουθενά.</p>
     </section>
   </footer>
-  <p class="ver">Έκδοση 9.10 · 01:05</p>
+  <p class="ver">Έκδοση 9.10 · 01:48</p>
 </div>
 
 <button type="button" class="bar" id="bar" aria-label="Δες την ανάλυση"><span>Καθαρά στο χέρι</span><b id="barNet">–</b></button>
@@ -320,7 +321,7 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
   }
 
   var DEF = { mode: 'gross', salary: 920, age: 31, kids: 0, sat: 0, d12: 0, d12p: 0, sun: 0, ype: 0, ypo: 0,
-    efka: 13.37, pays: 14, pSat: 40, hSat: 8, pYpe: 20, pYpo: 40, pPar: 120, pSun: 75, h12e: 1, h12o: 3, limit: 150 };
+    efka: 13.37, pays: 14, pSat: 30, hSat: 8, pYpe: 20, pYpo: 40, pPar: 120, pSun: 75, h12e: 1, h12o: 3, limit: 150 };
   var KEYS = Object.keys(DEF).filter(function (k) { return k !== 'mode'; });
   var st = {};
 

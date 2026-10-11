@@ -173,6 +173,19 @@ ol.pts li:last-child { border-bottom: 0; }
 .mk { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 700 12px/1 "Fira Sans Condensed", Arial, sans-serif;
   box-shadow: 0 1px 4px rgba(0,0,0,.35); border: 2px solid #fff; background: #141414; color: #fff; }
 .mk.night { background: #3b5bdb; }
+.mk.t { font: 15px/1 "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif; background: #ffffff; border-color: #141414; }
+.mk.t.start { background: #d62828; border-color: #fff; } .mk.t.meet { background: #f59f00; border-color: #fff; width: 32px; height: 32px; font-size: 17px; }
+.mk.t.dest { background: #141414; border-color: #fff; } .mk.t.night { background: #3b5bdb; border-color: #fff; }
+.pin.t { background: var(--soft); color: var(--ink); font: 15px/1 "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif; border: 1px solid var(--line); cursor: help; }
+.pin.t.start { background: var(--accent); border-color: var(--accent); } .pin.t.meet { background: #f59f00; border-color: #f59f00; }
+.pin.t.dest { background: var(--brand); border-color: var(--brand); } .pin.t.night { background: var(--night); border-color: var(--night); }
+.type-sel { flex: none; width: auto; padding: 3px 4px; font-size: 13px; border-radius: 6px; max-width: 150px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 12.5px; color: var(--muted); }
+.legend span { white-space: nowrap; cursor: help; }
+.part-title { font: 700 12px/1.2 var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+.part-title.shared { color: #c27c00; }
+.stat.meet { background: color-mix(in srgb, #f59f00 14%, var(--soft)); }
+.insert-banner { font-size: 13px; }
 .mk.start { background: #d62828; width: 30px; height: 30px; }
 details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 details[open] summary { margin-bottom: 8px; }
@@ -251,7 +264,7 @@ details[open] summary { margin-bottom: 8px; }
           <label class="chip"><input type="checkbox" id="avUnpaved"> Χωματόδρομοι</label>
           <label class="chip"><input type="checkbox" id="avFerry"> Πορθμεία</label>
         </div>
-        <label class="chip" style="align-self:flex-start"><input type="checkbox" id="loop"> Κυκλική: επιστροφή στην αφετηρία</label>
+        <label class="chip" style="align-self:flex-start"><input type="checkbox" id="loop"> Επιστροφή στην αφετηρία μετά τον προορισμό</label>
       </section>
 
       <section>
@@ -269,7 +282,10 @@ details[open] summary { margin-bottom: 8px; }
           <button class="small ghost danger" id="clearBtn">Καθαρισμός</button>
         </div>
         <ol class="pts" id="ptList"></ol>
-        <p class="hint" id="ptHint">Πάτα στον χάρτη για να βάλεις σημεία με τη σειρά που θες να περάσεις. Με ☾ σημειώνεις διανυκτέρευση και η διαδρομή χωρίζεται σε μέρες.</p>
+        <p class="hint" id="ptHint">Πάτα στον χάρτη για να βάλεις σημεία με τη σειρά που θες να περάσεις. Το πρώτο είναι η αφετηρία σου, το τελευταίο ο προορισμός. Στα ενδιάμεσα διαλέγεις τύπο: σημείο συνάντησης, καφές, φωτογραφία, φαγητό, βενζίνη, θέα, στάση ή διανυκτέρευση.</p>
+        <div class="legend" id="legend"></div>
+        <div class="row"><button class="small" id="addStartBtn" hidden>+ Η αφετηρία μου στην αρχή</button></div>
+        <div id="insertBanner" class="status insert-banner" hidden>Πάτα στον χάρτη ή ψάξε σημείο για την αφετηρία σου.</div>
         <button class="primary" id="calcBtn">Υπολόγισε τη διαδρομή</button>
         <div id="status" class="status" hidden></div>
       </section>
@@ -332,6 +348,21 @@ details[open] summary { margin-bottom: 8px; }
   var PHOTON = 'https://photon.komoot.io';
   var MAX_PTS = 60;
   var LS_AUTH = 'veagle.auth', LS_DRAFT = 'veagle.draft';
+  var TYPES = {
+    start: { i: '🏠', l: 'Αφετηρία' }, meet: { i: '🤝', l: 'Σημείο συνάντησης' }, coffee: { i: '☕', l: 'Καφές' },
+    photo: { i: '📷', l: 'Φωτογραφία' }, food: { i: '🍽️', l: 'Φαγητό' }, fuel: { i: '⛽', l: 'Βενζίνη' },
+    sight: { i: '🏞️', l: 'Αξιοθέατο / θέα' }, stop: { i: '📍', l: 'Στάση' }, night: { i: '🌙', l: 'Διανυκτέρευση' }, dest: { i: '🏁', l: 'Προορισμός' }
+  };
+  var MID_TYPES = ['stop', 'meet', 'coffee', 'photo', 'food', 'fuel', 'sight', 'night'];
+  // Ρόλος σημείου: πρώτο = αφετηρία (ή συνάντηση σε κοινή διαδρομή), τελευταίο = προορισμός, ενδιάμεσα = ο τύπος τους
+  function ptType(r, i) {
+    var p = r.points[i], n = r.points.length;
+    if (i === 0) return p.type === 'meet' ? 'meet' : 'start';
+    if (i === n - 1) return 'dest';
+    return MID_TYPES.indexOf(p.type) >= 0 ? p.type : 'stop';
+  }
+  function meetIdx(r) { for (var i = 0; i < r.points.length - 1; i++) if (ptType(r, i) === 'meet') return i; return -1; }
+  function typeTitle(r, i) { var t = TYPES[ptType(r, i)]; return t.l; }
   var STYLE_LABEL = { curvy: 'Στροφές & επαρχία', balanced: 'Ισορροπημένη', fast: 'Γρήγορη' };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -374,8 +405,12 @@ details[open] summary { margin-bottom: 8px; }
       author: String(r.author || b.author || ''), created: r.created || null, updated: r.updated || null,
       prefs: Object.assign({}, b.prefs, r.prefs || {}),
       points: (Array.isArray(r.points) ? r.points : []).slice(0, MAX_PTS).map(function (p) {
-        return { lat: +p.lat, lng: +p.lng, name: String(p.name || 'Σημείο'), night: !!p.night };
-      }).filter(function (p) { return isFinite(p.lat) && isFinite(p.lng); }),
+        var t = p.type || (p.night ? 'night' : 'stop'); if (!TYPES[t]) t = 'stop';
+        return { lat: +p.lat, lng: +p.lng, name: String(p.name || 'Σημείο'), type: t };
+      }).filter(function (p) { return isFinite(p.lat) && isFinite(p.lng); }).map(function (p, i, a) {
+        if (p.type === 'meet' && a.slice(0, i).some(function (q) { return q.type === 'meet'; })) p.type = 'stop';
+        return p;
+      }),
       stats: r.stats || null, poly: String(r.poly || '')
     };
     if (!STYLE_LABEL[out.prefs.style]) out.prefs.style = 'curvy';
@@ -543,9 +578,37 @@ details[open] summary { margin-bottom: 8px; }
       if (!d) d = { from: pts[i].name, to: '', km: 0, sec: 0 };
       d.km += legs[i].distance; d.sec += legs[i].duration; d.to = pts[i + 1].name;
       var isEnd = i === legs.length - 1;
-      if (isEnd || (pts[i + 1].night && i + 1 < r.points.length)) { days.push(d); d = null; }
+      if (isEnd || (i + 1 < r.points.length - 1 && ptType(r, i + 1) === 'night')) { days.push(d); d = null; }
     }
     return days;
+  }
+  function nearestGeom(geom, p) {
+    var best = 0, bd = Infinity;
+    for (var i = 0; i < geom.length; i++) { var dx = geom[i][0] - p.lng, dy = geom[i][1] - p.lat, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = i; } }
+    return best;
+  }
+  // Χωρισμός σε προσωπικό (ως τη συνάντηση) και κοινό κομμάτι
+  function splitParts(r, res) {
+    var m = meetIdx(r), sum = function (a) { return a.reduce(function (s, l) { return { km: s.km + l.distance, sec: s.sec + l.duration }; }, { km: 0, sec: 0 }); };
+    if (m <= 0) return null;
+    var nShared = r.points.length - 1 - m;          // σκέλη από τη συνάντηση ως τον προορισμό
+    var pers = sum(res.legs.slice(0, m)), shared = sum(res.legs.slice(m, m + nShared)), back = sum(res.legs.slice(m + nShared));
+    return { meet: m, personal: pers, shared: shared, back: back };
+  }
+  function sharedRoute(r) {
+    var m = meetIdx(r);
+    if (m <= 0) return r;
+    var c = JSON.parse(JSON.stringify(r));
+    c.points = r.points.slice(m).map(function (p, i) { var q = Object.assign({}, p); q.type = ptType(r, m + i); return q; });
+    c.prefs = Object.assign({}, r.prefs, { loop: false }); c.stats = null; c.poly = ''; c.id = r.id;
+    return c;
+  }
+  function sharedGeom(r, res) {
+    var m = meetIdx(r), g = res.geom || [];
+    if (m <= 0 || !g.length) return g;
+    var a = nearestGeom(g, r.points[m]), dest = r.points[r.points.length - 1];
+    var b = a + nearestGeom(g.slice(a), dest);
+    return g.slice(a, b + 1);
   }
   function statsFrom(res) { return { km: res.km, sec: res.sec, legs: res.legs.map(function (l) { return { d: Math.round(l.distance), t: Math.round(l.duration) }; }) }; }
   function resFromSaved(r) {
@@ -558,7 +621,7 @@ details[open] summary { margin-bottom: 8px; }
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap · Valhalla · Photon' }).addTo(map);
   var markers = [], line = null;
   function mkIcon(cls, label) {
-    var size = cls.indexOf('start') >= 0 ? 30 : 26;
+    var size = cls.indexOf('meet') >= 0 ? 32 : 26;
     return L.divIcon({ className: '', html: '<div class="mk ' + cls + '">' + label + '</div>', iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
   }
   function drawMap(r, res, editable) {
@@ -566,8 +629,9 @@ details[open] summary { margin-bottom: 8px; }
     if (line) { line.remove(); line = null; }
     if (!r) return;
     r.points.forEach(function (p, i) {
-      var cls = i === 0 ? 'start' : (p.night ? 'night' : ''), label = i === 0 ? 'Α' : (p.night ? '☾' : String(i + 1));
-      var m = L.marker([p.lat, p.lng], { icon: mkIcon(cls, label), draggable: !!editable }).addTo(map).bindTooltip(esc((i + 1) + '. ' + p.name));
+      var t = ptType(r, i);
+      var m = L.marker([p.lat, p.lng], { icon: mkIcon('t ' + t, TYPES[t].i), draggable: !!editable, title: TYPES[t].l, alt: TYPES[t].l, zIndexOffset: t === 'meet' ? 900 : 0 })
+        .addTo(map).bindTooltip('<b>' + esc(TYPES[t].l) + '</b><br>' + esc((i + 1) + '. ' + p.name));
       if (editable) m.on('dragend', function () { var ll = m.getLatLng(); p.lat = ll.lat; p.lng = ll.lng; p.name = 'Σημείο'; changed(); reverseName(p); });
       markers.push(m);
     });
@@ -585,21 +649,40 @@ details[open] summary { margin-bottom: 8px; }
   map.on('click', function (e) {
     if (tab !== 'plan' || !cur) return;
     if (cur.points.length >= MAX_PTS) { msg('status', 'Έφτασες το όριο των ' + MAX_PTS + ' σημείων.', 'err'); return; }
-    var p = { lat: e.latlng.lat, lng: e.latlng.lng, name: 'Σημείο', night: false };
-    cur.points.push(p); changed(); reverseName(p);
+    var p = { lat: e.latlng.lat, lng: e.latlng.lng, name: 'Σημείο', type: 'stop' };
+    addPoint(p); reverseName(p);
   });
 
+  var insertStart = false;
+  function addPoint(p) {
+    if (insertStart) { cur.points.unshift(p); insertStart = false; $('insertBanner').hidden = true; }
+    else cur.points.push(p);
+    changed();
+  }
+
   // ---------- αποτέλεσμα (κοινό για σχεδίαση και προβολή) ----------
-  function gmapsLinks(r) {
-    var pts = routePoints(r), CH = 9, links = [];
+  function chunkLinks(pts, label, startNo) {
+    var CH = 9, links = [];
     for (var i = 0; i < pts.length - 1; i += CH) {
       var part = pts.slice(i, i + CH + 1), o = part[0], d = part[part.length - 1], w = part.slice(1, -1);
       links.push({ url: 'https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=' + o.lat.toFixed(6) + ',' + o.lng.toFixed(6) +
         '&destination=' + d.lat.toFixed(6) + ',' + d.lng.toFixed(6) +
         (w.length ? '&waypoints=' + w.map(function (p) { return p.lat.toFixed(6) + ',' + p.lng.toFixed(6); }).join('%7C') : ''),
-        label: 'Κομμάτι ' + (links.length + 1), range: (i + 1) + ' → ' + Math.min(i + CH + 1, pts.length) });
+        label: label + (pts.length - 1 > CH ? ' ' + (links.length + 1) : ''), range: (startNo + i) + ' → ' + (startNo + Math.min(i + CH, pts.length - 1)) });
     }
     return links;
+  }
+  // Ενότητες πλοήγησης: προς τη συνάντηση, κοινή διαδρομή, επιστροφή
+  function gmapsSections(r) {
+    var pts = routePoints(r), m = meetIdx(r), last = r.points.length - 1, out = [];
+    if (m > 0) {
+      out.push({ title: 'Προς το σημείο συνάντησης', cls: '', links: chunkLinks(pts.slice(0, m + 1), 'Από την αφετηρία σου', 1) });
+      out.push({ title: 'Κοινή διαδρομή της παρέας', cls: 'shared', links: chunkLinks(pts.slice(m, last + 1), 'Κοινή διαδρομή', m + 1) });
+    } else {
+      out.push({ title: '', cls: '', links: chunkLinks(pts.slice(0, last + 1), 'Κομμάτι', 1) });
+    }
+    if (pts.length > last + 1) out.push({ title: 'Επιστροφή', cls: '', links: chunkLinks(pts.slice(last), 'Επιστροφή στην αφετηρία', last + 1) });
+    return out;
   }
   function xmlEsc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]; }); }
   function buildGPX(r, res) {
@@ -607,12 +690,13 @@ details[open] summary { margin-bottom: 8px; }
     var out = ['<?xml version="1.0" encoding="UTF-8"?>', '<gpx version="1.1" creator="Veagle on the road" xmlns="http://www.topografix.com/GPX/1/1">',
       '<metadata><name>' + xmlEsc(name) + '</name>' + (r.desc ? '<desc>' + xmlEsc(r.desc) + '</desc>' : '') + '</metadata>'];
     r.points.forEach(function (p, i) {
-      out.push('<wpt lat="' + p.lat.toFixed(6) + '" lon="' + p.lng.toFixed(6) + '"><name>' + xmlEsc((i + 1) + '. ' + p.name) + '</name>' + (p.night ? '<type>night</type>' : '') + '</wpt>');
+      var t = ptType(r, i);
+      out.push('<wpt lat="' + p.lat.toFixed(6) + '" lon="' + p.lng.toFixed(6) + '"><name>' + xmlEsc((i + 1) + '. ' + p.name) + '</name><desc>' + xmlEsc(TYPES[t].l) + '</desc><type>' + t + '</type></wpt>');
     });
     out.push('<rte><name>' + xmlEsc(name) + '</name>');
     routePoints(r).forEach(function (p) { out.push('<rtept lat="' + p.lat.toFixed(6) + '" lon="' + p.lng.toFixed(6) + '"><name>' + xmlEsc(p.name) + '</name></rtept>'); });
     out.push('</rte>', '<trk><name>' + xmlEsc(name) + '</name><trkseg>');
-    (res.geom || []).forEach(function (c) { out.push('<trkpt lat="' + c[1].toFixed(6) + '" lon="' + c[0].toFixed(6) + '"/>'); });
+    (res.geomOverride || res.geom || []).forEach(function (c) { out.push('<trkpt lat="' + c[1].toFixed(6) + '" lon="' + c[0].toFixed(6) + '"/>'); });
     out.push('</trkseg></trk>', '</gpx>');
     return out.join('\n');
   }
@@ -626,17 +710,26 @@ details[open] summary { margin-bottom: 8px; }
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }
   function shareUrl(r) {
-    if (r.visibility === 'public' && r.id && r.stats) return location.origin + location.pathname + '#p=' + r.id;
-    var data = { t: r.title, p: r.points.map(function (p) { return [Math.round(p.lat * 1e5) / 1e5, Math.round(p.lng * 1e5) / 1e5, p.name, p.night ? 1 : 0]; }), o: r.prefs };
+    if (r.visibility === 'public' && r.id && r.stats && meetIdx(r) <= 0) return location.origin + location.pathname + '#p=' + r.id;
+    var s = sharedRoute(r);
+    var data = { t: r.title, p: s.points.map(function (p, i) { return [Math.round(p.lat * 1e5) / 1e5, Math.round(p.lng * 1e5) / 1e5, p.name, ptType(s, i)]; }), o: s.prefs };
     return location.origin + location.pathname + '#r=' + b64url(JSON.stringify(data));
   }
   function resultHTML(r, res) {
     var days = splitDays(r, res.legs);
+    var parts = splitParts(r, res);
     var h = '<h2>Αποτέλεσμα</h2>' +
       '<div class="summary">' +
-      '<div class="stat"><b>' + fmtKm(res.km) + '</b><span>χιλιόμετρα</span></div>' +
+      '<div class="stat"><b>' + fmtKm(res.km) + '</b><span>' + (parts ? 'km συνολικά για σένα' : 'χιλιόμετρα') + '</span></div>' +
       '<div class="stat"><b>' + fmtTime(res.sec) + '</b><span>οδήγηση</span></div>' +
       '<div class="stat"><b>' + days.length + '</b><span>' + (days.length === 1 ? 'μέρα' : 'μέρες') + '</span></div></div>';
+    if (parts) {
+      h += '<div class="days">' +
+        '<div><span>🏠 → 🤝 Ως το σημείο συνάντησης</span><span>' + fmtKm(parts.personal.km) + ' km · ' + fmtTime(parts.personal.sec) + '</span></div>' +
+        '<div><span><b>🤝 → 🏁 Κοινή διαδρομή</b></span><span><b>' + fmtKm(parts.shared.km) + ' km · ' + fmtTime(parts.shared.sec) + '</b></span></div>' +
+        (parts.back.km ? '<div><span>🏁 → 🏠 Επιστροφή</span><span>' + fmtKm(parts.back.km) + ' km · ' + fmtTime(parts.back.sec) + '</span></div>' : '') +
+        '</div>';
+    }
     if (days.length > 1) {
       h += '<div class="days">' + days.map(function (d, i) {
         return '<div><span><b>Μέρα ' + (i + 1) + '</b> · ' + esc(d.from) + ' → ' + esc(d.to) + '</span><span>' + fmtKm(d.km) + ' km · ' + fmtTime(d.sec) + '</span></div>';
@@ -646,15 +739,26 @@ details[open] summary { margin-bottom: 8px; }
       (res.engine === 'valhalla' ? ' · Διόδια στη διαδρομή: <b>' + (res.hasToll ? 'ναι' : 'όχι') + '</b>' : ' · δεν ξέρει να αποφεύγει διόδια') + '</p>';
     if (res.tollNote && !res.approx) h += '<p class="hint">Δεν υπάρχει διαδρομή εντελώς χωρίς διόδια ανάμεσα σε αυτά τα σημεία, οπότε περνάει από όσο λιγότερα γίνεται.</p>';
     if (res.approx) h += '<p class="hint">Η υπηρεσία για μηχανή δεν απάντησε, οπότε η διαδρομή βγήκε με το απλό προφίλ αυτοκινήτου. Δοκίμασε ξανά σε λίγο.</p>';
-    h += '<div class="row"><button class="small" data-act="share">Κοινή χρήση link</button><button class="small" data-act="gpx">Αρχείο GPX</button></div>' +
+    h += (parts ? '<p class="hint">Η κοινή χρήση και το GPX μοιράζονται την <b>κοινή διαδρομή</b>, από το σημείο συνάντησης ως τον προορισμό. Ο καθένας προσθέτει τη δική του αφετηρία.</p>' : '') +
+      '<div class="row"><button class="small" data-act="share">' + (parts ? 'Κοινή χρήση κοινής διαδρομής' : 'Κοινή χρήση link') + '</button>' +
+      '<button class="small" data-act="gpx">' + (parts ? 'GPX κοινής διαδρομής' : 'Αρχείο GPX') + '</button>' +
+      (parts ? '<button class="small ghost" data-act="gpxall">GPX όλης της δικής μου</button>' : '') + '</div>' +
       '<div class="row" data-share hidden><input type="text" readonly aria-label="Link διαδρομής"><button class="small" data-act="copy">Αντιγραφή</button></div>' +
       '<h2 style="margin-top:6px">Πλοήγηση στο Google Maps</h2><div class="nav-links">' +
-      gmapsLinks(r).map(function (l) { return '<a href="' + esc(l.url) + '" target="_blank" rel="noopener"><b>' + l.label + '</b><span>σημεία ' + l.range + '</span></a>'; }).join('') +
+      gmapsSections(r).map(function (sec) {
+        return (sec.title ? '<div class="part-title ' + sec.cls + '">' + esc(sec.title) + '</div>' : '') +
+          sec.links.map(function (l) { return '<a href="' + esc(l.url) + '" target="_blank" rel="noopener"><b>' + esc(l.label) + '</b><span>σημεία ' + l.range + '</span></a>'; }).join('');
+      }).join('') +
       '</div><p class="hint">Το Google Maps χαράζει μόνο του τον δρόμο ανάμεσα στα σημεία. Για να κρατήσεις τους επαρχιακούς, βάλε εκεί αποφυγή αυτοκινητοδρόμων και διοδίων, ή άνοιξε το GPX σε εφαρμογή όπως OsmAnd ή Calimoto.</p>';
     return h;
   }
   function wireResult(box, r, res) {
-    box.querySelector('[data-act="gpx"]').onclick = function () { saveFile(buildGPX(r, res), slug(r.title) + '.gpx', 'application/gpx+xml'); };
+    box.querySelector('[data-act="gpx"]').onclick = function () {
+      if (meetIdx(r) > 0) saveFile(buildGPX(sharedRoute(r), { geom: sharedGeom(r, res) }), slug(r.title) + '-koini.gpx', 'application/gpx+xml');
+      else saveFile(buildGPX(r, res), slug(r.title) + '.gpx', 'application/gpx+xml');
+    };
+    var ga = box.querySelector('[data-act="gpxall"]');
+    if (ga) ga.onclick = function () { saveFile(buildGPX(r, res), slug(r.title) + '.gpx', 'application/gpx+xml'); };
     box.querySelector('[data-act="share"]').onclick = function () {
       var url = shareUrl(r), row = box.querySelector('[data-share]');
       row.hidden = false; row.querySelector('input').value = url;
@@ -695,16 +799,24 @@ details[open] summary { margin-bottom: 8px; }
     var legs = curRes ? curRes.legs : null;
     cur.points.forEach(function (p, i) {
       var li = document.createElement('li');
-      li.innerHTML = '<div class="pin' + (p.night ? ' night' : '') + '">' + (i === 0 ? 'Α' : p.night ? '☾' : (i + 1)) + '</div>' +
+      var t = ptType(cur, i), mid = i > 0 && i < cur.points.length - 1;
+      li.innerHTML = '<div class="pin t ' + t + '" title="' + esc(TYPES[t].l) + '" aria-label="' + esc(TYPES[t].l) + '">' + TYPES[t].i + '</div>' +
         '<div class="grow"><div class="name" title="Πάτα για μετονομασία"></div><div class="meta"></div></div>' +
+        (mid ? '<select class="type-sel" aria-label="Τύπος σημείου" title="Τύπος σημείου">' + MID_TYPES.map(function (k) {
+          return '<option value="' + k + '"' + (k === t ? ' selected' : '') + '>' + TYPES[k].i + ' ' + TYPES[k].l + '</option>'; }).join('') + '</select>' : '') +
         '<button class="small ghost icon-btn" data-a="up" aria-label="Πάνω"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
         '<button class="small ghost icon-btn" data-a="down" aria-label="Κάτω"' + (i === cur.points.length - 1 ? ' disabled' : '') + '>↓</button>' +
-        '<button class="small icon-btn" data-a="night" aria-label="Διανυκτέρευση" aria-pressed="' + p.night + '"' + (i === 0 ? ' disabled' : '') + '>☾</button>' +
         '<button class="small ghost danger icon-btn" data-a="del" aria-label="Αφαίρεση">✕</button>';
       var nm = li.querySelector('.name'); nm.textContent = p.name;
       var meta = li.querySelector('.meta');
-      if (legs && i > 0 && legs[i - 1]) meta.textContent = '+' + fmtKm(legs[i - 1].distance) + ' km · ' + fmtTime(legs[i - 1].duration) + (p.night ? ' · διανυκτέρευση' : '');
-      else meta.textContent = i === 0 ? 'Αφετηρία' : (p.night ? 'Διανυκτέρευση' : '');
+      meta.textContent = (i + 1) + ' · ' + TYPES[t].l + (legs && i > 0 && legs[i - 1] ? ' · +' + fmtKm(legs[i - 1].distance) + ' km · ' + fmtTime(legs[i - 1].duration) : '');
+      var sel = li.querySelector('.type-sel');
+      if (sel) sel.onchange = function () {
+        var v = sel.value;
+        if (v === 'meet') cur.points.forEach(function (q) { if (q.type === 'meet') q.type = 'stop'; });
+        p.type = v;
+        if (curRes) { renderPlan(); saveDraft(); showPlanResult(); } else changed(true);
+      };
       nm.onclick = function () {
         var inp = document.createElement('input'); inp.type = 'text'; inp.className = 'name-input'; inp.value = p.name; inp.setAttribute('aria-label', 'Όνομα σημείου');
         nm.replaceWith(inp); inp.focus(); inp.select();
@@ -713,12 +825,12 @@ details[open] summary { margin-bottom: 8px; }
       };
       li.querySelector('[data-a="up"]').onclick = function () { cur.points.splice(i - 1, 0, cur.points.splice(i, 1)[0]); changed(); };
       li.querySelector('[data-a="down"]').onclick = function () { cur.points.splice(i + 1, 0, cur.points.splice(i, 1)[0]); changed(); };
-      li.querySelector('[data-a="night"]').onclick = function () { p.night = !p.night; curRes ? (renderPlan(), saveDraft(), showPlanResult()) : changed(true); };
       li.querySelector('[data-a="del"]').onclick = function () { cur.points.splice(i, 1); changed(); };
       li.querySelector('.grow').ondblclick = function () { map.setView([p.lat, p.lng], 13); };
       ol.appendChild(li);
     });
-    if (cur.points.length && cur.points[0].night) cur.points[0].night = false;
+    $('addStartBtn').hidden = !(cur.points.length && cur.points[0].type === 'meet');
+    $('legend').innerHTML = cur.points.length ? '' : Object.keys(TYPES).map(function (k) { return '<span title="' + esc(TYPES[k].l) + '">' + TYPES[k].i + ' ' + esc(TYPES[k].l) + '</span>'; }).join('');
     $('calcBtn').disabled = cur.points.length < 2;
 
     // αποθήκευση
@@ -911,8 +1023,9 @@ details[open] summary { margin-bottom: 8px; }
       (auth ? '<div class="row"><button class="small" data-act="copyedit">' + (canEdit(r) && r.id ? 'Επεξεργασία' : 'Αντιγραφή για επεξεργασία') + '</button></div>' : '') +
       '</div>';
     var pts = '<h2>Σημεία</h2><ol class="pts">' + r.points.map(function (p, i) {
-      return '<li><div class="pin' + (p.night ? ' night' : '') + '">' + (i === 0 ? 'Α' : p.night ? '☾' : (i + 1)) + '</div><div class="grow"><div class="name" style="cursor:default">' + esc(p.name) + '</div>' +
-        (res && i > 0 && res.legs[i - 1] ? '<div class="meta">+' + fmtKm(res.legs[i - 1].distance) + ' km · ' + fmtTime(res.legs[i - 1].duration) + '</div>' : '') + '</div></li>';
+      var t = ptType(r, i);
+      return '<li><div class="pin t ' + t + '" title="' + esc(TYPES[t].l) + '">' + TYPES[t].i + '</div><div class="grow"><div class="name" style="cursor:default">' + esc(p.name) + '</div>' +
+        '<div class="meta">' + (i + 1) + ' · ' + esc(TYPES[t].l) + (res && i > 0 && res.legs[i - 1] ? ' · +' + fmtKm(res.legs[i - 1].distance) + ' km · ' + fmtTime(res.legs[i - 1].duration) : '') + '</div></div></li>';
     }).join('') + '</ol>';
     box.innerHTML = head + (res ? '<section>' + resultHTML(r, res) + '</section>' : '<p class="hint">Υπολογισμός διαδρομής…</p>') + pts;
     var wire = function (rr) {
@@ -993,6 +1106,7 @@ details[open] summary { margin-bottom: 8px; }
     $(p[0]).onchange = function (e) { cur.prefs[p[1]] = e.target.checked; var had = !!curRes; changed(); if (had) calc(); };
   });
   $('calcBtn').onclick = calc;
+  $('addStartBtn').onclick = function () { insertStart = true; $('insertBanner').hidden = false; $('searchInput').focus(); };
   $('saveBtn').onclick = save;
   $('deleteBtn').onclick = del;
   $('newBtn').onclick = function () { cur = blankRoute(); curSha = null; curRes = null; msg('status', ''); msg('saveStatus', ''); renderPlan(); showPlanResult(); saveDraft(); };
@@ -1009,7 +1123,7 @@ details[open] summary { margin-bottom: 8px; }
         var b = document.createElement('button'); b.type = 'button'; b.textContent = it.label;
         b.onclick = function () {
           if (cur.points.length >= MAX_PTS) return;
-          cur.points.push({ lat: it.lat, lng: it.lng, name: it.label.split(',')[0], night: false });
+          addPoint({ lat: it.lat, lng: it.lng, name: it.label.split(',')[0], type: 'stop' });
           map.setView([it.lat, it.lng], Math.max(map.getZoom(), 10));
           box.hidden = true; $('searchInput').value = ''; changed();
         };
@@ -1036,7 +1150,7 @@ details[open] summary { margin-bottom: 8px; }
   else if (hr) {
     try {
       var d = JSON.parse(unb64url(hr[1]));
-      var shared = normRoute({ title: d.t || 'Κοινή διαδρομή', prefs: d.o, points: (d.p || []).map(function (p) { return { lat: p[0], lng: p[1], name: p[2], night: !!p[3] }; }) });
+      var shared = normRoute({ title: d.t || 'Κοινή διαδρομή', prefs: d.o, points: (d.p || []).map(function (p) { return { lat: p[0], lng: p[1], name: p[2], type: p[3] === 1 ? 'night' : (typeof p[3] === 'string' ? p[3] : 'stop') }; }) });
       showViewer(shared, true);
     } catch (e) { switchTab('plan'); }
   } else {

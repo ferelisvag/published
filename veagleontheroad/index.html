@@ -179,6 +179,12 @@ ol.pts li:last-child { border-bottom: 0; }
 .pin.t { background: var(--soft); color: var(--ink); font: 15px/1 "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif; border: 1px solid var(--line); cursor: help; }
 .pin.t.start { background: var(--accent); border-color: var(--accent); } .pin.t.meet { background: #f59f00; border-color: #f59f00; }
 .pin.t.dest { background: var(--brand); border-color: var(--brand); } .pin.t.night { background: var(--night); border-color: var(--night); }
+ol.pts li { flex-wrap: wrap; }
+.pt-ctrl { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-left: 34px; }
+.pt-ctrl .type-sel { max-width: none; flex: 1 1 120px; min-width: 0; }
+.pt-ctrl { box-sizing: border-box; max-width: 100%; padding-right: 6px; }
+.wait-lbl { flex: none; }
+.wait-lbl { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); }
 .wait-in { flex: none; width: 54px; padding: 3px 5px; font-size: 13px; border-radius: 6px; text-align: right; }
 .eta { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .type-sel { flex: none; width: auto; padding: 3px 4px; font-size: 13px; border-radius: 6px; max-width: 150px; }
@@ -847,12 +853,14 @@ details[open] summary { margin-bottom: 8px; }
       var t = ptType(cur, i), mid = i > 0 && i < cur.points.length - 1;
       li.innerHTML = '<div class="pin t ' + t + '" title="' + esc(TYPES[t].l) + '" aria-label="' + esc(TYPES[t].l) + '">' + TYPES[t].i + '</div>' +
         '<div class="grow"><div class="name" title="Πάτα για μετονομασία"></div><div class="meta"></div></div>' +
-        (mid ? '<select class="type-sel" aria-label="Τύπος σημείου" title="Τύπος σημείου">' + MID_TYPES.map(function (k) {
-          return '<option value="' + k + '"' + (k === t ? ' selected' : '') + '>' + TYPES[k].i + ' ' + TYPES[k].l + '</option>'; }).join('') + '</select>' : '') +
-        (mid && t !== 'night' ? '<input class="wait-in" type="number" min="0" max="600" step="5" inputmode="numeric" title="Λεπτά στάσης" aria-label="Λεπτά στάσης">' : '') +
         '<button class="small ghost icon-btn" data-a="up" aria-label="Πάνω"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
         '<button class="small ghost icon-btn" data-a="down" aria-label="Κάτω"' + (i === cur.points.length - 1 ? ' disabled' : '') + '>↓</button>' +
-        '<button class="small ghost danger icon-btn" data-a="del" aria-label="Αφαίρεση">✕</button>';
+        '<button class="small ghost danger icon-btn" data-a="del" aria-label="Αφαίρεση">✕</button>' +
+        (mid ? '<div class="pt-ctrl">' : '') +
+        (mid ? '<select class="type-sel" aria-label="Τύπος σημείου" title="Τύπος σημείου">' + MID_TYPES.map(function (k) {
+          return '<option value="' + k + '"' + (k === t ? ' selected' : '') + '>' + TYPES[k].i + ' ' + TYPES[k].l + '</option>'; }).join('') + '</select>' : '') +
+        (mid && t !== 'night' ? '<label class="wait-lbl"><input class="wait-in" type="number" min="0" max="600" step="5" inputmode="numeric" title="Λεπτά στάσης" aria-label="Λεπτά στάσης"> λεπτά</label>' : '') +
+        (mid ? '</div>' : '');
       var nm = li.querySelector('.name'); nm.textContent = p.name;
       var meta = li.querySelector('.meta');
       var eta = sch ? (i === 0 ? hhmm(depSec(cur)) : (sch.arr[i] != null ? hhmm(sch.arr[i], true) : '')) : '';

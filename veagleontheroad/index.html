@@ -109,7 +109,7 @@ button.small { padding: 4px 9px; font-size: 13px; font-weight: 500; }
 button.ghost { border-color: transparent; background: transparent; color: var(--muted); }
 button.ghost:hover { color: var(--ink); }
 button.ghost.danger:hover { color: var(--err); }
-.tabs { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .tabs button { border: 0; border-radius: 0; font: 700 14px/1.2 var(--display); letter-spacing: .04em; padding: 10px 6px; background: transparent; color: var(--muted); }
 .tabs button[aria-selected="true"] { background: var(--brand); color: var(--brand-ink); }
 .tabs button:disabled { opacity: .45; }
@@ -197,6 +197,22 @@ ol.pts li { flex-wrap: wrap; }
 .mk.start { background: #d62828; width: 30px; height: 30px; }
 details summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 details[open] summary { margin-bottom: 8px; }
+.trip-box, .prop-box { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+.trip-box.on { border-color: #f59f00; }
+.member-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.prop { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: var(--soft); }
+.prop .who { font-weight: 600; } .prop .diff { font-size: 13px; color: var(--muted); }
+.prop .diff b { color: var(--ink); font-weight: 600; }
+.badge.trip { color: #c27c00; } .badge.link { color: var(--night); }
+.lock { font-size: 12px; color: var(--muted); }
+table.admin { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.admin th { text-align: left; font: 700 11px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 6px 4px; border-bottom: 1px solid var(--line); }
+table.admin td { padding: 6px 4px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+table.admin td.c, table.admin th.c { text-align: center; }
+table.admin input[type=text] { padding: 5px 8px; font-size: 13.5px; }
+.table-wrap { overflow-x: auto; }
+.group { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
+.howto { font-size: 13.5px; color: var(--ink); padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 4px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -235,6 +251,7 @@ details[open] summary { margin-bottom: 8px; }
       <button role="tab" id="tabPlan" aria-selected="true" data-tab="plan">Σχεδίαση</button>
       <button role="tab" id="tabMine" aria-selected="false" data-tab="mine">Οι διαδρομές μου</button>
       <button role="tab" id="tabPublic" aria-selected="false" data-tab="public">Διαδρομές</button>
+      <button role="tab" id="tabAdmin" aria-selected="false" data-tab="admin" hidden>Διαχείριση</button>
     </div>
 
     <!-- ========== ΣΧΕΔΙΑΣΗ ========== -->
@@ -257,6 +274,19 @@ details[open] summary { margin-bottom: 8px; }
           <button data-vis="public" role="radio" aria-checked="false">Δημόσια</button>
         </div>
         <p class="hint" id="visHint"></p>
+        <div id="linkInfo" class="status" hidden></div>
+        <div class="trip-box" id="tripBox" hidden>
+          <label class="chip" style="align-self:flex-start"><input type="checkbox" id="tripOn"> Εκδρομή παρέας</label>
+          <div id="tripFields" hidden>
+            <div class="row">
+              <label class="field-label" for="tripLeader" style="flex:1 1 120px">Αρχηγός εκδρομής</label>
+              <select id="tripLeader" style="flex:1 1 160px"></select>
+            </div>
+            <div class="field-label" style="margin-top:6px">Συμμετέχουν</div>
+            <div class="member-list" id="tripMembers"></div>
+            <p class="hint">Ο αρχηγός αλλάζει την κοινή πορεία. Τα μέλη τη βλέπουν, κάνουν προτάσεις και την αντιγράφουν στο προφίλ τους με τη δική τους αφετηρία.</p>
+          </div>
+        </div>
       </section>
 
       <section>
@@ -302,11 +332,35 @@ details[open] summary { margin-bottom: 8px; }
         <div class="legend" id="legend"></div>
         <div class="row"><button class="small" id="addStartBtn" hidden>+ Η αφετηρία μου στην αρχή</button></div>
         <div id="insertBanner" class="status insert-banner" hidden>Πάτα στον χάρτη ή ψάξε σημείο για την αφετηρία σου.</div>
-        <button class="primary" id="calcBtn">Υπολόγισε τη διαδρομή</button>
+        <div class="row">
+          <button class="primary" id="calcBtn" style="flex:1">Υπολόγισε τη διαδρομή</button>
+          <button class="ghost danger" id="resetBtn" title="Καθαρίζει όλη τη σχεδίαση">Εκκαθάριση</button>
+        </div>
         <div id="status" class="status" hidden></div>
       </section>
 
       <section id="planResult" hidden></section>
+
+      <section id="propSection" hidden>
+        <div class="prop-box">
+          <div class="row spread"><h2>Προτάσεις αλλαγών <span class="count" id="propCount"></span></h2><button class="small ghost" id="propReload">Ανανέωση</button></div>
+          <div id="propList" class="cards"></div>
+          <div id="propStatus" class="status" hidden></div>
+        </div>
+      </section>
+
+      <section id="proposeBox" hidden>
+        <div class="prop-box">
+          <h2>Πρόταση αλλαγής</h2>
+          <p class="hint">Η διαδρομή είναι του αρχηγού. Άλλαξε σημεία στον χάρτη και στη λίστα, γράψε τι προτείνεις και στείλ' το. Δεν αλλάζει το πρωτότυπο μέχρι να το εγκρίνει.</p>
+          <textarea id="propNote" placeholder="π.χ. Καφές στο Μέτσοβο αντί για Βοβούσα, έχει θέα" aria-label="Σημείωση πρότασης"></textarea>
+          <div class="row">
+            <button class="primary" id="propSend">Αποστολή πρότασης</button>
+            <button class="small" id="copyBtn">Αντιγραφή στο προφίλ μου</button>
+          </div>
+          <div id="proposeStatus" class="status" hidden></div>
+        </div>
+      </section>
 
       <section id="saveBox">
         <div class="row">
@@ -328,6 +382,38 @@ details[open] summary { margin-bottom: 8px; }
         <div class="cards" id="mineList"></div>
         <div id="mineStatus" class="status" hidden></div>
       </section>
+    </div>
+
+    <!-- ========== ΔΙΑΧΕΙΡΙΣΗ ========== -->
+    <div id="paneAdmin" class="pane" hidden>
+      <section>
+        <div class="row spread"><h2>Χρήστες</h2><button class="small" id="addUserBtn">+ Χρήστης</button></div>
+        <div class="table-wrap">
+          <table class="admin">
+            <thead><tr><th>Όνομα</th><th class="c" title="Διαχειριστής: χρήστες, παρέες, όλες οι διαδρομές">Διαχ.</th><th class="c" title="Μπορεί να κάνει διαδρομές δημόσιες">Δημοσ.</th><th class="c" title="Μπορεί να σημειώνει «Δοκιμασμένη»">Δοκιμ.</th><th></th></tr></thead>
+            <tbody id="userRows"></tbody>
+          </table>
+        </div>
+        <p class="hint">Το όνομα πρέπει να είναι ίδιο με αυτό που γράφει ο φίλος στην Είσοδο. Η «Δημοσίευση» δουλεύει μόνο αν ο κωδικός του έχει πρόσβαση και στο repo <b>published</b>.</p>
+      </section>
+      <section>
+        <div class="row spread"><h2>Παρέες</h2><button class="small" id="addGroupBtn">+ Παρέα</button></div>
+        <div id="groupList" class="cards"></div>
+        <p class="hint">Κάθε μέλος βλέπει τις διαδρομές των μελών της παρέας του. Αν δεν υπάρχει καμία παρέα, όλοι βλέπουν όλες.</p>
+      </section>
+      <div class="row"><button class="primary" id="teamSave">Αποθήκευση</button></div>
+      <div id="teamStatus" class="status" hidden></div>
+      <details>
+        <summary>Πώς δίνω κωδικό σε φίλο</summary>
+        <ol class="howto">
+          <li>GitHub → Settings → Developer settings → Personal access tokens → <b>Fine-grained tokens</b> → Generate new token.</li>
+          <li>Όνομα π.χ. «Veagle – Νίκος», λήξη π.χ. 1 χρόνος.</li>
+          <li>Repository access → Only select → <b>veagleontheroad-data</b> (και <b>published</b> αν θα δημοσιεύει).</li>
+          <li>Permissions → Repository → <b>Contents: Read and write</b> → Generate.</li>
+          <li>Στείλε του τον κωδικό και πρόσθεσέ τον εδώ με το ίδιο όνομα που θα γράφει στην Είσοδο.</li>
+          <li>Για ακύρωση: Delete στο token από την ίδια σελίδα.</li>
+        </ol>
+      </details>
     </div>
 
     <!-- ========== ΔΗΜΟΣΙΕΣ ========== -->
@@ -398,6 +484,7 @@ details[open] summary { margin-bottom: 8px; }
     var destArr = arr[last] != null ? arr[last] : null, multi = arr.some(function (x) { return x != null && x - dep >= 86400 - dep; });
     return { arr: arr, dest: destArr, end: arr[arr.length - 1], stops: stops, multiDay: day > 0 };
   }
+  function linkStart(r) { return r && r.linkTo ? meetIdx(r) : -1; }
   function meetIdx(r) { for (var i = 0; i < r.points.length - 1; i++) if (ptType(r, i) === 'meet') return i; return -1; }
   function typeTitle(r, i) { var t = TYPES[ptType(r, i)]; return t.l; }
   var STYLE_LABEL = { curvy: 'Στροφές & επαρχία', fast: 'Άμεση με διόδια' };
@@ -449,7 +536,9 @@ details[open] summary { margin-bottom: 8px; }
         if (p.type === 'meet' && a.slice(0, i).some(function (q) { return q.type === 'meet'; })) p.type = 'stop';
         return p;
       }),
-      stats: r.stats || null, poly: String(r.poly || '')
+      stats: r.stats || null, poly: String(r.poly || ''),
+      trip: r.trip && r.trip.on ? { on: true, leader: String(r.trip.leader || ''), members: (r.trip.members || []).map(String) } : null,
+      linkTo: r.linkTo || null
     };
     if (!STYLE_LABEL[out.prefs.style]) out.prefs.style = 'curvy';
     if (!/^\d{1,2}:\d{2}$/.test(out.prefs.depart || '')) out.prefs.depart = '09:00';
@@ -527,8 +616,37 @@ details[open] summary { margin-bottom: 8px; }
       return role;
     });
   }
-  function isOwner() { return !!(auth && auth.role === 'owner'); }
-  function canEdit(r) { return !!auth && (isOwner() || !r.author || r.author === auth.name); }
+  function isOwner() { return !!(auth && auth.role === 'owner'); }   // ο κωδικός έχει πρόσβαση στο published
+  // ---------- ομάδα: χρήστες, δικαιώματα, παρέες (team.json στο private repo) ----------
+  var team = { users: [], groups: [] }, teamSha = null, teamLoaded = false;
+  function me() { return auth ? auth.name : ''; }
+  function sameName(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); }
+  function userRec(n) { return team.users.filter(function (u) { return sameName(u.name, n); })[0] || null; }
+  function isAdmin() {
+    if (!auth) return false;
+    if (!team.users.length) return isOwner();
+    var u = userRec(me()); return !!(u && u.admin);
+  }
+  function can(perm) { if (!auth) return false; if (isAdmin()) return true; var u = userRec(me()); return !!(u && u[perm]); }
+  function canPublish() { return isOwner() && can('publish'); }
+  function canTested() { return can('tested'); }
+  function isLeader(r) { return !!(auth && r.trip && r.trip.on && sameName(r.trip.leader, me())); }
+  function isMember(r) { return !!(auth && r.trip && r.trip.on && (isLeader(r) || r.trip.members.some(function (m) { return sameName(m, me()); }))); }
+  function inSameGroup(a, b) { return team.groups.some(function (g) { return g.members.some(function (m) { return sameName(m, a); }) && g.members.some(function (m) { return sameName(m, b); }); }); }
+  function canSee(r) {
+    if (!auth) return false;
+    if (isAdmin() || !r.author || sameName(r.author, me()) || isMember(r)) return true;
+    return !team.groups.length || inSameGroup(r.author, me());
+  }
+  function canEdit(r) { return !!auth && (isAdmin() || !r.author || sameName(r.author, me()) || isLeader(r)); }
+  function loadTeam() {
+    if (!auth) return Promise.resolve();
+    return ghGetFile(GH.dataRepo, 'team.json').then(function (f) {
+      team = f && f.data ? { users: (f.data.users || []).map(function (u) { return { name: String(u.name || ''), admin: !!u.admin, publish: !!u.publish, tested: !!u.tested }; }),
+        groups: (f.data.groups || []).map(function (g) { return { name: String(g.name || ''), members: (g.members || []).map(String) }; }) } : { users: [], groups: [] };
+      teamSha = f ? f.sha : null; teamLoaded = true;
+    }).catch(function () { teamLoaded = true; }).then(function () { renderAuth(); renderPlan(); });
+  }
 
   // ---------- διευθύνσεις ----------
   function photonLabel(p) {
@@ -695,7 +813,9 @@ details[open] summary { margin-bottom: 8px; }
 
   var insertStart = false;
   function addPoint(p) {
+    var ls = linkStart(cur);
     if (insertStart) { cur.points.unshift(p); insertStart = false; $('insertBanner').hidden = true; }
+    else if (ls >= 0) cur.points.splice(ls, 0, p);       // σε αντίγραφο: τα νέα σημεία μπαίνουν πριν τη συνάντηση
     else cur.points.push(p);
     changed();
   }
@@ -839,10 +959,18 @@ details[open] summary { margin-bottom: 8px; }
     $('avToll').parentNode.style.opacity = fastStyle ? '.5' : '';
     $('avToll').checked = !!cur.prefs.toll && !fastStyle; $('avUnpaved').checked = !!cur.prefs.unpaved; $('avFerry').checked = !!cur.prefs.ferry; $('loop').checked = !!cur.prefs.loop;
     var pubBtn = document.querySelector('[data-vis="public"]');
-    pubBtn.disabled = !isOwner();
-    $('visHint').textContent = isOwner()
-      ? (cur.visibility === 'public' ? 'Θα εμφανίζεται στις Διαδρομές για όλους μετά την αποθήκευση.' : 'Τη βλέπεις μόνο εσύ και όσοι έχουν κωδικό.')
-      : 'Μόνο ο διαχειριστής δημοσιεύει διαδρομές.';
+    pubBtn.disabled = !canPublish();
+    document.querySelector('[data-status="tested"]').disabled = !!auth && !canTested() && cur.status !== 'tested';
+    $('visHint').textContent = canPublish()
+      ? (cur.visibility === 'public' ? 'Θα εμφανίζεται στις Διαδρομές για όλους μετά την αποθήκευση.' : 'Τη βλέπεις εσύ και όσοι έχουν κωδικό, ανάλογα με την παρέα.')
+      : 'Δημοσίευση κάνει όποιος έχει το δικαίωμα από τη Διαχείριση.';
+    renderTrip(edit);
+    var li0 = linkStart(cur);
+    $('linkInfo').hidden = !cur.linkTo;
+    if (cur.linkTo) $('linkInfo').innerHTML = '🔗 Αντίγραφο κοινής διαδρομής. Τα σημεία από το 🤝 και μετά ενημερώνονται αυτόματα από τον αρχηγό. Εσύ αλλάζεις την αφετηρία σου και ό,τι είναι πριν τη συνάντηση.';
+    var proposeMode = !!(auth && cur.id && !edit && isMember(cur));
+    $('proposeBox').hidden = !proposeMode;
+    $('propSection').hidden = !(auth && cur.id && edit && cur.trip && cur.trip.on);
 
     var ol = $('ptList'); ol.innerHTML = '';
     $('ptCount').textContent = cur.points.length ? cur.points.length + '/' + MAX_PTS : '';
@@ -850,12 +978,13 @@ details[open] summary { margin-bottom: 8px; }
     var legs = curRes ? curRes.legs : null, sch = curRes ? schedule(cur, curRes.legs) : null;
     cur.points.forEach(function (p, i) {
       var li = document.createElement('li');
-      var t = ptType(cur, i), mid = i > 0 && i < cur.points.length - 1;
+      var t = ptType(cur, i), locked = li0 >= 0 && i >= li0, mid = i > 0 && i < cur.points.length - 1 && !locked;
       li.innerHTML = '<div class="pin t ' + t + '" title="' + esc(TYPES[t].l) + '" aria-label="' + esc(TYPES[t].l) + '">' + TYPES[t].i + '</div>' +
         '<div class="grow"><div class="name" title="Πάτα για μετονομασία"></div><div class="meta"></div></div>' +
+        (locked ? '<span class="lock" title="Κοινή διαδρομή: την αλλάζει ο αρχηγός">🔒</span>' :
         '<button class="small ghost icon-btn" data-a="up" aria-label="Πάνω"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
-        '<button class="small ghost icon-btn" data-a="down" aria-label="Κάτω"' + (i === cur.points.length - 1 ? ' disabled' : '') + '>↓</button>' +
-        '<button class="small ghost danger icon-btn" data-a="del" aria-label="Αφαίρεση">✕</button>' +
+        '<button class="small ghost icon-btn" data-a="down" aria-label="Κάτω"' + (i === cur.points.length - 1 || (li0 >= 0 && i === li0 - 1) ? ' disabled' : '') + '>↓</button>' +
+        '<button class="small ghost danger icon-btn" data-a="del" aria-label="Αφαίρεση">✕</button>') +
         (mid ? '<div class="pt-ctrl">' : '') +
         (mid ? '<select class="type-sel" aria-label="Τύπος σημείου" title="Τύπος σημείου">' + MID_TYPES.map(function (k) {
           return '<option value="' + k + '"' + (k === t ? ' selected' : '') + '>' + TYPES[k].i + ' ' + TYPES[k].l + '</option>'; }).join('') + '</select>' : '') +
@@ -885,9 +1014,11 @@ details[open] summary { margin-bottom: 8px; }
         var done = function () { p.name = inp.value.trim() || p.name; renderPlan(); saveDraft(); };
         inp.onblur = done; inp.onkeydown = function (e) { if (e.key === 'Enter') inp.blur(); };
       };
-      li.querySelector('[data-a="up"]').onclick = function () { cur.points.splice(i - 1, 0, cur.points.splice(i, 1)[0]); changed(); };
-      li.querySelector('[data-a="down"]').onclick = function () { cur.points.splice(i + 1, 0, cur.points.splice(i, 1)[0]); changed(); };
-      li.querySelector('[data-a="del"]').onclick = function () { cur.points.splice(i, 1); changed(); };
+      if (!locked) {
+        li.querySelector('[data-a="up"]').onclick = function () { cur.points.splice(i - 1, 0, cur.points.splice(i, 1)[0]); changed(); };
+        li.querySelector('[data-a="down"]').onclick = function () { cur.points.splice(i + 1, 0, cur.points.splice(i, 1)[0]); changed(); };
+        li.querySelector('[data-a="del"]').onclick = function () { cur.points.splice(i, 1); changed(); };
+      }
       li.querySelector('.grow').ondblclick = function () { map.setView([p.lat, p.lng], 13); };
       ol.appendChild(li);
     });
@@ -920,8 +1051,194 @@ details[open] summary { margin-bottom: 8px; }
   }
   function loadIntoPlan(r, sha) {
     cur = normRoute(JSON.parse(JSON.stringify(r))); curSha = sha || null; curRes = resFromSaved(cur);
-    msg('status', ''); msg('saveStatus', '');
+    msg('status', ''); msg('saveStatus', ''); msg('proposeStatus', '');
     switchTab('plan'); renderPlan(); showPlanResult(); fitTo(cur, curRes); saveDraft();
+    if (cur.linkTo && auth) refreshLink();
+    if (cur.id && auth && cur.trip && cur.trip.on && canEdit(cur)) loadProposals();
+  }
+
+  // ---------- αντίγραφα κοινής διαδρομής ----------
+  // Σύνθεση: τα δικά μου σημεία πριν τη συνάντηση + η κοινή διαδρομή της πηγής από τη συνάντηση και μετά
+  function relink(mineR, src) {
+    var sm = meetIdx(src); if (sm < 0) return null;
+    var mm = meetIdx(mineR);
+    var before = mm > 0 ? mineR.points.slice(0, mm) : mineR.points.slice(0, 1);
+    var shared = src.points.slice(sm).map(function (p) { return Object.assign({}, p); });
+    var a = JSON.stringify(mineR.points.slice(mm >= 0 ? mm : 1)), b = JSON.stringify(shared);
+    if (a === b) return null;
+    var out = normRoute(Object.assign({}, mineR, { points: before.concat(shared), stats: null, poly: '' }));
+    out._updated = true;
+    return out;
+  }
+  function fetchRoute(id) {
+    return ghGetFile(GH.dataRepo, GH.dataDir + '/' + id + '.json').then(function (f) {
+      if (f) return normRoute(f.data);
+      return getJSON('routes/' + encodeURIComponent(id) + '.json?t=' + Date.now()).then(normRoute);
+    });
+  }
+  function refreshLink() {
+    var id = cur.id;
+    fetchRoute(cur.linkTo).then(function (src) {
+      if (!cur || cur.id !== id) return;
+      var u = relink(cur, src);
+      if (u) { cur = u; curRes = null; renderPlan(); showPlanResult(); saveDraft(); msg('status', 'Η κοινή διαδρομή άλλαξε από τον αρχηγό και ενημερώθηκε. Πάτα «Υπολόγισε».', 'ok'); }
+    }).catch(function () {});
+  }
+  function copyToProfile() {
+    if (!auth || !cur.id) return;
+    var m = meetIdx(cur);
+    if (m < 0) { msg('proposeStatus', 'Η διαδρομή δεν έχει σημείο συνάντησης, οπότε δεν υπάρχει κοινό κομμάτι για αντιγραφή.', 'err'); return; }
+    var c = normRoute({ title: cur.title + ' · ' + me(), desc: cur.desc, prefs: Object.assign({}, cur.prefs, { loop: true }),
+      points: cur.points.slice(m), author: me(), linkTo: cur.id });
+    cur = c; curSha = null; curRes = null; insertStart = true;
+    renderPlan(); showPlanResult(); saveDraft();
+    $('insertBanner').hidden = false;
+    msg('status', 'Αντιγράφηκε. Βάλε την αφετηρία σου (σπίτι) στον χάρτη ή με αναζήτηση, πάτα «Υπολόγισε» και «Αποθήκευση».', 'ok');
+  }
+
+  // ---------- προτάσεις αλλαγών ----------
+  var props = [], propsSha = null;
+  function propPath(id) { return GH.dataDir + '/' + id + '.proposals.json'; }
+  function ptKey(p) { return p.name + '@' + p.lat.toFixed(3) + ',' + p.lng.toFixed(3); }
+  function diffPoints(a, b) {
+    var ka = a.map(ptKey), kb = b.map(ptKey), out = [];
+    b.forEach(function (p, i) { if (ka.indexOf(kb[i]) < 0) out.push('<b>+</b> ' + esc(TYPES[p.type] ? TYPES[p.type].i : '') + ' ' + esc(p.name)); });
+    a.forEach(function (p, i) { if (kb.indexOf(ka[i]) < 0) out.push('<b>−</b> ' + esc(p.name)); });
+    a.forEach(function (p, i) { var j = kb.indexOf(ka[i]); if (j >= 0 && b[j].type !== p.type) out.push('<b>≈</b> ' + esc(p.name) + ': ' + esc(TYPES[p.type].l) + ' → ' + esc(TYPES[b[j].type].l)); });
+    if (!out.length && JSON.stringify(ka) !== JSON.stringify(kb)) out.push('Αλλαγή σειράς σημείων');
+    return out.length ? out.join('<br>') : 'Χωρίς αλλαγή στα σημεία';
+  }
+  function loadProposals() {
+    var id = cur.id;
+    msg('propStatus', 'Φόρτωση…');
+    ghGetFile(GH.dataRepo, propPath(id)).then(function (f) {
+      if (!cur || cur.id !== id) return;
+      props = f && Array.isArray(f.data) ? f.data : []; propsSha = f ? f.sha : null;
+      renderProposals(); msg('propStatus', props.some(function (p) { return p.status === 'open'; }) ? '' : 'Καμία ανοιχτή πρόταση.');
+    }).catch(function (e) { msg('propStatus', 'Δεν φορτώθηκαν: ' + e.message, 'err'); });
+  }
+  function renderProposals() {
+    var box = $('propList'); box.innerHTML = '';
+    var open = props.filter(function (p) { return p.status === 'open'; });
+    $('propCount').textContent = open.length ? String(open.length) : '';
+    open.forEach(function (pr) {
+      var d = document.createElement('div'); d.className = 'prop';
+      d.innerHTML = '<span class="who">' + esc(pr.by) + ' <span class="meta">· ' + fmtDate(pr.at) + '</span></span>' +
+        (pr.note ? '<span>' + esc(pr.note) + '</span>' : '') +
+        '<span class="diff">' + diffPoints(cur.points, normRoute({ points: pr.points }).points) + '</span>' +
+        '<div class="row"><button class="small" data-a="view">Προβολή</button><button class="small primary" data-a="ok">Αποδοχή</button><button class="small ghost danger" data-a="no">Απόρριψη</button></div>';
+      d.querySelector('[data-a="view"]').onclick = function () { drawMap(normRoute({ points: pr.points, prefs: cur.prefs }), null, false); fitTo(normRoute({ points: pr.points }), null); msg('propStatus', 'Ο χάρτης δείχνει την πρόταση του ' + pr.by + '. Πάτα σε ένα σημείο της λίστας ή «Υπολόγισε» για να γυρίσεις.', 'ok'); };
+      d.querySelector('[data-a="ok"]').onclick = function () { decide(pr, 'accepted'); };
+      d.querySelector('[data-a="no"]').onclick = function () { decide(pr, 'rejected'); };
+      box.appendChild(d);
+    });
+  }
+  function decide(pr, status) {
+    pr.status = status; pr.decidedBy = me(); pr.decidedAt = new Date().toISOString();
+    msg('propStatus', 'Αποθήκευση απόφασης…');
+    ghPutFile(GH.dataRepo, propPath(cur.id), props, propsSha, (status === 'accepted' ? 'Αποδοχή' : 'Απόρριψη') + ' πρότασης: ' + cur.title).then(function (sha) {
+      propsSha = sha;
+      if (status === 'accepted') {
+        cur.points = normRoute({ points: pr.points }).points; changed(); showPlanResult();
+        msg('propStatus', 'Η πρόταση μπήκε στη διαδρομή. Πάτα «Υπολόγισε» και «Αποθήκευση αλλαγών» για να ενημερωθούν όλοι.', 'ok');
+      } else msg('propStatus', 'Η πρόταση απορρίφθηκε.', 'ok');
+      renderProposals();
+    }).catch(function (e) { msg('propStatus', 'Δεν αποθηκεύτηκε: ' + e.message, 'err'); });
+  }
+  function sendProposal() {
+    if (!auth || !cur.id) return;
+    var id = cur.id, entry = { pid: Date.now().toString(36), by: me(), at: new Date().toISOString(), note: $('propNote').value.trim(),
+      points: cur.points.map(function (p) { return { lat: p.lat, lng: p.lng, name: p.name, type: p.type, wait: p.wait }; }), status: 'open' };
+    $('propSend').disabled = true; msg('proposeStatus', 'Αποστολή…');
+    ghGetFile(GH.dataRepo, propPath(id)).then(function (f) {
+      var list = f && Array.isArray(f.data) ? f.data : [];
+      list.push(entry);
+      return ghPutFile(GH.dataRepo, propPath(id), list, f ? f.sha : null, 'Πρόταση από ' + me() + ': ' + cur.title);
+    }).then(function () {
+      $('propNote').value = '';
+      msg('proposeStatus', 'Η πρόταση στάλθηκε στον αρχηγό. Θα τη δει στη διαδρομή και θα αποφασίσει.', 'ok');
+    }).catch(function (e) { msg('proposeStatus', 'Δεν στάλθηκε: ' + e.message, 'err'); })
+      .then(function () { $('propSend').disabled = false; });
+  }
+
+  // ---------- εκδρομή ----------
+  function renderTrip(edit) {
+    var show = !!auth;
+    $('tripBox').hidden = !show;
+    if (!show) return;
+    var t = cur.trip, on = !!(t && t.on), canSet = edit;
+    $('tripOn').checked = on; $('tripOn').disabled = !canSet;
+    $('tripBox').classList.toggle('on', on);
+    $('tripFields').hidden = !on;
+    if (!on) return;
+    var names = team.users.map(function (u) { return u.name; });
+    if (me() && !names.some(function (n) { return sameName(n, me()); })) names.unshift(me());
+    if (t.leader && !names.some(function (n) { return sameName(n, t.leader); })) names.push(t.leader);
+    var sel = $('tripLeader');
+    sel.innerHTML = names.map(function (n) { return '<option' + (sameName(n, t.leader) ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('');
+    sel.disabled = !(isAdmin() || sameName(cur.author || me(), me()));
+    var ml = $('tripMembers'); ml.innerHTML = '';
+    names.forEach(function (n) {
+      var lab = document.createElement('label'); lab.className = 'chip';
+      lab.innerHTML = '<input type="checkbox"> ' + esc(n);
+      var cb = lab.querySelector('input');
+      cb.checked = t.members.some(function (m) { return sameName(m, n); }) || sameName(n, t.leader);
+      cb.disabled = !canSet || sameName(n, t.leader);
+      cb.onchange = function () {
+        t.members = t.members.filter(function (m) { return !sameName(m, n); });
+        if (cb.checked) t.members.push(n);
+        saveDraft();
+      };
+      ml.appendChild(lab);
+    });
+  }
+
+  // ---------- διαχείριση ----------
+  function renderAdmin() {
+    var tb = $('userRows'); tb.innerHTML = '';
+    if (!team.users.length && auth) team.users.push({ name: me(), admin: true, publish: true, tested: true });
+    team.users.forEach(function (u, i) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><input type="text" aria-label="Όνομα χρήστη"></td>' +
+        ['admin', 'publish', 'tested'].map(function (k) { return '<td class="c"><input type="checkbox" data-k="' + k + '" aria-label="' + k + '"></td>'; }).join('') +
+        '<td class="c"><button class="small ghost danger icon-btn" aria-label="Αφαίρεση χρήστη">✕</button></td>';
+      var nm = tr.querySelector('input[type=text]'); nm.value = u.name; nm.id = 'u-n-' + i;
+      nm.onchange = function () { u.name = nm.value.trim(); };
+      Array.prototype.forEach.call(tr.querySelectorAll('[data-k]'), function (cb) {
+        cb.checked = !!u[cb.dataset.k];
+        cb.onchange = function () { u[cb.dataset.k] = cb.checked; };
+      });
+      tr.querySelector('button').onclick = function () {
+        if (sameName(u.name, me()) && u.admin) { msg('teamStatus', 'Δεν μπορείς να αφαιρέσεις τον εαυτό σου.', 'err'); return; }
+        team.users.splice(i, 1); renderAdmin();
+      };
+      tb.appendChild(tr);
+    });
+    var gl = $('groupList'); gl.innerHTML = '';
+    team.groups.forEach(function (g, gi) {
+      var d = document.createElement('div'); d.className = 'group';
+      d.innerHTML = '<div class="row"><input type="text" aria-label="Όνομα παρέας" placeholder="Όνομα παρέας"><button class="small ghost danger icon-btn" aria-label="Διαγραφή παρέας">✕</button></div><div class="member-list"></div>';
+      var gn = d.querySelector('input'); gn.value = g.name; gn.onchange = function () { g.name = gn.value.trim(); };
+      d.querySelector('button').onclick = function () { team.groups.splice(gi, 1); renderAdmin(); };
+      var ml = d.querySelector('.member-list');
+      team.users.forEach(function (u) {
+        if (!u.name) return;
+        var lab = document.createElement('label'); lab.className = 'chip';
+        lab.innerHTML = '<input type="checkbox"> ' + esc(u.name);
+        var cb = lab.querySelector('input'); cb.checked = g.members.some(function (m) { return sameName(m, u.name); });
+        cb.onchange = function () { g.members = g.members.filter(function (m) { return !sameName(m, u.name); }); if (cb.checked) g.members.push(u.name); };
+        ml.appendChild(lab);
+      });
+      gl.appendChild(d);
+    });
+  }
+  function saveTeam() {
+    team.users = team.users.filter(function (u) { return u.name; });
+    if (!team.users.some(function (u) { return u.admin; })) { msg('teamStatus', 'Χρειάζεται τουλάχιστον ένας διαχειριστής.', 'err'); return; }
+    msg('teamStatus', 'Αποθήκευση…');
+    ghPutFile(GH.dataRepo, 'team.json', team, teamSha, 'Ομάδα: χρήστες και παρέες').then(function (sha) {
+      teamSha = sha; mineLoaded = false; renderAuth(); renderAdmin(); msg('teamStatus', 'Αποθηκεύτηκε.', 'ok');
+    }).catch(function (e) { msg('teamStatus', 'Δεν αποθηκεύτηκε: ' + e.message + (e.status === 409 ? ' Κάποιος άλλος το άλλαξε. Ανανέωσε τη σελίδα.' : ''), 'err'); });
   }
 
   // ---------- αποθήκευση / δημοσίευση ----------
@@ -966,18 +1283,18 @@ details[open] summary { margin-bottom: 8px; }
     var wasPublic = false, now = new Date().toISOString();
     go.then(function () {
       if (!cur.id) { cur.id = slug(cur.title) + '-' + Date.now().toString(36); cur.created = now; cur.author = auth.name; }
-      if (!isOwner()) cur.visibility = 'private';
       cur.updated = now;
       msg('saveStatus', 'Αποθήκευση…');
       var path = GH.dataDir + '/' + cur.id + '.json';
       return ghGetFile(GH.dataRepo, path).then(function (f) {
         wasPublic = !!(f && f.data && f.data.visibility === 'public');
+        if (!canPublish()) cur.visibility = wasPublic ? 'public' : 'private';   // χωρίς δικαίωμα δεν αλλάζει η ορατότητα
         return ghPutFile(GH.dataRepo, path, cur, f ? f.sha : null, 'Αποθήκευση: ' + cur.title);
       });
     }).then(function (sha) {
       curSha = sha;
-      if (isOwner() && cur.visibility === 'public') { msg('saveStatus', 'Δημοσίευση…'); return publish(cur).then(function () { return 'published'; }); }
-      if (isOwner() && wasPublic) { msg('saveStatus', 'Απόσυρση από τις δημόσιες…'); return unpublish(cur.id, cur.title).then(function () { return 'unpublished'; }); }
+      if (canPublish() && cur.visibility === 'public') { msg('saveStatus', 'Δημοσίευση…'); return publish(cur).then(function () { return 'published'; }); }
+      if (isOwner() && wasPublic && cur.visibility !== 'public') { msg('saveStatus', 'Απόσυρση από τις δημόσιες…'); return unpublish(cur.id, cur.title).then(function () { return 'unpublished'; }); }
       return 'saved';
     }).then(function (what) {
       saveDraft(); renderPlan();
@@ -985,7 +1302,7 @@ details[open] summary { margin-bottom: 8px; }
         : what === 'unpublished' ? 'Αποθηκεύτηκε ως ιδιωτική και αποσύρθηκε από τις δημόσιες.' : 'Αποθηκεύτηκε.', 'ok');
       mineLoaded = false;
     }).catch(function (e) { msg('saveStatus', 'Δεν αποθηκεύτηκε: ' + (e.message || 'σφάλμα'), 'err'); })
-      .then(function () { $('saveBtn').disabled = !auth; });
+      .then(function () { renderPlan(); });
   }
   var confirmDelete = false;
   function del() {
@@ -1024,10 +1341,16 @@ details[open] summary { margin-bottom: 8px; }
     if (!auth) return;
     msg('mineStatus', 'Φόρτωση…');
     ghList(GH.dataRepo, GH.dataDir).then(function (files) {
-      files = files.filter(function (f) { return /\.json$/.test(f.name); });
+      files = files.filter(function (f) { return /\.json$/.test(f.name) && !/\.proposals\.json$/.test(f.name); });
       return Promise.all(files.map(function (f) { return ghGetFile(GH.dataRepo, GH.dataDir + '/' + f.name).catch(function () { return null; }); }));
     }).then(function (all) {
-      mine = all.filter(Boolean).map(function (f) { return { route: normRoute(f.data), sha: f.sha }; });
+      var allRoutes = all.filter(Boolean).filter(function (f) { return !/\.proposals$/.test(String(f.data && f.data.id || '')) && f.data && f.data.points; });
+      var byId = {}; allRoutes.forEach(function (f) { byId[f.data.id] = normRoute(f.data); });
+      mine = allRoutes.map(function (f) {
+        var r = normRoute(f.data);
+        if (r.linkTo && byId[r.linkTo]) { var u = relink(r, byId[r.linkTo]); if (u) r = u; }
+        return { route: r, sha: f.sha };
+      }).filter(function (m) { return canSee(m.route); });
       mine.sort(function (a, b) { return String(b.route.updated).localeCompare(String(a.route.updated)); });
       mineLoaded = true; renderMine();
       msg('mineStatus', mine.length ? '' : 'Δεν υπάρχουν αποθηκευμένες διαδρομές ακόμα. Σχεδίασε μία και πάτα Αποθήκευση.');
@@ -1040,7 +1363,8 @@ details[open] summary { margin-bottom: 8px; }
       var r = m.route, b = document.createElement('button');
       b.className = 'card'; b.type = 'button';
       var s = summaryOf(r); s.visibility = r.visibility;
-      b.innerHTML = cardHTML(s);
+      b.innerHTML = cardHTML(s, (r.trip && r.trip.on ? '<span class="badge trip">Εκδρομή' + (r.trip.leader ? ' · ' + esc(r.trip.leader) : '') + '</span>' : '') +
+        (r.linkTo ? '<span class="badge link">🔗 Συνδεδεμένη</span>' : ''));
       b.onclick = function () { loadIntoPlan(r, m.sha); };
       box.appendChild(b);
     });
@@ -1118,30 +1442,32 @@ details[open] summary { margin-bottom: 8px; }
   // ---------- καρτέλες ----------
   var tab = 'plan';
   function switchTab(t) {
-    if (t === 'mine' && !auth) t = 'plan';
+    if ((t === 'mine' && !auth) || (t === 'admin' && !isAdmin())) t = 'plan';
     tab = t;
-    ['plan', 'mine', 'public'].forEach(function (k) {
+    ['plan', 'mine', 'public', 'admin'].forEach(function (k) {
       $('pane' + k.charAt(0).toUpperCase() + k.slice(1)).hidden = k !== t;
       $('tab' + k.charAt(0).toUpperCase() + k.slice(1)).setAttribute('aria-selected', String(k === t));
     });
     $('viewBanner').hidden = !(t === 'public' && viewing);
     if (t === 'plan') { renderPlan(); }
     else if (t === 'mine') { drawMap(null); if (!mineLoaded) loadMine(); else renderMine(); }
+    else if (t === 'admin') { drawMap(null); renderAdmin(); }
     else if (t === 'public') { if (viewing) { drawMap(viewing, resFromSaved(viewing), false); } else { drawMap(null); loadPublic(); } }
   }
 
   // ---------- είσοδος ----------
   function renderAuth() {
     $('tabMine').disabled = !auth;
+    $('tabAdmin').hidden = !isAdmin();
     if (auth) {
-      $('authWho').innerHTML = 'Συνδεδεμένος: <b>' + esc(auth.name) + '</b> · ' + (auth.role === 'owner' ? 'διαχειριστής' : 'μέλος');
+      $('authWho').innerHTML = 'Συνδεδεμένος: <b>' + esc(auth.name) + '</b> · ' + (isAdmin() ? 'διαχειριστής' : 'μέλος');
       $('authToggle').textContent = 'Έξοδος'; $('loginForm').hidden = true;
     } else {
       $('authWho').textContent = 'Βλέπεις τις δημόσιες διαδρομές. Για σχεδίαση και αποθήκευση, κάνε είσοδο.';
       $('authToggle').textContent = $('loginForm').hidden ? 'Είσοδος' : 'Άκυρο';
     }
   }
-  function logout() { auth = null; lsSet(LS_AUTH, null); mine = []; mineLoaded = false; if (tab === 'mine') switchTab('plan'); renderAuth(); renderPlan(); }
+  function logout() { team = { users: [], groups: [] }; teamSha = null; auth = null; lsSet(LS_AUTH, null); mine = []; mineLoaded = false; if (tab === 'mine') switchTab('plan'); renderAuth(); renderPlan(); }
   $('authToggle').onclick = function () {
     if (auth) { logout(); return; }
     $('loginForm').hidden = !$('loginForm').hidden; renderAuth();
@@ -1155,7 +1481,7 @@ details[open] summary { margin-bottom: 8px; }
     login(name, code).then(function (role) {
       $('loginCode').value = ''; msg('loginStatus', '');
       if (cur && !cur.id) cur.author = name;
-      renderAuth(); renderPlan();
+      renderAuth(); renderPlan(); loadTeam();
     }).catch(function (err) { msg('loginStatus', err.message, 'err'); });
   });
 
@@ -1172,6 +1498,28 @@ details[open] summary { margin-bottom: 8px; }
   $('departAt').onchange = function (e) { cur.prefs.depart = e.target.value || '09:00'; renderPlan(); saveDraft(); if (curRes) showPlanResult(); };
   $('addStartBtn').onclick = function () { insertStart = true; $('insertBanner').hidden = false; $('searchInput').focus(); };
   $('saveBtn').onclick = save;
+  $('propSend').onclick = sendProposal;
+  $('copyBtn').onclick = copyToProfile;
+  $('propReload').onclick = loadProposals;
+  $('addUserBtn').onclick = function () { team.users.push({ name: '', admin: false, publish: false, tested: false }); renderAdmin(); var el = $('u-n-' + (team.users.length - 1)); if (el) el.focus(); };
+  $('addGroupBtn').onclick = function () { team.groups.push({ name: 'Παρέα ' + (team.groups.length + 1), members: [] }); renderAdmin(); };
+  $('teamSave').onclick = saveTeam;
+  $('tripOn').onchange = function (e) {
+    cur.trip = e.target.checked ? (cur.trip || { on: true, leader: me(), members: [me()] }) : null;
+    if (cur.trip) cur.trip.on = true;
+    renderPlan(); saveDraft();
+  };
+  $('tripLeader').onchange = function (e) { cur.trip.leader = e.target.value; if (!cur.trip.members.some(function (m) { return sameName(m, e.target.value); })) cur.trip.members.push(e.target.value); renderPlan(); saveDraft(); };
+  var confirmReset = false;
+  $('resetBtn').onclick = function () {
+    if (!confirmReset) { confirmReset = true; $('resetBtn').textContent = 'Σίγουρα;'; setTimeout(function () { confirmReset = false; $('resetBtn').textContent = 'Εκκαθάριση'; }, 4000); return; }
+    confirmReset = false; $('resetBtn').textContent = 'Εκκαθάριση';
+    var keep = cur ? cur.prefs : null;
+    cur = blankRoute(); if (keep) cur.prefs = Object.assign({}, keep, { loop: false });
+    curSha = null; curRes = null; insertStart = false; $('insertBanner').hidden = true; props = [];
+    msg('status', ''); msg('saveStatus', ''); renderPlan(); showPlanResult(); saveDraft();
+    msg('status', 'Η σχεδίαση καθαρίστηκε. Οι αποθηκευμένες διαδρομές δεν πειράχτηκαν.', 'ok');
+  };
   $('deleteBtn').onclick = del;
   $('newBtn').onclick = function () { cur = blankRoute(); curSha = null; curRes = null; msg('status', ''); msg('saveStatus', ''); renderPlan(); showPlanResult(); saveDraft(); };
   $('clearBtn').onclick = function () { cur.points = []; changed(); showPlanResult(); };
@@ -1209,6 +1557,7 @@ details[open] summary { margin-bottom: 8px; }
   curSha = draft ? draft.sha || null : null;
   curRes = resFromSaved(cur);
   renderAuth();
+  if (auth) loadTeam();
   var hp = location.hash.match(/^#p=([a-z0-9-]+)$/i), hr = location.hash.match(/^#r=([A-Za-z0-9_-]+)$/);
   if (hp) { switchTab('public'); openPublic(hp[1]); }
   else if (hr) {

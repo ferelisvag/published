@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Υπολογιστής Επένδυσης & Σύνθετου Τόκου</title>
-    <!-- Tailwind CSS για μοντέρνο και γρήγορο design -->
+    <title>Υπολογιστής Επένδυσης & Σύνθετου Τόκου | Veagle Finance</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Chart.js για τα γραφήματα -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 flex flex-col justify-between">
 
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-4xl mx-auto w-full">
         <header class="text-center mb-8">
             <h1 class="text-3xl font-extrabold text-emerald-400">📈 Υπολογιστής Επένδυσης</h1>
             <p class="text-slate-400 mt-2">Υπολόγισε την ανάπτυξη των χρημάτων σου με μηνιαίες καταθέσεις και ανατοκισμό.</p>
@@ -19,7 +19,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Φόρμα Εισαγωγής Δεδομένων -->
-            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl space-y-4 md:col-span-1">
+            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl space-y-4 md:col-span-1 border border-slate-700">
                 <h2 class="text-xl font-semibold border-b border-slate-700 pb-2 text-emerald-300">Παράμετροι</h2>
                 
                 <div>
@@ -48,7 +48,7 @@
             </div>
 
             <!-- Αποτελέσματα & Γράφημα -->
-            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between md:col-span-2 space-y-6">
+            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between md:col-span-2 space-y-6 border border-slate-700">
                 <div>
                     <h2 class="text-xl font-semibold border-b border-slate-700 pb-2 text-emerald-300 mb-4">Αποτελέσματα</h2>
                     <div class="grid grid-cols-3 gap-4 text-center">
@@ -75,6 +75,11 @@
         </div>
     </div>
 
+    <!-- Disclaimer / Αποποίηση Ευθύνης -->
+    <footer class="max-w-4xl mx-auto w-full mt-12 pt-6 border-t border-slate-800 text-center text-xs text-slate-500 leading-relaxed">
+        <p>⚠️ <strong>Αποποίηση Ευθύνης (Disclaimer):</strong> Η παρούσα εφαρμογή παρέχεται αποκλειστικά για ενημερωτικούς, εκπαιδευτικούς και υπολογιστικούς σκοπούς. Τα αποτελέσματα βασίζονται σε θεωρητικές σταθερές αποδόσεις και δεν αποτελούν επενδυτική, χρηματοοικονομική ή νομική συμβουλή. Οι πραγματικές επενδύσεις ενέχουν ρίσκο και οι αποδόσεις ενδέχεται να διαφέρουν.</p>
+    </footer>
+
     <!-- JavaScript Λογική -->
     <script>
         let myChart = null;
@@ -99,7 +104,6 @@
                 currentTotal = (currentTotal + monthly) * (1 + monthlyRate);
                 totalDeposited += monthly;
 
-                // Αποθήκευση δεδομένων ανά έτος
                 if (m % 12 === 0) {
                     let yearNum = m / 12;
                     labels.push(`Έτος ${yearNum}`);
@@ -110,12 +114,10 @@
 
             let totalInterest = currentTotal - totalDeposited;
 
-            // Ενημέρωση κειμένου αποτελεσμάτων
             document.getElementById('resTotal').innerText = Math.round(currentTotal).toLocaleString() + ' €';
             document.getElementById('resDeposits').innerText = Math.round(totalDeposited).toLocaleString() + ' €';
             document.getElementById('resInterest').innerText = Math.round(totalInterest).toLocaleString() + ' €';
 
-            // Σχεδίαση/Ενημέρωση Γραφήματος
             updateChart(labels, values, deposits);
         }
 
@@ -163,7 +165,6 @@
             });
         }
 
-        // Εκτέλεση υπολογισμού κατά την φόρτωση της σελίδας
         window.onload = calculate;
     </script>
 </body>

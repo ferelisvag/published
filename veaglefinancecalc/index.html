@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογιστής Επένδυσης & Σύνθετου Τόκου</title>
+    <!-- Tailwind CSS για μοντέρνο και γρήγορο design -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Chart.js για τα γραφήματα -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-emerald-400">📈 Υπολογιστής Επένδυσης</h1>
+            <p class="text-slate-400 mt-2">Υπολόγισε την ανάπτυξη των χρημάτων σου με μηνιαίες καταθέσεις και ανατοκισμό.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Φόρμα Εισαγωγής Δεδομένων -->
+            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl space-y-4 md:col-span-1">
+                <h2 class="text-xl font-semibold border-b border-slate-700 pb-2 text-emerald-300">Παράμετροι</h2>
+                
+                <div>
+                    <label class="block text-sm text-slate-300 mb-1">Αρχικό Ποσό (€)</label>
+                    <input type="number" id="initial" value="1000" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-slate-300 mb-1">Μηνιαία Κατάθεση (€)</label>
+                    <input type="number" id="monthly" value="200" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-slate-300 mb-1">Ετήσια Απόδοση (%)</label>
+                    <input type="number" step="0.1" id="rate" value="7" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-400">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-slate-300 mb-1">Διάρκεια (Έτη)</label>
+                    <input type="number" id="years" value="10" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-400">
+                </div>
+
+                <button onclick="calculate()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-lg transition duration-200 cursor-pointer shadow-lg shadow-emerald-500/20">
+                    Υπολογισμός
+                </button>
+            </div>
+
+            <!-- Αποτελέσματα & Γράφημα -->
+            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between md:col-span-2 space-y-6">
+                <div>
+                    <h2 class="text-xl font-semibold border-b border-slate-700 pb-2 text-emerald-300 mb-4">Αποτελέσματα</h2>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-700">
+                            <span class="block text-xs text-slate-400">Συνολική Αξία</span>
+                            <span id="resTotal" class="text-lg md:text-xl font-bold text-emerald-400">0 €</span>
+                        </div>
+                        <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-700">
+                            <span class="block text-xs text-slate-400">Καταθέσεις</span>
+                            <span id="resDeposits" class="text-lg md:text-xl font-bold text-slate-200">0 €</span>
+                        </div>
+                        <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-700">
+                            <span class="block text-xs text-slate-400">Κέρδος (Τόκοι)</span>
+                            <span id="resInterest" class="text-lg md:text-xl font-bold text-sky-400">0 €</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Καμβάς Γραφήματος -->
+                <div class="relative h-64 md:h-72 w-full">
+                    <canvas id="investmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Λογική -->
+    <script>
+        let myChart = null;
+
+        function calculate() {
+            const initial = parseFloat(document.getElementById('initial').value) || 0;
+            const monthly = parseFloat(document.getElementById('monthly').value) || 0;
+            const annualRate = parseFloat(document.getElementById('rate').value) || 0;
+            const years = parseInt(document.getElementById('years').value) || 0;
+
+            const monthlyRate = annualRate / 100 / 12;
+            const totalMonths = years * 12;
+
+            let currentTotal = initial;
+            let totalDeposited = initial;
+
+            let labels = ['Έτος 0'];
+            let values = [initial];
+            let deposits = [initial];
+
+            for (let m = 1; m <= totalMonths; m++) {
+                currentTotal = (currentTotal + monthly) * (1 + monthlyRate);
+                totalDeposited += monthly;
+
+                // Αποθήκευση δεδομένων ανά έτος
+                if (m % 12 === 0) {
+                    let yearNum = m / 12;
+                    labels.push(`Έτος ${yearNum}`);
+                    values.push(Math.round(currentTotal));
+                    deposits.push(Math.round(totalDeposited));
+                }
+            }
+
+            let totalInterest = currentTotal - totalDeposited;
+
+            // Ενημέρωση κειμένου αποτελεσμάτων
+            document.getElementById('resTotal').innerText = Math.round(currentTotal).toLocaleString() + ' €';
+            document.getElementById('resDeposits').innerText = Math.round(totalDeposited).toLocaleString() + ' €';
+            document.getElementById('resInterest').innerText = Math.round(totalInterest).toLocaleString() + ' €';
+
+            // Σχεδίαση/Ενημέρωση Γραφήματος
+            updateChart(labels, values, deposits);
+        }
+
+        function updateChart(labels, values, deposits) {
+            const ctx = document.getElementById('investmentChart').getContext('2d');
+            
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Συνολική Αξία (€)',
+                            data: values,
+                            borderColor: '#34d399',
+                            backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Καταθέσεις (€)',
+                            data: deposits,
+                            borderColor: '#94a3b8',
+                            backgroundColor: 'transparent',
+                            borderDash: [5, 5],
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+                    }
+                }
+            });
+        }
+
+        // Εκτέλεση υπολογισμού κατά την φόρτωση της σελίδας
+        window.onload = calculate;
+    </script>
+</body>
+</html>

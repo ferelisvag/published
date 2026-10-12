@@ -1,1 +1,15 @@
-[]
+[
+ {
+  "id": "imerisia-nayplio-mv5mwa7f",
+  "title": "Ημερήσια Ναύπλιο",
+  "desc": "",
+  "status": "tested",
+  "author": "veagle",
+  "updated": "2026-10-12T19:18:00.647Z",
+  "km": 270059,
+  "sec": 15173.351,
+  "days": 1,
+  "start": "Σταθμός 14",
+  "points": 7
+ }
+]

@@ -58,6 +58,7 @@ body { background: var(--bg); color: var(--ink); font: 15px/1.45 var(--font); }
 .app { display: grid; grid-template-columns: 400px 1fr; height: 100%; }
 .panel { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+.panel > * { flex-shrink: 0; }
 .map-wrap { position: relative; min-height: 0; }
 #map { height: 100%; width: 100%; background: var(--soft); }
 @media (max-width: 760px) {
@@ -249,7 +250,7 @@ table.admin input[type=text] { padding: 5px 8px; font-size: 13.5px; }
 
     <div class="tabs" role="tablist">
       <button role="tab" id="tabPlan" aria-selected="true" data-tab="plan">Σχεδίαση</button>
-      <button role="tab" id="tabMine" aria-selected="false" data-tab="mine">Οι διαδρομές μου</button>
+      <button role="tab" id="tabMine" aria-selected="false" data-tab="mine">Δικές μου</button>
       <button role="tab" id="tabPublic" aria-selected="false" data-tab="public">Διαδρομές</button>
       <button role="tab" id="tabAdmin" aria-selected="false" data-tab="admin" hidden>Διαχείριση</button>
     </div>

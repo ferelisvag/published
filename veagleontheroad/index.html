@@ -711,6 +711,8 @@ table.admin input[type=text] { padding: 5px 8px; font-size: 13.5px; }
           });
           sum.km += trip.summary.length * 1000; sum.sec += trip.summary.time;
           sum.engine = 'valhalla'; if (trip.summary.has_toll) sum.hasToll = true;
+          // ο δημόσιος server αγνοεί τα exclude_* (προειδοποίηση 208), άρα η αποφυγή είναι μόνο ήπια
+          if ((d.warnings || []).some(function (w) { return w && w.code === 208; })) sum.hardIgnored = true;
           return sum;
         });
       });
@@ -906,6 +908,12 @@ table.admin input[type=text] { padding: 5px 8px; font-size: 13.5px; }
     if (res.engine) h += '<p class="hint">Υπηρεσία: ' + (res.engine === 'valhalla' ? 'Valhalla, προφίλ μηχανής' : 'OSRM, εφεδρική') +
       (res.engine === 'valhalla' ? ' · Διόδια στη διαδρομή: <b>' + (res.hasToll ? 'ναι' : 'όχι') + '</b>' : ' · δεν ξέρει να αποφεύγει διόδια') + '</p>';
     if (res.tollNote && !res.approx) h += '<p class="hint">Δεν υπάρχει διαδρομή εντελώς χωρίς διόδια ανάμεσα σε αυτά τα σημεία, οπότε περνάει από όσο λιγότερα γίνεται.</p>';
+    var avoidToll = r.prefs.toll && r.prefs.style !== 'fast';
+    if (res.hardIgnored && !res.approx) {
+      var soft = [avoidToll ? 'τα διόδια' : '', r.prefs.unpaved ? 'τους χωματόδρομους' : ''].filter(Boolean).join(' και ');
+      if (soft) h += '<p class="hint">Η υπηρεσία δεν δέχεται αυστηρό αποκλεισμό, οπότε αποφεύγει ' + soft + ' όσο γίνεται, χωρίς εγγύηση.</p>';
+    }
+    if (avoidToll && res.engine === 'valhalla' && res.hasToll && !res.tollNote) h += '<p class="hint"><b>Προσοχή:</b> ζήτησες αποφυγή διοδίων, αλλά η διαδρομή περνάει από διόδια.</p>';
     if (res.approx) h += '<p class="hint">Η υπηρεσία για μηχανή δεν απάντησε, οπότε η διαδρομή βγήκε με το απλό προφίλ αυτοκινήτου. Δοκίμασε ξανά σε λίγο.</p>';
     h += (parts ? '<p class="hint">Η κοινή χρήση και το GPX μοιράζονται την <b>κοινή διαδρομή</b>, από το σημείο συνάντησης ως τον προορισμό. Ο καθένας προσθέτει τη δική του αφετηρία.</p>' : '') +
       '<div class="row"><button class="small" data-act="share">' + (parts ? 'Κοινή χρήση κοινής διαδρομής' : 'Κοινή χρήση link') + '</button>' +

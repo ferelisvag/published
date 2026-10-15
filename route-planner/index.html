@@ -599,6 +599,8 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
           });
           sum.km += trip.summary.length * 1000; sum.sec += trip.summary.time;
           sum.engine = 'valhalla'; if (trip.summary.has_toll) sum.hasToll = true;
+          // ο δημόσιος server αγνοεί τα exclude_* (προειδοποίηση 208), άρα η αποφυγή είναι μόνο ήπια
+          if ((d.warnings || []).some(function (w) { return w && w.code === 208; })) sum.hardIgnored = true;
           return sum;
         });
       });
@@ -661,6 +663,13 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
       else status('Η διαδρομή είναι έτοιμη.', 'ok');
       var el = $('status');
       el.textContent += ' Υπηρεσία: ' + (r.engine === 'valhalla' ? 'Valhalla · διόδια στη διαδρομή: ' + (r.hasToll ? 'ναι' : 'όχι') : 'OSRM (δεν αποφεύγει διόδια)') + '.';
+      if (o.toll && r.engine === 'valhalla' && r.hasToll && !r.tollNote) {
+        el.className = 'status err';
+        el.textContent += ' Προσοχή: ζήτησες αποφυγή διοδίων, αλλά η διαδρομή περνάει από διόδια. Η δωρεάν υπηρεσία δεν δέχεται αυστηρό αποκλεισμό και τα αποφεύγει μόνο όσο γίνεται.';
+      } else if (r.hardIgnored && !r.approx) {
+        var soft = [o.toll ? 'τα διόδια' : '', o.unpaved ? 'τους χωματόδρομους' : ''].filter(Boolean).join(' και ');
+        if (soft) el.textContent += ' Η υπηρεσία αποφεύγει ' + soft + ' όσο γίνεται, χωρίς εγγύηση.';
+      }
     }).catch(function (err) { status(err.message || 'Κάτι πήγε στραβά. Δοκίμασε ξανά.', 'err'); })
       .then(function () { btn.disabled = S.stops.length === 0; render(); });
   }

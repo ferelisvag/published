@@ -215,6 +215,7 @@ table.admin input[type=text] { padding: 5px 8px; font-size: 13.5px; }
 .group { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
 .howto { font-size: 13.5px; color: var(--ink); padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 4px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+@media print { body::after { content: "Veagle on the road · ferelis.gr"; position: fixed; left: 0; right: 0; bottom: 0; text-align: center; font: 10px/1.4 system-ui, sans-serif; color: #555; background: #fff; padding: 2px 0; } }
 </style>
 </head>
 <body>
@@ -432,7 +433,7 @@ table.admin input[type=text] { padding: 5px 8px; font-size: 13.5px; }
         <div id="pubStatus" class="status" hidden></div>
       </section>
     </div>
-    <p class="hint" style="margin-top:auto;font-size:11.5px">Έκδοση 9.10 · 00:20</p>
+    <p class="hint app-foot" style="margin-top:auto;font-size:11.5px">Veagle on the road · <a href="https://ferelis.gr" target="_blank" rel="noopener" style="color:inherit">ferelis.gr</a> · Έκδοση 15.10 · 21:08</p>
   </aside>
   <div class="map-wrap">
     <div id="map"></div>
@@ -850,8 +851,9 @@ table.admin input[type=text] { padding: 5px 8px; font-size: 13.5px; }
   function xmlEsc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[c]; }); }
   function buildGPX(r, res) {
     var name = r.title || 'Διαδρομή';
-    var out = ['<?xml version="1.0" encoding="UTF-8"?>', '<gpx version="1.1" creator="Veagle on the road" xmlns="http://www.topografix.com/GPX/1/1">',
-      '<metadata><name>' + xmlEsc(name) + '</name>' + (r.desc ? '<desc>' + xmlEsc(r.desc) + '</desc>' : '') + '</metadata>'];
+    var out = ['<?xml version="1.0" encoding="UTF-8"?>', '<gpx version="1.1" creator="Veagle on the road (ferelis.gr)" xmlns="http://www.topografix.com/GPX/1/1">',
+      '<metadata><name>' + xmlEsc(name) + '</name><desc>' + xmlEsc((r.desc ? r.desc + '\n\n' : '') + 'Δημιουργήθηκε με Veagle on the road · ferelis.gr') + '</desc>' +
+      '<link href="https://ferelis.gr"><text>ferelis.gr</text></link></metadata>'];
     r.points.forEach(function (p, i) {
       var t = ptType(r, i);
       out.push('<wpt lat="' + p.lat.toFixed(6) + '" lon="' + p.lng.toFixed(6) + '"><name>' + xmlEsc((i + 1) + '. ' + p.name) + '</name><desc>' + xmlEsc(TYPES[t].l) + '</desc><type>' + t + '</type></wpt>');

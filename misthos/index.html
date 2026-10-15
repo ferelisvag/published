@@ -172,6 +172,8 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
 .foot li { margin-bottom: 6px; }
 .foot a { color: var(--accent); }
 .ver { color: var(--muted); font-size: 11.5px; margin-top: 18px; text-align: center; }
+.ver a { color: inherit; }
+@media print { .bar { display: none !important; } .ver { color: #444; } }
 @media (prefers-reduced-motion: no-preference) { .net b { transition: color .2s; } }
 </style>
 </head>
@@ -328,7 +330,7 @@ button:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); out
       <p>Ό,τι γράφεις μένει στη συσκευή σου. Δεν στέλνεται πουθενά.</p>
     </section>
   </footer>
-  <p class="ver">Έκδοση 9.10 · 01:57</p>
+  <p class="ver">Υπολόγισε τον μισθό σου · <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a> · Έκδοση 15.10 · 21:08</p>
 </div>
 
 <button type="button" class="bar" id="bar" aria-label="Δες την ανάλυση"><span>Καθαρά στο χέρι</span><b id="barNet">–</b></button>

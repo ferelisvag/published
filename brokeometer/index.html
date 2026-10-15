@@ -143,6 +143,17 @@ button, input, select { font: inherit; color: inherit; }
 .field { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
 .field input { width: 100%; min-width: 0; border: 1px solid var(--line); background: var(--sunken); border-radius: 8px; padding: 8px 10px; font-family: var(--f-num); font-size: 14px; color: var(--ink); }
 .goal-out { margin: 10px 0 0; font-size: 13.5px; }
+.fund-intro { margin: -4px 0 12px; font-size: 13.5px; color: var(--muted); }
+.fund-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.fund-opt { display: grid; gap: 2px; text-align: left; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--sunken); cursor: pointer; min-width: 0; }
+.fund-opt:hover { border-color: var(--muted); }
+.fund-opt[aria-checked="true"] { border-color: var(--good); background: color-mix(in srgb, var(--good) 12%, var(--surface)); }
+.fund-opt .t { font-size: 11.5px; color: var(--muted); }
+.fund-opt .m { font-weight: 700; font-size: 14px; }
+.fund-opt .a { font-family: var(--f-num); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fund-desc { margin: 10px 0 12px; font-size: 13px; }
+.fund-bar { height: 8px; border-radius: 8px; background: var(--sunken); border: 1px solid var(--line); overflow: hidden; margin-top: 10px; }
+.fund-bar span { display: block; height: 100%; width: 0; background: var(--good); border-radius: 8px; transition: width .4s; }
 .export { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .export .btn { justify-content: center; }
 .export-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
@@ -296,6 +307,16 @@ button, input, select { font: inherit; color: inherit; }
       </section>
 
       <section class="card">
+        <h2>Ταμείο έκτακτης ανάγκης</h2>
+        <p class="fund-intro">Ο «χρυσός κανόνας»: κράτα στην άκρη 3 έως 6 μήνες από τα έξοδά σου, για να είσαι ασφαλής και ανεξάρτητος. Πόσους ακριβώς, εξαρτάται από το ρίσκο της ζωής σου.</p>
+        <div class="fund-opts" id="fundOpts" role="radiogroup" aria-label="Πόσους μήνες"></div>
+        <p class="fund-desc" id="fundDesc"></p>
+        <label class="field">Έχω ήδη μαζέψει (€)<input type="text" inputmode="decimal" id="fundSaved" placeholder="0"></label>
+        <div class="fund-bar" aria-hidden="true"><span id="fundBar"></span></div>
+        <p class="goal-out" id="fundOut"></p>
+      </section>
+
+      <section class="card">
         <h2>Στόχος αποταμίευσης</h2>
         <div class="goal">
           <label class="field">Θέλω να μαζέψω (€)<input type="text" inputmode="decimal" id="goalAmt"></label>
@@ -350,7 +371,7 @@ const cat = (key, rows) => ({ id: key, key, name: CATS[key].name, rows });
 const vehicleRows = () => [row('Ασφάλεια', 0, 'y'), row('Τέλη κυκλοφορίας', 0, 'y'), row('Λάστιχα', 0, 'y2'), row('Λάδια & σέρβις', 0, 'y'), row('Καύσιμα', 0)];
 function sampleState() {
   return {
-    v: 1, sample: true, onlySure: false, goal: { amount: 2000, months: 6 },
+    v: 1, sample: true, onlySure: false, goal: { amount: 2000, months: 6 }, fund: { months: 3, saved: 0 },
     income: [
       row('Μισθός (καθαρός)', 820, 'm14', true),
       row('Επιπλέον έσοδα Α', 0, 'm', false),
@@ -369,7 +390,7 @@ function sampleState() {
 }
 function emptyState() {
   return {
-    v: 1, sample: false, onlySure: false, goal: { amount: 0, months: 0 },
+    v: 1, sample: false, onlySure: false, goal: { amount: 0, months: 0 }, fund: { months: 3, saved: 0 },
     income: [row('Μισθός (καθαρός)', 0, 'm14', true)],
     cats: Object.keys(CATS).map(k => cat(k, [])),
   };
@@ -377,7 +398,12 @@ function emptyState() {
 
 let state = load() || sampleState();
 function load() {
-  try { const s = JSON.parse(localStorage.getItem(STORE)); return s && s.v === 1 && Array.isArray(s.cats) ? s : null; } catch { return null; }
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE));
+    if (!(s && s.v === 1 && Array.isArray(s.cats))) return null;
+    s.fund ||= { months: 3, saved: 0 };
+    return s;
+  } catch { return null; }
 }
 function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch { /* storage unavailable */ } }
 
@@ -604,7 +630,6 @@ function update() {
   if (home && c.inc > 0 && home.total / c.inc > 0.4) notes.push({ k: 'warn', t: `Το σπίτι παίρνει ${Math.round(home.total / c.inc * 100)}% των εσόδων. Συνήθως προτείνεται κάτω από 35–40%.` });
   const zeros = sections().slice(1).map(s => ({ name: s.name, rows: s.rows.filter(r => r.name && !monthly(r)) })).filter(s => s.rows.length);
   if (zeros.length) notes.push({ k: 'warn', t: `Χωρίς ποσό: ${zeros.map(s => s.rows.length === 1 ? esc(s.rows[0].name) : `${esc(s.name)} (${s.rows.length})`).join(', ')}. Αν ξοδεύεις κάτι εκεί, γράψ' το.` });
-  if (c.rem > 0 && c.exp > 0) { const buf = c.exp * 3; notes.push({ k: 'good', t: `Ένα αποθεματικό 3 μηνών για έκτακτα είναι περίπου ${eur0(buf)}. Με το τωρινό περίσσευμα το μαζεύεις σε ${Math.ceil(buf / c.rem)} μήνες.` }); }
   funNotes(c).forEach(t => notes.push({ k: 'fun', t }));
   $('notes').innerHTML = notes.map(n => `<li data-k="${n.k}">${n.t}</li>`).join('');
   $('notesCard').hidden = notes.length === 0;
@@ -618,12 +643,39 @@ function update() {
     else go = `Χρειάζεσαι ${eur(need)} τον μήνα. Με το τωρινό περίσσευμα θέλεις ${Math.ceil(ga / c.useRem)} μήνες αντί για ${gm}.`;
   }
   $('goalOut').textContent = go;
+  updateFund(c);
 }
+
+/* ---------- Ταμείο έκτακτης ανάγκης ---------- */
+const FUND = [
+  { m: 3,  t: 'Σταθερή δουλειά', d: '<b>3 μήνες:</b> για μισθωτούς με σταθερή δουλειά και χωρίς οικογενειακές υποχρεώσεις.' },
+  { m: 6,  t: 'Πιο πολύ ρίσκο',  d: '<b>6 μήνες:</b> για ελεύθερους επαγγελματίες, όσους έχουν κυμαινόμενο εισόδημα, παιδιά ή δάνεια.' },
+  { m: 12, t: 'Ελευθερία',       d: '<b>12+ μήνες:</b> τα λεγόμενα «FU money». Σου δίνουν την ελευθερία να παραιτηθείς, να αλλάξεις καριέρα ή να πάρεις μεγάλα ρίσκα χωρίς άγχος.' },
+];
+function updateFund(c) {
+  const f = state.fund, opt = FUND.find(o => o.m === f.months) || FUND[0];
+  $('fundOpts').innerHTML = FUND.map(o => `<button type="button" class="fund-opt" role="radio" aria-checked="${o.m === opt.m}" data-m="${o.m}"><span class="t">${o.t}</span><span class="m">${o.m} μήνες</span><span class="a">${eur0(c.exp * o.m)}</span></button>`).join('');
+  $('fundDesc').innerHTML = opt.d;
+  const target = c.exp * opt.m, saved = Number(f.saved) || 0, left = Math.max(0, target - saved);
+  $('fundBar').style.width = target > 0 ? Math.min(100, saved / target * 100) + '%' : '0';
+  let out;
+  if (c.exp <= 0) out = 'Πρόσθεσε τα έξοδά σου για να δεις πόσα χρειάζεσαι.';
+  else if (left === 0) out = `Το ταμείο των ${opt.m} μηνών (${eur0(target)}) είναι γεμάτο. Σεβασμός.`;
+  else if (c.useRem <= 0) out = `Στόχος ${eur0(target)}, λείπουν ${eur0(left)}. Με αρνητικό υπόλοιπο δεν μαζεύεται: πρώτα πρέπει να κοπεί κάποιο έξοδο.`;
+  else out = `Στόχος ${eur0(target)}, λείπουν ${eur0(left)}. Αν βάζεις στην άκρη όλο το περίσσευμα (${eur0(c.useRem)} τον μήνα), το γεμίζεις σε ${Math.ceil(left / c.useRem)} μήνες.`;
+  $('fundOut').textContent = out;
+}
+$('fundOpts').addEventListener('click', e => {
+  const b = e.target.closest('.fund-opt'); if (!b) return;
+  state.fund.months = Number(b.dataset.m); update(); save();
+  $('fundOpts').querySelector(`[data-m="${b.dataset.m}"]`)?.focus();
+});
+$('fundSaved').addEventListener('input', e => { state.fund.saved = parseNum(e.target.value); update(); save(); });
 
 $('onlySure').addEventListener('change', e => { state.onlySure = e.target.checked; update(); save(); });
 $('goalAmt').addEventListener('input', e => { state.goal.amount = parseNum(e.target.value); update(); save(); });
 $('goalMonths').addEventListener('input', e => { state.goal.months = Math.max(0, Math.round(parseNum(e.target.value))); update(); save(); });
-function fillGoal() { $('goalAmt').value = showNum(state.goal.amount); $('goalMonths').value = state.goal.months || ''; }
+function fillGoal() { $('goalAmt').value = showNum(state.goal.amount); $('goalMonths').value = state.goal.months || ''; $('fundSaved').value = showNum(state.fund.saved); }
 
 $('btnSample').addEventListener('click', () => { state = sampleState(); fillGoal(); renderLedger(); save(); toast('Φορτώθηκε το παράδειγμα'); });
 $('btnClear').addEventListener('click', () => { $('notice').hidden = false; $('confirmClear').hidden = false; $('yesClear').focus(); });

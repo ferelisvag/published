@@ -22,7 +22,7 @@
   --panel: #12302A; --panel-2: #1B4038; --panel-ink: #EAF3EE; --panel-muted: #9FB8AD;
   --accent: #F5B700; --accent-ink: #1A1400; --focus: #2F6FED;
   --good: #1E9E62; --ok: #6DBB5A; --warn: #F08A24; --bad: #D7443E;
-  --c-income: #1E9E62; --c-home: #3B7DD8; --c-car: #8B5CF6; --c-daily: #14A3A3; --c-edu: #E07B1A; --c-debt: #C2417A; --c-other: #7A8B83;
+  --c-income: #1E9E62; --c-home: #3B7DD8; --c-car: #8B5CF6; --c-moto: #6E9E2E; --c-daily: #14A3A3; --c-edu: #E07B1A; --c-debt: #C2417A; --c-other: #7A8B83;
   --f-display: 'Commissioner', 'Segoe UI', system-ui, sans-serif;
   --f-body: 'Commissioner', 'Segoe UI', system-ui, sans-serif;
   --f-num: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
@@ -34,7 +34,7 @@
   --panel: #163A32; --panel-2: #1E4A40; --panel-ink: #EAF3EE; --panel-muted: #A3C4B6;
   --accent: #FFC83A; --accent-ink: #1A1400; --focus: #6B9BFF;
   --good: #34C27A; --ok: #86CF6F; --warn: #F59A42; --bad: #EE6159;
-  --c-income: #34C27A; --c-home: #5B95E6; --c-car: #A07CF8; --c-daily: #2CC0C0; --c-edu: #F59A42; --c-debt: #DA5C93; --c-other: #93A39C;
+  --c-income: #34C27A; --c-home: #5B95E6; --c-car: #A07CF8; --c-moto: #8CBF4A; --c-daily: #2CC0C0; --c-edu: #F59A42; --c-debt: #DA5C93; --c-other: #93A39C;
   color-scheme: dark;
 } }
 :root[data-theme="dark"] {
@@ -43,7 +43,7 @@
   --panel: #163A32; --panel-2: #1E4A40; --panel-ink: #EAF3EE; --panel-muted: #A3C4B6;
   --accent: #FFC83A; --accent-ink: #1A1400; --focus: #6B9BFF;
   --good: #34C27A; --ok: #86CF6F; --warn: #F59A42; --bad: #EE6159;
-  --c-income: #34C27A; --c-home: #5B95E6; --c-car: #A07CF8; --c-daily: #2CC0C0; --c-edu: #F59A42; --c-debt: #DA5C93; --c-other: #93A39C;
+  --c-income: #34C27A; --c-home: #5B95E6; --c-car: #A07CF8; --c-moto: #8CBF4A; --c-daily: #2CC0C0; --c-edu: #F59A42; --c-debt: #DA5C93; --c-other: #93A39C;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -149,8 +149,8 @@ button, input, select { font: inherit; color: inherit; }
 .cat-head h3 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 16px; flex: 1; min-width: 0; }
 .cat-head .tot { font-family: var(--f-num); font-weight: 700; font-size: 14px; white-space: nowrap; }
 .cat-head .tot small { font-weight: 500; color: var(--muted); font-size: 11px; margin-left: 4px; }
-.cols, .row { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(86px, .7fr) minmax(128px, .9fr) minmax(92px, .7fr) 34px; gap: 8px; align-items: center; }
-.cat.is-income .cols, .cat.is-income .row { grid-template-columns: minmax(0, 1.6fr) minmax(86px, .7fr) minmax(128px, .9fr) minmax(92px, .7fr) 78px 34px; }
+.cols, .row { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(80px, .6fr) minmax(192px, 1fr) minmax(92px, .7fr) 34px; gap: 8px; align-items: center; }
+.cat.is-income .cols, .cat.is-income .row { grid-template-columns: minmax(0, 1.6fr) minmax(80px, .6fr) minmax(192px, 1fr) minmax(92px, .7fr) 78px 34px; }
 .cols { padding: 8px 16px 2px; font-size: 11px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
 .cols .r, .row .mo { text-align: right; }
 .rows { padding: 4px 10px 6px; }
@@ -169,13 +169,15 @@ button, input, select { font: inherit; color: inherit; }
 .del svg { width: 14px; height: 14px; }
 .add { margin: 0 16px 14px; border: 1px dashed var(--line); background: transparent; border-radius: 9px; padding: 7px 12px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--muted); }
 .add:hover { color: var(--ink); border-color: var(--muted); }
+.calc14 { margin: 2px 6px 8px; padding: 9px 12px; background: color-mix(in srgb, var(--c-income) 9%, var(--sunken)); border-radius: 9px; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+.calc14 b { color: var(--ink); font-family: var(--f-num); font-weight: 700; font-size: 12px; display: block; margin-bottom: 2px; }
 .empty-row { padding: 10px 16px 12px; color: var(--muted); font-size: 13.5px; }
 .hint { font-size: 12px; color: var(--muted); padding: 0 16px 12px; margin: -4px 0 0; }
 
 @media (max-width: 640px) {
   .wrap { padding-inline: 16px; }
   .cols { display: none; }
-  .row, .cat.is-income .row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 34px; grid-template-areas: "name name del" "amt freq freq" "mo mo sure"; padding: 8px 6px; border-bottom: 1px solid var(--line); border-radius: 0; }
+  .row, .cat.is-income .row { grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr) 34px; grid-template-areas: "name name del" "amt freq freq" "mo mo sure"; padding: 8px 6px; border-bottom: 1px solid var(--line); border-radius: 0; }
   .row:last-child { border-bottom: 0; }
   .row .name { grid-area: name; font-weight: 600; }
   .row .amt { grid-area: amt; text-align: left; }
@@ -316,7 +318,7 @@ button, input, select { font: inherit; color: inherit; }
 /* ---------- Model ---------- */
 const FREQS = [
   { k: 'm',   label: 'τον μήνα',      f: 1 },
-  { k: 'm14', label: 'τον μήνα ×14',  f: 14 / 12 },
+  { k: 'm14', label: 'τον μήνα (14 μισθοί)', f: 14 / 12 },
   { k: 'd',   label: 'την ημέρα',     f: 30 },
   { k: 'w',   label: 'την εβδομάδα',  f: 52 / 12 },
   { k: 'q',   label: 'ανά 3 μήνες',   f: 1 / 3 },
@@ -325,31 +327,34 @@ const FREQS = [
 ];
 const CATS = {
   home:  { name: 'Σπίτι',            color: '--c-home',  xl: 'FF3B7DD8' },
-  car:   { name: 'Όχημα',            color: '--c-car',   xl: 'FF8B5CF6' },
+  car:   { name: 'Αυτοκίνητο',       color: '--c-car',   xl: 'FF8B5CF6' },
+  moto:  { name: 'Μοτοσυκλέτα',      color: '--c-moto',  xl: 'FF6E9E2E' },
   daily: { name: 'Καθημερινά',       color: '--c-daily', xl: 'FF14A3A3' },
   edu:   { name: 'Εκπαίδευση',       color: '--c-edu',   xl: 'FFE07B1A' },
   debt:  { name: 'Δόσεις & έξοδοι',  color: '--c-debt',  xl: 'FFC2417A' },
   other: { name: 'Άλλα',             color: '--c-other', xl: 'FF7A8B83' },
 };
-const STORE = 'brokeometer.v1';
+const STORE = 'brokeometer.v2';
 const uid = () => Math.random().toString(36).slice(2, 10);
 const row = (name, amount, freq = 'm', sure) => ({ id: uid(), name, amount, freq, ...(sure === undefined ? {} : { sure }) });
 const cat = (key, rows) => ({ id: key, key, name: CATS[key].name, rows });
 
+const vehicleRows = () => [row('Ασφάλεια', 0, 'y'), row('Τέλη κυκλοφορίας', 0, 'y'), row('Λάστιχα', 0, 'y2'), row('Λάδια & σέρβις', 0, 'y'), row('Καύσιμα', 0)];
 function sampleState() {
   return {
     v: 1, sample: true, onlySure: false, goal: { amount: 2000, months: 6 },
     income: [
       row('Μισθός (καθαρός)', 820, 'm14', true),
-      row('Επιπλέον έσοδα Α', 180, 'm', false),
-      row('Επιπλέον έσοδα Β', 400, 'm', false),
+      row('Επιπλέον έσοδα Α', 0, 'm', false),
+      row('Επιπλέον έσοδα Β (γιαγιά, παππούς)', 0, 'm', false),
     ],
     cats: [
-      cat('home',  [row('Ενοίκιο', 320), row('Ρεύμα', 60), row('Νερό', 45, 'q'), row('Κοινόχρηστα', 60), row('Internet', 25)]),
-      cat('car',   [row('Ασφάλεια', 400, 'y'), row('Τέλη κυκλοφορίας', 110, 'y'), row('Λάστιχα', 600, 'y2'), row('Λάδια & σέρβις', 100, 'y'), row('Καύσιμα', 100)]),
-      cat('daily', [row('Σούπερ μάρκετ', 100), row('Κινητό', 20), row('Καφές', 0.5, 'd'), row('Τσιγάρα', 45)]),
-      cat('edu',   [row('ΙΕΚ', 160)]),
-      cat('debt',  [row('Δόσεις', 50), row('Έξοδοι', 0)]),
+      cat('home',  [row('Ενοίκιο', 300), row('Ρεύμα', 60), row('Νερό', 45, 'q'), row('Κοινόχρηστα', 50), row('Internet', 25)]),
+      cat('car',   vehicleRows()),
+      cat('moto',  vehicleRows()),
+      cat('daily', [row('Σούπερ μάρκετ', 100), row('Κινητό', 20), row('Καφές', 0.5, 'd'), row('Τσιγάρα', 40)]),
+      cat('edu',   [row('Δίδακτρα & μαθήματα (σχολή, φροντιστήριο, ξένες γλώσσες)', 0)]),
+      cat('debt',  [row('Δόσεις', 0), row('Έξοδοι', 0)]),
       cat('other', []),
     ],
   };
@@ -419,7 +424,14 @@ function rowHTML(r, income) {
     <output class="mo" data-mo="${r.id}"></output>
     ${income ? `<label class="sure" title="Έσοδο που έρχεται σίγουρα κάθε μήνα"><input type="checkbox" class="sure-cb"${r.sure ? ' checked' : ''}>Σίγουρο</label>` : ''}
     <button type="button" class="del" aria-label="Διαγραφή ${esc(r.name)}">${ICON_X}</button>
-  </div>`;
+  </div>${income ? `<p class="calc14" data-calc="${r.id}" hidden></p>` : ''}`;
+}
+function calc14Text(r) {
+  const a = Number(r.amount) || 0;
+  const why = 'Οι 14 μισθοί είναι οι 12 μηνιάτικοι μαζί με το δώρο Χριστουγέννων, το δώρο Πάσχα και το επίδομα αδείας. Τα μοιράζουμε σε κάθε μήνα, για να ξέρεις πόσα έχεις πραγματικά τον μήνα.';
+  return a > 0
+    ? `<b>${eur(a)} × 14 = ${eur(a * 14)} τον χρόνο ÷ 12 = ${eur(a * 14 / 12)} τον μήνα.</b> ${why}`
+    : why;
 }
 function sectionHTML(sec) {
   const income = sec.id === 'income';
@@ -427,7 +439,7 @@ function sectionHTML(sec) {
   return `<section class="cat${income ? ' is-income' : ''}" data-sec="${sec.id}" style="--c: var(${sec.color})">
     <div class="cat-head"><span class="dot"></span><h3>${esc(sec.name)}</h3><span class="tot" data-tot="${sec.id}"></span></div>
     ${sec.rows.length ? cols + `<div class="rows">${sec.rows.map(r => rowHTML(r, income)).join('')}</div>` : `<div class="empty-row">${income ? 'Δεν υπάρχουν έσοδα ακόμα.' : 'Τίποτα εδώ ακόμα.'}</div>`}
-    ${income ? '<p class="hint">Μισθός με δώρα και επίδομα αδείας: διάλεξε «τον μήνα ×14». Ό,τι δεν έρχεται σταθερά, άφησέ το χωρίς «Σίγουρο».</p>' : ''}
+    ${income ? '<p class="hint">Για τον μισθό γράψε τον καθαρό μηνιάτικο και διάλεξε «τον μήνα (14 μισθοί)». Ό,τι δεν έρχεται σταθερά κάθε μήνα, άφησέ το χωρίς «Σίγουρο».</p>' : ''}
     <button type="button" class="add">+ Προσθήκη${income ? ' εσόδου' : ''}</button>
   </section>`;
 }
@@ -445,6 +457,7 @@ function renderLedger() {
   update();
 }
 
+function markEdited() { if (state.sample) { state.sample = false; $('notice').hidden = $('confirmClear').hidden; } }
 const ledger = $('ledger');
 ledger.addEventListener('input', e => {
   const rEl = e.target.closest('.row'); if (!rEl) return;
@@ -454,18 +467,18 @@ ledger.addEventListener('input', e => {
   else if (e.target.classList.contains('amt')) r.amount = parseNum(e.target.value);
   else if (e.target.classList.contains('freq')) r.freq = e.target.value;
   else if (e.target.classList.contains('sure-cb')) r.sure = e.target.checked;
-  update(); save();
+  markEdited(); update(); save();
 });
 ledger.addEventListener('click', e => {
   const secEl = e.target.closest('.cat'); if (!secEl) return;
   const secId = secEl.dataset.sec, rows = rowsOf(secId);
   if (e.target.closest('.del')) {
     const id = e.target.closest('.row').dataset.row;
-    rows.splice(rows.findIndex(x => x.id === id), 1);
+    rows.splice(rows.findIndex(x => x.id === id), 1); markEdited();
     renderLedger(); save();
   } else if (e.target.closest('.add')) {
     const r = row('', 0, 'm', secId === 'income' ? false : undefined);
-    rows.push(r); renderLedger(); save();
+    rows.push(r); markEdited(); renderLedger(); save();
     document.getElementById('n-' + r.id)?.focus();
   }
 });
@@ -519,6 +532,8 @@ function update() {
     for (const r of sec.rows) {
       const el = ledger.querySelector(`[data-mo="${r.id}"]`);
       if (el) { const m = monthly(r); el.textContent = eur(m); el.dataset.zero = String(m === 0); }
+      const cx = ledger.querySelector(`[data-calc="${r.id}"]`);
+      if (cx) { cx.hidden = r.freq !== 'm14'; if (!cx.hidden) cx.innerHTML = calc14Text(r); }
     }
     const t = ledger.querySelector(`[data-tot="${sec.id}"]`);
     if (t) { const tot = sum(sec.rows.map(monthly)); t.innerHTML = `${eur(tot)}<small>/μήνα</small>`; }
@@ -542,8 +557,8 @@ function update() {
   if (c.inc > 0 && c.remSure < 0 && c.rem >= 0) notes.push({ k: 'bad', t: `Μόνο με τα σίγουρα έσοδα λείπουν ${eur(-c.remSure)} τον μήνα. Τα υπόλοιπα έσοδα κρατάνε τον προϋπολογισμό.` });
   const home = c.cats.find(k => k.key === 'home');
   if (home && c.inc > 0 && home.total / c.inc > 0.4) notes.push({ k: 'warn', t: `Το σπίτι παίρνει ${Math.round(home.total / c.inc * 100)}% των εσόδων. Συνήθως προτείνεται κάτω από 35–40%.` });
-  const zeros = sections().slice(1).flatMap(s => s.rows).filter(r => r.name && !monthly(r));
-  if (zeros.length) notes.push({ k: 'warn', t: `Χωρίς ποσό: ${zeros.map(r => esc(r.name)).join(', ')}. Αν ξοδεύεις κάτι εκεί, γράψ' το.` });
+  const zeros = sections().slice(1).map(s => ({ name: s.name, rows: s.rows.filter(r => r.name && !monthly(r)) })).filter(s => s.rows.length);
+  if (zeros.length) notes.push({ k: 'warn', t: `Χωρίς ποσό: ${zeros.map(s => s.rows.length === 1 ? esc(s.rows[0].name) : `${esc(s.name)} (${s.rows.length})`).join(', ')}. Αν ξοδεύεις κάτι εκεί, γράψ' το.` });
   if (c.rem > 0 && c.exp > 0) { const buf = c.exp * 3; notes.push({ k: 'good', t: `Ένα αποθεματικό 3 μηνών για έκτακτα είναι περίπου ${eur0(buf)}. Με το τωρινό περίσσευμα το μαζεύεις σε ${Math.ceil(buf / c.rem)} μήνες.` }); }
   $('notes').innerHTML = notes.map(n => `<li data-k="${n.k}">${n.t}</li>`).join('');
   $('notesCard').hidden = notes.length === 0;
@@ -685,7 +700,7 @@ async function buildXlsx() {
   });
   ws.getRow(R.ver).height = 26;
   ws.addConditionalFormatting({ ref: `D${R.rem}:E${R.sure}`, rules: [{ type: 'cellIs', operator: 'lessThan', formulae: [0], priority: 1, style: { font: { bold: true, color: { argb: 'FFD7443E' } } } }] });
-  ws.getCell(`A${R.ver + 2}`).value = 'Φτιαγμένο με BrokeOMeter. Οι συχνότητες και οι συντελεστές τους είναι στο φύλλο «Συχνότητες».';
+  ws.getCell(`A${R.ver + 2}`).value = '«τον μήνα (14 μισθοί)» = μηνιάτικο × 14 ÷ 12, δηλαδή μαζί με δώρο Χριστουγέννων, δώρο Πάσχα και επίδομα αδείας. Οι συχνότητες είναι στο φύλλο «Συχνότητες». Φτιαγμένο με BrokeOMeter.';
   ws.getCell(`A${R.ver + 2}`).font = { italic: true, size: 9, color: { argb: MUTED } };
   ws.pageSetup = { paperSize: 9, orientation: 'portrait', fitToPage: true, fitToWidth: 1, fitToHeight: 0, margins: { left: 0.5, right: 0.5, top: 0.6, bottom: 0.6, header: 0.3, footer: 0.3 } };
   ws.pageSetup.printTitlesRow = '4:4';
@@ -696,7 +711,7 @@ async function buildXlsx() {
 const MARK = document.querySelector('.brand svg').outerHTML;
 function reportHTML() {
   const c = calc(), v = verdict(c.useInc, c.useRem, c.exp);
-  const light = { home: '#3B7DD8', car: '#8B5CF6', daily: '#14A3A3', edu: '#E07B1A', debt: '#C2417A', other: '#7A8B83' };
+  const light = { home: '#3B7DD8', car: '#8B5CF6', moto: '#6E9E2E', daily: '#14A3A3', edu: '#E07B1A', debt: '#C2417A', other: '#7A8B83' };
   const ratio = c.useInc > 0 ? c.useRem / c.useInc : (c.exp > 0 ? -1 : 0);
   const gauge = `<svg viewBox="0 0 240 150" width="220" height="138">${gaugeSVG({ ...GAUGE_COLORS, tick: '#9FB8AD', rot: 90 - ang(ratio), static: true }).replace(/<text /g, '<text fill="#A3C4B6" font-size="9" font-family="JetBrains Mono, monospace" ')}</svg>`;
   const table = (name, color, rows, total, income) => `<table><thead><tr style="background:${color}"><th>${esc(name)}</th><th class="n">Ποσό</th><th>Συχνότητα</th><th class="n">Μήνας</th><th class="n">Έτος</th></tr></thead><tbody>
@@ -722,7 +737,7 @@ function reportHTML() {
     </div>
     ${table('Έσοδα', '#1E9E62', state.income, c.inc, true)}
     <div class="cols2">${c.cats.filter(k => k.rows.length).map(k => mini(k.name, light[k.key], k.rows, k.total)).join('')}</div>
-    <div class="r-foot"><span>Φτιαγμένο με BrokeOMeter</span><span>Μισθός ×14 = μηνιαίος × 14 / 12</span></div>`;
+    <div class="r-foot"><span>Φτιαγμένο με BrokeOMeter</span><span>14 μισθοί = μηνιάτικο × 14 ÷ 12 (με δώρο Χριστουγέννων, Πάσχα και επίδομα αδείας)</span></div>`;
 }
 async function buildPdf() {
   await Promise.all([loadScript(LIBS.h2c), loadScript(LIBS.jspdf)]);

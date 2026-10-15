@@ -16,9 +16,10 @@ Repo `ferelisvag/published` (public), δημοσιεύεται με GitHub Pages
 - Βέλτιστη σειρά με δικό μας TSP (2-opt + or-opt) πάνω σε πίνακα OSRM/Valhalla, ίδια αφετηρία/επιστροφή, σταθερή πρώτη/τελευταία στάση, χρόνοι στάσεων, κόστος δρομολογίου, GPX/CSV, link. Ίδιος περιορισμός με τα διόδια.
 
 ## brokeometer/ — BrokeOMeter (μηνιαίος προϋπολογισμός)
-- Έσοδα (`state.income`, με σημαία `sure`) και κατηγορίες εξόδων (`state.cats`: home, car, daily, edu, debt, other). Κάθε ποσό έχει συχνότητα από τον πίνακα `FREQS` (m, m14 = ×14/12, d = ×30, w, q, y, y2), `monthly()` τη μετατρέπει σε μηνιαίο.
+- Έσοδα (`state.income`, με σημαία `sure`) και κατηγορίες εξόδων (`state.cats`: home, car, moto, daily, edu, debt, other). Κάθε ποσό έχει συχνότητα από τον πίνακα `FREQS` (m, m14 = 14 μισθοί ÷ 12, d = ×30, w, q, y, y2), `monthly()` τη μετατρέπει σε μηνιαίο. Κάτω από κάθε έσοδο με m14 φαίνεται ο υπολογισμός (`calc14Text`).
+- Τα νούμερα του παραδείγματος είναι στη `sampleState()`.
 - Ετυμηγορία από `verdict()` με βάση το ποσοστό που περισσεύει: <0 «Δεν βγαίνεις», <10% «Στο τσακ», <25% «Βγαίνεις», αλλιώς «Άνετα». Διακόπτης «Μόνο σίγουρα έσοδα» (`state.onlySure`).
-- Αποθήκευση στο localStorage (`brokeometer.v1`). Εξαγωγή Excel με ExcelJS (τύποι + φύλλο «Συχνότητες» για VLOOKUP) και PDF με html2canvas + jsPDF, όλα από cdnjs και φορτώνονται μόνο όταν πατηθεί το κουμπί.
+- Αποθήκευση στο localStorage (`brokeometer.v2`). Εξαγωγή Excel με ExcelJS (τύποι + φύλλο «Συχνότητες» για VLOOKUP) και PDF με html2canvas + jsPDF, όλα από cdnjs και φορτώνονται μόνο όταν πατηθεί το κουμπί.
 - Η ίδια εφαρμογή υπάρχει και ως claude.ai Artifact. Εκεί η λήψη γίνεται μέσω `claude.use('downloads')`, εδώ με κανονικό download link.
 
 ## Τρόπος δουλειάς

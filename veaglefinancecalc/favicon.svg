@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="512" height="512" role="img" aria-label="Υπολογιστής Επένδυσης">
+  <rect width="128" height="128" rx="30" fill="#0F172A"/>
+  <g fill="#34D399" opacity=".28">
+    <rect x="26" y="74" width="16" height="26" rx="3"/>
+    <rect x="50" y="62" width="16" height="38" rx="3"/>
+    <rect x="74" y="50" width="16" height="50" rx="3"/>
+  </g>
+  <polyline points="24,86 50,66 70,74 100,38" fill="none" stroke="#34D399" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="104,30 106,54 84,44" fill="#34D399"/>
+  <rect x="24" y="104" width="80" height="6" rx="3" fill="#E2E8F0" opacity=".22"/>
+</svg>

@@ -1,82 +1,143 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Υπολογιστής Επένδυσης & Σύνθετου Τόκου | Veagle Finance</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Υπολογιστής Επένδυσης & Σύνθετου Τόκου | Veagle Finance</title>
+<meta name="description" content="Υπολόγισε πόσο μεγαλώνουν τα χρήματά σου με αρχικό ποσό, μηνιαίες καταθέσεις και ανατοκισμό, με γράφημα ανά έτος.">
+<meta name="theme-color" content="#0F172A">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Επένδυση">
+<style>
+/* Layout: settings card beside a results card with the growth chart; stacks on phones. Same look as the first Tailwind version. */
+:root{
+  --bg:#0F172A; --card:#1E293B; --sunken:#334155; --line:#334155; --line-2:#475569;
+  --ink:#F1F5F9; --ink-2:#E2E8F0; --muted:#94A3B8; --muted-2:#CBD5E1; --faint:#64748B;
+  --accent:#34D399; --accent-2:#6EE7B7; --button:#10B981; --button-hover:#059669; --button-ink:#020617;
+  --sky:#38BDF8;
+}
+*{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0; min-height:100vh; padding:16px; display:flex; flex-direction:column; justify-content:space-between;
+  background:var(--bg); color:var(--ink);
+  font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height:1.5;
+}
+.wrap{ max-width:56rem; width:100%; margin:0 auto; }
+header{ text-align:center; margin-bottom:2rem; }
+h1{ margin:0; font-size:1.875rem; line-height:2.25rem; font-weight:800; color:var(--accent); }
+header p{ margin:.5rem 0 0; color:var(--muted); }
+.grid{ display:grid; grid-template-columns:1fr; gap:1.5rem; }
+.card{ background:var(--card); border:1px solid var(--line); border-radius:1rem; padding:1.5rem; box-shadow:0 20px 25px -5px rgba(0,0,0,.25), 0 8px 10px -6px rgba(0,0,0,.2); }
+.card h2{ margin:0; font-size:1.25rem; line-height:1.75rem; font-weight:600; color:var(--accent-2); border-bottom:1px solid var(--line); padding-bottom:.5rem; }
+.form > * + *{ margin-top:1rem; }
+label{ display:block; font-size:.875rem; color:var(--muted-2); margin-bottom:.25rem; }
+input{
+  width:100%; padding:.625rem; border-radius:.5rem; border:1px solid var(--line-2); background:var(--sunken); color:#fff;
+  font:inherit; font-size:1rem;
+}
+input:focus{ outline:none; border-color:var(--accent); }
+button{
+  width:100%; padding:.75rem; border:none; border-radius:.5rem; cursor:pointer;
+  background:var(--button); color:var(--button-ink); font:inherit; font-weight:700;
+  box-shadow:0 10px 15px -3px rgba(16,185,129,.2), 0 4px 6px -4px rgba(16,185,129,.2); transition:background .2s;
+}
+button:hover{ background:var(--button-hover); }
+button:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+.results{ display:flex; flex-direction:column; justify-content:space-between; gap:1.5rem; }
+.results h2{ margin-bottom:1rem; }
+.tiles{ display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem; text-align:center; }
+.tile{ background:rgba(51,65,85,.5); border:1px solid var(--line); border-radius:.75rem; padding:.75rem; }
+.tile span{ display:block; }
+.tile .k{ font-size:.75rem; color:var(--muted); }
+.tile .v{ font-size:1.125rem; line-height:1.75rem; font-weight:700; }
+.v.total{ color:var(--accent); } .v.deposits{ color:var(--ink-2); } .v.interest{ color:var(--sky); }
+.chart{ position:relative; height:16rem; width:100%; }
+footer{
+  max-width:56rem; width:100%; margin:3rem auto 0; padding-top:1.5rem; border-top:1px solid #1E293B;
+  text-align:center; font-size:.75rem; line-height:1.6; color:var(--faint);
+}
+footer p{ margin:0; }
+@media (min-width:768px){
+  body{ padding:2rem; }
+  .grid{ grid-template-columns:repeat(3, 1fr); }
+  .form{ grid-column:span 1; }
+  .results{ grid-column:span 2; }
+  .tile .v{ font-size:1.25rem; }
+  .chart{ height:18rem; }
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 md:p-8 flex flex-col justify-between">
+<body>
 
-    <div class="max-w-4xl mx-auto w-full">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold text-emerald-400">📈 Υπολογιστής Επένδυσης</h1>
-            <p class="text-slate-400 mt-2">Υπολόγισε την ανάπτυξη των χρημάτων σου με μηνιαίες καταθέσεις και ανατοκισμό.</p>
+    <div class="wrap">
+        <header>
+            <h1>📈 Υπολογιστής Επένδυσης</h1>
+            <p>Υπολόγισε την ανάπτυξη των χρημάτων σου με μηνιαίες καταθέσεις και ανατοκισμό.</p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid">
             <!-- Φόρμα Εισαγωγής Δεδομένων -->
-            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl space-y-4 md:col-span-1 border border-slate-700">
-                <h2 class="text-xl font-semibold border-b border-slate-700 pb-2 text-emerald-300">Παράμετροι</h2>
-                
+            <div class="card form">
+                <h2>Παράμετροι</h2>
+
                 <div>
-                    <label class="block text-sm text-slate-300 mb-1">Αρχικό Ποσό (€)</label>
-                    <input type="number" id="initial" value="1000" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-400">
+                    <label for="initial">Αρχικό Ποσό (€)</label>
+                    <input type="number" id="initial" value="1000" inputmode="decimal">
                 </div>
 
                 <div>
-                    <label class="block text-sm text-slate-300 mb-1">Μηνιαία Κατάθεση (€)</label>
-                    <input type="number" id="monthly" value="200" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-400">
+                    <label for="monthly">Μηνιαία Κατάθεση (€)</label>
+                    <input type="number" id="monthly" value="200" inputmode="decimal">
                 </div>
 
                 <div>
-                    <label class="block text-sm text-slate-300 mb-1">Ετήσια Απόδοση (%)</label>
-                    <input type="number" step="0.1" id="rate" value="7" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-400">
+                    <label for="rate">Ετήσια Απόδοση (%)</label>
+                    <input type="number" step="0.1" id="rate" value="7" inputmode="decimal">
                 </div>
 
                 <div>
-                    <label class="block text-sm text-slate-300 mb-1">Διάρκεια (Έτη)</label>
-                    <input type="number" id="years" value="10" class="w-full bg-slate-700 border border-slate-600 rounded-lg p-2.5 text-white focus:outline-none focus:border-emerald-400">
+                    <label for="years">Διάρκεια (Έτη)</label>
+                    <input type="number" id="years" value="10" inputmode="numeric">
                 </div>
 
-                <button onclick="calculate()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-lg transition duration-200 cursor-pointer shadow-lg shadow-emerald-500/20">
-                    Υπολογισμός
-                </button>
+                <button type="button" onclick="calculate()">Υπολογισμός</button>
             </div>
 
             <!-- Αποτελέσματα & Γράφημα -->
-            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between md:col-span-2 space-y-6 border border-slate-700">
+            <div class="card results">
                 <div>
-                    <h2 class="text-xl font-semibold border-b border-slate-700 pb-2 text-emerald-300 mb-4">Αποτελέσματα</h2>
-                    <div class="grid grid-cols-3 gap-4 text-center">
-                        <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-700">
-                            <span class="block text-xs text-slate-400">Συνολική Αξία</span>
-                            <span id="resTotal" class="text-lg md:text-xl font-bold text-emerald-400">0 €</span>
+                    <h2>Αποτελέσματα</h2>
+                    <div class="tiles">
+                        <div class="tile">
+                            <span class="k">Συνολική Αξία</span>
+                            <span id="resTotal" class="v total">0 €</span>
                         </div>
-                        <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-700">
-                            <span class="block text-xs text-slate-400">Καταθέσεις</span>
-                            <span id="resDeposits" class="text-lg md:text-xl font-bold text-slate-200">0 €</span>
+                        <div class="tile">
+                            <span class="k">Καταθέσεις</span>
+                            <span id="resDeposits" class="v deposits">0 €</span>
                         </div>
-                        <div class="bg-slate-700/50 p-3 rounded-xl border border-slate-700">
-                            <span class="block text-xs text-slate-400">Κέρδος (Τόκοι)</span>
-                            <span id="resInterest" class="text-lg md:text-xl font-bold text-sky-400">0 €</span>
+                        <div class="tile">
+                            <span class="k">Κέρδος (Τόκοι)</span>
+                            <span id="resInterest" class="v interest">0 €</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Καμβάς Γραφήματος -->
-                <div class="relative h-64 md:h-72 w-full">
-                    <canvas id="investmentChart"></canvas>
+                <div class="chart">
+                    <canvas id="investmentChart" aria-label="Γράφημα εξέλιξης της επένδυσης ανά έτος" role="img"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Disclaimer / Αποποίηση Ευθύνης -->
-    <footer class="max-w-4xl mx-auto w-full mt-12 pt-6 border-t border-slate-800 text-center text-xs text-slate-500 leading-relaxed">
+    <footer>
         <p>⚠️ <strong>Αποποίηση Ευθύνης (Disclaimer):</strong> Η παρούσα εφαρμογή παρέχεται αποκλειστικά για ενημερωτικούς, εκπαιδευτικούς και υπολογιστικούς σκοπούς. Τα αποτελέσματα βασίζονται σε θεωρητικές σταθερές αποδόσεις και δεν αποτελούν επενδυτική, χρηματοοικονομική ή νομική συμβουλή. Οι πραγματικές επενδύσεις ενέχουν ρίσκο και οι αποδόσεις ενδέχεται να διαφέρουν.</p>
     </footer>
 
@@ -114,16 +175,16 @@
 
             let totalInterest = currentTotal - totalDeposited;
 
-            document.getElementById('resTotal').innerText = Math.round(currentTotal).toLocaleString() + ' €';
-            document.getElementById('resDeposits').innerText = Math.round(totalDeposited).toLocaleString() + ' €';
-            document.getElementById('resInterest').innerText = Math.round(totalInterest).toLocaleString() + ' €';
+            document.getElementById('resTotal').innerText = Math.round(currentTotal).toLocaleString('el-GR') + ' €';
+            document.getElementById('resDeposits').innerText = Math.round(totalDeposited).toLocaleString('el-GR') + ' €';
+            document.getElementById('resInterest').innerText = Math.round(totalInterest).toLocaleString('el-GR') + ' €';
 
             updateChart(labels, values, deposits);
         }
 
         function updateChart(labels, values, deposits) {
             const ctx = document.getElementById('investmentChart').getContext('2d');
-            
+
             if (myChart) {
                 myChart.destroy();
             }
@@ -154,6 +215,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    locale: 'el-GR',
                     plugins: {
                         legend: { labels: { color: '#cbd5e1' } }
                     },

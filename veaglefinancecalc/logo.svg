@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 128" width="1200" height="256" role="img" aria-label="Veagle Finance · Υπολογιστής Επένδυσης">
+  <style>
+    .w { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-weight: 800; font-size: 50px; letter-spacing: -1px; }
+    .t { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-weight: 500; font-size: 19px; letter-spacing: 0.4px; }
+  </style>
+  <rect width="128" height="128" rx="30" fill="#0F172A"/>
+  <g fill="#34D399" opacity=".28">
+    <rect x="26" y="74" width="16" height="26" rx="3"/>
+    <rect x="50" y="62" width="16" height="38" rx="3"/>
+    <rect x="74" y="50" width="16" height="50" rx="3"/>
+  </g>
+  <polyline points="24,86 50,66 70,74 100,38" fill="none" stroke="#34D399" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="104,30 106,54 84,44" fill="#34D399"/>
+  <rect x="24" y="104" width="80" height="6" rx="3" fill="#E2E8F0" opacity=".22"/>
+  <text x="150" y="66" class="w" fill="#0F172A">Veagle <tspan fill="#10B981">Finance</tspan></text>
+  <text x="152" y="98" class="t" fill="#64748B">Υπολογιστής Επένδυσης &amp; Σύνθετου Τόκου</text>
+</svg>

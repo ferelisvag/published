@@ -106,6 +106,11 @@ button, input, select { font: inherit; color: inherit; }
 .verdict .label[data-k="good"] { color: #5FE0A0; }
 .verdict .label[data-k="none"] { color: var(--panel-muted); font-size: 24px; }
 .verdict p { margin: 6px auto 0; max-width: 32ch; font-size: 14px; color: var(--panel-muted); text-wrap: balance; }
+.verdict .quip { margin-top: 8px; font-size: 13px; font-style: italic; color: var(--accent); opacity: .9; }
+.brand svg { cursor: pointer; transition: transform .15s; }
+.brand svg:active { transform: rotate(-8deg) scale(.95); }
+.coin { position: fixed; top: -40px; z-index: 50; width: 26px; height: 26px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #FFE27A, #F5B700 55%, #C98F00); color: #6B4B00; font: 700 14px/26px var(--f-num); text-align: center; pointer-events: none; animation: coinfall linear forwards; }
+@keyframes coinfall { to { transform: translateY(calc(100vh + 80px)) rotate(540deg); } }
 .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--panel-2); border-radius: 12px; overflow: hidden; margin-top: 16px; }
 .kpi { background: var(--panel); padding: 10px 10px 9px; min-width: 0; }
 .kpi .k { font-size: 11px; color: var(--panel-muted); }
@@ -132,6 +137,7 @@ button, input, select { font: inherit; color: inherit; }
 .notes li::before { content: ""; border-radius: 3px; background: var(--warn); }
 .notes li[data-k="bad"]::before { background: var(--bad); }
 .notes li[data-k="good"]::before { background: var(--good); }
+.notes li[data-k="fun"]::before { background: var(--accent); }
 
 .goal { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .field { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
@@ -156,9 +162,10 @@ button, input, select { font: inherit; color: inherit; }
 .rows { padding: 4px 10px 6px; }
 .row { padding: 4px 6px; border-radius: 9px; }
 .row:hover { background: var(--sunken); }
-.row input[type="text"], .row select { width: 100%; min-width: 0; border: 1px solid transparent; background: transparent; border-radius: 7px; padding: 7px 8px; }
-.row input[type="text"]:hover, .row select:hover { border-color: var(--line); }
-.row input[type="text"]:focus, .row select:focus { border-color: var(--focus); background: var(--surface); outline: none; }
+.row input[type="text"], .row select, .row textarea { width: 100%; min-width: 0; border: 1px solid transparent; background: transparent; border-radius: 7px; padding: 7px 8px; }
+.row input[type="text"]:hover, .row select:hover, .row textarea:hover { border-color: var(--line); }
+.row input[type="text"]:focus, .row select:focus, .row textarea:focus { border-color: var(--focus); background: var(--surface); outline: none; }
+.row textarea.name { display: block; resize: none; overflow: hidden; line-height: 1.35; font: inherit; color: inherit; field-sizing: content; min-height: calc(1.35em + 16px); }
 .row .amt { font-family: var(--f-num); text-align: right; }
 .row .mo { font-family: var(--f-num); font-size: 14px; padding-right: 4px; white-space: nowrap; }
 .row .mo[data-zero="true"] { color: var(--muted); }
@@ -186,7 +193,7 @@ button, input, select { font: inherit; color: inherit; }
   .row .mo::before { content: "τον μήνα: "; font-family: var(--f-body); color: var(--muted); font-size: 12px; }
   .row .sure { grid-area: sure; justify-self: end; }
   .row .del { grid-area: del; }
-  .row input[type="text"], .row select { border-color: var(--line); background: var(--sunken); }
+  .row input[type="text"], .row select, .row textarea { border-color: var(--line); background: var(--sunken); }
   .split { grid-template-columns: minmax(0, 1fr); justify-items: center; }
   .legend { width: 100%; }
   .brand h1 { font-size: 24px; }
@@ -266,6 +273,7 @@ button, input, select { font: inherit; color: inherit; }
         <div class="verdict">
           <div class="label" id="vLabel" data-k="none">—</div>
           <p id="vText"></p>
+          <p class="quip" id="vQuip"></p>
         </div>
         <div class="kpis">
           <div class="kpi"><div class="k">Μπαίνουν</div><div class="v" id="kInc">—</div><div class="y" id="kIncY"></div></div>
@@ -307,7 +315,7 @@ button, input, select { font: inherit; color: inherit; }
     </aside>
   </main>
 
-  <p class="foot">Τα στοιχεία σου μένουν μόνο σε αυτή τη συσκευή. Δεν στέλνονται πουθενά.</p>
+  <p class="foot">Τα στοιχεία σου μένουν μόνο σε αυτή τη συσκευή. Δεν στέλνονται πουθενά, ούτε στην πεθερά σου.</p>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
@@ -385,6 +393,31 @@ function calc(s = state) {
   const useInc = s.onlySure ? sure : inc;
   return { inc, sure, exp, cats, rem: inc - exp, remSure: sure - exp, useInc, useRem: useInc - exp };
 }
+/* ---------- Χιούμορ (μόνο στην οθόνη, όχι στο Excel/PDF) ---------- */
+const QUIPS = {
+  none: ['Ένας άδειος προϋπολογισμός είναι ο μόνος που βγαίνει πάντα.'],
+  bad:  ['Το πορτοφόλι σου κυματίζει μεσίστιο.', 'Ο Άγιος Φανούριος έχει πολλή δουλειά μαζί σου.', 'Μέχρι τις 20 του μήνα φακές. Μετά, σκέτο νερό.'],
+  warn: ['Ζεις στην κόψη του ξυραφιού. Και του πορτοφολιού.', 'Μια κλήση της Τροχαίας και πας για «Δεν βγαίνεις».', 'Το σουβλάκι μόνο Παρασκευή.'],
+  ok:   ['Βγαίνεις. Μην το πεις δυνατά, θα σε ακούσει ο σπιτονοικοκύρης.', 'Όχι πλούσιος, αλλά ούτε θέμα για ρεπορτάζ.', 'Ο λογαριασμός του ρεύματος δεν σε τρομάζει πια.'],
+  good: ['Άνετα. Κέρνα καφέ.', 'Οι φίλοι σου μόλις έμαθαν ποιος πληρώνει απόψε.', 'Η γιαγιά θα είναι περήφανη. Και θα σου δώσει κι άλλα.'],
+  floor: ['Η βελόνα έφτασε στο τέρμα. Πιο κάτω δεν πάει, εσύ όμως μπορείς.'],
+};
+const quipSeed = Math.floor(Math.random() * 1000);
+const quipFor = k => QUIPS[k][quipSeed % QUIPS[k].length];
+const EMPTY_CAT = ['Τίποτα εδώ ακόμα. Ή είσαι πολύ οργανωμένος ή πολύ αισιόδοξος.', 'Άδειο. Σαν το ψυγείο στις 29 του μήνα.', 'Τίποτα εδώ. Ζηλευτό.'];
+function funNotes(c) {
+  const out = [], all = sections().flatMap(s => s.rows), yr = r => monthly(r) * 12;
+  const find = re => all.filter(r => re.test(r.name || '') && monthly(r) > 0);
+  const smoke = find(/τσιγ|καπν|στριφτ/i);
+  if (smoke.length) out.push(`Τα τσιγάρα κάνουν ${eur0(sum(smoke.map(yr)))} τον χρόνο. Αυτό είναι ένα ταξίδι στη Νάξο, με ταβέρνα.`);
+  const coffee = find(/καφ|coffee|freddo|φρέντο/i);
+  if (coffee.length) out.push(`Ο καφές βγαίνει ${eur0(sum(coffee.map(yr)))} τον χρόνο. Ο barista σε έχει ήδη στις επαφές του.`);
+  if (find(/λόττο|λοττο|λότο|λοτο|τζόκερ|τζοκερ|joker|οπαπ|στοίχημα|στοιχημα|κίνο|κινο|kino|ξυστό|ξυστο/i).length) out.push('Το Τζόκερ δεν μετράει για επενδυτικό πλάνο. Το ελέγξαμε.');
+  const rent = find(/ενοίκ|ενοικ/i);
+  if (rent.length && c.inc > 0 && sum(rent.map(monthly)) / c.inc > 0.5) out.push('Δουλεύεις μισό μήνα για τον σπιτονοικοκύρη.');
+  if (c.inc > 20000) out.push('Με τέτοια έσοδα δεν χρειάζεσαι εφαρμογή. Χρειάζεσαι λογιστή. Και σκάφος.');
+  return out;
+}
 function verdict(inc, rem, exp) {
   if (inc <= 0 && exp <= 0) return { k: 'none', label: 'Συμπλήρωσε τα ποσά', text: 'Ξεκίνα από τα έσοδα και μετά πρόσθεσε τα έξοδα.' };
   const r = inc > 0 ? rem / inc : -1;
@@ -418,7 +451,7 @@ function freqSelect(sel) {
 }
 function rowHTML(r, income) {
   return `<div class="row" data-row="${r.id}">
-    <input type="text" class="name" id="n-${r.id}" aria-label="Περιγραφή" placeholder="${income ? 'π.χ. Μισθός' : 'π.χ. Ενοίκιο'}" value="${esc(r.name)}">
+    <textarea class="name" id="n-${r.id}" rows="1" aria-label="Περιγραφή" placeholder="${income ? 'π.χ. Μισθός' : 'π.χ. Ενοίκιο'}">${esc(r.name)}</textarea>
     <input type="text" class="amt" id="a-${r.id}" inputmode="decimal" aria-label="Ποσό σε ευρώ" placeholder="0,00" value="${showNum(r.amount)}">
     ${freqSelect(r.freq)}
     <output class="mo" data-mo="${r.id}"></output>
@@ -438,7 +471,7 @@ function sectionHTML(sec) {
   const cols = `<div class="cols"><span>Περιγραφή</span><span class="r">Ποσό</span><span>Πόσο συχνά</span><span class="r">Τον μήνα</span>${income ? '<span></span>' : ''}<span></span></div>`;
   return `<section class="cat${income ? ' is-income' : ''}" data-sec="${sec.id}" style="--c: var(${sec.color})">
     <div class="cat-head"><span class="dot"></span><h3>${esc(sec.name)}</h3><span class="tot" data-tot="${sec.id}"></span></div>
-    ${sec.rows.length ? cols + `<div class="rows">${sec.rows.map(r => rowHTML(r, income)).join('')}</div>` : `<div class="empty-row">${income ? 'Δεν υπάρχουν έσοδα ακόμα.' : 'Τίποτα εδώ ακόμα.'}</div>`}
+    ${sec.rows.length ? cols + `<div class="rows">${sec.rows.map(r => rowHTML(r, income)).join('')}</div>` : `<div class="empty-row">${income ? 'Δεν υπάρχουν έσοδα ακόμα. Ζεις με αέρα;' : EMPTY_CAT[(sec.id.length + quipSeed) % EMPTY_CAT.length]}</div>`}
     ${income ? '<p class="hint">Για τον μισθό γράψε τον καθαρό μηνιάτικο και διάλεξε «τον μήνα (14 μισθοί)». Ό,τι δεν έρχεται σταθερά κάθε μήνα, άφησέ το χωρίς «Σίγουρο».</p>' : ''}
     <button type="button" class="add">+ Προσθήκη${income ? ' εσόδου' : ''}</button>
   </section>`;
@@ -455,15 +488,25 @@ function renderLedger() {
   $('ledger').innerHTML = sections().map(sectionHTML).join('');
   $('notice').hidden = !state.sample && $('confirmClear').hidden;
   update();
+  fitNames();
 }
+// Descriptions wrap onto more lines instead of being cut off.
+function fitName(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 2 + 'px'; }
+function fitNames() { ledger.querySelectorAll('textarea.name').forEach(fitName); }
+let fitT; addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitNames, 120); });
+document.fonts?.ready.then(fitNames);
 
+$('ledger').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('textarea.name')) { e.preventDefault(); e.target.closest('.row').querySelector('.amt')?.focus(); } });
 function markEdited() { if (state.sample) { state.sample = false; $('notice').hidden = $('confirmClear').hidden; } }
 const ledger = $('ledger');
 ledger.addEventListener('input', e => {
   const rEl = e.target.closest('.row'); if (!rEl) return;
   const secId = e.target.closest('.cat').dataset.sec;
   const r = rowsOf(secId).find(x => x.id === rEl.dataset.row); if (!r) return;
-  if (e.target.classList.contains('name')) r.name = e.target.value;
+  if (e.target.classList.contains('name')) {
+    if (/\n/.test(e.target.value)) e.target.value = e.target.value.replace(/\s*\n\s*/g, ' ');
+    r.name = e.target.value; fitName(e.target);
+  }
   else if (e.target.classList.contains('amt')) r.amount = parseNum(e.target.value);
   else if (e.target.classList.contains('freq')) r.freq = e.target.value;
   else if (e.target.classList.contains('sure-cb')) r.sure = e.target.checked;
@@ -542,6 +585,8 @@ function update() {
   updateGauge(c);
   const v = verdict(c.useInc, c.useRem, c.exp);
   $('vLabel').textContent = v.label; $('vLabel').dataset.k = v.k; $('vText').textContent = v.text;
+  const pinned = c.useInc > 0 && c.useRem / c.useInc <= VMIN;
+  $('vQuip').textContent = quipFor(pinned ? 'floor' : v.k);
   $('kInc').textContent = eur(c.useInc); $('kIncY').textContent = eur0(c.useInc * 12) + ' / έτος';
   $('kExp').textContent = eur(c.exp); $('kExpY').textContent = eur0(c.exp * 12) + ' / έτος';
   $('kRem').textContent = eur(c.useRem); $('kRem').dataset.neg = String(c.useRem < 0); $('kRemY').textContent = eur0(c.useRem * 12) + ' / έτος';
@@ -551,7 +596,7 @@ function update() {
   const parts = c.cats.filter(k => k.total > 0).sort((a, b) => b.total - a.total);
   $('legend').innerHTML = parts.length
     ? parts.map(k => `<li><span class="sw" style="background: var(${CATS[k.key].color})"></span><span class="nm">${esc(k.name)} · <span class="num">${eur0(k.total)}</span></span><span class="pc">${Math.round(k.total / c.exp * 100)}%</span></li>`).join('')
-    : '<li class="empty">Πρόσθεσε έξοδα για να δεις την κατανομή.</li>';
+    : '<li class="empty">Πρόσθεσε έξοδα για να δεις την κατανομή. Ή απόλαυσε τη στιγμή.</li>';
   // notes
   const notes = [];
   if (c.inc > 0 && c.remSure < 0 && c.rem >= 0) notes.push({ k: 'bad', t: `Μόνο με τα σίγουρα έσοδα λείπουν ${eur(-c.remSure)} τον μήνα. Τα υπόλοιπα έσοδα κρατάνε τον προϋπολογισμό.` });
@@ -560,6 +605,7 @@ function update() {
   const zeros = sections().slice(1).map(s => ({ name: s.name, rows: s.rows.filter(r => r.name && !monthly(r)) })).filter(s => s.rows.length);
   if (zeros.length) notes.push({ k: 'warn', t: `Χωρίς ποσό: ${zeros.map(s => s.rows.length === 1 ? esc(s.rows[0].name) : `${esc(s.name)} (${s.rows.length})`).join(', ')}. Αν ξοδεύεις κάτι εκεί, γράψ' το.` });
   if (c.rem > 0 && c.exp > 0) { const buf = c.exp * 3; notes.push({ k: 'good', t: `Ένα αποθεματικό 3 μηνών για έκτακτα είναι περίπου ${eur0(buf)}. Με το τωρινό περίσσευμα το μαζεύεις σε ${Math.ceil(buf / c.rem)} μήνες.` }); }
+  funNotes(c).forEach(t => notes.push({ k: 'fun', t }));
   $('notes').innerHTML = notes.map(n => `<li data-k="${n.k}">${n.t}</li>`).join('');
   $('notesCard').hidden = notes.length === 0;
   // goal
@@ -567,8 +613,8 @@ function update() {
   let go = 'Γράψε ποσό και μήνες για να δεις αν βγαίνει.';
   if (ga > 0 && gm > 0) {
     const need = ga / gm;
-    if (c.useRem <= 0) go = `Χρειάζεσαι ${eur(need)} τον μήνα, αλλά τώρα δεν περισσεύει τίποτα.`;
-    else if (c.useRem >= need) go = `Χρειάζεσαι ${eur(need)} τον μήνα. Βγαίνει, και σου μένουν ${eur(c.useRem - need)} ακόμα.`;
+    if (c.useRem <= 0) go = `Χρειάζεσαι ${eur(need)} τον μήνα, αλλά τώρα δεν περισσεύει τίποτα. Ο στόχος θα περιμένει.`;
+    else if (c.useRem >= need) go = `Χρειάζεσαι ${eur(need)} τον μήνα. Βγαίνει, και σου μένουν ${eur(c.useRem - need)} ακόμα. Ξεκίνα να κοιτάς εισιτήρια.`;
     else go = `Χρειάζεσαι ${eur(need)} τον μήνα. Με το τωρινό περίσσευμα θέλεις ${Math.ceil(ga / c.useRem)} μήνες αντί για ${gm}.`;
   }
   $('goalOut').textContent = go;
@@ -582,7 +628,26 @@ function fillGoal() { $('goalAmt').value = showNum(state.goal.amount); $('goalMo
 $('btnSample').addEventListener('click', () => { state = sampleState(); fillGoal(); renderLedger(); save(); toast('Φορτώθηκε το παράδειγμα'); });
 $('btnClear').addEventListener('click', () => { $('notice').hidden = false; $('confirmClear').hidden = false; $('yesClear').focus(); });
 $('noClear').addEventListener('click', () => { $('confirmClear').hidden = true; $('notice').hidden = !state.sample; });
-$('yesClear').addEventListener('click', () => { state = emptyState(); $('confirmClear').hidden = true; fillGoal(); renderLedger(); save(); toast('Όλα καθαρά. Ξεκίνα από τα έσοδα.'); });
+$('yesClear').addEventListener('click', () => { state = emptyState(); $('confirmClear').hidden = true; fillGoal(); renderLedger(); save(); toast('Όλα καθαρά. Σαν τον λογαριασμό στις 28 του μήνα.'); });
+
+// Easter egg: 5 κλικ στο λογότυπο.
+let logoClicks = 0, logoT;
+document.querySelector('.brand svg').addEventListener('click', () => {
+  clearTimeout(logoT); logoT = setTimeout(() => { logoClicks = 0; }, 1500);
+  if (++logoClicks < 5) return;
+  logoClicks = 0;
+  toast('Βρήκες τον κρυφό κουμπαρά. Δυστυχώς είναι άδειος.');
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (let i = 0; i < 24; i++) {
+    const s = document.createElement('span');
+    s.className = 'coin'; s.textContent = '€';
+    s.style.left = Math.random() * 96 + 'vw';
+    s.style.animationDuration = 1.4 + Math.random() * 1.4 + 's';
+    s.style.animationDelay = Math.random() * 0.6 + 's';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 3600);
+  }
+});
 
 let toastT;
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
@@ -770,11 +835,13 @@ async function buildPdf() {
   return pdf.output('blob');
 }
 
+const SAVED = { xlsx: 'Το Excel κατέβηκε. Τώρα είσαι επίσημα ενήλικας.', pdf: 'Το PDF κατέβηκε. Τύπωσέ το και κόλλα το στο ψυγείο.' };
 async function offer(filename, blob) {
+  const ok = SAVED[filename.split('.').pop()] || 'Το αρχείο κατέβηκε';
   if (window.claude && typeof window.claude.use === 'function') {
     const dl = await window.claude.use('downloads');
     if (!dl) { toast('Η αποθήκευση αρχείων δεν επιτρέπεται σε αυτή την προβολή.'); return; }
-    try { await dl.save({ filename, data: blob }); toast('Το αρχείο αποθηκεύτηκε'); }
+    try { await dl.save({ filename, data: blob }); toast(ok); }
     catch (e) { toast(e && e.code === 'declined' ? 'Η αποθήκευση ακυρώθηκε' : 'Δεν έγινε η αποθήκευση. Ξαναδοκίμασε.'); }
     return;
   }
@@ -782,7 +849,7 @@ async function offer(filename, blob) {
   a.href = URL.createObjectURL(blob); a.download = filename;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-  toast('Το αρχείο κατέβηκε');
+  toast(ok);
 }
 async function runExport(btn, build, name) {
   btn.setAttribute('aria-busy', 'true');

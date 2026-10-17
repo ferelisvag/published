@@ -209,6 +209,25 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     </section>
 
     <section>
+      <h2>Από Google Maps</h2>
+      <form id="gmForm" class="row">
+        <input id="gmInput" type="text" placeholder="Επικόλλησε το link κοινής χρήσης" autocomplete="off" aria-label="Link από Google Maps">
+        <button type="submit">Εισαγωγή</button>
+      </form>
+      <label class="chip" style="align-self:flex-start"><input type="checkbox" id="gmBase"> Το πρώτο σημείο γίνεται αφετηρία</label>
+      <div id="gmStatus" class="status" hidden></div>
+      <details>
+        <summary>Πώς παίρνω το link</summary>
+        <ol class="hint" style="margin:6px 0 0;padding-left:18px">
+          <li>Στο Google Maps φτιάξε τη διαδρομή (ή άνοιξε ένα μέρος).</li>
+          <li>Πάτα <b>Κοινοποίηση</b> → <b>Αντιγραφή συνδέσμου</b>.</li>
+          <li>Επικόλλησέ το εδώ και πάτα <b>Εισαγωγή</b>. Τα σημεία μπαίνουν ως στάσεις και μετά πατάς «Βέλτιστη σειρά».</li>
+          <li>Αν δεν περάσει σύντομο link (maps.app.goo.gl), άνοιξέ το στον browser και αντέγραψε τη διεύθυνση από επάνω.</li>
+        </ol>
+      </details>
+    </section>
+
+    <section>
       <h2>Κριτήρια διαδρομής</h2>
       <div class="field-label">Ελαχιστοποίηση</div>
       <div class="seg wide" role="radiogroup" aria-label="Ελαχιστοποίηση">
@@ -315,7 +334,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
       </div>
     </section>
 
-    <p class="hint app-foot" style="margin-top:auto;font-size:11.5px">Ο δικός μου δρόμος · <a href="https://ferelis.gr" target="_blank" rel="noopener" style="color:inherit">ferelis.gr</a> · Έκδοση 15.10 · 21:08</p>
+    <p class="hint app-foot" style="margin-top:auto;font-size:11.5px">Ο δικός μου δρόμος · <a href="https://ferelis.gr" target="_blank" rel="noopener" style="color:inherit">ferelis.gr</a> · Έκδοση 17.10 · 14:34</p>
   </aside>
   <div class="map-wrap">
     <div id="map"></div>
@@ -465,6 +484,105 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     getJSON(PHOTON + '/reverse?lat=' + obj.lat + '&lon=' + obj.lng + '&limit=1')
       .then(function (d) { var f = d && d.features && d.features[0]; if (f) { obj.name = photonLabel(f.properties || {}); render(); } })
       .catch(function () {});
+  }
+
+  // Ανάγνωση link Google Maps → σημεία { lat, lng, name } ή { q } (όνομα για αναζήτηση)
+  function gmExtractUrl(text) { var m = String(text || '').match(/https?:\/\/[^\s<>"']+/i); return m ? m[0].replace(/[).,;]+$/, '') : ''; }
+  function gmIsShort(u) { return /^(maps\.app\.goo\.gl|goo\.gl|g\.co)$/i.test(u.hostname); }
+  function gmCoord(s) { var m = String(s || '').trim().match(/^(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)$/); return m ? { lat: +m[1], lng: +m[2] } : null; }
+  function gmDec(s) { try { return decodeURIComponent(String(s).replace(/\+/g, ' ')).trim(); } catch (e) { return String(s).replace(/\+/g, ' ').trim(); } }
+  function gmPoint(s) { s = gmDec(s); if (!s) return null; var c = gmCoord(s); return c ? { lat: c.lat, lng: c.lng, name: '' } : { q: s }; }
+  function gmParse(text) {
+    var raw = gmExtractUrl(text); if (!raw) throw new Error('nourl');
+    var u = new URL(raw);
+    if (/consent\.google\./i.test(u.hostname) && u.searchParams.get('continue')) u = new URL(u.searchParams.get('continue'));
+    if (gmIsShort(u)) return { short: u.toString() };
+    if (!/(^|\.)google\.[a-z.]+$/i.test(u.hostname) || (u.pathname.indexOf('/maps') !== 0 && !/^maps\./i.test(u.hostname))) throw new Error('notgmaps');
+    var sp = u.searchParams, pts = [];
+    // 1. μορφή api=1 (origin, waypoints, destination)
+    if (sp.get('api') === '1' && (sp.get('destination') || sp.get('origin'))) {
+      [sp.get('origin')].concat((sp.get('waypoints') || '').split('|'), [sp.get('destination')]).forEach(function (v) { var p = v && gmPoint(v); if (p) pts.push(p); });
+      return { points: pts };
+    }
+    // 2. παλιές μορφές: saddr / daddr / q
+    if (sp.get('daddr') || sp.get('saddr')) {
+      var d = [sp.get('saddr')].concat((sp.get('daddr') || '').split(/\s+to:/));
+      d.forEach(function (v) { var p = v && gmPoint(v); if (p) pts.push(p); });
+      return { points: pts };
+    }
+    var segs = u.pathname.split('/').filter(Boolean), data = (u.pathname.match(/\/data=([^/?]+)/) || [])[1] || '';
+    var at = segs.filter(function (x) { return x.charAt(0) === '@'; })[0];
+    var view = at ? gmCoord(at.slice(1).split(',').slice(0, 2).join(',')) : null;
+    var kind = segs[1] || '';
+    // 3. διαδρομή: /maps/dir/Α/Β/Γ/@…/data=…
+    if (kind === 'dir') {
+      var stops = segs.slice(2).filter(function (x) { return x.charAt(0) !== '@' && x.indexOf('data=') !== 0 && x.indexOf('am=') !== 0; }).map(gmPoint).filter(Boolean);
+      var pairs = [], re = /!1d(-?\d+(?:\.\d+)?)!2d(-?\d+(?:\.\d+)?)/g, m;
+      while ((m = re.exec(data))) pairs.push({ lng: +m[1], lat: +m[2] });
+      var named = stops.filter(function (p) { return p.q; });
+      if (pairs.length && pairs.length === named.length) named.forEach(function (p, i) { p.lat = pairs[i].lat; p.lng = pairs[i].lng; p.name = p.q; delete p.q; });
+      return { points: stops };
+    }
+    // 4. ένα μέρος: /maps/place/Όνομα/@… (ακριβής θέση στο !3d…!4d…)
+    if (kind === 'place' || kind === 'search') {
+      var nm = gmDec(segs[2] || ''), exact = data.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/), c = gmCoord(nm);
+      if (exact) return { points: [{ lat: +exact[1], lng: +exact[2], name: c ? '' : nm }] };
+      if (c) return { points: [{ lat: c.lat, lng: c.lng, name: '' }] };
+      if (kind === 'place' && view) return { points: [{ lat: view.lat, lng: view.lng, name: nm }] };
+      return { points: nm ? [{ q: nm }] : [] };
+    }
+    // 5. ?q=… ή ?query=… ή σκέτο @lat,lng
+    var q = sp.get('q') || sp.get('query');
+    if (q) { var pq = gmPoint(q); return { points: pq ? [pq] : [] }; }
+    if (view) return { points: [{ lat: view.lat, lng: view.lng, name: '' }] };
+    return { points: [] };
+  }
+
+  // Βοηθός (Cloudflare Worker) που ανοίγει τα σύντομα links maps.app.goo.gl. Κενό = δεν έχει στηθεί ακόμα.
+  var GM_RESOLVER = '';
+  function gmMsg(text, kind) { var el = $('gmStatus'); if (!text) { el.hidden = true; return; } el.hidden = false; el.className = 'status' + (kind ? ' ' + kind : ''); el.textContent = text; }
+  function gmResolve(text) {
+    return Promise.resolve().then(function () { return gmShort(gmParse(text)); });
+  }
+  function gmShort(r) {
+    if (!r.short) return r;
+    if (!GM_RESOLVER) return Promise.reject(new Error('Αυτό είναι σύντομο link (maps.app.goo.gl). Άνοιξέ το στον browser, περίμενε να φορτώσει ο χάρτης και αντέγραψε τη διεύθυνση από τη γραμμή επάνω. Επικόλλησε εκείνη εδώ.'));
+    return getJSON(GM_RESOLVER + '?u=' + encodeURIComponent(r.short), 15000).then(function (d) {
+      if (!d || !d.url) throw new Error('Το σύντομο link δεν άνοιξε. Δοκίμασε με το πλήρες link.');
+      return gmParse(d.url);
+    });
+  }
+  function gmImport(text) {
+    gmMsg('Ανάγνωση link…');
+    return gmResolve(text).then(function (r) {
+      var pts = (r.points || []).slice(0, MAX + 1);
+      if (!pts.length) throw new Error('Δεν βρέθηκαν σημεία σε αυτό το link.');
+      var missing = [];
+      // ονόματα χωρίς συντεταγμένες: αναζήτηση στον χάρτη, ένα-ένα
+      return pts.reduce(function (acc, p) {
+        return acc.then(function () {
+          if (!p.q) return;
+          return geocode(p.q).then(function (items) {
+            if (items.length) { p.lat = items[0].lat; p.lng = items[0].lng; p.name = p.q; } else missing.push(p.q);
+          }).catch(function () { missing.push(p.q); });
+        });
+      }, Promise.resolve()).then(function () {
+        var ok = pts.filter(function (p) { return p.lat != null && isFinite(p.lat) && isFinite(p.lng); });
+        if (!ok.length) throw new Error('Δεν βρέθηκε η θέση των σημείων: ' + missing.join(', '));
+        var added = 0, asBase = $('gmBase').checked && ok.length > 1;
+        if (asBase) { var b = ok.shift(); setBase(b.lat, b.lng, b.name || ''); }
+        ok.forEach(function (p) { if (!isStop(p) && addStop(p.lat, p.lng, p.name || '', true)) added++; });
+        invalidate(); render();
+        var all = ok.concat(asBase ? [S.base] : []);
+        try { if (all.length) map.fitBounds(L.latLngBounds(all.map(function (p) { return [p.lat, p.lng]; })), { padding: [30, 30] }); } catch (e) {}
+        $('gmInput').value = '';
+        gmMsg((added === 1 ? 'Μπήκε 1 στάση' : 'Μπήκαν ' + added + ' στάσεις') + (asBase ? ' και η αφετηρία' : '') + '.' + (missing.length ? ' Δεν βρέθηκαν: ' + missing.join(', ') + '.' : '') +
+          (S.stops.length >= MAX ? ' Έφτασες το όριο των ' + MAX + ' στάσεων.' : '') + ' Πάτα «Βέλτιστη σειρά» για τη διαδρομή.', missing.length ? 'err' : 'ok');
+      });
+    }).catch(function (e) {
+      var m = e.message === 'nourl' ? 'Δεν βρήκα link στο κείμενο. Επικόλλησε το link από το Google Maps.' : e.message === 'notgmaps' ? 'Αυτό δεν είναι link του Google Maps.' : e.message;
+      gmMsg(m, 'err');
+    });
   }
 
   // ---------- βέλτιστη σειρά (υπολογίζεται τοπικά) ----------
@@ -1146,6 +1264,7 @@ button.small[aria-pressed="true"] { background: var(--soft); border-color: var(-
     status(full ? 'Προστέθηκαν ' + added + ' πελάτες. Έφτασες το όριο των ' + MAX + ' στάσεων.' : 'Προστέθηκαν ' + added + ' πελάτες.', full ? 'err' : 'ok');
   };
 
+  $('gmForm').addEventListener('submit', function (e) { e.preventDefault(); var t = $('gmInput').value.trim(); if (t) gmImport(t); });
   $('searchForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var q = $('searchInput').value.trim(), box = $('searchResults');

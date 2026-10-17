@@ -14,6 +14,7 @@ Repo `ferelisvag/published` (public), δημοσιεύεται με GitHub Pages
 
 ## route-planner/ — «Ο δικός μου δρόμος» (δρομολόγια διανομών, έως 30 στάσεις)
 - Βέλτιστη σειρά με δικό μας TSP (2-opt + or-opt) πάνω σε πίνακα OSRM/Valhalla, ίδια αφετηρία/επιστροφή, σταθερή πρώτη/τελευταία στάση, χρόνοι στάσεων, κόστος δρομολογίου, GPX/CSV, link. Ίδιος περιορισμός με τα διόδια.
+- Εισαγωγή από Google Maps: πεδίο «Από Google Maps» διαβάζει link (`gmParse`: /maps/dir με ονόματα και συντεταγμένες από το data=, api=1, place, q, saddr/daddr, σελίδα consent). Ονόματα χωρίς θέση → Photon. Σύντομα links (maps.app.goo.gl) θέλουν τον βοηθό `route-planner/gmaps-resolver.worker.js` (Cloudflare Worker) και τη διεύθυνσή του στο `GM_RESOLVER`· χωρίς αυτόν, μήνυμα να επικολλήσει το πλήρες link.
 
 ## brokeometer/ — BrokeOMeter (μηνιαίος προϋπολογισμός)
 - Έσοδα (`state.income`, με σημαία `sure`) και κατηγορίες εξόδων (`state.cats`: home, car, moto, daily, edu, debt, other). Κάθε ποσό έχει συχνότητα από τον πίνακα `FREQS` (m, m14 = 14 μισθοί ÷ 12, d = ×30, w, q, y, y2), `monthly()` τη μετατρέπει σε μηνιαίο. Κάτω από κάθε έσοδο με m14 φαίνεται ο υπολογισμός (`calc14Text`).

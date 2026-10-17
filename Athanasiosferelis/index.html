@@ -4,565 +4,77 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Athanasios Ferelis</title>
-<meta name="description" content="Athanasios Ferelis – Vorstellung für die Position Supplier and Product Data Administrator, Einkauf, Fokus Nachhaltigkeit">
+<meta name="description" content="Athanasios Ferelis – Präsentation für die Position Supplier and Product Data Administrator">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{
-  --paper:#f5f2ed; --sand:#e7e1d8; --stone:#cfc6b9; --ink:#1e2226; --muted:#5d6670;
-  --line:#1e2226; --sage:#56735b; --sage-soft:#e3ebe2; --gold:#b38d55; --gold-soft:#f1e7d6;
-  --mono:"IBM Plex Mono",ui-monospace,monospace; --sans:"Inter",system-ui,sans-serif;
-  --bar:52px;
-}
+:root{--paper:#f5f2ed;--stone:#cfc6b9;--ink:#1e2226;--muted:#5d6670;--gold:#b38d55;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;--sans:"Inter",system-ui,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--sand);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
-button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
-
-/* ---------- deck ---------- */
-#stage{position:fixed;inset:0 0 var(--bar) 0;display:grid;place-items:center;overflow:hidden}
-#deck{width:1280px;height:720px;position:relative;transform-origin:center center}
-.slide{position:absolute;inset:0;background:var(--paper);overflow:hidden;opacity:0;pointer-events:none;
-  transition:opacity .6s ease, transform .7s cubic-bezier(.2,.7,.2,1);transform:translateX(40px)}
-.slide.active{opacity:1;pointer-events:auto;transform:none}
-.slide.before{transform:translateX(-40px)}
-.slide .pad{position:absolute;inset:64px 80px}
-.kicker{font-family:var(--mono);font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-h1,h2{font-family:var(--mono);font-weight:500;letter-spacing:-.01em}
-h2{font-size:44px;margin-top:10px}
-.rule{height:2px;background:var(--line);width:0;margin:22px 0 34px;transition:width 1s .2s cubic-bezier(.2,.7,.2,1)}
-.active .rule{width:100%}
-.reveal{opacity:0;transform:translateY(14px);transition:opacity .5s, transform .5s}
-.active .reveal{opacity:1;transform:none}
-.active .reveal:nth-child(1){transition-delay:.25s}.active .reveal:nth-child(2){transition-delay:.35s}
-.active .reveal:nth-child(3){transition-delay:.45s}.active .reveal:nth-child(4){transition-delay:.55s}
-.active .reveal:nth-child(5){transition-delay:.65s}.active .reveal:nth-child(6){transition-delay:.75s}
-
-/* decorative stripes like the original */
-.stripes{position:absolute;display:flex;gap:14px}
-.stripes i{display:block;width:10px;background:var(--ink);opacity:.85}
-
-/* slide 1 */
-#s1{background:linear-gradient(180deg,#e9eef0 0%,#dfe5e7 52%,#c9d2d5 53%,#d6dcdd 100%)}
-#s1 .sea{position:absolute;left:0;right:0;top:53%;bottom:0;background:
-  repeating-linear-gradient(180deg,rgba(255,255,255,.18) 0 2px,transparent 2px 9px)}
-#s1 .stripes{right:70px;top:60px;height:170px}#s1 .stripes i{height:100%}
-#s1 .name{position:absolute;left:80px;top:250px;font-size:84px;line-height:1}
-#s1 .name span{display:inline-block;opacity:0;transform:translateY(20px);transition:.6s}
-#s1.active .name span{opacity:1;transform:none}
-#s1 .rule{position:absolute;left:80px;top:360px;margin:0;width:0}
-#s1.active .rule{width:620px}
-#s1 .role{position:absolute;left:80px;top:390px;max-width:760px}
-#s1 .role b{display:block;font-family:var(--sans);font-weight:600;font-size:26px;line-height:1.3}
-#s1 .role small{display:block;margin-top:8px;font-size:19px;color:var(--muted)}
-#s1 .company{position:absolute;left:80px;bottom:70px;font-family:var(--mono);font-size:18px;letter-spacing:.3em;text-transform:lowercase}
-.start{position:absolute;right:80px;bottom:62px;display:flex;align-items:center;gap:12px;padding:14px 22px;border:2px solid var(--ink);
-  font-family:var(--mono);font-size:16px;background:rgba(245,242,237,.7);transition:.2s}
-.start:hover{background:var(--ink);color:var(--paper)}
-
-/* slide 2 */
-.edu{display:grid;grid-template-columns:1.05fr 1fr;gap:56px}
-.degree{font-size:30px;font-weight:600;line-height:1.25}
-.school{margin-top:14px;font-size:19px;color:var(--muted);line-height:1.5}
-.skills{display:grid;gap:12px}
-.skill{text-align:left;border:1.5px solid var(--stone);background:#fff;padding:16px 20px;transition:.25s;position:relative}
-.skill b{display:block;font-size:19px;font-weight:600}
-.skill p{font-size:15.5px;color:var(--muted);line-height:1.45;max-height:0;overflow:hidden;opacity:0;transition:.35s}
-.skill:hover,.skill.open{border-color:var(--ink)}
-.skill.open p{max-height:80px;opacity:1;margin-top:6px}
-.skill::after{content:"+";position:absolute;right:18px;top:14px;font-family:var(--mono);font-size:20px;transition:.25s}
-.skill.open::after{transform:rotate(45deg)}
-.hint{font-family:var(--mono);font-size:13px;color:var(--muted);margin-top:16px}
-
-.yr{font-family:var(--mono);font-size:14px;color:var(--gold);letter-spacing:.05em;margin-bottom:8px;display:block}
-.edu2{margin-top:30px;display:grid;gap:18px;border-top:1.5px solid var(--stone);padding-top:22px}
-.edu2 b{display:block;font-size:18px}.edu2 p{font-size:15.5px;color:var(--muted);margin-top:3px}
-.edu2 .yr{margin-bottom:4px}
-/* slide 3 */
-.exp{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;height:470px}
-.roles{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
-.role-tab{border:1.5px solid var(--stone);background:#fff;padding:9px 14px;text-align:left;font-size:15px;font-weight:600;transition:.2s}
-.role-tab span{display:block;font-family:var(--mono);font-size:12px;font-weight:400;color:var(--muted);margin-bottom:2px}
-.role-tab:hover{border-color:var(--ink)}
-.role-tab.on{background:var(--ink);border-color:var(--ink);color:#fff}.role-tab.on span{color:#c9c4bc}
-.job{font-size:25px;font-weight:600}.job span{font-weight:400;color:var(--muted)}
-.tasks{list-style:none;margin-top:22px;display:grid;gap:14px}
-.tasks li{font-size:19px;line-height:1.4;padding-left:26px;position:relative}
-.tasks li::before{content:"";position:absolute;left:0;top:11px;width:12px;height:2px;background:var(--ink)}
-.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
-.tool{font-family:var(--mono);font-size:14px;padding:7px 12px;border:1.5px solid var(--ink);background:#fff}
-.stat{background:var(--ink);color:var(--paper);padding:44px 40px;display:flex;flex-direction:column;justify-content:center}
-.stat .num{font-family:var(--mono);font-size:84px;font-weight:600;line-height:1;color:#fff}
-.stat .lbl{font-size:20px;line-height:1.4;margin-top:18px;color:#d9d4cc}
-.stat .flow{display:flex;gap:8px;margin-top:30px;flex-wrap:wrap}
-.stat .flow span{font-family:var(--mono);font-size:13px;padding:6px 10px;border:1px solid #6d737a;color:#cfd2d4}
-
-/* slide 3b */
-.pers{display:grid;grid-template-columns:1fr 1fr;gap:64px}
-.sub{font-family:var(--mono);font-weight:500;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
-.lang{display:grid;grid-template-columns:130px 1fr 40px;align-items:center;gap:16px;margin-bottom:18px}
-.lang b{font-size:20px}.lang span{font-family:var(--mono);font-size:16px;text-align:right}
-.meter{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;height:12px}
-.meter i{background:var(--stone);transition:background .4s}
-.meter i.f{background:var(--ink)}
-.scale{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:146px;letter-spacing:.06em}
-.intl{font-size:19px;line-height:1.5}
-.soft{display:flex;flex-wrap:wrap;gap:10px}
-.soft span{font-size:17px;padding:9px 16px;border:1.5px solid var(--ink);background:#fff}
-/* slide 4 */
-#s4 .kicker{color:var(--sage)}
-.chain{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:6px}
-.step{background:#fff;border:1.5px solid var(--stone);padding:20px 16px 18px;text-align:left;position:relative;transition:.25s;min-height:132px}
-.step:not(:last-child)::after{content:"→";position:absolute;right:-13px;top:50%;transform:translateY(-50%);font-family:var(--mono);color:var(--muted);z-index:2}
-.step .n{font-family:var(--mono);font-size:13px;color:var(--muted)}
-.step b{display:block;font-size:18px;margin-top:8px;line-height:1.3}
-.step.on{background:var(--sage);border-color:var(--sage);color:#fff}
-.step.on .n{color:#dbe6dc}
-.detail{margin-top:26px;background:var(--sage-soft);border-left:4px solid var(--sage);padding:24px 28px;min-height:172px}
-.detail h3{font-size:21px;font-weight:600}
-.detail ul{list-style:none;margin-top:12px;display:grid;gap:8px}
-.detail li{font-size:17.5px;line-height:1.45;padding-left:22px;position:relative}
-.detail li::before{content:"✓";position:absolute;left:0;color:var(--sage);font-weight:600}
-.dpp{position:absolute;right:80px;top:64px;font-family:var(--mono);font-size:13px;padding:8px 12px;background:var(--gold-soft);border:1px solid var(--gold);max-width:320px;line-height:1.45}
-
-/* slide 5 */
-.why{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
-.card{background:#fff;border:1.5px solid var(--stone);padding:26px 26px 24px;display:flex;gap:18px;align-items:flex-start;transition:.25s}
-.card:hover{border-color:var(--ink);transform:translateY(-3px)}
-.ico{flex:0 0 46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff}
-.ico svg{width:22px;height:22px}
-.card b{font-size:21px;display:block;line-height:1.3}
-.card p{font-size:16.5px;color:var(--muted);margin-top:6px;line-height:1.45}
-.brand{font-family:var(--mono);letter-spacing:.3em;font-size:16px;color:var(--muted);margin-bottom:6px}
-
-/* slide 6 */
-#s6{background:linear-gradient(180deg,#eef0ee 0%,#e4e7e6 58%,#cdd5d6 59%,#d9dedf 100%)}
-#s6 .sea{position:absolute;left:0;right:0;top:59%;bottom:0;background:repeating-linear-gradient(180deg,rgba(255,255,255,.2) 0 2px,transparent 2px 10px)}
-#s6 .t1{position:absolute;left:80px;top:220px;font-size:46px;font-family:var(--mono);font-weight:500}
-#s6 .t2{position:absolute;right:80px;top:470px;font-size:36px;font-family:var(--mono)}
-#s6 .stripes{left:80px;bottom:60px;height:70px}#s6 .stripes i{height:100%;width:6px}
-.li{position:absolute;left:80px;top:320px;font-family:var(--mono);font-size:16px;color:var(--ink)}
-.restart{position:absolute;right:80px;bottom:60px;font-family:var(--mono);font-size:15px;border-bottom:1.5px solid var(--ink);padding-bottom:3px}
-
-.foot{position:absolute;left:80px;bottom:22px;font-size:12px;color:var(--muted);font-family:var(--mono)}
-.foot a{color:inherit}
-
-/* ---------- bottom bar ---------- */
-#bar{position:fixed;left:0;right:0;bottom:0;height:var(--bar);background:var(--ink);color:#e9e5df;display:flex;align-items:center;gap:6px;padding:0 12px;z-index:10}
-#bar .btn{height:36px;min-width:36px;padding:0 10px;display:grid;place-items:center;border-radius:4px;font-family:var(--mono);font-size:13px}
-#bar .btn:hover{background:#343a40}
-#bar .btn svg{width:18px;height:18px}
-#bar .btn.on{background:#e9e5df;color:var(--ink)}
-#dots{display:flex;gap:6px;margin:0 auto}
-#dots button{width:28px;height:4px;background:#545b62;border-radius:2px;transition:.3s}
-#dots button.on{background:#fff;width:44px}
-#count{font-family:var(--mono);font-size:13px;min-width:48px;text-align:center}
-#progress{position:fixed;left:0;bottom:var(--bar);height:3px;background:var(--gold);transition:width .5s;z-index:10}
-
-/* notes */
-#notes{position:fixed;left:50%;bottom:calc(var(--bar) + 14px);transform:translateX(-50%) translateY(20px);width:min(760px,calc(100% - 32px));
-  background:#fffdf9;border:1.5px solid var(--ink);padding:16px 20px;font-size:16px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.18);
-  opacity:0;pointer-events:none;transition:.3s;z-index:11}
-#notes.show{opacity:1;pointer-events:auto;transform:translateX(-50%)}
-#notes .k{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-
-/* overview */
-#overview{position:fixed;inset:0 0 var(--bar) 0;background:rgba(30,34,38,.92);z-index:9;display:none;overflow:auto;padding:32px}
-#overview.show{display:block}
-#ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;max-width:1100px;margin:0 auto}
-.ov{background:var(--paper);aspect-ratio:16/9;padding:18px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;border:2px solid transparent}
-.ov:hover,.ov.cur{border-color:var(--gold)}
-.ov span{font-family:var(--mono);font-size:12px;color:var(--muted)}
-.ov b{font-family:var(--mono);font-weight:500;font-size:19px}
-
-/* help */
-#help{position:fixed;right:14px;bottom:calc(var(--bar) + 14px);background:#fffdf9;border:1.5px solid var(--ink);padding:14px 18px;font-size:14px;line-height:1.8;z-index:11;display:none}
-#help.show{display:block}
-kbd{font-family:var(--mono);font-size:12px;border:1px solid var(--stone);border-bottom-width:2px;padding:1px 6px;border-radius:3px;background:#fff}
-
-/* ---------- mobile: vertical scrolling ---------- */
-@media (max-width:820px), (max-height:500px) and (orientation:landscape){
-  #stage{position:static;display:block;overflow:visible;padding-bottom:var(--bar)}
-  #deck{width:auto;height:auto;transform:none!important}
-  .slide{position:relative;opacity:1;transform:none;pointer-events:auto;min-height:auto;border-bottom:1px solid var(--stone)}
-  .slide .pad{position:static;padding:40px 16px 44px}
-  .reveal{opacity:1;transform:none}.rule{width:100%}
-  h2{font-size:30px}
-  #s1,#s6{min-height:88vh}
-  #s1 .name{position:static;font-size:46px;padding:28vh 16px 0}
-  #s1 .name span{opacity:1;transform:none}
-  #s1 .rule{position:static;width:auto;margin:18px 16px}
-  #s1 .role{position:static;padding:0 16px}#s1 .role b{font-size:21px}#s1 .role small{font-size:16px}
-  #s1 .company{position:static;padding:22px 16px 0}
-  #s1 .stripes{right:16px;top:20px;height:100px;gap:9px}#s1 .stripes i{width:7px}
-  .start{display:none}
-  .edu,.exp,.why,.pers{grid-template-columns:1fr;gap:26px;height:auto}
-  .lang{grid-template-columns:100px 1fr 34px}.scale{margin-left:116px}
-  .li{position:static;display:block;padding:20px 16px 0}
-  .degree{font-size:24px}
-  .stat{padding:30px 24px}.stat .num{font-size:56px}
-  .chain{grid-template-columns:1fr;gap:10px}
-  .step{min-height:0}.step:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-15px;transform:translateX(-50%)}
-  .dpp{position:static;margin-bottom:18px;max-width:none}
-  #s6 .t1{position:static;font-size:30px;padding:24vh 16px 0}
-  #s6 .t2{position:static;font-size:24px;padding:20px 16px 0;text-align:right}
-  #s6 .stripes,.restart{display:none}
-  .foot{position:static;padding:14px 16px 20px}
-  #dots,#count,[data-act=prev],[data-act=next],[data-act=overview],[data-act=full]{display:none}
-  #bar{justify-content:flex-end}
-  #progress{display:none}
-}
-
-/* ---------- print: one slide per page ---------- */
-@media print{
-  @page{size:1280px 720px;margin:0}
-  html,body{background:#fff}
-  #bar,#progress,#notes,#overview,#help,.start,.restart,.hint{display:none!important}
-  #stage{position:static;display:block}
-  #deck{transform:none!important;width:1280px;height:auto}
-  .slide{position:relative;width:1280px;height:720px;opacity:1;transform:none;page-break-after:always;break-after:page}
-  .reveal{opacity:1;transform:none}.rule{width:100%}#s1 .rule{width:620px}#s1 .name span{opacity:1;transform:none}
-  .skill p{max-height:none;opacity:1;margin-top:6px}
-  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{min-height:100%}
+body{font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;
+  background:linear-gradient(180deg,#e9eef0 0%,#dfe5e7 55%,#c9d2d5 55.2%,#d6dcdd 100%) fixed;min-height:100vh;display:flex;flex-direction:column}
+body::before{content:"";position:fixed;left:0;right:0;top:55%;bottom:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.18) 0 2px,transparent 2px 9px)}
+.stripes{position:fixed;right:6vw;top:7vh;height:22vh;display:flex;gap:1.1vw}
+.stripes i{display:block;width:10px;height:100%;background:var(--ink);opacity:.85}
+main{position:relative;flex:1;width:min(1080px,100%);margin:0 auto;padding:16vh 24px 40px}
+h1{font-family:var(--mono);font-weight:500;font-size:clamp(40px,7vw,80px);line-height:1;letter-spacing:-.01em}
+.rule{height:2px;background:var(--ink);width:min(620px,100%);margin:26px 0 22px}
+.role{font-size:clamp(18px,2.2vw,24px);font-weight:600;line-height:1.35}
+.role small{display:block;font-weight:400;font-size:.8em;color:var(--muted);margin-top:4px}
+.choose{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:56px 0 16px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:rgba(245,242,237,.94);border:2px solid var(--ink);
+  padding:28px 28px 24px;transition:transform .25s, box-shadow .25s, background .25s;min-height:240px}
+.card:hover,.card:focus-visible{transform:translateY(-4px);box-shadow:0 14px 30px rgba(30,34,38,.18);outline:none}
+.card .n{font-family:var(--mono);font-size:13px;color:var(--gold)}
+.card h2{font-family:var(--mono);font-weight:500;font-size:26px;margin-top:10px}
+.card p{font-size:16.5px;line-height:1.5;color:var(--muted);margin-top:10px}
+.card ul{list-style:none;margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.card li{font-family:var(--mono);font-size:12.5px;padding:5px 9px;border:1px solid var(--stone);background:#fff}
+.card .go{margin-top:auto;padding-top:22px;font-family:var(--mono);font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.card .go span{transition:transform .25s}
+.card:hover .go span{transform:translateX(6px)}
+.card.dark{background:var(--ink);color:var(--paper)}
+.card.dark p{color:#c9c4bc}.card.dark li{background:transparent;border-color:#5d646b;color:#d9d4cc}
+footer{position:relative;text-align:center;font-family:var(--mono);font-size:12px;color:#3f464d;padding:18px 16px 22px}
+footer a{color:inherit}
+@media (max-width:760px){
+  main{padding-top:14vh}
+  .cards{grid-template-columns:1fr}
+  .stripes{right:16px;top:20px;height:90px;gap:8px}.stripes i{width:6px}
+  .card{min-height:0}
 }
 </style>
 </head>
 <body>
+<div class="stripes"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<main>
+  <h1>Athanasios Ferelis</h1>
+  <div class="rule"></div>
+  <div class="role">Supplier and Product Data Administrator
+    <small>Purchasing Department · Focus on Sustainability</small></div>
 
-<div id="stage"><div id="deck">
-
-  <!-- 1 -->
-  <section class="slide" id="s1" data-title="Athanasios Ferelis"
-    data-notes="Guten Tag, mein Name ist Athanasios Ferelis. Ich möchte mich kurz vorstellen und zeigen, warum ich gut zu dieser Position passe.">
-    <div class="sea"></div>
-    <div class="stripes"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-    <h1 class="name" id="nameAnim">Athanasios Ferelis</h1>
-    <div class="rule"></div>
-    <div class="role">
-      <b>Supplier and Product Data Administrator</b>
-      <small>Einkauf · Fokus Nachhaltigkeit</small>
-    </div>
-    <div class="company">breuninger</div>
-    <button class="start" data-act="next">Präsentation starten <span>→</span></button>
-  </section>
-
-  <!-- 2 -->
-  <section class="slide" id="s2" data-title="Ausbildung & Kompetenzen"
-    data-notes="Ich habe Betriebswirtschaft in Kavala studiert. Dort habe ich die Grundlage für meine Arbeit mit Daten und E-Commerce gelegt.">
-    <div class="pad">
-      <div class="kicker">01 · Ausbildung</div>
-      <h2>Ausbildung &amp; Kompetenzen</h2>
-      <div class="rule"></div>
-      <div class="edu">
-        <div>
-          <div class="yr reveal">2010 – 2015</div>
-          <div class="degree reveal">Bachelor of Business<br>Administration (BBA)</div>
-          <div class="school reveal">Technological Educational Institute<br>of Eastern Macedonia and Thrace<br>Kavala, Griechenland</div>
-          <div class="edu2 reveal">
-            <div><span class="yr">2007 – 2010</span><b>Fachrichtung Informatik</b><p>Computer- und Netzwerktechnik · Berufliches Lyzeum, Eleftheroupoli</p></div>
-            <div><span class="yr">Erasmus+</span><b>Tomas Bata University</b><p>Zlín, Tschechien</p></div>
-          </div>
-        </div>
-        <div>
-          <div class="skills">
-            <button class="skill reveal"><b>Datenmanagement &amp; Datenpflege</b><p>Produkt- und Lieferantendaten vollständig, einheitlich und fehlerfrei halten.</p></button>
-            <button class="skill reveal"><b>E-Commerce &amp; Content Management</b><p>Produktinhalte im CMS und PIM pflegen, damit sie im Shop korrekt erscheinen.</p></button>
-            <button class="skill reveal"><b>Fotografie &amp; Bildbearbeitung</b><p>Produktbilder nach klaren Standards bearbeiten und prüfen.</p></button>
-            <button class="skill reveal"><b>IT-Support &amp; Systemkenntnisse</b><p>Sicherer Umgang mit Systemen, Tools und Datenbanken im Alltag.</p></button>
-            <button class="skill reveal"><b>Interior Design</b><p>Gestaltung von Räumen und Präsentation – mit einem Blick dafür, wie Produkte auf Kundinnen und Kunden wirken.</p></button>
-          </div>
-          <div class="hint">Klicken für Details</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 3 -->
-  <section class="slide" id="s3" data-title="Berufserfahrung"
-    data-notes="Von 2021 bis 2024 war ich bei Internetstores, zuerst als Photography Production Assistant, dann als Manager Product Content. Pro Jahr habe ich über 800.000 Produktbilder recherchiert, geprüft und eingepflegt, mit klaren Qualitätsstandards und in Abstimmung mit Marketing und Content über Jira. Danach habe ich bei Heaven’s Kitchen Schichten geleitet und Teams koordiniert – diese Erfahrung bringe ich jetzt zurück in die Arbeit mit Produktdaten.">
-    <div class="pad">
-      <div class="kicker">02 · Berufserfahrung</div>
-      <h2>Berufserfahrung</h2>
-      <div class="rule"></div>
-      <div class="exp">
-        <div>
-          <div class="roles" id="roles">
-            <button class="role-tab on" data-r="0"><span>12.2022 – 04.2024</span>Manager Product Content</button>
-            <button class="role-tab" data-r="1"><span>06.2021 – 11.2022</span>Photography Production Assistant</button>
-            <button class="role-tab" data-r="2"><span>05.2025 – 09.2026</span>Heaven’s Kitchen</button>
-          </div>
-          <div class="job" id="jobTitle"></div>
-          <ul class="tasks" id="jobTasks"></ul>
-          <div class="tools">
-            <span class="tool">Excel</span><span class="tool">MySQL</span><span class="tool">Jira</span>
-            <span class="tool">Photoshop</span><span class="tool">PIM</span><span class="tool">CMS</span>
-            <span class="tool">Supplier &amp; Product Data Portals</span>
-          </div>
-        </div>
-        <div class="stat">
-          <div class="num"><span id="counter">0</span>+</div>
-          <div class="lbl">Produktbilder pro Jahr recherchiert, geprüft und eingepflegt</div>
-          <div class="flow"><span>recherchieren</span><span>prüfen</span><span>bearbeiten</span><span>einpflegen</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 3b -->
-  <section class="slide" id="s3b" data-title="Sprachen & Stärken"
-    data-notes="Ich spreche Griechisch als Muttersprache, Englisch auf B2- und Deutsch auf B1-Niveau. Durch Erasmus+ in Tschechien habe ich früh in einem internationalen Umfeld gelernt und gearbeitet.">
-    <div class="pad">
-      <div class="kicker">03 · Persönlich</div>
-      <h2>Sprachen &amp; Stärken</h2>
-      <div class="rule"></div>
-      <div class="pers">
-        <div>
-          <h3 class="sub reveal">Sprachen</h3>
-          <div class="lang reveal"><b>Griechisch</b><div class="meter" data-v="6"></div><span>C2</span></div>
-          <div class="lang reveal"><b>Englisch</b><div class="meter" data-v="4"></div><span>B2</span></div>
-          <div class="lang reveal"><b>Deutsch</b><div class="meter" data-v="3"></div><span>B1</span></div>
-          <p class="scale reveal">A1 · A2 · B1 · B2 · C1 · C2</p>
-        </div>
-        <div>
-          <h3 class="sub reveal">Internationale Erfahrung</h3>
-          <div class="intl reveal"><b>Erasmus+</b> · Tomas Bata University, Zlín, Tschechien</div>
-          <h3 class="sub reveal" style="margin-top:34px">Soft Skills</h3>
-          <div class="soft reveal"><span>Problemlösung</span><span>Teamarbeit</span><span>Kommunikationsfähigkeit</span><span>Teamkoordination</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 4 -->
-  <section class="slide" id="s4" data-title="Nachhaltigkeit & Daten"
-    data-notes="Für mich beginnt Nachhaltigkeit bei korrekten Daten. Nur wenn Materialien, Herkunft und Zertifikate stimmen, können Kundinnen und Kunden eine bewusste Entscheidung treffen.">
-    <div class="pad">
-      <div class="kicker">04 · Fokus Nachhaltigkeit</div>
-      <h2>Nachhaltigkeit beginnt bei den Daten</h2>
-      <div class="rule"></div>
-      <div class="chain" id="chain">
-        <button class="step on" data-i="0"><span class="n">01</span><b>Lieferant</b></button>
-        <button class="step" data-i="1"><span class="n">02</span><b>Produktdaten</b></button>
-        <button class="step" data-i="2"><span class="n">03</span><b>Prüfung</b></button>
-        <button class="step" data-i="3"><span class="n">04</span><b>Onlineshop</b></button>
-        <button class="step" data-i="4"><span class="n">05</span><b>Kundin &amp; Kunde</b></button>
-      </div>
-      <div class="detail" id="detail"></div>
-    </div>
-    <div class="dpp">Ausblick: Digitaler Produktpass der EU – saubere Daten sind die Voraussetzung.</div>
-  </section>
-
-  <!-- 5 -->
-  <section class="slide" id="s5" data-title="Warum Breuninger"
-    data-notes="Deshalb reizt mich diese Position besonders: Ich kann meine Erfahrung mit Produktdaten mit einem Thema verbinden, das mir wichtig ist.">
-    <div class="pad">
-      <div class="kicker">05 · Motivation</div>
-      <h2>Warum Breuninger</h2>
-      <div class="rule"></div>
-      <div class="why">
-        <div class="card reveal"><div class="ico" style="background:#2f6fb5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg></div>
-          <div><b>Zurück zu Produktdaten</b><p>Nach Gastronomie und Events kehre ich bewusst in meinen Beruf zurück – mit zusätzlicher Erfahrung in Teamführung.</p></div></div>
-        <div class="card reveal"><div class="ico" style="background:#d9822b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></div>
-          <div><b>Produktdaten als Basis</b><p>Vollständige, korrekte Daten ermöglichen gute Kaufentscheidungen.</p></div></div>
-        <div class="card reveal"><div class="ico" style="background:var(--sage)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 21c0-9 6-15 15-16-1 9-7 15-15 16zM5 21l7-7"/></svg></div>
-          <div><b>Nachhaltigkeit transparent machen</b><p>Materialien, Herkunft und Zertifikate klar und überprüfbar darstellen.</p></div></div>
-        <div class="card reveal"><div class="ico" style="background:#7b4fa6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V14M10 20V10M16 20V6M3 9l6-5 5 4 7-5"/></svg></div>
-          <div><b>Langfristig wachsen</b><p>Meine Zukunft bei Breuninger aktiv mitgestalten.</p></div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 6 -->
-  <section class="slide" id="s6" data-title="Vielen Dank"
-    data-notes="Vielen Dank für Ihre Zeit. Ich freue mich auf Ihre Fragen.">
-    <div class="sea"></div>
-    <div class="t1">Vielen Dank für Ihre Zeit.</div>
-    <div class="t2">Ich freue mich auf Ihre Fragen.</div>
-    <div class="stripes"><i></i><i></i><i></i><i></i></div>
-    <button class="restart" data-act="first">↺ Von vorne</button>
-    <a class="li" href="https://www.linkedin.com/in/athanasios-ferelis" target="_blank" rel="noopener">linkedin.com/in/athanasios-ferelis ↗</a>
-    <div class="foot">Präsentation · <a href="https://ferelis.gr">ferelis.gr</a> · Version 17.10 · 15:45</div>
-  </section>
-
-</div></div>
-
-<div id="progress"></div>
-
-<div id="notes"><div class="k">Sprechnotiz</div><div id="notesText"></div></div>
-
-<div id="overview"><div id="ovgrid"></div></div>
-
-<div id="help">
-  <kbd>←</kbd> <kbd>→</kbd> Folie wechseln<br>
-  <kbd>O</kbd> Übersicht · <kbd>N</kbd> Notizen<br>
-  <kbd>F</kbd> Vollbild · <kbd>P</kbd> Als PDF drucken
-</div>
-
-<nav id="bar">
-  <button class="btn" data-act="prev" title="Zurück (←)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <button class="btn" data-act="next" title="Weiter (→)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
-  <span id="count">1 / 7</span>
-  <div id="dots"></div>
-  <button class="btn" data-act="notes" title="Sprechnotizen (N)">Notizen</button>
-  <button class="btn" data-act="overview" title="Übersicht (O)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
-  <button class="btn" data-act="print" title="Als PDF drucken (P)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg></button>
-  <button class="btn" data-act="full" title="Vollbild (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
-  <button class="btn" data-act="help" title="Tastenkürzel">?</button>
-</nav>
-
-<script>
-(function(){
-  const slides=[...document.querySelectorAll('.slide')];
-  const deck=document.getElementById('deck');
-  const dots=document.getElementById('dots');
-  const count=document.getElementById('count');
-  const progress=document.getElementById('progress');
-  const notes=document.getElementById('notes');
-  const notesText=document.getElementById('notesText');
-  const overview=document.getElementById('overview');
-  const ovgrid=document.getElementById('ovgrid');
-  const help=document.getElementById('help');
-  const isMobile=()=>matchMedia('(max-width:820px), (max-height:500px) and (orientation:landscape)').matches;
-  let cur=0;
-
-  // name letters animation
-  const nm=document.getElementById('nameAnim');
-  nm.innerHTML=[...nm.textContent].map((c,i)=>`<span style="transition-delay:${(i*0.03).toFixed(2)}s">${c===' '?'&nbsp;':c}</span>`).join('');
-
-  // dots + overview
-  slides.forEach((s,i)=>{
-    const d=document.createElement('button');d.title=s.dataset.title;d.onclick=()=>go(i);dots.appendChild(d);
-    const o=document.createElement('button');o.className='ov';
-    o.innerHTML=`<span>${String(i+1).padStart(2,'0')}</span><b>${s.dataset.title}</b>`;
-    o.onclick=()=>{toggleOverview(false);go(i)};ovgrid.appendChild(o);
-  });
-
-  function fit(){
-    if(isMobile()){deck.style.transform='none';return}
-    const st=document.getElementById('stage');
-    const k=Math.min(st.clientWidth/1280,st.clientHeight/720);
-    deck.style.transform=`scale(${k})`;
-  }
-
-  function go(i){
-    i=Math.max(0,Math.min(slides.length-1,i));
-    cur=i;
-    slides.forEach((s,j)=>{s.classList.toggle('active',j===i);s.classList.toggle('before',j<i)});
-    [...dots.children].forEach((d,j)=>d.classList.toggle('on',j===i));
-    [...ovgrid.children].forEach((d,j)=>d.classList.toggle('cur',j===i));
-    count.textContent=`${i+1} / ${slides.length}`;
-    progress.style.width=((i+1)/slides.length*100)+'%';
-    notesText.textContent=slides[i].dataset.notes||'';
-    if(slides[i].id==='s3')runCounter();
-    fillMeters(slides[i].id==='s3b'||isMobile());
-    try{history.replaceState(null,'','#'+(i+1))}catch(e){}
-  }
-
-  // counter
-  let counted=false;
-  function runCounter(){
-    const el=document.getElementById('counter');const target=800000;const t0=performance.now();const dur=1600;
-    if(counted&&!isMobile()){el.textContent='0'}
-    counted=true;
-    (function tick(t){
-      const p=Math.min(1,(t-t0)/dur);const e=1-Math.pow(1-p,3);
-      el.textContent=Math.round(target*e).toLocaleString('de-DE');
-      if(p<1)requestAnimationFrame(tick);
-    })(t0);
-  }
-
-  // skills accordion
-  document.querySelectorAll('.skill').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();b.classList.toggle('open')}));
-
-  // roles
-  const ROLES=[
-    {t:'Manager Product Content',c:'Internetstores GmbH',li:['Verwaltung und Optimierung von Produktinhalten im E-Commerce','Bearbeitung und Qualitätskontrolle von Produktbildern','Datenpflege im CMS und PIM, Koordination über Jira','Zusammenarbeit mit Marketing- und Content-Teams','Verbesserung der Produktdarstellung und Conversion Rate']},
-    {t:'Photography Production Assistant',c:'Internetstores GmbH',li:['Unterstützung bei Fotoshootings und Content-Produktion','Organisation von Equipment und Setups','Auswahl und Bearbeitung von Bildmaterial']},
-    {t:'Head of Interior Design · Schichtleiter · Barista',c:'Heaven’s Kitchen – Vegan Restaurant & Event Company',li:['Gestaltung und Weiterentwicklung des Interior Designs','Verantwortung für reibungslose Schichten und Teamkoordination','Organisation und Unterstützung bei Events','Sicherstellung eines hochwertigen Kundenerlebnisses']}
-  ];
-  const roles=document.getElementById('roles');
-  function showRole(i){
-    [...roles.children].forEach((b,j)=>b.classList.toggle('on',j===i));
-    const r=ROLES[i];
-    document.getElementById('jobTitle').innerHTML=`${r.t} <span>· ${r.c}</span>`;
-    document.getElementById('jobTasks').innerHTML=r.li.map(x=>`<li>${x}</li>`).join('');
-  }
-  roles.querySelectorAll('.role-tab').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();showRole(+b.dataset.r)}));
-  showRole(0);
-
-  // language meters
-  document.querySelectorAll('.meter').forEach(m=>{m.innerHTML='<i></i>'.repeat(6)});
-  function fillMeters(on){
-    document.querySelectorAll('.meter').forEach(m=>{
-      const v=+m.dataset.v;[...m.children].forEach((c,k)=>{c.classList.remove('f');if(on)setTimeout(()=>c.classList.toggle('f',k<v),300+k*90)});
-    });
-  }
-
-  // sustainability chain
-  const STEPS=[
-    {h:'Lieferant',li:['Vollständige Angaben direkt an der Quelle anfordern','Materialien, Herkunft und Produktionsort erfassen','Klare Kommunikation bei fehlenden Daten']},
-    {h:'Produktdaten',li:['Materialzusammensetzung einheitlich pflegen','Zertifikate (z. B. GOTS, OEKO-TEX) mit Nachweis hinterlegen','Strukturierte Pflege im PIM']},
-    {h:'Prüfung',li:['Nachhaltigkeitsangaben prüfen, bevor sie live gehen','Schutz vor Greenwashing','Qualitätsstandards wie bei 800.000+ Bildern pro Jahr']},
-    {h:'Onlineshop',li:['Korrekte Filter und Siegel im Shop','Einheitliche Darstellung über alle Kategorien','Weniger Rückfragen und Retouren']},
-    {h:'Kundin & Kunde',li:['Bewusste Kaufentscheidung auf Basis echter Daten','Vertrauen in die Marke Breuninger','Transparenz, die überprüfbar ist']}
-  ];
-  const chain=document.getElementById('chain'),detail=document.getElementById('detail');
-  function showStep(i){
-    [...chain.children].forEach((b,j)=>b.classList.toggle('on',j===i));
-    const s=STEPS[i];
-    detail.innerHTML=`<h3>${s.h}</h3><ul>${s.li.map(x=>`<li>${x}</li>`).join('')}</ul>`;
-  }
-  chain.querySelectorAll('.step').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();showStep(+b.dataset.i)}));
-  showStep(0);
-
-  // controls
-  function toggleOverview(v){overview.classList.toggle('show',v??!overview.classList.contains('show'));document.querySelector('[data-act=overview]').classList.toggle('on',overview.classList.contains('show'))}
-  function toggleNotes(){notes.classList.toggle('show');document.querySelector('[data-act=notes]').classList.toggle('on',notes.classList.contains('show'))}
-  function full(){
-    try{ if(!document.fullscreenElement)document.documentElement.requestFullscreen(); else document.exitFullscreen(); }catch(e){}
-  }
-  const ACT={prev:()=>go(cur-1),next:()=>go(cur+1),first:()=>go(0),notes:toggleNotes,overview:()=>toggleOverview(),print:()=>window.print(),full,help:()=>help.classList.toggle('show')};
-  document.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();ACT[b.dataset.act]()}));
-
-  document.addEventListener('keydown',e=>{
-    if(e.metaKey||e.ctrlKey||e.altKey)return;
-    const k=e.key;
-    if(['ArrowRight','PageDown',' '].includes(k)){if(!isMobile()){e.preventDefault();go(cur+1)}}
-    else if(['ArrowLeft','PageUp'].includes(k)){if(!isMobile()){e.preventDefault();go(cur-1)}}
-    else if(k==='Home')go(0);else if(k==='End')go(slides.length-1);
-    else if(k==='o'||k==='O')toggleOverview();
-    else if(k==='n'||k==='N')toggleNotes();
-    else if(k==='f'||k==='F')full();
-    else if(k==='p'||k==='P')window.print();
-    else if(k==='Escape'){toggleOverview(false);help.classList.remove('show')}
-  });
-
-  // swipe
-  let sx=null;
-  document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
-  document.addEventListener('touchend',e=>{
-    if(sx===null||isMobile())return;const dx=e.changedTouches[0].clientX-sx;
-    if(Math.abs(dx)>50)go(cur+(dx<0?1:-1));sx=null;
-  });
-
-  // mobile: run counter when visible
-  if('IntersectionObserver' in window){
-    new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting&&isMobile()&&!counted)runCounter()}),{threshold:.4}).observe(document.getElementById('s3'));
-  }
-
-  // notes on mobile follow scroll position
-  window.addEventListener('scroll',()=>{
-    if(!isMobile())return;
-    let best=0;slides.forEach((s,i)=>{if(s.getBoundingClientRect().top<innerHeight*.5)best=i});
-    if(best!==cur){cur=best;notesText.textContent=slides[best].dataset.notes||''}
-  },{passive:true});
-
-  window.addEventListener('resize',fit);
-  window.addEventListener('beforeprint',()=>{document.getElementById('counter').textContent='800.000';document.querySelectorAll('.meter').forEach(m=>[...m.children].forEach((c,k)=>c.classList.toggle('f',k<+m.dataset.v)))});
-  fit();
-  const h=parseInt(location.hash.slice(1),10);
-  go(h>0?h-1:0);
-})();
-</script>
+  <div class="choose">Version wählen</div>
+  <div class="cards">
+    <a class="card dark" href="praesentation/">
+      <span class="n">01</span>
+      <h2>Präsentation</h2>
+      <p>Die Vorstellung für das Gespräch – kompakt, mit Fokus auf Produktdaten und Nachhaltigkeit.</p>
+      <ul><li>6 Folien</li><li>Sprechnotizen</li><li>PDF</li></ul>
+      <div class="go">Öffnen <span>→</span></div>
+    </a>
+    <a class="card" href="komplett/">
+      <span class="n">02</span>
+      <h2>Vollständige Version</h2>
+      <p>Alle Stationen mit Daten, Sprachen, internationaler Erfahrung und Soft Skills.</p>
+      <ul><li>7 Folien</li><li>Lebenslauf</li><li>Sprechnotizen</li><li>PDF</li></ul>
+      <div class="go">Öffnen <span>→</span></div>
+    </a>
+  </div>
+</main>
+<footer>Athanasios Ferelis · <a href="https://ferelis.gr">ferelis.gr</a> · Version 17.10 · 15:50</footer>
 </body>
 </html>

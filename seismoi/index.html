@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Σεισμοί στην Ελλάδα 1964–2026 | Χάρτης & χρονολόγιο</title>
+<meta name="description" content="Οι σεισμοί 5 Ρίχτερ και πάνω στην Ελλάδα από το 1964 ως σήμερα: διαδραστικός χάρτης, χρονολόγιο που παίζει σαν ταινία και στατιστικά. Δεδομένα από το gein.noa.gr.">
+<meta name="theme-color" content="#0B0F17">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Σεισμοί">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+/* Layout: hero with live seismograph, full-width map with timeline player, stats strip, charts grid, top-10 list, disclaimer, footer. */
+:root{
+  --bg:#0B0F17; --panel:#121826; --panel-2:#182033; --line:#243049; --line-2:#33405e;
+  --ink:#EEF2F8; --ink-2:#C9D2E3; --muted:#8A97B1; --faint:#5D6A85;
+  --lava:#FF6B35; --lava-2:#FF9F1C; --glow:rgba(255,107,53,.35);
+  --d1:#FFD166; --d2:#FF9F1C; --d3:#FF4D4D; --d4:#C13CFF;
+  --radius:16px;
+}
+*{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height:1.5;
+  font-variant-numeric:tabular-nums;
+}
+a{ color:var(--lava-2); }
+.wrap{ max-width:1240px; margin:0 auto; padding:0 16px; }
+button{ font:inherit; color:inherit; cursor:pointer; }
+
+/* Hero */
+.hero{ position:relative; overflow:hidden; border-bottom:1px solid var(--line); }
+#seismo{ position:absolute; inset:0; width:100%; height:100%; opacity:.55; }
+.hero::after{ content:""; position:absolute; inset:0; background:radial-gradient(ellipse at 20% 0%, rgba(255,107,53,.18), transparent 60%), linear-gradient(to bottom, transparent 55%, var(--bg)); pointer-events:none; }
+.hero-in{ position:relative; z-index:1; padding:56px 16px 40px; }
+.eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:12.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--lava-2); font-weight:700; }
+.eyebrow .live{ width:8px; height:8px; border-radius:50%; background:var(--lava); box-shadow:0 0 0 0 var(--glow); animation:beat 1.8s infinite; }
+@keyframes beat{ 0%{ box-shadow:0 0 0 0 rgba(255,107,53,.7);} 70%{ box-shadow:0 0 0 12px rgba(255,107,53,0);} 100%{ box-shadow:0 0 0 0 rgba(255,107,53,0);} }
+h1{ font-size:clamp(34px, 6vw, 64px); line-height:1.02; margin:14px 0 12px; letter-spacing:-.02em; font-weight:800; }
+h1 .grad{ background:linear-gradient(90deg, var(--d1), var(--lava) 55%, var(--d4)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.lede{ max-width:640px; color:var(--ink-2); font-size:17px; margin:0; }
+.hero-stats{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; margin-top:32px; }
+.hs{ background:rgba(18,24,38,.7); backdrop-filter:blur(6px); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; }
+.hs b{ display:block; font-size:clamp(24px, 3.4vw, 36px); line-height:1.1; font-weight:800; }
+.hs span{ color:var(--muted); font-size:13px; }
+
+/* Section heads */
+section{ margin-top:36px; }
+.sh{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+.sh h2{ margin:0; font-size:22px; letter-spacing:-.01em; }
+.sh p{ margin:2px 0 0; color:var(--muted); font-size:14px; }
+
+/* Controls */
+.controls{ display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; margin-bottom:12px; }
+.seg{ display:inline-flex; background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:3px; }
+.seg button{ background:none; border:0; padding:6px 12px; border-radius:999px; font-size:13.5px; color:var(--ink-2); white-space:nowrap; }
+.seg button.on{ background:var(--lava); color:#1a0b04; font-weight:700; }
+.ctl{ display:flex; align-items:center; gap:8px; }
+.ctl-label{ min-width:64px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-right:2px; }
+.search{ flex:1 1 220px; min-width:180px; position:relative; }
+.search input{ width:100%; background:var(--panel); border:1px solid var(--line); color:var(--ink); border-radius:999px; padding:8px 34px 8px 14px; font:inherit; font-size:14px; outline:none; }
+.search input:focus{ border-color:var(--lava); }
+.search button{ position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:0; color:var(--muted); font-size:18px; line-height:1; padding:4px 6px; display:none; }
+.search.has button{ display:block; }
+
+/* Map */
+.map-area{ position:relative; }
+.map-box{ position:relative; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; background:#0d1220; }
+#map{ height:min(68vh, 640px); min-height:380px; background:#0d1220; }
+.year-big{ position:absolute; z-index:500; left:58px; top:12px; text-shadow:0 2px 12px rgba(0,0,0,.6); pointer-events:none; font-weight:800; font-size:clamp(40px, 7vw, 76px); line-height:1; color:rgba(238,242,248,.13); letter-spacing:-.03em; }
+.year-big small{ display:block; font-size:13px; letter-spacing:.05em; color:var(--ink-2); font-weight:600; margin-top:6px; opacity:.9; }
+.legend{ position:absolute; z-index:500; right:12px; bottom:28px; background:rgba(11,15,23,.82); backdrop-filter:blur(6px); border:1px solid var(--line); border-radius:12px; padding:10px 12px; font-size:12px; color:var(--ink-2); }
+.legend h4{ margin:0 0 6px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+.legend .row{ display:flex; align-items:center; gap:8px; margin:3px 0; }
+.legend .dot{ width:10px; height:10px; border-radius:50%; flex:none; }
+.legend .sizes{ display:flex; align-items:flex-end; gap:10px; margin-top:4px; }
+.legend .sizes i{ display:block; border-radius:50%; border:1.5px solid var(--ink-2); margin:0 auto 3px; }
+.legend .sizes div{ text-align:center; }
+.legend-toggle{ display:none; }
+.leaflet-container{ font:inherit; }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip{ background:var(--panel-2); color:var(--ink); border:1px solid var(--line-2); box-shadow:0 10px 40px rgba(0,0,0,.5); }
+.leaflet-popup-content{ margin:12px 14px; font-size:13.5px; line-height:1.45; }
+.leaflet-container a.leaflet-popup-close-button{ color:var(--muted); }
+.leaflet-control-attribution{ background:rgba(11,15,23,.75)!important; color:var(--muted)!important; font-size:10.5px; }
+.leaflet-control-attribution a{ color:var(--ink-2)!important; }
+.leaflet-bar a{ background:var(--panel-2); color:var(--ink); border-color:var(--line)!important; }
+.leaflet-bar a:hover{ background:var(--line); }
+.pop-mag{ display:inline-block; font-weight:800; font-size:20px; padding:0 8px; border-radius:8px; color:#140904; margin-right:6px; }
+.pop-where{ font-weight:700; }
+.pop-meta{ color:var(--muted); font-size:12.5px; margin-top:6px; }
+.q-big{ filter:drop-shadow(0 0 6px rgba(255,107,53,.75)); }
+.q-new{ animation:qpulse 2.2s ease-in-out infinite; }
+@keyframes qpulse{ 50%{ stroke-width:6; stroke-opacity:.25; } }
+.ripple{ pointer-events:none; }
+.ripple span{ display:block; width:100%; height:100%; border-radius:50%; border:2px solid var(--rc, var(--lava)); animation:rip 1.6s ease-out forwards; }
+@keyframes rip{ from{ transform:scale(.1); opacity:1; } to{ transform:scale(1); opacity:0; } }
+
+/* Player */
+.player{ display:flex; align-items:center; gap:12px; padding:12px 14px; border-top:1px solid var(--line); background:var(--panel); flex-wrap:wrap; }
+.play{ width:44px; height:44px; border-radius:50%; border:0; background:var(--lava); color:#1a0b04; display:grid; place-items:center; flex:none; box-shadow:0 0 0 0 var(--glow); transition:transform .15s; }
+.play:hover{ transform:scale(1.06); }
+.play svg{ width:20px; height:20px; }
+.track{ flex:1 1 300px; display:flex; flex-direction:column; gap:4px; min-width:200px; }
+.track-top{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); }
+.track-top b{ color:var(--ink); font-weight:700; }
+input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:6px; background:linear-gradient(to right, var(--lava) var(--p,100%), var(--line) var(--p,100%)); outline:none; margin:6px 0; }
+input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:#fff; border:3px solid var(--lava); cursor:pointer; }
+input[type=range]::-moz-range-thumb{ width:14px; height:14px; border-radius:50%; background:#fff; border:3px solid var(--lava); cursor:pointer; }
+.pbtn{ background:var(--panel-2); border:1px solid var(--line); border-radius:999px; padding:7px 12px; font-size:13px; color:var(--ink-2); white-space:nowrap; }
+.pbtn:hover{ border-color:var(--line-2); color:var(--ink); }
+
+/* Stats strip */
+.strip{ display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:12px; margin-top:14px; }
+.st{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; min-width:0; }
+.st .k{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
+.st .v{ font-size:26px; font-weight:800; line-height:1.15; margin-top:4px; }
+.st .s{ font-size:12.5px; color:var(--ink-2); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* Charts */
+.grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
+.card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px; min-width:0; }
+.card h3{ margin:0; font-size:15px; }
+.card .sub{ color:var(--muted); font-size:12.5px; margin:2px 0 10px; }
+.card.wide{ grid-column:1 / -1; }
+.chart svg{ display:block; width:100%; height:auto; overflow:visible; }
+.chart text{ fill:var(--muted); font-size:11px; font-family:inherit; }
+.chart .grid-l{ stroke:var(--line); stroke-width:1; }
+.chart rect.bar{ transition:opacity .15s; }
+.chart rect.bar:hover, .chart .hbar:hover rect{ opacity:.75; }
+.chart .hbar{ cursor:pointer; }
+.chart .hbar text.lbl{ fill:var(--ink-2); font-size:12px; }
+.chart .hbar text.num{ fill:var(--ink); font-size:12px; font-weight:700; }
+.chart .cur{ fill:none; stroke:#fff; stroke-width:1.5; stroke-dasharray:3 3; }
+
+/* Top list */
+.top{ list-style:none; margin:0; padding:0; counter-reset:t; }
+.top li{ display:grid; grid-template-columns:28px 58px 1fr auto; gap:10px; align-items:center; padding:9px 6px; border-top:1px solid var(--line); cursor:pointer; border-radius:8px; }
+.top li:first-child{ border-top:0; }
+.top li:hover{ background:var(--panel-2); }
+.top li::before{ counter-increment:t; content:counter(t); color:var(--faint); font-weight:700; text-align:center; }
+.top .m{ font-weight:800; font-size:17px; text-align:center; border-radius:8px; color:#140904; padding:2px 0; }
+.top .w{ min-width:0; }
+.top .w b{ display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.top .w span{ font-size:12.5px; color:var(--muted); }
+.top .dp{ font-size:12.5px; color:var(--muted); white-space:nowrap; }
+
+/* Energy */
+.energy{ display:grid; grid-template-columns:1.1fr 1fr; gap:18px; align-items:center; }
+.energy p{ color:var(--ink-2); margin:0 0 10px; font-size:14.5px; }
+.eb{ display:flex; flex-direction:column; gap:8px; }
+.eb .r{ display:grid; grid-template-columns:52px 1fr 92px; gap:10px; align-items:center; font-size:13px; }
+.eb .r b{ font-weight:800; }
+.eb .r .bar{ height:12px; border-radius:6px; background:linear-gradient(90deg, var(--d1), var(--lava)); min-width:3px; }
+.eb .r span{ color:var(--muted); text-align:right; }
+
+/* Disclaimer + footer */
+.disc{ margin-top:40px; border:1px solid rgba(255,159,28,.45); background:linear-gradient(180deg, rgba(255,159,28,.09), rgba(255,159,28,.03)); border-radius:var(--radius); padding:18px 20px; display:grid; grid-template-columns:auto 1fr; gap:14px; }
+.disc .ic{ width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:rgba(255,159,28,.15); color:var(--lava-2); font-size:22px; font-weight:800; }
+.disc h3{ margin:0 0 6px; font-size:16px; }
+.disc p{ margin:0 0 8px; color:var(--ink-2); font-size:14px; }
+.disc p:last-child{ margin-bottom:0; }
+.disc small{ color:var(--muted); }
+footer{ margin:28px 0 0; padding:20px 0 28px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+footer a{ color:inherit; }
+.app-foot{ font-size:11.5px; margin:0; }
+.actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+/* Tooltip */
+#tip{ position:fixed; z-index:2000; pointer-events:none; background:var(--panel-2); border:1px solid var(--line-2); color:var(--ink); padding:6px 9px; border-radius:8px; font-size:12.5px; box-shadow:0 8px 24px rgba(0,0,0,.45); opacity:0; transition:opacity .1s; max-width:260px; }
+#tip.on{ opacity:1; }
+
+@media (max-width: 960px){
+  .strip{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .strip .st:first-child{ grid-column:1 / -1; }
+  .grid, .energy{ grid-template-columns:1fr; }
+}
+@media (max-width: 640px){
+  .hero-in{ padding:36px 16px 28px; }
+  .hero-stats{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .seg button{ padding:6px 9px; font-size:13px; }
+  .legend{ display:none; }
+  .legend.open{ display:block; }
+  .legend-toggle{ display:block; position:absolute; z-index:501; right:12px; bottom:12px; background:rgba(11,15,23,.85); border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:12px; color:var(--ink-2); }
+  .legend.open + .legend-toggle{ display:none; }
+  .top li{ grid-template-columns:22px 50px 1fr; }
+  .top .dp{ display:none; }
+  .disc{ grid-template-columns:1fr; }
+}
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+}
+@media print{
+  body{ background:#fff; color:#000; }
+  .hero::after, #seismo, .controls, .player, .legend-toggle, .actions, #tip{ display:none!important; }
+  .hs, .st, .card, .disc{ background:#fff!important; border-color:#bbb!important; color:#000; }
+  .chart text, .st .k, .card .sub, .hs span{ fill:#333; color:#333; }
+  section{ break-inside:avoid; }
+  footer::after{ content:"Σεισμοί στην Ελλάδα · ferelis.gr · Δεδομένα: gein.noa.gr"; position:fixed; bottom:0; left:0; right:0; text-align:center; font-size:10px; color:#555; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <canvas id="seismo" aria-hidden="true"></canvas>
+  <div class="wrap hero-in">
+    <div class="eyebrow"><span class="live"></span> Σεισμολογικός κατάλογος · 1964–2026</div>
+    <h1>Η Ελλάδα <span class="grad">σείεται.</span></h1>
+    <p class="lede">Κάθε σεισμός 5 Ρίχτερ και πάνω στην Ελλάδα και γύρω της τα τελευταία 62 χρόνια. Δες τον χάρτη, πάτα ▶ για να τους δεις να έρχονται με τη σειρά, και φίλτραρε κατά μέγεθος, βάθος ή περιοχή.</p>
+    <div class="hero-stats">
+      <div class="hs"><b data-count="total">0</b><span>σεισμοί ≥ 5,0</span></div>
+      <div class="hs"><b data-count="max">0</b><span id="hsMaxWhere">ο ισχυρότερος</span></div>
+      <div class="hs"><b data-count="perYear">0</b><span>σεισμοί τον χρόνο κατά μέσο όρο</span></div>
+      <div class="hs"><b data-count="eq">0</b><span>αν όλη η ενέργεια ήταν ένας σεισμός</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="mapSec" style="margin-top:28px">
+    <div class="controls" role="group" aria-label="Φίλτρα">
+      <div class="ctl"><span class="ctl-label">Μέγεθος</span>
+      <div class="seg" id="segMag">
+        <button data-v="5" class="on">≥ 5</button><button data-v="5.5">≥ 5,5</button><button data-v="6">≥ 6</button><button data-v="6.5">≥ 6,5</button>
+      </div></div>
+      <div class="ctl"><span class="ctl-label">Βάθος</span>
+      <div class="seg" id="segDepth">
+        <button data-v="all" class="on">Όλα</button><button data-v="s">≤ 30 χλμ</button><button data-v="m">31–70</button><button data-v="d">&gt; 70</button>
+      </div></div>
+      <div class="search" id="searchBox">
+        <input id="q" type="search" placeholder="Περιοχή, π.χ. Κρήτη, Ζάκυνθος, Σάμος…" autocomplete="off" aria-label="Αναζήτηση περιοχής">
+        <button id="qClear" aria-label="Καθαρισμός">×</button>
+      </div>
+    </div>
+
+    <div class="map-box">
+      <div class="map-area">
+      <div id="map" aria-label="Χάρτης σεισμών"></div>
+      <div class="year-big" id="yearBig">2026<small id="yearSub"></small></div>
+      <div class="legend" id="legend">
+        <h4>Βάθος</h4>
+        <div class="row"><span class="dot" style="background:var(--d1)"></span>έως 10 χλμ</div>
+        <div class="row"><span class="dot" style="background:var(--d2)"></span>11–30 χλμ</div>
+        <div class="row"><span class="dot" style="background:var(--d3)"></span>31–70 χλμ</div>
+        <div class="row"><span class="dot" style="background:var(--d4)"></span>πάνω από 70 χλμ</div>
+        <h4 style="margin-top:10px">Μέγεθος</h4>
+        <div class="sizes" id="legendSizes"></div>
+      </div>
+      <button class="legend-toggle" id="legendToggle">Υπόμνημα</button>
+      </div>
+      <div class="player">
+        <button class="play" id="play" aria-label="Αναπαραγωγή"><svg id="playIco" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></button>
+        <div class="track">
+          <div class="track-top"><span>Έως <b id="upLabel">—</b></span><span id="visLabel">—</span></div>
+          <input type="range" id="time" min="0" max="1000" value="1000" aria-label="Χρονολόγιο">
+        </div>
+        <button class="pbtn" id="speed" title="Ταχύτητα">Ταχύτητα 1×</button>
+        <button class="pbtn" id="showAll">Όλα</button>
+      </div>
+    </div>
+
+    <div class="strip">
+      <div class="st"><div class="k">Στον χάρτη</div><div class="v" id="sCount">—</div><div class="s" id="sCountSub">—</div></div>
+      <div class="st"><div class="k">Ισχυρότερος</div><div class="v" id="sMax">—</div><div class="s" id="sMaxSub">—</div></div>
+      <div class="st"><div class="k">Πιο πρόσφατος</div><div class="v" id="sLast">—</div><div class="s" id="sLastSub">—</div></div>
+      <div class="st"><div class="k">Μέσο βάθος</div><div class="v" id="sDepth">—</div><div class="s" id="sDepthSub">—</div></div>
+      <div class="st"><div class="k">Ισοδύναμο ενέργειας</div><div class="v" id="sEq">—</div><div class="s">όλοι μαζί σαν ένας σεισμός</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sh"><div><h2>Σε αριθμούς</h2><p>Τα γραφήματα ακολουθούν τα φίλτρα και το χρονολόγιο.</p></div></div>
+    <div class="grid">
+      <div class="card wide"><h3>Σεισμοί ανά έτος</h3><div class="sub">Το χρώμα δείχνει τον ισχυρότερο σεισμό της χρονιάς.</div><div class="chart" id="cYear"></div></div>
+      <div class="card"><h3>Πόσο μεγάλοι</h3><div class="sub">Πλήθος ανά μέγεθος (ML). Οι μεγάλοι είναι σπάνιοι.</div><div class="chart" id="cMag"></div></div>
+      <div class="card"><h3>Πόσο βαθιά</h3><div class="sub">Οι περισσότεροι γίνονται στα πρώτα 30 χιλιόμετρα.</div><div class="chart" id="cDepth"></div></div>
+      <div class="card"><h3>Πού γίνονται</h3><div class="sub">Κατά προσέγγιση, από την πλησιέστερη πόλη. Πάτα μια περιοχή για φίλτρο.</div><div class="chart" id="cArea"></div></div>
+      <div class="card"><h3>Οι 10 ισχυρότεροι</h3><div class="sub">Πάτα για να τον δεις στον χάρτη.</div><ul class="top" id="topList"></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sh"><div><h2>Ένα Ρίχτερ πάνω, 32 φορές περισσότερη ενέργεια</h2><p>Γιατί ένας 7άρης δεν είναι «λίγο μεγαλύτερος» από έναν 5άρη.</p></div></div>
+    <div class="card energy">
+      <div>
+        <p>Η κλίμακα είναι λογαριθμική. Κάθε μονάδα πάνω σημαίνει περίπου <b>32 φορές</b> περισσότερη ενέργεια, και δύο μονάδες σχεδόν <b>1.000 φορές</b>.</p>
+        <p>Έτσι ο σεισμός των 7,0 του 1964 (στη βορειοδυτική Τουρκία, 164 χλμ από τη Μυτιλήνη) απελευθέρωσε όση ενέργεια χίλιοι σεισμοί των 5,0. Στη μπάρα δίπλα, κάθε γραμμή έχει μήκος ανάλογο της ενέργειας.</p>
+        <p style="color:var(--muted);font-size:13px;margin:0">Οι μπάρες κάτω από 5,5 είναι τόσο μικρές που μόλις φαίνονται. Αυτό ακριβώς είναι το νόημα.</p>
+      </div>
+      <div class="eb" id="energyBars"></div>
+    </div>
+  </section>
+
+  <div class="disc" role="note">
+    <div class="ic">!</div>
+    <div>
+      <h3>Πηγή δεδομένων και αποποίηση ευθύνης</h3>
+      <p>Τα δεδομένα προέρχονται από τη <b>Βάση Αναζήτησης του Γεωδυναμικού Ινστιτούτου του Εθνικού Αστεροσκοπείου Αθηνών</b> (<a href="https://www.gein.noa.gr" target="_blank" rel="noopener">gein.noa.gr</a>). Αναζήτηση στις 31/10/2026 με κριτήρια: 01/01/1820 – 31/10/2026, γεωγρ. πλάτος 33,52°–42,44° Β, μήκος 18,28°–30,72° Α, βάθος 0–200 χλμ, μέγεθος 5–8. Ο κατάλογος ξεκινά το 1964.</p>
+      <p>Η σελίδα αυτή είναι προσωπική και <b>δεν σχετίζεται με το Εθνικό Αστεροσκοπείο Αθηνών</b>. Τα στοιχεία παρουσιάζονται όπως είναι, μόνο για ενημέρωση, χωρίς καμία εγγύηση ακρίβειας ή πληρότητας, και μπορεί να έχουν αναθεωρηθεί από τότε. Δεν προβλέπει σεισμούς και δεν πρέπει να χρησιμοποιείται για αποφάσεις ασφάλειας. Για επίσημη και επίκαιρη πληροφόρηση ανατρέξτε στο <a href="https://www.gein.noa.gr" target="_blank" rel="noopener">gein.noa.gr</a>.</p>
+      <p><small>Για παλιότερους σεισμούς (περίπου πριν το 1985) οι συντεταγμένες είναι στρογγυλεμένες και το βάθος συχνά ορίζεται συμβατικά στα 10 χλμ. Η «περιοχή» βγαίνει από την πλησιέστερη πόλη του καταλόγου, γι' αυτό σεισμοί στα σύνορα ή στη θάλασσα μπορεί να αντιστοιχούν σε μακρινή πόλη. Οι ώρες εμφανίζονται σε ώρα Ελλάδας. Χαρτογραφικό υπόβαθρο: © Esri.</small></p>
+    </div>
+  </div>
+
+  <footer>
+    <div>
+      <p class="app-foot">Σεισμοί στην Ελλάδα · <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a> · Έκδοση 31.10 · 12:09</p>
+      <p class="app-foot">Δεδομένα: Γεωδυναμικό Ινστιτούτο, Εθνικό Αστεροσκοπείο Αθηνών · <a href="https://www.gein.noa.gr" target="_blank" rel="noopener">gein.noa.gr</a></p>
+    </div>
+    <div class="actions">
+      <button class="pbtn" id="csv">Λήψη CSV</button>
+      <button class="pbtn" onclick="window.print()">Εκτύπωση</button>
+    </div>
+  </footer>
+</main>
+
+<div id="tip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// Data: gein.noa.gr search export, [time GMT, lat, lon, depth km, ML, location]
+const RAW = [
+["2026-07-02 11:06:21",35.397,27.3019,12,5.2,"33.1 km SSE of Karpathos"],
+["2026-06-24 08:25:57",35.441,27.2049,16,5,"25.6 km SSE of Karpathos"],
+["2026-06-20 09:37:28",34.8541,24.1498,15,5.3,"63.9 km SSW of Rethimnon"],
+["2026-06-14 18:17:26",36.6756,21.6783,9,5.1,"15.8 km S of Methoni"],
+["2026-06-07 10:02:47",38.7025,23.448,13,5.2,"29.6 km NNW of Chalkida"],
+["2026-04-24 08:58:16",34.8541,26.1127,6,5,"103.6 km ESE of Iraklion"],
+["2026-04-24 03:18:51",34.8459,25.9561,10,5.7,"92.1 km SE of Iraklion"],
+["2026-03-08 03:32:31",39.6858,20.6474,10,5.3,"17.5 km W of Ioannina"],
+["2025-12-15 23:41:42",37.3279,19.8816,8,5.2,"103.1 km WSW of Zakynthos"],
+["2025-11-11 01:58:19",35.4254,22.8058,25,5,"93.8 km SSW of Kithira"],
+["2025-09-08 21:27:56",38.1999,24.1539,14,5.2,"44.0 km ENE of Athens"],
+["2025-07-23 13:26:55",35.8017,23.4988,61,5.1,"56.7 km NW of Chania"],
+["2025-07-11 16:24:03",37.1274,20.3714,12,5,"87.1 km SSW of Zakynthos"],
+["2025-07-07 17:46:08",35.1993,26.5823,8,5,"72.8 km SW of Karpathos"],
+["2025-06-07 12:46:19",40.2773,24.1475,12,5.3,"9.2 km WNW of Kariai"],
+["2025-06-03 11:26:30",34.8514,25.8536,9,5.3,"84.3 km SE of Iraklion"],
+["2025-06-02 23:17:28",36.6376,28.2477,65,5.8,"22.0 km N of Rodhos"],
+["2025-05-22 03:19:37",35.701,25.9067,60,6.1,"81.7 km ENE of Iraklion"],
+["2025-05-13 22:51:15",35.2139,26.9522,64,6.1,"53.2 km SSW of Karpathos"],
+["2025-02-18 16:54:34",38.0095,21.1052,14,5,"18.7 km NW of Andravida"],
+["2025-02-18 04:46:52",36.638,25.8412,13,5,"44.0 km NE of Thira"],
+["2025-02-17 07:49:50",36.628,25.6993,12,5.1,"33.4 km NE of Thira"],
+["2025-02-12 01:14:54",36.5941,25.6892,12,5,"30.2 km NE of Thira"],
+["2025-02-10 22:37:26",36.6444,25.7259,13,5,"36.4 km NE of Thira"],
+["2025-02-10 20:16:28",36.6838,25.7817,12,5.3,"43.0 km NE of Thira"],
+["2025-02-09 19:05:39",36.649,25.6599,12,5,"32.8 km NE of Thira"],
+["2025-02-05 19:09:38",36.6417,25.7423,12,5.2,"37.3 km NE of Thira"],
+["2025-02-04 13:04:14",36.6147,25.7016,13,5,"32.6 km NE of Thira"],
+["2025-01-21 20:38:43",39.4093,26.2715,14,5.1,"27.0 km N of Mitilini"],
+["2024-11-03 17:03:51",40.1353,23.2475,15,5.2,"31.1 km SSW of Poliyiros"],
+["2024-08-28 16:29:55",34.9017,24.2194,14,5.2,"56.4 km SSW of Rethimnon"],
+["2024-07-21 04:01:29",34.8871,23.1866,22,5.3,"102.5 km SW of Chania"],
+["2024-03-29 07:12:48",37.2098,21.1935,30,5.8,"57.3 km SSW of Pyrgos"],
+["2023-11-03 06:26:37",38.7383,23.5808,11,5.1,"30.6 km N of Chalkida"],
+["2023-05-18 18:58:52",34.9956,24.8378,8,5.1,"45.3 km SW of Iraklion"],
+["2023-04-26 20:00:36",36.3199,26.3901,108,5.2,"86.3 km E of Thira"],
+["2023-03-14 16:36:01",35.6003,22.1329,15,5.2,"107.7 km SW of Kithira"],
+["2023-01-25 12:37:06",35.799,28.6212,30,5.9,"79.8 km SSE of Rodhos"],
+["2022-11-29 20:06:39",38.2576,24.2555,9,5,"54.9 km NE of Athens"],
+["2022-11-20 23:25:01",35.8099,26.4606,47,5.5,"63.8 km WNW of Karpathos"],
+["2022-10-08 22:02:28",38.3052,22.516,13,5,"27.4 km SSE of Amfissa"],
+["2022-10-02 04:04:00",34.2654,26.2253,8,5,"154.5 km SE of Iraklion"],
+["2022-09-08 07:36:20",37.8708,19.9026,9,5.4,"60.9 km WSW of Argostoli"],
+["2022-09-03 04:13:09",34.8734,26.4432,4,5.2,"108.8 km SW of Karpathos"],
+["2022-08-31 10:10:11",37.5577,26.8204,10,5.2,"26.1 km SSW of Samos"],
+["2022-04-27 01:51:53",35.907,22.6428,79,5.2,"51.0 km SW of Kithira"],
+["2022-01-16 11:48:05",39.9834,24.2747,19,5.4,"29.7 km S of Kariai"],
+["2022-01-09 21:43:47",40.779,21.3826,14,5.3,"1.5 km WSW of Florina"],
+["2021-12-29 16:47:08",34.628,25.1706,52,5.3,"77.6 km S of Iraklion"],
+["2021-12-29 05:08:09",34.791,25.1303,67,5.7,"59.4 km S of Iraklion"],
+["2021-12-26 18:59:02",35.2029,26.8497,6,5.5,"58.0 km SSW of Karpathos"],
+["2021-12-26 15:15:09",35.0372,26.9659,9,5.2,"71.8 km SSW of Karpathos"],
+["2021-12-18 05:16:39",36.0777,23.2201,58,5.4,"26.5 km SE of Kithira"],
+["2021-11-30 04:00:39",37.6968,26.0019,16,5,"19.2 km NW of Ikaria"],
+["2021-10-19 05:32:35",34.7131,28.2532,58,6.1,"146.2 km SE of Karpathos"],
+["2021-10-12 09:24:02",34.8944,26.4716,10,6.3,"105.4 km SW of Karpathos"],
+["2021-09-28 04:48:09",35.154,25.2232,11,5.3,"20.8 km SSE of Iraklion"],
+["2021-09-27 06:17:21",35.153,25.2745,10,5.7,"23.2 km SE of Iraklion"],
+["2021-08-03 12:38:19",36.3515,27.0992,12,5,"62.6 km SSW of Kos"],
+["2021-08-01 04:31:26",36.3821,27.0895,16,5.3,"59.6 km SSW of Kos"],
+["2021-06-21 22:14:15",36.3808,27.0708,15,5.7,"60.2 km SSW of Kos"],
+["2021-04-13 20:28:04",36.465,27.1797,15,5.2,"48.6 km SSW of Kos"],
+["2021-03-12 12:57:50",39.8392,22.0139,7,5.3,"38.0 km NNE of Trikala"],
+["2021-03-04 19:23:51",39.8378,21.9438,9,5.1,"34.8 km NNE of Trikala"],
+["2021-03-04 18:38:19",39.7993,22.126,5,5.9,"31.0 km NW of Larissa"],
+["2021-03-03 18:24:08",39.7316,22.1013,6,5.2,"29.2 km WNW of Larissa"],
+["2021-03-03 11:45:45",39.6996,22.2478,7,5,"16.3 km WNW of Larissa"],
+["2021-03-03 10:16:08",39.76,22.2102,8,5.9,"22.6 km NW of Larissa"],
+["2021-02-17 03:36:06",38.3601,21.9466,6,5,"17.1 km NW of Aegion"],
+["2020-10-30 15:14:56",37.8195,26.8698,15,5,"11.7 km NW of Samos"],
+["2020-10-30 11:51:24",37.9001,26.8149,12,6.7,"21.3 km NW of Samos"],
+["2020-10-21 23:00:55",37.164,20.4025,7,5.3,"82.2 km SSW of Zakynthos"],
+["2020-10-12 04:11:27",35.6328,26.2926,8,5.3,"77.1 km W of Karpathos"],
+["2020-10-12 00:30:41",35.6314,26.293,21,5.1,"77.1 km W of Karpathos"],
+["2020-09-26 22:50:24",39.9541,24.3059,18,5.2,"33.2 km S of Kariai"],
+["2020-09-18 16:28:18",34.9338,25.2933,52,5.3,"45.9 km SSE of Iraklion"],
+["2020-08-17 07:27:03",36.9049,23.725,90,5.2,"69.2 km WNW of Milos"],
+["2020-06-28 17:43:30",36.7117,28.2431,54,5.4,"30.2 km N of Rodhos"],
+["2020-06-26 07:21:13",38.7424,27.7982,20,5.2,"130.9 km NNE of Samos"],
+["2020-05-23 22:50:12",34.118,25.6732,29,5,"143.1 km SSE of Iraklion"],
+["2020-05-20 23:43:18",35.0647,20.3357,38,5.9,"230.3 km SSW of Methoni"],
+["2020-05-18 23:22:37",34.292,25.5908,7,5.2,"122.3 km SSE of Iraklion"],
+["2020-05-02 12:51:09",34.4366,25.6915,9,6,"111.3 km SSE of Iraklion"],
+["2020-03-21 00:49:50",39.3265,20.5215,8,5.6,"29.5 km SE of Igoumenitsa"],
+["2020-01-30 11:21:38",35.3339,27.8009,11,5.3,"69.9 km ESE of Karpathos"],
+["2020-01-30 01:28:08",35.1965,28.0042,28,5.2,"93.7 km ESE of Karpathos"],
+["2020-01-28 15:38:34",35.1332,28.0611,13,5.1,"102.0 km SE of Karpathos"],
+["2019-12-10 21:58:30",35.3851,26.4972,33,5.3,"66.4 km WSW of Karpathos"],
+["2019-11-27 07:23:42",35.6854,23.2599,71,6.1,"66.6 km SSE of Kithira"],
+["2019-10-03 04:44:55",36.2814,28.5947,14,5.1,"37.8 km ESE of Rodhos"],
+["2019-09-21 14:04:24",41.4375,19.4087,10,5.9,"182.0 km WNW of Florina"],
+["2019-07-31 04:40:05",35.4044,24.8941,66,5.2,"23.2 km WNW of Iraklion"],
+["2019-07-19 11:13:15",38.118,23.53,13,5.1,"23.3 km NW of Athens"],
+["2019-06-01 04:26:18",40.5222,20.7706,6,5,"41.9 km W of Kastoria"],
+["2019-03-30 10:46:19",38.3492,22.2972,13,5.4,"20.6 km SSW of Amfissa"],
+["2019-02-20 18:23:29",39.5572,26.3974,20,5,"45.2 km NNE of Mitilini"],
+["2019-02-05 02:26:08",39.0042,20.6094,7,5.4,"13.6 km WNW of Preveza"],
+["2019-01-24 14:30:54",35.9418,28.1708,35,5.2,"55.7 km S of Rodhos"],
+["2018-11-19 13:05:54",37.1477,20.5033,10,5.1,"79.5 km SSW of Zakynthos"],
+["2018-10-30 15:12:02",37.4575,20.4522,6,5.5,"53.9 km SW of Zakynthos"],
+["2018-10-30 02:59:59",37.5938,20.5123,7,5.4,"40.2 km WSW of Zakynthos"],
+["2018-10-25 23:09:20",37.1384,20.6589,8,5.3,"75.5 km SSW of Zakynthos"],
+["2018-10-25 22:54:50",37.3516,20.4922,13,6.6,"60.4 km SW of Zakynthos"],
+["2018-09-27 10:21:50",36.6632,21.5021,14,5.2,"24.5 km SW of Methoni"],
+["2018-08-31 07:12:24",39.2857,21.6307,10,5,"26.6 km WSW of Karditsa"],
+["2018-06-25 05:14:47",36.6833,21.3745,5,5.2,"32.6 km WSW of Methoni"],
+["2017-10-11 22:49:44",39.114,24.227,12,5,"37.2 km NW of Skyros"],
+["2017-09-01 16:48:34",36.0012,28.0002,76,5.1,"52.8 km SSW of Rodhos"],
+["2017-08-08 07:42:21",37.0283,27.6052,5,5.1,"31.9 km ENE of Kos"],
+["2017-07-31 21:29:09",34.1427,23.9057,8,5.3,"145.4 km SSW of Rethimnon"],
+["2017-07-20 22:31:11",36.9643,27.4332,10,6.2,"15.1 km ENE of Kos"],
+["2017-07-15 20:30:15",34.8185,25.4608,5,5.3,"63.8 km SSE of Iraklion"],
+["2017-07-03 11:18:20",41.1787,20.9053,4,5,"60.5 km NW of Florina"],
+["2017-06-17 19:50:05",38.8497,26.4302,12,5.2,"38.5 km SSE of Mitilini"],
+["2017-06-12 12:28:38",38.8388,26.3623,12,6.1,"37.7 km SSE of Mitilini"],
+["2017-05-27 15:53:23",38.761,27.8295,24,5.2,"134.2 km NNE of Samos"],
+["2017-05-17 11:30:32",36.0288,27.4943,22,5.1,"51.2 km NE of Karpathos"],
+["2017-02-07 02:24:04",39.4898,26.1148,16,5.2,"37.8 km NNW of Mitilini"],
+["2017-02-06 10:58:02",39.5097,26.1213,15,5.1,"39.7 km NNW of Mitilini"],
+["2017-02-06 03:51:41",39.5143,26.0978,14,5,"40.8 km NNW of Mitilini"],
+["2017-01-25 18:50:53",35.3965,26.4477,61,5.4,"69.9 km WSW of Karpathos"],
+["2016-12-20 06:03:44",36.54,26.93,122,5.3,"50.7 km SW of Kos"],
+["2016-10-15 20:14:49",39.79,20.69,17,5.3,"19.4 km NW of Ioannina"],
+["2016-09-28 07:17:34",36.73,21.87,56,5,"17.9 km ESE of Methoni"],
+["2016-09-27 20:57:05",36.33,27.58,89,5.4,"58.8 km WSW of Rodhos"],
+["2016-07-30 17:26:20",35.11,22.67,10,5.1,"130.0 km WSW of Chania"],
+["2016-05-25 08:36:15",35.04,26.29,20,5.5,"104.2 km SW of Karpathos"],
+["2016-03-29 01:05:28",37.34,20.06,13,5.2,"89.1 km SW of Zakynthos"],
+["2016-02-15 18:55:00",37.59,21.72,24,5.2,"25.9 km ESE of Pyrgos"],
+["2015-12-26 11:00:49",35.61,27.25,66,5.2,"11.4 km ESE of Karpathos"],
+["2015-11-17 08:33:40",38.65,20.56,9,5.1,"9.8 km SW of Leukada"],
+["2015-11-17 07:10:07",38.67,20.6,11,6,"5.9 km SSW of Leukada"],
+["2015-07-24 09:58:32",36.58,26.8,155,5.3,"55.8 km SW of Kos"],
+["2015-06-09 21:49:46",35.04,26.79,16,5.4,"76.7 km SSW of Karpathos"],
+["2015-06-09 01:09:03",38.62,23.39,13,5.3,"25.2 km NW of Chalkida"],
+["2015-04-17 02:05:42",35.16,26.74,40,5.4,"67.2 km SSW of Karpathos"],
+["2015-04-16 18:07:44",35.23,26.82,37,6.1,"56.7 km SSW of Karpathos"],
+["2015-03-27 23:34:52",35.68,26.56,67,5.3,"52.9 km W of Karpathos"],
+["2014-12-06 01:45:06",38.87,26.27,27,5.1,"33.0 km S of Mitilini"],
+["2014-11-17 23:09:03",38.64,23.41,23,5.2,"25.6 km NW of Chalkida"],
+["2014-11-17 23:05:55",38.64,23.4,24,5.2,"26.2 km NW of Chalkida"],
+["2014-11-08 23:15:42",38.1,20.44,18,5,"8.9 km SSW of Argostoli"],
+["2014-10-24 23:43:15",38.92,21.15,12,5.2,"30.3 km SSE of Arta"],
+["2014-08-29 03:45:05",36.67,23.67,97,5.7,"69.4 km W of Milos"],
+["2014-08-22 04:27:53",39.92,23.46,29,5,"50.6 km S of Poliyiros"],
+["2014-06-11 03:53:39",34.84,28.36,32,5.1,"143.6 km SE of Karpathos"],
+["2014-05-24 09:25:01",40.29,25.4,28,6.3,"22.9 km SSW of Samothraki"],
+["2014-04-04 20:08:07",37.2,23.73,113,5.5,"66.2 km W of Seriphos"],
+["2014-02-03 03:08:44",38.25,20.4,11,5.7,"11.2 km NW of Argostoli"],
+["2014-01-26 18:45:08",38.23,20.41,17,5.1,"8.9 km NW of Argostoli"],
+["2014-01-26 13:55:43",38.22,20.53,16,5.8,"6.7 km NE of Argostoli"],
+["2013-10-12 13:11:53",35.5,23.28,65,6.2,"66.6 km W of Chania"],
+["2013-08-07 09:06:51",38.7,22.68,8,5.2,"28.2 km W of Atalanti"],
+["2013-06-16 21:39:04",34.28,25.13,28,5.6,"116.2 km S of Iraklion"],
+["2013-06-15 16:11:01",34.34,25.06,32,5.8,"109.7 km S of Iraklion"],
+["2013-06-06 11:53:46",36.74,21.86,39,5,"16.6 km ESE of Methoni"],
+["2013-04-06 11:26:06",34.82,24.11,24,5.1,"68.9 km SSW of Rethimnon"],
+["2013-02-17 03:12:52",37.16,20.52,15,5,"77.6 km SSW of Zakynthos"],
+["2013-01-08 14:16:08",39.67,25.56,31,5.8,"38.1 km SE of Limnos"],
+["2012-09-12 03:27:43",34.71,24.02,26,5.5,"83.6 km SSW of Rethimnon"],
+["2012-07-09 13:54:59",35.62,28.87,43,5.4,"108.3 km SSE of Rodhos"],
+["2012-06-10 12:49:36",36.41,28.91,39,5,"61.6 km E of Rodhos"],
+["2012-06-10 12:44:16",36.42,28.88,35,5.8,"58.9 km E of Rodhos"],
+["2012-06-07 20:54:24",40.92,27.93,22,5.4,"173.0 km E of Alexandroupolis"],
+["2012-04-16 11:23:42",36.66,21.54,33,5.2,"22.5 km SW of Methoni"],
+["2012-03-04 03:31:07",40.13,24.05,24,5,"21.6 km SW of Kariai"],
+["2012-02-14 01:34:38",40.13,24.09,24,5,"19.0 km SW of Kariai"],
+["2012-01-27 01:33:23",36.06,25.13,31,5.2,"48.1 km SW of Thira"],
+["2012-01-26 04:24:58",36.06,25.07,29,5.3,"51.3 km SW of Thira"],
+["2011-11-23 12:17:48",34.12,25.03,10,5.1,"134.3 km S of Iraklion"],
+["2011-07-19 07:13:12",37.21,19.92,9,5,"107.6 km SW of Zakynthos"],
+["2011-04-01 13:29:10",35.64,26.56,63,6.2,"52.9 km W of Karpathos"],
+["2011-02-28 07:49:07",34.98,25.42,53,5.2,"46.5 km SE of Iraklion"],
+["2010-12-17 09:37:47",36.94,24,106,5.1,"48.7 km WSW of Seriphos"],
+["2010-11-03 02:51:26",40.44,26.17,31,5,"51.7 km SSE of Alexandroupolis"],
+["2010-10-03 15:20:56",34.78,26.52,17,5.1,"113.7 km SSW of Karpathos"],
+["2010-08-22 10:22:58",37.24,19.95,24,5.4,"103.5 km SW of Zakynthos"],
+["2010-07-16 18:53:10",39.32,24.02,34,5.1,"49.3 km ENE of Skiathos"],
+["2010-07-16 08:11:01",36.81,26.91,165,5.1,"35.0 km WSW of Kos"],
+["2010-03-09 02:55:00",38.87,23.65,22,5.1,"36.0 km SSE of Skiathos"],
+["2010-01-22 00:46:56",38.42,21.97,12,5.1,"21.4 km NNW of Aegion"],
+["2010-01-18 15:56:09",38.41,21.95,20,5.2,"21.3 km NNW of Aegion"],
+["2010-01-17 20:16:04",35.26,27.86,29,5,"78.9 km SE of Karpathos"],
+["2009-11-11 09:51:08",37.47,20.47,21,5.3,"51.8 km SW of Zakynthos"],
+["2009-11-03 05:25:09",37.39,20.35,39,5.6,"65.6 km SW of Zakynthos"],
+["2009-09-06 21:49:40",41.62,20.41,10,5.4,"124.6 km NW of Florina"],
+["2009-07-01 09:30:13",34.35,25.4,30,5.8,"111.2 km SSE of Iraklion"],
+["2009-06-26 20:37:37",36.53,25.49,28,5,"13.6 km NNE of Thira"],
+["2009-06-19 14:05:02",35.46,28.31,42,5.4,"107.8 km ESE of Karpathos"],
+["2009-05-24 16:17:50",41.3,22.74,23,5.1,"36.0 km NNW of Kilkis"],
+["2009-02-16 23:16:38",37.13,20.78,15,5.5,"74.2 km S of Zakynthos"],
+["2009-01-13 06:12:42",35.66,26.39,42,5.2,"68.2 km W of Karpathos"],
+["2009-01-08 12:04:00",41.94,20.74,2,5,"139.9 km NNW of Florina"],
+["2008-12-13 08:27:19",38.72,22.57,24,5.2,"23.3 km SSE of Lamia"],
+["2008-10-14 02:16:57",38.87,23.61,21,5.1,"34.8 km SSE of Skiathos"],
+["2008-10-14 02:06:34",38.85,23.62,24,5.6,"37.1 km SSE of Skiathos"],
+["2008-08-04 19:38:22",33.89,26.56,32,5,"204.6 km SSW of Karpathos"],
+["2008-08-03 00:39:16",39.59,23.9,30,5.3,"59.1 km NE of Skiathos"],
+["2008-07-30 05:02:56",38.02,20.12,9,5,"36.0 km WSW of Argostoli"],
+["2008-07-15 03:26:34",35.85,27.92,56,6.2,"71.1 km SSW of Rodhos"],
+["2008-06-21 11:36:22",36.03,21.83,12,5.5,"88.2 km S of Methoni"],
+["2008-06-18 01:58:42",37.67,22.78,83,5.1,"12.1 km NNW of Nafplio"],
+["2008-06-12 00:20:45",35.11,26.19,29,5,"99.2 km ESE of Iraklion"],
+["2008-06-08 12:25:27",37.98,21.51,25,6.5,"23.1 km ENE of Andravida"],
+["2008-05-10 20:53:04",36.3,22.24,57,5.1,"70.0 km W of Kithira"],
+["2008-03-28 00:16:21",35.01,25.33,50,5.1,"39.4 km SSE of Iraklion"],
+["2008-03-19 23:01:52",38.92,24.17,35,5,"34.1 km W of Skyros"],
+["2008-02-26 10:46:05",35.96,21.7,5,5.2,"95.3 km S of Methoni"],
+["2008-02-20 18:27:04",36.18,21.72,25,6,"70.8 km S of Methoni"],
+["2008-02-19 23:15:40",36.19,21.77,22,5.1,"70.0 km S of Methoni"],
+["2008-02-14 12:08:55",36.22,21.75,38,6.1,"66.5 km S of Methoni"],
+["2008-02-14 10:09:23",36.5,21.78,41,6.2,"35.9 km SSE of Methoni"],
+["2008-02-04 22:15:37",38.09,21.94,25,5,"16.4 km WNW of Kalavrita"],
+["2008-01-06 05:14:19",37.11,22.78,86,6.1,"9.3 km SW of Leonidhion"],
+["2007-11-09 01:43:04",38.77,25.77,37,5.1,"54.9 km NW of Chios"],
+["2007-09-23 00:54:29",35.27,27.12,24,5.1,"44.1 km S of Karpathos"],
+["2007-06-29 18:09:11",39.25,20.26,19,5.2,"28.2 km S of Igoumenitsa"],
+["2007-04-16 07:38:47",41.46,19.68,8,5,"162.5 km WNW of Florina"],
+["2007-03-25 13:57:58",38.34,20.42,15,5.5,"19.3 km NNW of Argostoli"],
+["2007-02-03 13:43:22",35.8,22.58,99,5,"63.8 km SW of Kithira"],
+["2007-01-28 17:32:23",34.9,22.75,34,5.1,"133.6 km WSW of Chania"],
+["2006-08-08 21:20:08",40.1,19.72,20,5,"56.0 km NNW of Kerkyra"],
+["2006-08-06 07:49:43",40.21,19.49,14,5.1,"75.1 km NNW of Kerkyra"],
+["2006-04-12 16:52:01",37.61,20.95,19,5.4,"20.7 km SSE of Zakynthos"],
+["2006-04-11 17:29:28",37.68,20.91,18,5.4,"12.5 km S of Zakynthos"],
+["2006-04-11 00:02:41",37.64,20.92,18,5.2,"17.0 km S of Zakynthos"],
+["2006-04-04 22:05:03",37.58,20.93,18,5.2,"23.7 km S of Zakynthos"],
+["2006-01-08 11:34:54",36.21,23.41,69,6.4,"35.5 km E of Kithira"],
+["2005-11-25 09:30:56",35.02,23.32,32,5.2,"83.6 km SW of Chania"],
+["2005-10-20 21:40:03",38.15,26.63,25,5.6,"49.5 km ESE of Chios"],
+["2005-10-18 15:25:59",37.58,20.86,22,5.6,"23.7 km S of Zakynthos"],
+["2005-10-17 09:46:56",38.14,26.59,26,5.4,"47.1 km ESE of Chios"],
+["2005-10-17 05:45:18",38.13,26.59,29,5.5,"47.7 km ESE of Chios"],
+["2005-01-31 01:05:29",37.41,20.11,16,5.7,"81.1 km WSW of Zakynthos"],
+["2005-01-11 04:35:57",37.01,27.85,30,5,"51.5 km ENE of Kos"],
+["2004-12-20 23:02:13",37.01,28.28,19,5.1,"63.5 km N of Rodhos"],
+["2004-11-23 02:26:12",40.35,20.6,11,5.4,"36.1 km NNW of Konitsa"],
+["2004-11-04 06:22:37",35.86,23.23,95,5,"47.5 km SSE of Kithira"],
+["2004-10-07 01:05:13",36.5,26.81,126,5.2,"61.1 km SW of Kos"],
+["2004-08-04 14:18:47",36.98,27.69,5,5.1,"36.9 km ENE of Kos"],
+["2004-08-04 03:01:07",36.92,27.7,20,5.4,"36.7 km E of Kos"],
+["2004-03-17 05:20:58",34.46,23.26,24,6,"135.7 km SSW of Chania"],
+["2004-03-01 00:35:57",37.19,22.14,14,5,"17.0 km N of Kalamata"],
+["2004-02-07 21:17:24",36.04,26.91,25,5,"46.7 km NNW of Karpathos"],
+["2003-10-17 12:57:08",35.96,22.25,37,5.3,"76.2 km WSW of Kithira"],
+["2003-08-14 16:18:03",38.76,20.67,9,5.2,"5.8 km NNE of Leukada"],
+["2003-08-14 12:18:15",38.76,20.67,8,5.1,"5.8 km NNE of Leukada"],
+["2003-08-14 05:14:53",38.79,20.56,12,5.9,"10.3 km NW of Leukada"],
+["2003-07-26 08:36:49",38.1,28.78,5,5,"162.7 km ENE of Samos"],
+["2003-07-23 04:56:01",38.19,28.9,5,5,"175.3 km ENE of Samos"],
+["2003-07-06 19:10:28",40.41,26.09,33,5.4,"48.6 km E of Samothraki"],
+["2003-06-09 07:06:40",39.94,22.35,18,5,"34.2 km N of Larissa"],
+["2003-04-29 01:51:20",36.83,21.72,67,5,"2.3 km NE of Methoni"],
+["2003-04-17 22:34:22",38.19,26.9,5,5,"48.6 km N of Samos"],
+["2003-04-10 00:40:16",38.17,26.76,29,5.3,"49.7 km NNW of Samos"],
+["2002-12-09 09:35:02",37.76,19.75,6,5,"78.9 km SW of Argostoli"],
+["2002-12-02 04:58:56",37.8,21.15,17,5.3,"15.1 km SW of Andravida"],
+["2002-10-12 05:58:54",35,26.31,21,5.1,"105.9 km SW of Karpathos"],
+["2002-06-06 22:35:43",35.65,26.22,93,5.2,"83.6 km W of Karpathos"],
+["2002-05-21 20:53:30",36.57,24.31,97,5.1,"17.0 km SW of Milos"],
+["2002-01-22 04:53:54",35.56,26.73,104,6.1,"39.3 km WSW of Karpathos"],
+["2001-12-07 19:44:52",39.38,23.78,24,5,"34.9 km NE of Skiathos"],
+["2001-11-26 05:03:22",34.76,24.07,24,5,"76.5 km SSW of Rethimnon"],
+["2001-09-16 02:00:48",37.29,21.83,5,5.2,"37.6 km NW of Kalamata"],
+["2001-07-26 00:21:39",39.05,24.35,19,5.3,"24.5 km NW of Skyros"],
+["2001-06-23 06:52:44",35.65,28.4,56,5.2,"89.4 km S of Rodhos"],
+["2001-06-10 13:11:03",38.47,25.59,32,5.1,"48.9 km WNW of Chios"],
+["2001-05-29 04:44:00",35.63,27.81,5,5.1,"60.2 km E of Karpathos"],
+["2001-04-09 17:38:41",40.05,20.44,27,5.3,"27.0 km W of Konitsa"],
+["2000-06-13 01:43:18",35.12,27.19,37,5.2,"60.9 km S of Karpathos"],
+["2000-05-26 01:28:22",38.91,20.58,5,5.3,"15.4 km WSW of Preveza"],
+["2000-05-24 05:40:37",36,22.01,5,5.4,"94.8 km WSW of Kithira"],
+["2000-04-05 04:36:58",34.22,25.69,38,5.2,"133.1 km SSE of Iraklion"],
+["2000-02-22 11:55:31",34.75,25.53,36,5,"73.6 km SSE of Iraklion"],
+["1999-09-07 11:56:50",38.15,23.62,30,5.4,"21.0 km NNW of Athens"],
+["1999-07-25 06:56:56",39.3,27.79,28,5,"133.5 km E of Mitilini"],
+["1999-06-11 07:50:15",37.56,21.11,58,5.1,"31.9 km SE of Zakynthos"],
+["1999-04-17 08:17:59",35.97,21.65,32,5,"94.3 km S of Methoni"],
+["1998-10-08 03:50:17",37.79,20.27,5,5.2,"46.5 km SSW of Argostoli"],
+["1998-10-06 12:27:43",37.19,21.13,5,5.2,"61.7 km SSW of Pyrgos"],
+["1998-09-30 23:42:59",41.93,20.57,32,5.4,"145.1 km NNW of Florina"],
+["1998-07-16 17:29:16",38.66,20.56,5,5.1,"9.0 km SW of Leukada"],
+["1998-04-29 03:30:37",35.99,21.98,5,5.5,"95.3 km SSE of Methoni"],
+["1998-03-09 11:21:21",36.04,28.49,54,5,"50.6 km SSE of Rodhos"],
+["1998-01-10 19:21:54",37.12,20.73,5,5.2,"76.1 km S of Zakynthos"],
+["1997-11-18 15:23:32",37.25,21.16,16,5,"54.6 km SSW of Pyrgos"],
+["1997-11-18 13:13:48",37.36,20.65,5,5.6,"52.6 km SSW of Zakynthos"],
+["1997-11-18 13:07:36",37.26,20.49,5,6.1,"69.1 km SSW of Zakynthos"],
+["1997-11-14 21:38:52",38.8,25.87,25,5.4,"52.4 km SW of Mitilini"],
+["1997-10-13 13:39:39",36.41,22.18,6,5.6,"62.3 km SE of Methoni"],
+["1997-07-27 10:07:52",35.28,21,40,5.2,"182.1 km SSW of Methoni"],
+["1997-05-16 07:00:49",41.02,20.33,5,5.5,"93.7 km WNW of Florina"],
+["1997-01-12 12:10:46",40.97,19.29,5,5.2,"159.3 km NNW of Kerkyra"],
+["1996-08-05 22:46:43",40.07,20.67,1,5.2,"7.7 km WNW of Konitsa"],
+["1996-07-20 00:00:39",36.11,27.52,38,6.1,"59.8 km NE of Karpathos"],
+["1996-04-26 07:01:29",36.42,27.99,63,5.3,"20.9 km W of Rodhos"],
+["1996-04-12 15:39:11",36.62,27.09,156,5,"35.2 km SSW of Kos"],
+["1996-02-01 17:57:56",37.72,19.85,1,5.2,"74.9 km SW of Argostoli"],
+["1995-06-15 00:30:52",38.33,21.93,5,5.2,"16.1 km NW of Aegion"],
+["1995-06-15 00:15:51",38.37,22.15,26,5.6,"14.7 km NNE of Aegion"],
+["1995-05-17 04:14:26",40.07,21.69,5,5.1,"23.3 km E of Grevena"],
+["1995-05-15 04:13:57",40.06,21.68,5,5,"22.6 km E of Grevena"],
+["1995-05-13 08:47:17",40.18,21.71,39,6.1,"17.1 km S of Kozani"],
+["1995-05-04 00:34:10",40.57,23.69,7,5,"30.4 km NE of Poliyiros"],
+["1994-09-01 16:12:41",41.15,21.26,5,5.9,"42.4 km NNW of Florina"],
+["1994-05-24 02:18:35",38.69,26.37,10,5.2,"41.2 km NNE of Chios"],
+["1994-05-24 02:05:37",38.71,26.32,12,5.6,"41.3 km NNE of Chios"],
+["1994-05-23 06:46:16",35.4,24.73,81,5.6,"23.8 km E of Rethimnon"],
+["1994-04-16 23:09:36",37.43,20.58,30,5.3,"48.8 km SW of Zakynthos"],
+["1994-02-25 02:30:49",38.73,20.58,5,5.3,"4.9 km WNW of Leukada"],
+["1994-01-28 15:45:25",38.67,27.57,6,5.3,"114.0 km NNE of Samos"],
+["1994-01-11 07:22:53",35.84,21.95,40,5.4,"106.4 km WSW of Kithira"],
+["1993-08-26 10:03:53",36.66,28.42,17,5.2,"30.1 km NE of Rodhos"],
+["1993-07-14 12:31:50",38.16,21.76,13,5.1,"9.7 km SSE of Patras"],
+["1993-06-29 04:37:12",35.39,27.08,5,5,"31.3 km S of Karpathos"],
+["1993-06-13 23:26:40",39.25,20.57,5,5.4,"36.8 km NNW of Preveza"],
+["1993-03-26 11:58:18",37.65,21.44,1,5,"3.8 km SSW of Pyrgos"],
+["1993-03-05 06:55:06",37.07,21.46,1,5.3,"35.3 km NW of Methoni"],
+["1992-11-21 05:07:19",35.51,22.38,93,5.8,"100.5 km SW of Kithira"],
+["1992-11-18 21:10:43",38.27,22.33,23,5.2,"21.8 km E of Aegion"],
+["1992-11-06 19:08:08",38.09,27.19,39,5.7,"41.5 km NNE of Samos"],
+["1992-07-23 20:12:45",39.82,24.43,19,5,"50.2 km SSE of Kariai"],
+["1992-04-30 11:44:40",35.22,26.75,1,5.6,"61.2 km SW of Karpathos"],
+["1992-01-23 04:24:16",38.28,20.41,3,5,"13.4 km NNW of Argostoli"],
+["1991-03-19 12:09:28",35.13,26.32,1,5.3,"95.6 km SW of Karpathos"],
+["1991-02-12 09:55:03",40.83,28.72,39,5,"239.4 km E of Alexandroupolis"],
+["1990-12-21 06:57:43",40.95,22.43,1,5.4,"36.2 km ENE of Edhessa"],
+["1990-08-28 20:21:21",36.36,27.15,5,5,"60.6 km SSW of Kos"],
+["1990-06-16 02:16:20",39.13,20.38,38,5.5,"37.7 km WNW of Preveza"],
+["1989-08-24 02:13:13",37.89,20.11,1,5.2,"45.3 km SW of Argostoli"],
+["1989-08-20 18:32:30",37.24,21.12,1,5.4,"57.3 km SSW of Pyrgos"],
+["1989-04-28 13:30:19",37.05,27.9,1,5.1,"57.0 km ENE of Kos"],
+["1989-04-27 23:06:52",37.07,27.97,1,5,"63.6 km ENE of Kos"],
+["1989-03-19 05:37:00",39.29,23.57,13,5.3,"15.6 km NNE of Skiathos"],
+["1988-11-20 21:01:12",35.49,28.8,32,5,"117.8 km SSE of Rodhos"],
+["1988-10-16 12:34:05",37.9,20.96,4,5.5,"13.3 km NNE of Zakynthos"],
+["1988-09-22 12:05:40",37.99,21.11,1,5,"17.0 km NW of Andravida"],
+["1988-05-22 03:44:15",38.35,20.54,1,5,"20.3 km NNE of Argostoli"],
+["1988-05-18 05:17:42",38.35,20.47,1,5.3,"19.7 km N of Argostoli"],
+["1988-01-09 01:02:48",41.21,19.66,16,5.1,"153.5 km WNW of Florina"],
+["1987-10-05 09:26:59",36.29,28.46,6,5.1,"27.1 km SE of Rodhos"],
+["1987-06-10 14:50:11",37.17,21.46,12,5,"44.7 km NNW of Methoni"],
+["1987-05-29 18:40:33",37.53,21.6,29,5,"21.6 km SE of Pyrgos"],
+["1987-02-27 23:34:54",38.37,20.42,1,5.4,"22.6 km NNW of Argostoli"],
+["1986-12-17 21:18:33",39.76,19.9,1,5.1,"15.7 km N of Kerkyra"],
+["1986-09-13 17:24:33",37.1,22.19,1,5.5,"9.6 km NE of Kalamata"],
+["1986-03-29 18:36:39",38.37,25.18,16,5.3,"63.5 km NNE of Andros"],
+["1986-03-25 01:41:36",38.38,25.13,16,5.2,"63.2 km NNE of Andros"],
+["1985-11-21 21:57:19",41.43,19.76,5,5.3,"155.1 km WNW of Florina"],
+["1985-11-09 23:30:45",41.11,24.05,23,5.1,"9.0 km WSW of Drama"],
+["1985-09-27 16:39:53",34.71,26.61,36,5,"116.9 km SSW of Karpathos"],
+["1985-09-07 10:20:49",37.24,21.25,5,5.2,"52.4 km SSW of Pyrgos"],
+["1985-07-22 21:32:33",34.31,28.35,34,5.3,"186.5 km SE of Karpathos"],
+["1985-04-30 18:14:12",39.24,22.89,13,5.3,"14.9 km SSW of Volos"],
+["1985-04-21 08:49:41",35.65,22.17,7,5.1,"101.5 km SW of Kithira"],
+["1985-01-16 23:36:03",40.53,19.39,41,5,"110.8 km NNW of Kerkyra"],
+["1984-10-25 14:38:25",40.49,21.32,20,5.1,"5.4 km ESE of Kastoria"],
+["1984-10-05 20:58:50",39.12,25.32,36,5.2,"69.7 km ENE of Skyros"],
+["1984-06-21 10:43:46",35.36,23.31,46,5.9,"66.1 km WSW of Chania"],
+["1984-06-17 07:48:01",38.88,25.99,41,5.3,"39.0 km SW of Mitilini"],
+["1984-02-11 08:02:51",38.32,21.93,24,5.1,"15.5 km WNW of Aegion"],
+["1983-10-10 10:16:57",40.44,25.43,8,5.4,"8.6 km WSW of Samothraki"],
+["1983-09-27 23:59:38",36.62,26.97,165,5.2,"41.6 km SW of Kos"],
+["1983-09-09 17:59:46",35.62,27.23,15,5.1,"9.2 km ESE of Karpathos"],
+["1983-09-08 22:04:54",37.61,20.95,5,5,"20.7 km SSE of Zakynthos"],
+["1983-08-08 08:09:29",40.39,25.51,5,5.1,"9.3 km S of Samothraki"],
+["1983-08-06 15:43:53",40.08,24.81,22,6.6,"41.6 km WNW of Limnos"],
+["1983-07-14 02:54:21",35.8,22.03,18,5.2,"102.1 km WSW of Kithira"],
+["1983-07-05 12:01:30",40.27,27.13,35,5.9,"124.0 km ESE of Alexandroupolis"],
+["1983-05-14 23:13:48",38.41,20.44,5,5,"26.6 km N of Argostoli"],
+["1983-05-13 23:50:28",38.35,20.17,5,5.1,"33.6 km NW of Argostoli"],
+["1983-03-24 04:17:30",38.04,20.25,10,5.1,"25.1 km SW of Argostoli"],
+["1983-03-23 23:51:07",38.19,20.4,10,5.7,"7.4 km WNW of Argostoli"],
+["1983-03-19 21:41:49",35.35,25.3,28,5.2,"15.6 km E of Iraklion"],
+["1983-03-16 21:19:39",38.79,20.81,9,5,"17.4 km ENE of Leukada"],
+["1983-02-21 00:13:06",37.73,20.09,4,5.1,"60.1 km SW of Argostoli"],
+["1983-01-31 15:27:00",38.05,20.41,2,5.3,"15.1 km SSW of Argostoli"],
+["1983-01-19 05:41:46",37.65,19.78,10,5.1,"84.7 km SW of Argostoli"],
+["1983-01-19 00:02:15",38.05,20.41,6,5.5,"15.1 km SSW of Argostoli"],
+["1983-01-17 12:41:30",37.97,20.25,9,6.2,"30.4 km SW of Argostoli"],
+["1982-11-16 23:41:27",40.54,19.8,49,5.3,"97.8 km NW of Konitsa"],
+["1982-08-17 22:22:25",34,22.9,10,5.7,"196.6 km SSW of Chania"],
+["1982-06-22 03:04:26",37.1,21.2,10,5.7,"54.5 km NW of Methoni"],
+["1982-01-18 19:31:14",39.8,24.2,10,5.2,"50.2 km S of Kariai"],
+["1982-01-18 19:27:23",39.9,24.5,10,6.4,"44.4 km SSE of Kariai"],
+["1981-12-29 08:00:41",38.7,24.8,10,5.4,"30.6 km SE of Skyros"],
+["1981-12-27 17:39:12",38.9,24.9,10,6,"29.2 km E of Skyros"],
+["1981-12-21 14:13:17",39.2,25.4,10,5,"73.4 km W of Mitilini"],
+["1981-12-19 14:10:49",39.2,25.3,10,6.3,"71.6 km ENE of Skyros"],
+["1981-07-12 17:14:38",37.8,20.1,10,5.1,"53.3 km SW of Argostoli"],
+["1981-07-03 21:42:54",39.6,20.5,10,5.3,"22.8 km ENE of Igoumenitsa"],
+["1981-06-30 15:09:21",37.9,20,10,5,"52.0 km SW of Argostoli"],
+["1981-06-28 17:20:21",37.9,20.1,10,5.5,"45.2 km SW of Argostoli"],
+["1981-06-24 18:41:26",37.8,20,10,5.2,"59.2 km SW of Argostoli"],
+["1981-06-01 08:47:26",35.6,26.3,10,5.1,"76.7 km W of Karpathos"],
+["1981-05-27 18:12:02",38.8,21,10,5,"27.3 km SE of Preveza"],
+["1981-05-27 15:25:50",38.8,20.9,10,5,"21.1 km SE of Preveza"],
+["1981-05-27 15:03:57",38.8,20.7,10,5,"10.9 km NNE of Leukada"],
+["1981-03-10 15:16:18",39.3,20.8,10,5.3,"22.3 km NW of Arta"],
+["1981-03-07 11:34:42",38.2,23.3,10,5.1,"39.3 km SW of Chalkida"],
+["1981-03-05 06:59:06",38.3,23.2,10,5.6,"32.2 km ESE of Levadhia"],
+["1981-03-04 21:58:04",38.3,23.2,10,5.8,"32.2 km ESE of Levadhia"],
+["1981-02-25 05:08:13",38.2,23.1,10,5.1,"32.6 km NNE of Korinthos"],
+["1981-02-25 02:35:50",38.2,23,10,5.9,"28.4 km SSE of Levadhia"],
+["1981-02-25 01:57:53",38.1,23,10,5.2,"19.0 km NNE of Korinthos"],
+["1981-02-24 20:53:36",38.14,23,10,6.3,"23.3 km NNE of Korinthos"],
+["1980-07-10 19:39:01",39.3,22.9,10,5,"8.4 km SSW of Volos"],
+["1980-07-09 02:35:50",39.2,22.7,10,5.6,"28.1 km SW of Volos"],
+["1980-07-09 02:11:54",39.2,23.9,10,6,"36.1 km E of Skiathos"],
+["1980-07-09 02:10:17",39.2,23.9,10,5.2,"36.1 km E of Skiathos"],
+["1980-05-16 00:37:25",35.7,27.4,10,5.6,"23.3 km E of Karpathos"],
+["1980-04-12 11:32:10",38.6,20.3,10,5.1,"31.7 km WSW of Leukada"],
+["1979-11-06 05:26:13",39.5,20.2,10,5.1,"5.6 km W of Igoumenitsa"],
+["1979-07-23 11:41:51",35.5,26.5,60,5.1,"61.2 km WSW of Karpathos"],
+["1979-07-18 13:11:59",39.6,28.7,10,5.2,"216.0 km ENE of Mitilini"],
+["1979-06-15 11:34:13",34.8,24.1,10,5.1,"71.3 km SSW of Rethimnon"],
+["1979-06-14 11:44:44",38.7,26.6,10,5.5,"54.7 km NE of Chios"],
+["1979-05-15 06:59:21",34.6,24.5,10,5.4,"85.1 km S of Rethimnon"],
+["1979-04-15 06:19:42",42,19,10,6.8,"241.6 km NW of Florina"],
+["1979-04-09 02:10:23",41.8,19.2,10,5,"215.8 km WNW of Florina"],
+["1979-02-16 04:28:18",36.7,25.9,10,5,"52.2 km NE of Thira"],
+["1978-08-18 20:53:21",41.8,20.4,10,5.1,"140.6 km NW of Florina"],
+["1978-06-20 20:03:21",40.8,23.3,33,6,"34.9 km ENE of Thessaloniki"],
+["1978-05-23 23:34:11",40.7,23.3,33,5.4,"30.8 km ENE of Thessaloniki"],
+["1978-03-07 22:33:45",34.5,25.3,10,5.1,"93.0 km S of Iraklion"],
+["1978-01-29 10:23:42",34.9,25.7,10,5.4,"70.1 km SE of Iraklion"],
+["1977-12-16 07:37:28",38.3,27.2,10,5.3,"63.4 km NNE of Samos"],
+["1977-11-28 02:59:11",36,27.5,10,5.2,"49.0 km NE of Karpathos"],
+["1977-09-11 23:19:22",35,23.1,10,5.9,"100.8 km SW of Chania"],
+["1977-08-18 09:27:43",35.3,23.4,50,5.2,"60.6 km WSW of Chania"],
+["1977-02-24 20:47:14",38.3,28.1,10,5,"115.4 km ENE of Samos"],
+["1976-12-27 07:54:13",38.85,20.5,32,5,"18.8 km NW of Leukada"],
+["1976-09-30 00:32:58",37.4,20.3,10,5.1,"68.2 km SW of Zakynthos"],
+["1976-06-12 00:59:18",37.3,20.4,7,5.6,"69.9 km SW of Zakynthos"],
+["1976-05-11 17:10:09",37.2,20.5,10,5.2,"74.4 km SSW of Zakynthos"],
+["1976-03-02 19:41:37",40.4,19.5,10,5,"93.8 km NNW of Kerkyra"],
+["1976-01-18 15:10:30",38.7,20.4,10,5.2,"20.3 km W of Leukada"],
+["1975-12-31 09:45:44",38.5,21.7,10,5.1,"27.7 km ENE of Mesolonghi"],
+["1975-12-21 16:07:52",38.4,21.7,10,5.1,"17.6 km N of Patras"],
+["1975-11-22 10:06:08",39.8,20.3,10,5.1,"33.1 km N of Igoumenitsa"],
+["1975-11-12 09:03:49",36,27.8,10,5,"62.0 km SW of Rodhos"],
+["1975-09-22 00:45:04",35.6,26.5,50,5.1,"58.8 km W of Karpathos"],
+["1975-09-16 05:06:22",41.3,19.4,10,5.1,"177.3 km WNW of Florina"],
+["1975-09-12 13:10:17",36.1,21.7,10,5,"79.7 km S of Methoni"],
+["1975-06-30 13:26:55",38.4,21.7,10,5.4,"17.6 km N of Patras"],
+["1975-04-04 05:16:18",38.1,22.1,10,5.1,"7.6 km N of Kalavrita"],
+["1975-03-27 05:15:06",40.4,26.1,10,5.7,"49.6 km E of Samothraki"],
+["1975-03-17 05:35:14",40.4,26.2,10,5.2,"56.8 km SSE of Alexandroupolis"],
+["1975-03-17 05:17:46",40.4,26.2,10,5,"56.8 km SSE of Alexandroupolis"],
+["1975-01-03 01:59:39",35.5,27.3,10,5,"23.2 km SE of Karpathos"],
+["1974-12-14 02:36:38",38.1,20.8,10,5,"29.0 km ESE of Argostoli"],
+["1974-07-09 02:32:09",36.3,28.9,10,5,"62.6 km ESE of Rodhos"],
+["1973-11-29 10:57:42",35.2,23.6,10,5.5,"51.2 km SW of Chania"],
+["1973-11-12 00:11:46",35.6,27.7,10,5.1,"50.7 km E of Karpathos"],
+["1973-11-04 15:52:14",38.78,20.55,10,5.4,"10.1 km NW of Leukada"],
+["1973-01-05 05:49:17",35.9,21.9,10,5.2,"103.5 km S of Methoni"],
+["1972-12-02 13:28:18",35.2,27.2,10,5,"52.1 km S of Karpathos"],
+["1972-10-30 14:32:10",38.3,20.4,10,5.1,"15.8 km NNW of Argostoli"],
+["1972-09-17 14:07:14",38.2,20.4,10,5.8,"7.8 km WNW of Argostoli"],
+["1972-09-16 03:53:29",39.9,20,10,5.3,"31.9 km NNE of Kerkyra"],
+["1972-09-13 04:13:23",37.8,22.4,40,5.4,"32.4 km N of Tripolis"],
+["1972-05-08 09:20:51",41.8,23.5,10,5,"79.6 km N of Serres"],
+["1972-05-04 21:40:05",35.3,23.6,50,6.1,"44.4 km WSW of Chania"],
+["1971-02-23 19:41:23",39.6,27.2,10,5.3,"94.8 km ENE of Mitilini"],
+["1970-11-11 20:58:12",36.1,28.3,10,5,"38.5 km S of Rodhos"],
+["1970-09-01 01:06:42",37.9,20.2,10,5,"39.1 km SW of Argostoli"],
+["1970-08-19 02:01:53",40.8,19.9,10,5.2,"110.6 km NW of Konitsa"],
+["1970-04-23 09:01:23",39.2,28.7,10,5.4,"211.2 km E of Mitilini"],
+["1970-04-08 13:50:28",38.3,22.6,10,5.4,"28.2 km WSW of Levadhia"],
+["1969-10-13 01:02:32",39.6,20.7,10,5.6,"14.9 km WSW of Ioannina"],
+["1969-09-28 22:54:03",34.1,24.9,10,5.1,"137.8 km S of Iraklion"],
+["1969-09-06 20:30:36",36.8,28.4,10,5,"43.0 km NNE of Rodhos"],
+["1969-08-09 16:25:36",42,19.2,10,5,"228.0 km NW of Florina"],
+["1969-07-08 08:09:14",37.6,20.1,10,5.7,"72.0 km SSW of Argostoli"],
+["1969-06-12 15:13:13",34.5,25,10,5.6,"92.5 km S of Iraklion"],
+["1969-05-01 18:02:12",35.3,27.8,10,5.1,"71.9 km SE of Karpathos"],
+["1969-04-30 20:20:27",39.1,28.9,10,5.2,"224.4 km NE of Samos"],
+["1969-04-16 23:21:02",35.3,28,10,5,"87.5 km ESE of Karpathos"],
+["1969-04-06 03:49:30",38.4,26.8,10,5.5,"58.0 km E of Chios"],
+["1969-04-03 23:45:12",40,19.9,10,5.1,"42.3 km N of Kerkyra"],
+["1969-04-03 22:12:20",40.5,19.9,10,5.5,"88.3 km NW of Konitsa"],
+["1969-03-28 01:48:28",38.6,28.5,10,6.6,"162.8 km NE of Samos"],
+["1969-03-25 13:21:32",39,28.5,10,5.7,"191.6 km NE of Samos"],
+["1969-03-24 01:59:31",39,28.5,10,5.1,"191.6 km NE of Samos"],
+["1969-03-23 21:08:41",39,28.5,10,5.8,"191.6 km NE of Samos"],
+["1969-01-14 23:12:09",36.2,28.9,10,6,"66.3 km ESE of Rodhos"],
+["1968-12-21 00:36:35",36.7,27,10,5,"33.5 km SW of Kos"],
+["1968-12-05 07:52:05",36.6,27.1,10,6.1,"36.7 km SSW of Kos"],
+["1968-11-12 03:37:35",36.8,27.3,10,5.1,"10.4 km S of Kos"],
+["1968-10-31 03:22:14",36.7,27.1,10,5.6,"27.3 km SW of Kos"],
+["1968-07-31 19:29:29",35.7,27.9,10,5.2,"68.3 km E of Karpathos"],
+["1968-07-27 02:45:48",35.4,27.9,10,5.2,"74.5 km ESE of Karpathos"],
+["1968-07-04 21:47:51",37.7,23.2,10,5,"35.4 km SE of Korinthos"],
+["1968-05-30 17:40:26",35.3,27.9,100,5.6,"79.6 km ESE of Karpathos"],
+["1968-04-24 08:18:00",39.4,24.9,10,5.1,"62.3 km NNE of Skyros"],
+["1968-03-28 16:37:50",39.25,20.5,10,5.4,"34.7 km SE of Igoumenitsa"],
+["1968-03-28 07:40:00",37.8,20.9,10,5.6,"1.0 km NNE of Zakynthos"],
+["1968-02-19 22:45:39",39.5,24.8,10,6.7,"60.2 km SW of Limnos"],
+["1968-02-07 22:22:21",36.6,26.8,150,5,"54.4 km SW of Kos"],
+["1967-12-02 12:44:38",41.4,20,10,5.3,"135.9 km WNW of Florina"],
+["1967-11-30 07:23:49",41.4,20.5,10,6.6,"101.9 km NW of Florina"],
+["1967-05-01 09:50:00",39.7,20.9,10,5,"5.5 km NE of Ioannina"],
+["1967-03-04 18:37:57",39.2,24.6,10,5.1,"33.0 km N of Skyros"],
+["1967-01-04 05:58:51",38.4,21.8,10,5.3,"18.2 km NNE of Patras"],
+["1966-10-29 02:39:25",38.8,21,10,6,"27.3 km SE of Preveza"],
+["1966-09-01 14:22:57",37.5,22.3,10,6,"7.1 km W of Tripolis"],
+["1966-08-21 01:30:45",40,27.4,10,5.3,"135.3 km NE of Mitilini"],
+["1966-05-09 00:42:55",34.5,26.5,10,5.4,"142.3 km SSW of Karpathos"],
+["1966-05-04 06:36:50",39.3,21.3,10,5.5,"31.2 km ENE of Arta"],
+["1966-02-05 02:57:58",39,21.9,10,5.2,"26.5 km NNE of Karpenision"],
+["1966-02-05 02:01:42",39.1,21.6,10,5.9,"35.3 km NNW of Karpenision"],
+["1966-01-02 23:12:16",37.8,23.1,10,5,"21.3 km SE of Korinthos"],
+["1965-12-20 00:08:11",40.1,24.8,10,5.9,"43.4 km WNW of Limnos"],
+["1965-11-28 05:26:02",35.9,27.9,10,5.4,"66.7 km SSW of Rodhos"],
+["1965-11-02 03:27:08",39.3,25.3,10,5.2,"68.7 km S of Limnos"],
+["1965-03-31 12:01:06",38.5,21.75,10,5.1,"28.4 km N of Patras"],
+["1965-03-02 22:00:15",38.5,27.5,10,5,"94.4 km NNE of Samos"],
+["1965-02-09 20:38:46",37.75,20.5,10,5,"35.0 km W of Zakynthos"],
+["1965-01-07 10:22:17",36.5,26.5,10,5.3,"82.8 km WSW of Kos"],
+["1964-10-17 09:50:27",35,25.5,10,5.9,"49.3 km SE of Iraklion"],
+["1964-10-06 14:31:22",39.75,28,10,7,"163.6 km ENE of Mitilini"],
+["1964-10-06 14:29:57",39.75,28,10,5.3,"163.6 km ENE of Mitilini"],
+["1964-07-18 03:40:11",35.5,25.5,10,5.4,"38.7 km ENE of Iraklion"],
+["1964-07-17 02:34:28",38,23.5,150,5.8,"20.5 km W of Athens"],
+["1964-04-29 17:00:03",39.25,23.75,10,5.2,"24.8 km ENE of Skiathos"],
+["1964-04-29 04:21:00",39.25,23.75,10,5.8,"24.8 km ENE of Skiathos"],
+["1964-04-24 03:49:58",38,21.8,10,5,"27.6 km W of Kalavrita"],
+["1964-04-11 16:00:00",39.75,25.25,10,5.7,"18.5 km S of Limnos"],
+["1964-02-24 23:30:25",38.9,23.9,10,5.3,"46.6 km SE of Skiathos"]
+];
+
+// English town name from the catalogue → [nominative, genitive, area]
+const TOWNS = {
+  Aegion:['Αίγιο','Αιγίου','Πελοπόννησος'], Alexandroupolis:['Αλεξανδρούπολη','Αλεξανδρούπολης','Θράκη'], Amfissa:['Άμφισσα','Άμφισσας','Στερεά Ελλάδα'],
+  Andravida:['Ανδραβίδα','Ανδραβίδας','Πελοπόννησος'], Andros:['Άνδρος','Άνδρου','Κυκλάδες'], Argostoli:['Αργοστόλι','Αργοστολίου','Ιόνιο'],
+  Arta:['Άρτα','Άρτας','Ήπειρος'], Atalanti:['Αταλάντη','Αταλάντης','Στερεά Ελλάδα'], Athens:['Αθήνα','Αθήνας','Στερεά Ελλάδα'],
+  Chalkida:['Χαλκίδα','Χαλκίδας','Στερεά Ελλάδα'], Chania:['Χανιά','Χανίων','Κρήτη'], Chios:['Χίος','Χίου','Ανατολικό Αιγαίο'],
+  Drama:['Δράμα','Δράμας','Μακεδονία'], Edhessa:['Έδεσσα','Έδεσσας','Μακεδονία'], Florina:['Φλώρινα','Φλώρινας','Μακεδονία'],
+  Grevena:['Γρεβενά','Γρεβενών','Μακεδονία'], Igoumenitsa:['Ηγουμενίτσα','Ηγουμενίτσας','Ήπειρος'], Ikaria:['Ικαρία','Ικαρίας','Ανατολικό Αιγαίο'],
+  Ioannina:['Ιωάννινα','Ιωαννίνων','Ήπειρος'], Iraklion:['Ηράκλειο','Ηρακλείου','Κρήτη'], Kalamata:['Καλαμάτα','Καλαμάτας','Πελοπόννησος'],
+  Kalavrita:['Καλάβρυτα','Καλαβρύτων','Πελοπόννησος'], Karditsa:['Καρδίτσα','Καρδίτσας','Θεσσαλία'], Kariai:['Καρυές','Καρυών','Μακεδονία'],
+  Karpathos:['Κάρπαθος','Καρπάθου','Δωδεκάνησα'], Karpenision:['Καρπενήσι','Καρπενησίου','Στερεά Ελλάδα'], Kastoria:['Καστοριά','Καστοριάς','Μακεδονία'],
+  Kerkyra:['Κέρκυρα','Κέρκυρας','Ιόνιο'], Kilkis:['Κιλκίς','Κιλκίς','Μακεδονία'], Kithira:['Κύθηρα','Κυθήρων','Πελοπόννησος'],
+  Konitsa:['Κόνιτσα','Κόνιτσας','Ήπειρος'], Korinthos:['Κόρινθος','Κορίνθου','Πελοπόννησος'], Kos:['Κως','Κω','Δωδεκάνησα'],
+  Kozani:['Κοζάνη','Κοζάνης','Μακεδονία'], Lamia:['Λαμία','Λαμίας','Στερεά Ελλάδα'], Larissa:['Λάρισα','Λάρισας','Θεσσαλία'],
+  Leonidhion:['Λεωνίδιο','Λεωνιδίου','Πελοπόννησος'], Leukada:['Λευκάδα','Λευκάδας','Ιόνιο'], Levadhia:['Λιβαδειά','Λιβαδειάς','Στερεά Ελλάδα'],
+  Limnos:['Λήμνος','Λήμνου','Ανατολικό Αιγαίο'], Mesolonghi:['Μεσολόγγι','Μεσολογγίου','Στερεά Ελλάδα'], Methoni:['Μεθώνη','Μεθώνης','Πελοπόννησος'],
+  Milos:['Μήλος','Μήλου','Κυκλάδες'], Mitilini:['Μυτιλήνη','Μυτιλήνης','Ανατολικό Αιγαίο'], Nafplio:['Ναύπλιο','Ναυπλίου','Πελοπόννησος'],
+  Patras:['Πάτρα','Πάτρας','Πελοπόννησος'], Poliyiros:['Πολύγυρος','Πολυγύρου','Μακεδονία'], Preveza:['Πρέβεζα','Πρέβεζας','Ήπειρος'],
+  Pyrgos:['Πύργος','Πύργου','Πελοπόννησος'], Rethimnon:['Ρέθυμνο','Ρεθύμνου','Κρήτη'], Rodhos:['Ρόδος','Ρόδου','Δωδεκάνησα'],
+  Samos:['Σάμος','Σάμου','Ανατολικό Αιγαίο'], Samothraki:['Σαμοθράκη','Σαμοθράκης','Θράκη'], Seriphos:['Σέριφος','Σερίφου','Κυκλάδες'],
+  Serres:['Σέρρες','Σερρών','Μακεδονία'], Skiathos:['Σκιάθος','Σκιάθου','Σποράδες'], Skyros:['Σκύρος','Σκύρου','Σποράδες'],
+  Thessaloniki:['Θεσσαλονίκη','Θεσσαλονίκης','Μακεδονία'], Thira:['Σαντορίνη','Σαντορίνης','Κυκλάδες'], Trikala:['Τρίκαλα','Τρικάλων','Θεσσαλία'],
+  Tripolis:['Τρίπολη','Τρίπολης','Πελοπόννησος'], Volos:['Βόλος','Βόλου','Θεσσαλία'], Zakynthos:['Ζάκυνθος','Ζακύνθου','Ιόνιο']
+};
+const DIR = { N:'Β', S:'Ν', E:'Α', W:'Δ' };
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+
+const EQ = RAW.map(r => {
+  const [t, lat, lon, dep, mag, loc] = r;
+  const m = loc.match(/^([\d.]+) km (\w+) of (.+)$/);
+  const town = m ? m[3] : loc;
+  const tw = TOWNS[town] || [town, town, 'Άλλη'];
+  const e = { t, d:new Date(t.replace(' ', 'T') + 'Z'), lat, lon, dep, mag, loc,
+    km: m ? +m[1] : 0, dir: m ? m[2].replace(/[NSEW]/g, c => DIR[c]) : '', nom:tw[0], gen:tw[1], area:tw[2] };
+  e.ms = e.d.getTime(); e.year = e.d.getUTCFullYear();
+  e.key = norm([e.nom, e.gen, e.area, town].join(' '));
+  return e;
+}).sort((a, b) => a.ms - b.ms);
+
+const T0 = Date.UTC(1964, 0, 1), T1 = EQ[EQ.length - 1].ms + 864e5;
+const Y0 = 1964, Y1 = EQ[EQ.length - 1].year;
+
+// Formatting
+const nf1 = new Intl.NumberFormat('el-GR', { minimumFractionDigits:1, maximumFractionDigits:1 });
+const nf0 = new Intl.NumberFormat('el-GR');
+const fDate = new Intl.DateTimeFormat('el-GR', { timeZone:'Europe/Athens', day:'numeric', month:'long', year:'numeric' });
+const fShort = new Intl.DateTimeFormat('el-GR', { timeZone:'Europe/Athens', day:'numeric', month:'short', year:'numeric' });
+const fTime = new Intl.DateTimeFormat('el-GR', { timeZone:'Europe/Athens', hour:'2-digit', minute:'2-digit', hourCycle:'h23' });
+const fDay = new Intl.DateTimeFormat('el-GR', { timeZone:'Europe/Athens', weekday:'long' });
+const place = e => e.km ? `${nf1.format(e.km)} χλμ ${e.dir} ${e.gen}` : e.nom;
+const depthColor = d => d <= 10 ? '#FFD166' : d <= 30 ? '#FF9F1C' : d <= 70 ? '#FF4D4D' : '#C13CFF';
+const magColor = m => m >= 6.5 ? '#C13CFF' : m >= 6 ? '#FF4D4D' : m >= 5.5 ? '#FF9F1C' : '#FFD166';
+const radius = m => 3 * Math.pow(2, m - 5) + 1;
+const eqMag = list => list.length ? (2 / 3) * Math.log10(list.reduce((s, e) => s + Math.pow(10, 1.5 * e.mag), 0)) : 0;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+
+// State
+const state = { minMag:5, depth:'all', q:'', upTo:T1, playing:false, speed:1 };
+const passes = e => e.mag >= state.minMag
+  && (state.depth === 'all' || (state.depth === 's' ? e.dep <= 30 : state.depth === 'm' ? e.dep > 30 && e.dep <= 70 : e.dep > 70))
+  && (!state.q || e.key.includes(state.q));
+const visible = () => EQ.filter(e => e.ms <= state.upTo && passes(e));
+
+// Map
+const map = L.map('map', { zoomControl:true, worldCopyJump:false, minZoom:4, maxZoom:11 }).fitBounds([[34.2, 19.4], [41.8, 28.6]]);
+const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+L.tileLayer(ESRI + 'World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom:16, attribution:'Υπόβαθρο © Esri · Δεδομένα: <a href="https://www.gein.noa.gr">gein.noa.gr</a>'
+}).addTo(map);
+L.tileLayer(ESRI + 'World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxZoom:16 }).addTo(map);
+const layer = L.layerGroup().addTo(map);
+const recentMs = T1 - 365 * 864e5;
+
+function popupHtml(e){
+  const energy = Math.pow(10, 1.5 * (e.mag - 5));
+  return `<span class="pop-mag" style="background:${magColor(e.mag)}">${nf1.format(e.mag)}</span><span class="pop-where">${esc(place(e))}</span>
+    <div style="margin-top:6px">${fDay.format(e.d)}, ${fDate.format(e.d)} · ${fTime.format(e.d)}</div>
+    <div>Βάθος <b>${nf0.format(e.dep)} χλμ</b> · ${e.area}</div>
+    <div class="pop-meta">${nf1.format(energy) === '1,0' ? 'Αναφορά: ' : '≈ ' + nf0.format(Math.round(energy)) + '× την ενέργεια ενός 5,0 · '}${e.lat.toFixed(3)}°, ${e.lon.toFixed(3)}° · ${e.t} GMT</div>`;
+}
+EQ.forEach(e => {
+  e.mk = L.circleMarker([e.lat, e.lon], {
+    radius:radius(e.mag), color:depthColor(e.dep), weight:1.2, opacity:.95, fillColor:depthColor(e.dep), fillOpacity:.38,
+    className:(e.mag >= 6 ? 'q-big' : '') + (e.ms >= recentMs ? ' q-new' : '')
+  }).bindPopup(() => popupHtml(e), { maxWidth:300 });
+});
+
+function ripple(e){
+  const s = Math.round(radius(e.mag) * 7);
+  const m = L.marker([e.lat, e.lon], { interactive:false, keyboard:false,
+    icon:L.divIcon({ className:'ripple', iconSize:[s, s], html:`<span style="--rc:${depthColor(e.dep)}"></span>` }) }).addTo(map);
+  setTimeout(() => map.removeLayer(m), 1700);
+}
+
+function drawMarkers(){
+  layer.clearLayers();
+  visible().sort((a, b) => b.mag - a.mag).forEach(e => layer.addLayer(e.mk));
+}
+
+// Legend sizes
+document.getElementById('legendSizes').innerHTML = [5, 6, 7].map(m => {
+  const d = radius(m) * 2;
+  return `<div><i style="width:${d}px;height:${d}px"></i>${m}</div>`;
+}).join('');
+document.getElementById('legendToggle').onclick = () => document.getElementById('legend').classList.add('open');
+document.getElementById('legend').onclick = () => document.getElementById('legend').classList.remove('open');
+
+// Tooltip for charts
+const tip = document.getElementById('tip');
+document.addEventListener('mousemove', ev => {
+  const t = ev.target.closest && ev.target.closest('[data-tip]');
+  if (!t){ tip.classList.remove('on'); return; }
+  tip.innerHTML = t.getAttribute('data-tip');
+  tip.classList.add('on');
+  const w = tip.offsetWidth, x = Math.min(ev.clientX + 14, innerWidth - w - 8);
+  tip.style.left = x + 'px'; tip.style.top = (ev.clientY + 16) + 'px';
+});
+
+// Charts (hand-drawn SVG)
+// Charts are drawn at their container's real width, so text stays 11–12px on any screen.
+const cw = id => Math.max(280, document.getElementById(id).clientWidth || 460);
+function yearChart(list){
+  const W = cw('cYear'), H = 220, every = W < 640 ? 10 : 5, pl = 30, pb = 22, pt = 8, n = Y1 - Y0 + 1, bw = (W - pl) / n;
+  const by = Array.from({ length:n }, () => ({ c:0, max:0 }));
+  list.forEach(e => { const b = by[e.year - Y0]; b.c++; b.max = Math.max(b.max, e.mag); });
+  const top = Math.max(5, ...by.map(b => b.c)), step = top > 30 ? 10 : 5, yMax = Math.ceil(top / step) * step;
+  const y = v => pt + (H - pt - pb) * (1 - v / yMax);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Σεισμοί ανά έτος">`;
+  for (let v = 0; v <= yMax; v += step) s += `<line class="grid-l" x1="${pl}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  by.forEach((b, i) => {
+    const yr = Y0 + i, x = pl + i * bw;
+    if (b.c) s += `<rect class="bar" x="${x + 1}" y="${y(b.c)}" width="${Math.max(1, bw - 2)}" height="${y(0) - y(b.c)}" rx="2" fill="${magColor(b.max)}" data-tip="<b>${yr}</b>: ${b.c} ${b.c === 1 ? 'σεισμός' : 'σεισμοί'} · ισχυρότερος ${nf1.format(b.max)}"/>`;
+    else s += `<rect x="${x}" y="${pt}" width="${bw}" height="${H - pt - pb}" fill="transparent" data-tip="<b>${yr}</b>: κανένας"/>`;
+    if (yr % every === 0) s += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle">${yr}</text>`;
+  });
+  if (state.upTo < T1){
+    const fy = (state.upTo - Date.UTC(Y0, 0, 1)) / (365.2425 * 864e5);
+    const cx = pl + fy * bw;
+    s += `<line class="cur" x1="${cx}" x2="${cx}" y1="${pt}" y2="${H - pb}"/>`;
+  }
+  return s + '</svg>';
+}
+
+function magChart(list){
+  const W = cw('cMag'), H = 200, pl = 30, pb = 22, pt = 8, bins = [];
+  for (let m = 50; m <= 70; m++) bins.push({ m:m / 10, c:0 });
+  list.forEach(e => { const i = Math.round(e.mag * 10) - 50; if (bins[i]) bins[i].c++; });
+  const top = Math.max(5, ...bins.map(b => b.c)), step = top > 50 ? 20 : top > 20 ? 10 : 5, yMax = Math.ceil(top / step) * step;
+  const bw = (W - pl) / bins.length, y = v => pt + (H - pt - pb) * (1 - v / yMax);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Κατανομή μεγέθους">`;
+  for (let v = 0; v <= yMax; v += step) s += `<line class="grid-l" x1="${pl}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  bins.forEach((b, i) => {
+    const x = pl + i * bw;
+    s += `<rect class="bar" x="${x + 1.5}" y="${b.c ? y(b.c) : y(0) - 1}" width="${bw - 3}" height="${b.c ? y(0) - y(b.c) : 1}" rx="2" fill="${magColor(b.m)}" opacity="${b.c ? 1 : .3}" data-tip="<b>${nf1.format(b.m)}</b>: ${b.c} ${b.c === 1 ? 'σεισμός' : 'σεισμοί'}"/>`;
+    if (i % 5 === 0) s += `<text x="${x + bw / 2}" y="${H - 6}" text-anchor="middle">${nf1.format(b.m)}</text>`;
+  });
+  return s + '</svg>';
+}
+
+function hbars(rows, aria, onClick, W){
+  const rh = 26, lw = 130, H = rows.length * rh + 4, top = Math.max(1, ...rows.map(r => r.c));
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${aria}">`;
+  rows.forEach((r, i) => {
+    const y = i * rh + 2, w = (W - lw - 44) * r.c / top;
+    s += `<g class="hbar" ${onClick ? `data-k="${esc(r.k)}"` : ''} data-tip="${esc(r.tip || r.label + ': ' + r.c)}">
+      <rect x="0" y="${y}" width="${W}" height="${rh - 4}" fill="transparent"/>
+      <text class="lbl" x="${lw - 10}" y="${y + 15}" text-anchor="end">${esc(r.label)}</text>
+      <rect x="${lw}" y="${y + 3}" width="${Math.max(2, w)}" height="${rh - 10}" rx="4" fill="${r.color}"/>
+      <text class="num" x="${lw + Math.max(2, w) + 8}" y="${y + 15}">${r.c}</text></g>`;
+  });
+  return s + '</svg>';
+}
+
+function depthChart(list){
+  const bins = [[0, 10, 'έως 10 χλμ'], [10, 20, '11–20'], [20, 30, '21–30'], [30, 50, '31–50'], [50, 70, '51–70'], [70, 100, '71–100'], [100, 999, 'πάνω από 100']];
+  return hbars(bins.map(([a, b, label]) => {
+    const c = list.filter(e => e.dep > a && e.dep <= b || (a === 0 && e.dep === 0)).length;
+    return { label, c, color:depthColor(b), tip:`${label}: ${c} σεισμοί` };
+  }), 'Κατανομή βάθους', false, cw('cDepth'));
+}
+
+function areaChart(list){
+  const m = new Map();
+  list.forEach(e => { const r = m.get(e.area) || { c:0, max:0 }; r.c++; r.max = Math.max(r.max, e.mag); m.set(e.area, r); });
+  const rows = [...m].sort((a, b) => b[1].c - a[1].c).slice(0, 9)
+    .map(([k, r]) => ({ k, label:k, c:r.c, color:magColor(r.max), tip:`<b>${k}</b>: ${r.c} σεισμοί · ισχυρότερος ${nf1.format(r.max)}` }));
+  return rows.length ? hbars(rows, 'Σεισμοί ανά περιοχή', true, cw('cArea')) : '<p style="color:var(--muted)">Κανένας σεισμός με αυτά τα φίλτρα.</p>';
+}
+
+function topList(list){
+  const top = [...list].sort((a, b) => b.mag - a.mag || b.ms - a.ms).slice(0, 10);
+  const ul = document.getElementById('topList');
+  ul.innerHTML = top.length ? top.map(e => `<li data-i="${EQ.indexOf(e)}">
+    <span class="m" style="background:${magColor(e.mag)}">${nf1.format(e.mag)}</span>
+    <span class="w"><b>${esc(place(e))}</b><span>${fDate.format(e.d)}</span></span>
+    <span class="dp">${e.dep} χλμ</span></li>`).join('') : '<li style="cursor:default">Κανένας σεισμός με αυτά τα φίλτρα.</li>';
+}
+
+function energyBars(){
+  const rows = [5, 5.5, 6, 6.5, 7].map(m => ({ m, x:Math.pow(10, 1.5 * (m - 5)) }));
+  document.getElementById('energyBars').innerHTML = rows.map(r => `<div class="r"><b>${nf1.format(r.m)}</b>
+    <div><div class="bar" style="width:${(r.x / 1000) * 100}%"></div></div><span>${r.x < 1.5 ? 'αναφορά' : '× ' + nf0.format(Math.round(r.x))}</span></div>`).join('');
+}
+
+// Stats strip
+function stats(list){
+  const all = EQ.filter(passes);
+  document.getElementById('sCount').textContent = nf0.format(list.length);
+  document.getElementById('sCountSub').textContent = state.upTo < T1 ? `από ${nf0.format(all.length)} με αυτά τα φίλτρα` : (all.length === EQ.length ? 'όλος ο κατάλογος' : `από ${nf0.format(EQ.length)} συνολικά`);
+  const max = list.reduce((a, e) => !a || e.mag > a.mag ? e : a, null);
+  const last = list[list.length - 1];
+  document.getElementById('sMax').textContent = max ? nf1.format(max.mag) : '—';
+  document.getElementById('sMaxSub').textContent = max ? `${max.nom} · ${max.year}` : '—';
+  document.getElementById('sLast').textContent = last ? fShort.format(last.d) : '—';
+  document.getElementById('sLastSub').textContent = last ? `${nf1.format(last.mag)} · ${place(last)}` : '—';
+  const avg = list.length ? list.reduce((s, e) => s + e.dep, 0) / list.length : 0;
+  document.getElementById('sDepth').textContent = list.length ? `${nf0.format(Math.round(avg))} χλμ` : '—';
+  document.getElementById('sDepthSub').textContent = list.length ? `${Math.round(100 * list.filter(e => e.dep <= 30).length / list.length)}% έως 30 χλμ` : '—';
+  document.getElementById('sEq').textContent = list.length ? nf1.format(eqMag(list)) : '—';
+}
+
+function charts(list){
+  document.getElementById('cYear').innerHTML = yearChart(list);
+  document.getElementById('cMag').innerHTML = magChart(list);
+  document.getElementById('cDepth').innerHTML = depthChart(list);
+  document.getElementById('cArea').innerHTML = areaChart(list);
+  topList(list);
+}
+
+// Timeline
+const timeEl = document.getElementById('time');
+const toMs = v => T0 + (T1 - T0) * v / 1000;
+function timeLabels(list){
+  const p = 1000 * (state.upTo - T0) / (T1 - T0);
+  timeEl.value = p; timeEl.style.setProperty('--p', (p / 10) + '%');
+  const d = new Date(Math.min(state.upTo, T1 - 864e5));
+  document.getElementById('upLabel').textContent = state.upTo >= T1 ? 'σήμερα' : fShort.format(d);
+  document.getElementById('visLabel').textContent = `${nf0.format(list.length)} σεισμοί`;
+  document.getElementById('yearBig').firstChild.nodeValue = state.upTo >= T1 ? `${Y0}–${Y1}` : d.getUTCFullYear();
+  const lastE = list[list.length - 1];
+  document.getElementById('yearSub').textContent = state.playing && lastE ? `${nf1.format(lastE.mag)} · ${place(lastE)}` : '';
+}
+
+function render(){
+  const list = visible();
+  drawMarkers(); stats(list); charts(list); timeLabels(list);
+}
+
+let raf = 0, lastFrame = 0, lastPaint = 0;
+const PLAY_SECONDS = 40;
+function setPlaying(on){
+  state.playing = on;
+  document.getElementById('playIco').innerHTML = on ? '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>' : '<path d="M7 4.5v15l13-7.5z"/>';
+  document.getElementById('play').setAttribute('aria-label', on ? 'Παύση' : 'Αναπαραγωγή');
+  if (on){
+    if (state.upTo >= T1){ state.upTo = T0; render(); }
+    map.closePopup();
+    lastFrame = performance.now();
+    raf = requestAnimationFrame(tick);
+  } else {
+    cancelAnimationFrame(raf);
+    render();
+  }
+}
+function tick(now){
+  const dt = Math.min(100, now - lastFrame); lastFrame = now;
+  const prev = state.upTo;
+  state.upTo = Math.min(T1, prev + (T1 - T0) * dt / (PLAY_SECONDS * 1000) * state.speed);
+  const fresh = EQ.filter(e => e.ms > prev && e.ms <= state.upTo && passes(e));
+  fresh.forEach(e => { layer.addLayer(e.mk); ripple(e); });
+  if (now - lastPaint > 120 || state.upTo >= T1){
+    const list = visible(); stats(list); charts(list); timeLabels(list); lastPaint = now;
+  }
+  if (state.upTo >= T1){ setPlaying(false); return; }
+  raf = requestAnimationFrame(tick);
+}
+document.getElementById('play').onclick = () => setPlaying(!state.playing);
+timeEl.addEventListener('input', () => { if (state.playing) setPlaying(false); state.upTo = toMs(+timeEl.value); if (+timeEl.value >= 1000) state.upTo = T1; render(); });
+document.getElementById('speed').onclick = ev => {
+  state.speed = state.speed === 1 ? 2 : state.speed === 2 ? 4 : state.speed === 4 ? 0.5 : 1;
+  ev.currentTarget.textContent = `Ταχύτητα ${String(state.speed).replace('.', ',')}×`;
+};
+document.getElementById('showAll').onclick = () => {
+  if (state.playing) setPlaying(false);
+  state.upTo = T1; render(); map.flyToBounds([[34.2, 19.4], [41.8, 28.6]], { duration:.8 });
+};
+
+// Filters
+function seg(id, key, parse){
+  const el = document.getElementById(id);
+  el.addEventListener('click', ev => {
+    const b = ev.target.closest('button'); if (!b) return;
+    el.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    state[key] = parse(b.dataset.v); render();
+  });
+}
+seg('segMag', 'minMag', Number);
+seg('segDepth', 'depth', String);
+const qEl = document.getElementById('q'), qBox = document.getElementById('searchBox');
+function setQ(v){
+  qEl.value = v; state.q = norm(v.trim()); qBox.classList.toggle('has', !!v);
+  render();
+  const list = visible();
+  if (state.q && list.length) map.flyToBounds(L.latLngBounds(list.map(e => [e.lat, e.lon])).pad(.25), { duration:.8, maxZoom:8 });
+}
+let qTimer = 0;
+qEl.addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => setQ(qEl.value), 250); });
+document.getElementById('qClear').onclick = () => { setQ(''); map.flyToBounds([[34.2, 19.4], [41.8, 28.6]], { duration:.8 }); };
+document.getElementById('cArea').addEventListener('click', ev => {
+  const g = ev.target.closest('.hbar'); if (!g) return;
+  setQ(g.dataset.k);
+  document.getElementById('mapSec').scrollIntoView({ behavior:'smooth' });
+});
+document.getElementById('topList').addEventListener('click', ev => {
+  const li = ev.target.closest('li[data-i]'); if (!li) return;
+  const e = EQ[+li.dataset.i];
+  document.getElementById('mapSec').scrollIntoView({ behavior:'smooth' });
+  map.flyTo([e.lat, e.lon], 8, { duration:1.2 });
+  map.once('moveend', () => { ripple(e); e.mk.openPopup(); });
+});
+
+// CSV of what is on the map
+document.getElementById('csv').onclick = () => {
+  const rows = [['Ημερομηνία (GMT)', 'Γεωγρ. Πλάτος', 'Γεωγρ. Μήκος', 'Βάθος (χλμ)', 'Μέγεθος (ML)', 'Θέση', 'Περιοχή']];
+  visible().forEach(e => rows.push([e.t, e.lat, e.lon, e.dep, e.mag, place(e), e.area]));
+  rows.push([]); rows.push(['Δημιουργήθηκε με Σεισμοί στην Ελλάδα · ferelis.gr · Δεδομένα: gein.noa.gr (Γεωδυναμικό Ινστιτούτο, ΕΑΑ)']);
+  const csv = '﻿' + rows.map(r => r.map(v => /[",;\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+  a.download = 'seismoi-ellada.csv'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+
+// Hero: count-up numbers
+(function heroStats(){
+  const max = EQ.reduce((a, e) => e.mag > a.mag ? e : a);
+  document.getElementById('hsMaxWhere').textContent = `ο ισχυρότερος, ${max.nom} ${max.year}`;
+  const vals = { total:[EQ.length, 0], max:[max.mag, 1], perYear:[EQ.length / (Y1 - Y0 + 1), 1], eq:[eqMag(EQ), 1] };
+  const els = document.querySelectorAll('[data-count]'), start = performance.now(), dur = 1600;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  (function step(now){
+    const k = reduce ? 1 : Math.min(1, (now - start) / dur), ease = 1 - Math.pow(1 - k, 3);
+    els.forEach(el => { const [v, dp] = vals[el.dataset.count]; el.textContent = dp ? nf1.format(v * ease) : nf0.format(Math.round(v * ease)); });
+    if (k < 1) requestAnimationFrame(step);
+  })(start);
+})();
+
+// Hero: live seismograph that spikes on real catalogue magnitudes
+(function seismo(){
+  const cv = document.getElementById('seismo'), ctx = cv.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let w = 0, h = 0, dpr = 1, buf = [], idx = 0, shake = 0, shakeAmp = 0;
+  function size(){ dpr = Math.min(2, devicePixelRatio || 1); w = cv.clientWidth; h = cv.clientHeight; cv.width = w * dpr; cv.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); buf = new Array(Math.ceil(w / 2)).fill(0); }
+  size(); addEventListener('resize', size);
+  const mags = EQ.map(e => e.mag);
+  let t = 0, nextQuake = 40;
+  function sample(){
+    t++;
+    if (--nextQuake <= 0){ shakeAmp = Math.pow(2, mags[idx++ % mags.length] - 5) * 0.14; shake = 90; nextQuake = 140 + Math.random() * 160; }
+    let v = (Math.random() - .5) * 0.02 + Math.sin(t / 9) * 0.006;
+    if (shake > 0){ const k = shake / 90; v += Math.sin(t * 1.7) * shakeAmp * k * k * (0.6 + Math.random() * 0.8); shake--; }
+    return v;
+  }
+  function draw(){
+    ctx.clearRect(0, 0, w, h);
+    const mid = h * 0.62, g = ctx.createLinearGradient(0, 0, w, 0);
+    g.addColorStop(0, 'rgba(255,209,102,0)'); g.addColorStop(.6, 'rgba(255,159,28,.6)'); g.addColorStop(1, 'rgba(255,107,53,1)');
+    ctx.strokeStyle = g; ctx.lineWidth = 1.6; ctx.beginPath();
+    buf.forEach((v, i) => { const x = i * 2, y = mid - v * h; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.stroke();
+    const lx = (buf.length - 1) * 2, ly = mid - buf[buf.length - 1] * h;
+    ctx.fillStyle = '#FF6B35'; ctx.beginPath(); ctx.arc(lx, ly, 3, 0, 7); ctx.fill();
+  }
+  function loop(){ for (let i = 0; i < 2; i++){ buf.push(sample()); buf.shift(); } draw(); requestAnimationFrame(loop); }
+  if (reduce){ for (let i = 0; i < buf.length; i++){ buf.push(sample()); buf.shift(); } draw(); } else loop();
+})();
+
+energyBars();
+render();
+let rzTimer = 0;
+addEventListener('resize', () => { clearTimeout(rzTimer); rzTimer = setTimeout(() => charts(visible()), 200); });
+</script>
+</body>
+</html>

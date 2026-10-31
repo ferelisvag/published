@@ -46,15 +46,15 @@ a{color:inherit}
 .hero{text-align:center;padding:46px 0 10px;position:relative}
 .kicker{display:inline-block;background:var(--red);color:#fff;font:800 14px var(--meme);letter-spacing:.14em;text-transform:uppercase;padding:5px 14px;transform:rotate(-3deg);box-shadow:4px 4px 0 var(--ink);border:3px solid var(--ink)}
 h1{font:900 clamp(54px,11vw,138px)/.86 var(--meme);text-transform:uppercase;margin:18px 0 6px;letter-spacing:-.01em;
-  background:linear-gradient(90deg,#ff3d00,#ffb703,#ffe66d,#3ddc97,#2ec4ff,#ff3d00);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
-  animation:rainbow 6s linear infinite;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;filter:drop-shadow(6px 6px 0 var(--ink))}
+  background:linear-gradient(90deg,#d62828,#f77f00,#e09f00,#0a9d62,#0077b6,#7b2cbf,#d62828);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:rainbow 6s linear infinite;-webkit-text-stroke:4px var(--ink);paint-order:stroke fill;filter:drop-shadow(6px 6px 0 var(--ink))}
 @keyframes rainbow{to{background-position:300% 0}}
 .sub{font:700 clamp(17px,2.4vw,24px) var(--fun);max-width:720px;margin:14px auto 0}
 .hero-egg{width:min(220px,48vw);margin:22px auto 0;display:block;cursor:pointer;filter:drop-shadow(0 18px 0 #1b120822)}
 .hero-egg:active{transform:scale(.96)}
 .bounce{animation:bounce 2.2s ease-in-out infinite}
 @keyframes bounce{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-16px) rotate(3deg)}}
-.clicks{font:700 13px var(--fun);opacity:.7;margin-top:4px;min-height:20px}
+.clicks{font:700 14px var(--fun);color:#4a3a22;margin-top:4px;min-height:20px}
 .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:26px 0 4px}
 .pill{border:3px solid var(--ink);background:#fff;border-radius:999px;padding:8px 18px;font:700 15px var(--fun);text-decoration:none;box-shadow:4px 4px 0 var(--ink);transition:transform .12s,box-shadow .12s;cursor:pointer}
 .pill:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink);background:var(--yolk)}
@@ -72,12 +72,12 @@ section{padding:54px 0 10px}
 .ctl-h b{background:var(--ink);color:var(--yolk);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:800 14px var(--meme)}
 .seg{display:flex;flex-wrap:wrap;gap:8px}
 .seg button{flex:1 1 auto;min-width:92px;border:3px solid var(--ink);background:#fff;border-radius:14px;padding:9px 10px;font:700 15px var(--body);cursor:pointer;transition:.12s;text-align:center;line-height:1.2}
-.seg button small{display:block;font:600 12px var(--body);opacity:.65;margin-top:2px}
+.seg button small{display:block;font:600 12px var(--body);color:#4a3a22;margin-top:2px}
 .seg button:hover{transform:translateY(-2px);background:#fff1b8}
 .seg button.on{background:var(--yolk);box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
 .seg button .e{font-size:22px;display:block}
 input[type=range]{width:100%;accent-color:var(--yolk2);height:28px}
-.alt-note{font:600 14px var(--fun);opacity:.8}
+.alt-note{font:700 14px var(--fun);color:#3a2d1a}
 
 /* result + timer */
 .stage{display:flex;flex-direction:column;gap:14px;align-items:center}
@@ -112,7 +112,7 @@ input[type=range]{width:100%;accent-color:var(--yolk2);height:28px}
 .big.alt{background:#fff;color:var(--ink);flex:0 0 auto;font-size:20px}
 .big.ice{background:var(--blue)}
 .read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
-.read div{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:6px 8px;text-align:center;font:600 12px var(--body)}
+.read div{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:6px 8px;text-align:center;font:700 13px var(--body);color:#3a2d1a}
 .read b{display:block;font:900 22px var(--meme)}
 
 /* yolk section */
@@ -120,10 +120,10 @@ input[type=range]{width:100%;accent-color:var(--yolk2);height:28px}
 @media(max-width:760px){.cs-grid{grid-template-columns:repeat(2,1fr)}}
 .cs{background:#fff;border:3px solid var(--ink);border-radius:16px;padding:8px 6px 10px;text-align:center;cursor:pointer;transition:.15s}
 .cs:hover{transform:translateY(-4px) rotate(-1deg)}
-.cs.on{background:var(--yolk);box-shadow:4px 4px 0 var(--ink)}
+.cs.on{background:#ffc933;box-shadow:4px 4px 0 var(--ink)}
 .cs svg{width:100%;max-width:120px}
 .cs b{display:block;font:800 17px var(--meme);text-transform:uppercase}
-.cs small{font:600 12px var(--body);opacity:.75}
+.cs small{font:600 13px/1.35 var(--body);color:#3a2d1a}
 
 /* tabs */
 .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
@@ -143,7 +143,7 @@ input[type=range]{width:100%;accent-color:var(--yolk2);height:28px}
 .tipbox li{margin:6px 0}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
 .chip{background:#fff;border:3px solid var(--ink);border-radius:999px;padding:3px 12px;font:700 13px var(--fun)}
-.rmeme{margin-top:14px;text-align:center;background:linear-gradient(135deg,#ff9a76,#ffd166);border:3px solid var(--ink);border-radius:14px;padding:14px;font:900 24px/1.05 var(--meme);text-transform:uppercase;-webkit-text-stroke:1px #000;color:#fff;text-shadow:2px 2px 0 #000}
+.rmeme{margin-top:14px;text-align:center;background:linear-gradient(135deg,#ffd166,#ffb703);border:3px solid var(--ink);border-radius:14px;padding:14px;font:900 24px/1.1 var(--meme);text-transform:uppercase;color:var(--ink)}
 
 /* myths */
 .myths{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
@@ -152,7 +152,7 @@ input[type=range]{width:100%;accent-color:var(--yolk2);height:28px}
 .myth.flip .in{transform:rotateY(180deg)}
 .myth .f,.myth .b{position:absolute;inset:0;backface-visibility:hidden;border:4px solid var(--ink);border-radius:18px;padding:16px;display:flex;flex-direction:column;justify-content:center;box-shadow:6px 6px 0 var(--ink)}
 .myth .f{background:#fff;font:800 20px/1.15 var(--meme);text-transform:uppercase;text-align:center}
-.myth .f small{display:block;margin-top:10px;font:700 12px var(--fun);text-transform:none;opacity:.6}
+.myth .f small{display:block;margin-top:10px;font:700 13px var(--fun);text-transform:none;color:#4a3a22}
 .myth .b{transform:rotateY(180deg);font:500 15px/1.4 var(--body)}
 .myth .b b{font:900 24px var(--meme);text-transform:uppercase;display:block;margin-bottom:4px}
 .myth.t .b{background:#c9f7de}.myth.m .b{background:#ffd0d0}.myth.h .b{background:#fff0b3}
@@ -176,7 +176,7 @@ input[type=range]{width:100%;accent-color:var(--yolk2);height:28px}
 .app-foot{margin-top:14px;font:600 14px var(--fun)}
 footer{margin-top:60px;background:var(--ink);color:#fff;text-align:center;padding:34px 20px 44px;font:600 15px var(--fun)}
 footer a{color:var(--yolk)}
-footer small{display:block;opacity:.65;max-width:720px;margin:12px auto 0;font:500 13px var(--body)}
+footer small{display:block;color:#e6dcc6;max-width:720px;margin:12px auto 0;font:500 13px var(--body)}
 .fx{position:fixed;pointer-events:none;z-index:99;font-size:30px;will-change:transform}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--ink);color:var(--yolk);border:3px solid var(--yolk);border-radius:14px;padding:12px 20px;font:800 18px var(--meme);text-transform:uppercase;z-index:100;transition:transform .4s;max-width:92vw;text-align:center}
 .toast.on{transform:translate(-50%,0)}
@@ -313,7 +313,7 @@ footer small{display:block;opacity:.65;max-width:720px;margin:12px auto 0;font:5
 
 <footer>
   Easter egg: γράψε <b>egg</b> ή <b>αυγό</b> οπουδήποτε στη σελίδα.
-  <div class="app-foot">Το Τέλειο Αυγό · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 31.10 · 21:30</div>
+  <div class="app-foot">Το Τέλειο Αυγό · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 31.10 · 23:05</div>
   <small>Οι χρόνοι είναι υπολογισμός, όχι εγγύηση. Δες το πλήρες disclaimer πιο πάνω.</small>
 </footer>
 

@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.4.1'
+$script:Version = '0.5.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -176,7 +176,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 15
+$TOTAL = 16
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -943,6 +943,71 @@ if (-not $Quick) {
 $extras | Add-Member -NotePropertyName storage -NotePropertyValue $spaceInfo -Force
 $extras | Add-Member -NotePropertyName gaming -NotePropertyValue $gaming -Force
 
+# ---------------------------------------------------------------- 16. crash dump codes and the event timeline
+Step 16 $TOTAL 'Crash dump files and the timeline of events'
+$dumps = @()
+try {
+    $dfiles = @(Get-ChildItem -LiteralPath (Join-Path $env:windir 'Minidump') -Filter *.dmp -File -ErrorAction Stop | Sort-Object LastWriteTime -Descending | Select-Object -First 10)
+    $mem = Join-Path $env:windir 'MEMORY.DMP'
+    if (Test-Path -LiteralPath $mem) { $dfiles += Get-Item -LiteralPath $mem -Force }
+    foreach ($f in $dfiles) {
+        $dcode = $null; $dpar = @()
+        try {
+            $fs = [IO.File]::Open($f.FullName, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
+            try { $buf = New-Object byte[] 128; [void]$fs.Read($buf, 0, 128) } finally { $fs.Close() }
+            if ([Text.Encoding]::ASCII.GetString($buf, 0, 8) -eq 'PAGEDU64') {
+                $dcode = '0x{0:x8}' -f [BitConverter]::ToUInt32($buf, 56)
+                for ($i = 0; $i -lt 4; $i++) { $dpar += ('0x{0:x}' -f [BitConverter]::ToUInt64($buf, 64 + 8 * $i)) }
+            }
+        } catch { }
+        $dumps += [pscustomobject]@{ file = [string]$f.Name; time = Iso $f.LastWriteTime; sizeMB = [int]($f.Length / 1MB); code = $dcode; params = $dpar }
+    }
+} catch { }
+
+$tl = New-Object System.Collections.ArrayList
+function Add-Tl($ev, [string]$kind, [string]$x) {
+    if ($x.Length -gt 70) { $x = $x.Substring(0, 70) }
+    [void]$tl.Add([pscustomobject]@{ t = Iso $ev.TimeCreated; k = $kind; x = $x })
+}
+function Ev-Prop($ev, [int]$i) { try { return [string]$ev.Properties[$i].Value } catch { return '' } }
+try {
+    foreach ($e in $sysEv) {
+        $pr = [string]$e.ProviderName; $id = [int]$e.Id
+        if ($pr -match 'Kernel-Power' -and $id -eq 41) { Add-Tl $e 'unclean' '' }
+        elseif ($pr -match 'WER-SystemErrorReporting' -and $id -eq 1001) { Add-Tl $e 'bsod' '' }
+        elseif ($pr -eq 'EventLog' -and $id -eq 6008) { Add-Tl $e 'unclean' 'dirty shutdown' }
+        elseif ($pr -match 'WHEA-Logger') { Add-Tl $e 'whea' ('id ' + $id) }
+        elseif ($pr -match '^(disk|Ntfs|stornvme|storahci|volmgr|nvme)$' -and (@(7, 11, 15, 51, 55, 98, 129, 153, 157) -contains $id)) { Add-Tl $e 'disk' ($pr + ' ' + $id) }
+        elseif ($pr -match '^(nvlddmkm|amdkmdag|atikmpag|Display)$') { Add-Tl $e 'gpu' ($pr + ' ' + $id) }
+        elseif ($pr -eq 'Service Control Manager' -and (@(7031, 7034) -contains $id)) { Add-Tl $e 'svc' (Ev-Prop $e 0) }
+        elseif ($pr -eq 'Tcpip' -and (@(4266, 4231) -contains $id)) { Add-Tl $e 'ports' '' }
+        elseif ($pr -match 'WindowsUpdateClient' -and $id -eq 20) { Add-Tl $e 'updfail' (FirstLine $e.Message 70) }
+    }
+    foreach ($e in $appEv) {
+        if ($e.ProviderName -eq 'Application Error' -and $e.Id -eq 1000) { Add-Tl $e 'crash' (Ev-Prop $e 0) }
+        elseif ($e.ProviderName -eq 'Application Hang') { Add-Tl $e 'hang' (Ev-Prop $e 0) }
+    }
+    $infoSys = @(Get-WinEvent -FilterHashtable @{ LogName = 'System'; Id = 19, 1074, 7045, 42, 107; StartTime = $since } -MaxEvents 700 -ErrorAction SilentlyContinue)
+    foreach ($e in $infoSys) {
+        $pr = [string]$e.ProviderName; $id = [int]$e.Id
+        if ($pr -match 'WindowsUpdateClient' -and $id -eq 19) { Add-Tl $e 'update' (FirstLine $e.Message 70) }
+        elseif ($pr -eq 'User32' -and $id -eq 1074) { $pn = Ev-Prop $e 0; if ($pn -match '[\\/]') { $pn = Split-Path -Leaf $pn }; Add-Tl $e 'shutdown' ((Ev-Prop $e 4) + ' ' + $pn) }
+        elseif ($pr -eq 'Service Control Manager' -and $id -eq 7045) { Add-Tl $e 'svcinst' (Ev-Prop $e 0) }
+        elseif ($pr -match 'Kernel-Power' -and $id -eq 42) { Add-Tl $e 'sleep' '' }
+        elseif ($pr -match 'Kernel-Power' -and $id -eq 107) { Add-Tl $e 'wake' '' }
+    }
+    $infoApp = @(Get-WinEvent -FilterHashtable @{ LogName = 'Application'; ProviderName = 'MsiInstaller'; Id = 11707, 11724; StartTime = $since } -MaxEvents 300 -ErrorAction SilentlyContinue)
+    foreach ($e in $infoApp) {
+        $pn = ''; $m1 = [regex]::Match([string]$e.Message, '(?i)(?:Product|Produkt|:)\s*([^-\r\n]{3,60})\s*--')
+        if ($m1.Success) { $pn = $m1.Groups[1].Value.Trim() } else { $pn = FirstLine $e.Message 60 }
+        if ($e.Id -eq 11707) { Add-Tl $e 'install' $pn } else { Add-Tl $e 'uninstall' $pn }
+    }
+    foreach ($b in $boots) { [void]$tl.Add([pscustomobject]@{ t = [string]$b.time; k = 'boot'; x = [string]$b.seconds }) }
+} catch { Warn ('timeline: ' + $_.Exception.Message) }
+$timeline = @($tl | Sort-Object t -Descending | Select-Object -First 900 | Sort-Object t)
+$extras | Add-Member -NotePropertyName dumps -NotePropertyValue $dumps -Force
+$extras | Add-Member -NotePropertyName timeline -NotePropertyValue $timeline -Force
+
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }
 
@@ -988,7 +1053,33 @@ $data = [ordered]@{
     extras   = $extras
 }
 
+# History: one line per scan in Reports\history.jsonl (only numbers, nothing personal). The report draws trends from it.
+$trendRaw = '[]'
+try {
+    $repDir0 = Split-Path -Parent $out
+    $hp = Join-Path $repDir0 'history.jsonl'
+    $cVol = @($volumes | Where-Object { $_.letter -eq ($env:SystemDrive) })[0]
+    $bootAvg = $null; if (@($boots).Count -gt 0) { $bootAvg = [math]::Round((@($boots | Select-Object -First 5 | ForEach-Object { [double]$_.seconds }) | Measure-Object -Average).Average, 1) }
+    $crashTot = 0; foreach ($cc in $crashList) { $crashTot += [int]$cc.count }
+    $startN = $null; try { $startN = @($startup.items | ForEach-Object { $_.name } | Select-Object -Unique).Count } catch { }
+    $hl = [ordered]@{
+        t = Iso (Get-Date); v = $script:Version; mode = $(if ($Quick) { 'quick' } else { 'full' })
+        freeC = $(if ($cVol) { [double]$cVol.freeGB } else { $null }); bootS = $bootAvg
+        sysErr = [int]$events.system.errors; appErr = [int]$events.application.errors; crashes = $crashTot
+        patchDays = $lastPatchDays; startup = $startN; outdated = $(if ($Quick) { $null } else { @($outdated).Count })
+        reliability = $relIndex; dumps = @($dumps).Count
+    }
+    $line = ($hl | ConvertTo-Json -Compress)
+    $u8 = New-Object System.Text.UTF8Encoding($false)
+    $old = @(); if (Test-Path -LiteralPath $hp) { $old = @([IO.File]::ReadAllLines($hp, $u8) | Where-Object { $_.Trim().StartsWith('{') }) }
+    $all = @($old + $line)
+    if ($all.Count -gt 60) { $all = @($all | Select-Object -Last 60) }
+    [IO.File]::WriteAllText($hp, (($all -join "`n") + "`n"), $u8)
+    $trendRaw = '[' + ($all -join ',') + ']'
+} catch { Warn ('history: ' + $_.Exception.Message) }
+
 $json = $data | ConvertTo-Json -Depth 9 -Compress
+$json = $json.Substring(0, $json.Length - 1) + ',"trend":' + $trendRaw + '}'
 $json = $json.Replace('</', '<\/')
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 [IO.File]::WriteAllText((Join-Path $out 'data.json'), $json, $utf8)

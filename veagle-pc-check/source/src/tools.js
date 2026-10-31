@@ -2,6 +2,7 @@
 var TOOLS = (function (V, AI, CMP) {
   'use strict';
   var $ = V.$, $$ = V.$$, esc = V.esc, arr = V.arr, num = V.num, g = V.g, D = V.D;
+  function I(en, el) { return V.I(en, el); }
 
   var GLOSSARY = [
     ['Administrator', 'A Windows login that is allowed to change the system. Some fixes only work when a program is started "as administrator".'],
@@ -27,7 +28,7 @@ var TOOLS = (function (V, AI, CMP) {
   ];
 
   function stamp() { var d = new Date(); function p(n) { return (n < 10 ? '0' : '') + n; } return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()); }
-  function ascii(s) { return String(s == null ? '' : s).replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"').replace(/[\u2013\u2014]/g, '-').replace(/[^\x09\x0a\x0d\x20-\x7e]/g, '?'); }
+  function ascii(s) { if (V.lang === 'el') return String(s == null ? '' : s); return String(s == null ? '' : s).replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"').replace(/[\u2013\u2014]/g, '-').replace(/[^\x09\x0a\x0d\x20-\x7e]/g, '?'); }
   function saveFile(name, text, type, bom) {
     var blob = new Blob([(bom ? '\uFEFF' : '') + text], { type: type + ';charset=utf-8' });
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
@@ -69,9 +70,11 @@ var TOOLS = (function (V, AI, CMP) {
     L.push('# Back up your important files before you change anything. Sections marked CAREFUL can break things if done wrong.');
     L.push('');
     var n = 0;
-    V.findings.forEach(function (f) {
-      var cmds = f.steps.filter(function (s) { return s.cmd; });
-      if (!cmds.length || f.sev === 'info') return;
+    var anySel = Object.keys(fixSel).some(function (k) { return fixSel[k]; });
+    if (!anySel) return ascii('# ' + I('Nothing is selected yet. Tick the problems you want in the list above and this script fills in.', 'Δεν έχει επιλεγεί τίποτα ακόμα. Τσέκαρε στη λίστα παραπάνω τα προβλήματα που θες και το script γεμίζει.'));
+    V.findings.forEach(function (f0) {
+      var f = V.tf(f0), cmds = f.steps.filter(function (s) { return s.cmd; });
+      if (!cmds.length || f.sev === 'info' || !fixSel[f.id]) return;
       n++;
       var m = V.META[f.id] || [10, 'Medium', 'Safe'];
       L.push('# ' + new Array(70).join('='));
@@ -100,7 +103,7 @@ var TOOLS = (function (V, AI, CMP) {
   }
 
   /* ---------- many PCs ---------- */
-  var fleet = [];
+  var fleet = [], fixSel = {};
   function rowOf(E, name) {
     var cvol = arr(E.D.volumes).filter(function (v) { return /^C:/i.test(v.letter); })[0];
     var bad = arr(E.D.disks).filter(function (d) { return d.health && !/healthy/i.test(d.health); }).length;
@@ -165,7 +168,7 @@ var TOOLS = (function (V, AI, CMP) {
 
   function render() {
     var root = $('#tab-tools'); if (!root) return;
-    var I = V.I, h = '';
+    var h = '';
     h += sect(I('New here? Start with this', 'Πρώτη φορά εδώ; Ξεκίνα από αυτό'), I('no computer knowledge needed', 'δεν χρειάζονται γνώσεις υπολογιστών'));
     h += box('how_to.txt', I('3 minutes', '3 λεπτά'),
       '<ol class="steps3"><li>' + I('<b>Look at the "Do this first" box</b> on the Dashboard. It shows the 3 most important things.', '<b>Κοίταξε το κουτί «Do this first»</b> στον Πίνακα. Δείχνει τα 3 σημαντικότερα πράγματα.') + '</li>' +
@@ -183,11 +186,15 @@ var TOOLS = (function (V, AI, CMP) {
       Object.keys(V.PROFILES).map(function (k) { return '<button type="button" class="btn sm" data-profile="' + k + '" aria-pressed="' + (V.profile === k) + '">' + esc(V.PROFILES[k].label) + '</button>'; }).join(' ') +
       '</div><p class="sub" id="profileNote" style="margin-top:10px">' + esc(V.PROFILES[V.profile].note) + '</p></div></div>';
 
+    if (V.readiness && V.readiness.rows.length && !V.readiness.alreadyWin11) { h += sect(I('Moving from Windows 10 to Windows 11', 'Μετάβαση από Windows 10 σε Windows 11'), I('what to do for your PC', 'τι να κάνεις για τον δικό σου υπολογιστή')); h += box('windows11_guide.txt', V.readiness.verdict, VIZ.win11Html()); }
     h += sect(I('Message for someone who helps you', 'Μήνυμα για κάποιον που σε βοηθά'), I('copy and paste into an email or ticket', 'αντίγραψε και επικόλλησε σε email ή ticket'));
     h += box('ticket.txt', I('short summary', 'σύντομη σύνοψη'), '<textarea id="ticketText" class="mono" rows="12" readonly style="width:100%"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="tkCopy">' + I('Copy summary', 'Αντιγραφή σύνοψης') + '</button></div><p class="sub" style="margin-top:8px">' + I('It contains the PC name. Remove that line if you do not want to share it.', 'Περιέχει το όνομα του PC. Σβήσε αυτή τη γραμμή αν δεν θέλεις να το μοιραστείς.') + '</p>');
 
-    h += sect(I('Fix script you can read first', 'Script διορθώσεων που διαβάζεις πρώτα'), I('every command is switched off', 'κάθε εντολή είναι κλειστή'));
-    h += box('veagle-fix-script.ps1', I('safe by design', 'ασφαλές εκ σχεδιασμού'), '<p class="sub">' + I('This file collects all the commands from the findings. <b>Nothing runs by itself:</b> every line starts with "# ", which makes Windows ignore it. You switch on only the lines you want (the file explains how).', 'Αυτό το αρχείο συγκεντρώνει όλες τις εντολές των ευρημάτων. <b>Τίποτα δεν τρέχει μόνο του:</b> κάθε γραμμή ξεκινά με «# », που κάνει τα Windows να την αγνοούν. Ενεργοποιείς μόνο τις γραμμές που θες (το αρχείο εξηγεί πώς).') + '</p><textarea id="fixText" class="mono" rows="10" readonly style="width:100%;margin-top:10px"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="fxCopy">' + I('Copy', 'Αντιγραφή') + '</button><button class="btn sm" type="button" id="fxSave">' + I('Save as file', 'Αποθήκευση ως αρχείο') + '</button></div>');
+    h += sect(I('Fix script: you choose what goes in', 'Script διορθώσεων: διαλέγεις εσύ τι μπαίνει'), I('every command stays switched off', 'κάθε εντολή μένει κλειστή'));
+    var cmdF = V.findings.filter(function (f) { return f.sev !== 'info' && f.steps.some(function (st) { return st.cmd; }); });
+    h += box('veagle-fix-script.ps1', I('safe by design', 'ασφαλές εκ σχεδιασμού'), '<p class="sub">' + I('Tick the problems you want in your script. Then copy or save it. <b>Nothing runs by itself:</b> every line starts with "# ", which makes Windows ignore it. You switch on only the lines you want (the file explains how).', 'Τσέκαρε τα προβλήματα που θες στο script σου. Μετά αντίγραψέ το ή αποθήκευσέ το. <b>Τίποτα δεν τρέχει μόνο του:</b> κάθε γραμμή ξεκινά με «# », που κάνει τα Windows να την αγνοούν. Ενεργοποιείς μόνο τις γραμμές που θες (το αρχείο εξηγεί πώς).') + '</p>' +
+      (cmdF.length ? '<div class="btns" style="margin-top:8px"><button class="btn sm" type="button" id="fxAll">' + I('Tick all', 'Τσέκαρε όλα') + '</button><button class="btn sm" type="button" id="fxSafe">' + I('Only easy and safe', 'Μόνο εύκολα και ασφαλή') + '</button><button class="btn sm" type="button" id="fxNone">' + I('Untick all', 'Ξε-τσέκαρε όλα') + '</button></div><div class="fixlist" id="fixPick">' + cmdF.map(function (f) { var y = V.tf(f), m = V.META[f.id] || [10, 'Medium', 'Safe']; return '<label><input type="checkbox" data-fix="' + esc(f.id) + '"' + (fixSel[f.id] ? ' checked' : '') + '><span>[' + f.sev.toUpperCase() + '] ' + esc(y.title) + ' <span class="sub">(' + esc(m[1]) + ', ' + esc(m[2]) + ')</span></span></label>'; }).join('') + '</div>' : '<p class="sub">' + I('No finding has a command to put in a script.', 'Κανένα εύρημα δεν έχει εντολή για να μπει σε script.') + '</p>') +
+      '<textarea id="fixText" class="mono" rows="10" readonly style="width:100%;margin-top:10px"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="fxCopy">' + I('Copy', 'Αντιγραφή') + '</button><button class="btn sm" type="button" id="fxSave">' + I('Save as file', 'Αποθήκευση ως αρχείο') + '</button></div>');
 
     h += sect(I('Export', 'Εξαγωγή'), I('for Excel or a helpdesk', 'για Excel ή helpdesk'));
     h += box('findings.csv', I('opens in Excel', 'ανοίγει στο Excel'), '<div class="btns"><button class="btn sm" type="button" id="csvSave">' + I('Save findings as CSV', 'Αποθήκευση ευρημάτων ως CSV') + '</button><button class="btn sm" type="button" id="csvCopy">' + I('Copy as text', 'Αντιγραφή ως κείμενο') + '</button></div>');
@@ -241,6 +248,12 @@ var TOOLS = (function (V, AI, CMP) {
     on('#fxSave', function () { saveFile('veagle-fix-script.ps1', $('#fixText').value, 'text/plain', true); AI.toast('Saved veagle-fix-script.ps1. All commands inside are switched off.'); });
     on('#schOnCopy', function () { AI.toast(AI.copyText($('#schOn').value) ? 'Copied. Paste it into PowerShell (as administrator).' : 'Copy failed.'); });
     on('#schOffCopy', function () { AI.toast(AI.copyText($('#schOff').value) ? 'Copied. Paste it into PowerShell (as administrator).' : 'Copy failed.'); });
+    var fp = $('#fixPick');
+    if (fp) fp.addEventListener('change', function (e) { var id = e.target.getAttribute && e.target.getAttribute('data-fix'); if (!id) return; fixSel[id] = e.target.checked; refreshTexts(); });
+    function setAll(fn) { $$('#fixPick input').forEach(function (c) { var id = c.getAttribute('data-fix'), f = V.findings.filter(function (x) { return x.id === id; })[0], m = V.META[id] || [10, 'Medium', 'Safe']; c.checked = !!fn(f, m); fixSel[id] = c.checked; }); refreshTexts(); }
+    on('#fxAll', function () { setAll(function () { return true; }); });
+    on('#fxNone', function () { setAll(function () { return false; }); });
+    on('#fxSafe', function () { setAll(function (f, m) { return m[1] === 'Easy' && m[2] === 'Safe'; }); });
     on('#csvSave', function () { saveFile('veagle-findings-' + stamp() + '.csv', findingsCsv(), 'text/csv', true); AI.toast('Saved the findings as CSV.'); });
     on('#csvCopy', function () { AI.toast(AI.copyText(findingsCsv()) ? 'Copied.' : 'Copy failed.'); });
     on('#fleetSave', function () { saveFile('veagle-many-pcs-' + stamp() + '.csv', fleetCsv(), 'text/csv', true); AI.toast('Saved the table as CSV.'); });

@@ -98,8 +98,38 @@ data = {
 out = pathlib.Path(__file__).resolve().parent / 'tools'; out.mkdir(exist_ok=True)
 
 import copy
+# --- timeline and trend for the demo (v0.5)
+def _tl():
+    rnd = random.Random(11)
+    T = []
+    def add(dt, k, x=''): T.append(dict(t=iso(dt), k=k, x=x))
+    d0 = now - datetime.timedelta(days=12, hours=-5)
+    add(d0, 'update', '2026-10 Cumulative Update for Windows 11 (KB5044284)')
+    add(d0 + datetime.timedelta(hours=9, minutes=20), 'install', 'NVIDIA Graphics Driver 566.14')
+    for i in range(30):
+        add(now - datetime.timedelta(days=30) + datetime.timedelta(hours=i * 23 + rnd.randint(0, 5)), 'boot', str(round(rnd.uniform(40, 52), 1)) if i < 12 else str(round(rnd.uniform(70, 95), 1)))
+    T = [e for e in T if not (e['k'] == 'boot' and e['t'] > iso(d0) and False)]
+    start = d0 + datetime.timedelta(hours=10)
+    for i in range(14):
+        t = start + datetime.timedelta(hours=i * 20 + rnd.randint(0, 6))
+        if t > now: break
+        add(t - datetime.timedelta(minutes=2), 'gpu', 'nvlddmkm 153')
+        add(t, 'crash', rnd.choice(['MemuService.exe', 'chrome.exe', 'nvcontainer.exe']))
+    for i, dd in enumerate([6, 9, 11]):
+        t = now - datetime.timedelta(days=dd, hours=2)
+        add(t - datetime.timedelta(minutes=7), 'sleep'); add(t - datetime.timedelta(minutes=4), 'wake'); add(t, 'unclean')
+        if i < 2: add(t - datetime.timedelta(minutes=3), 'disk', 'disk 153')
+    for dd in (2, 15):
+        t = now - datetime.timedelta(days=dd, hours=1)
+        add(t, 'unclean', 'dirty shutdown')
+    add(now - datetime.timedelta(days=4), 'install', 'VLC media player'); add(now - datetime.timedelta(days=20), 'uninstall', 'Old tool')
+    T.sort(key=lambda e: e['t'])
+    return T
+SAMPLE_TL = _tl()
+SAMPLE_TREND = [dict(t=iso(now - datetime.timedelta(days=7 * (7 - i))), v='0.4.1', mode='full', freeC=round(180 - i * 6.5 + (3 if i % 3 == 0 else 0), 1), bootS=round(44 + i * 5.2, 1), sysErr=300 + i * 90, appErr=40 + i * 12, crashes=2 + i * 6, patchDays=14 + (i % 4) * 9, startup=14 + i, outdated=3 + i, reliability=round(9 - i * 0.6, 1), dumps=i // 3) for i in range(8)]
+
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '0.3.0'
+data['meta']['version'] = '0.5.0'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -113,7 +143,10 @@ data['extras'] = dict(
     systemFiles=[dict(name='hiberfil.sys', mb=12800), dict(name='pagefile.sys', mb=4096)],
     bigFiles=[dict(path='C:\\Users\\demo\\Downloads\\Win11_Setup.iso', mb=5400, modified='2026-02-11T10:12:00'), dict(path='C:\\Users\\demo\\Videos\\trip2025.mp4', mb=3900, modified='2025-08-20T21:40:00')],
     oldInstallers=dict(count=23, mb=7400), recycleBinMB=1850),
-  gaming=dict(gameDvr=True, gameMode=False, hags=False))
+  gaming=dict(gameDvr=True, gameMode=False, hags=False),
+  dumps=[dict(file='101926-9812-01.dmp', time=iso(now - datetime.timedelta(days=6, hours=2)), sizeMB=1, code='0x00000133', params=['0x0','0x501','0x500','0x0']), dict(file='101326-8750-01.dmp', time=iso(now - datetime.timedelta(days=9, hours=5)), sizeMB=1, code='0x00000116', params=['0xffff','0x0','0x0','0x4']), dict(file='100526-8421-01.dmp', time=iso(now - datetime.timedelta(days=11, hours=1)), sizeMB=1, code='0x00000133', params=['0x0','0x501','0x500','0x0'])],
+  timeline=SAMPLE_TL)
+data['trend'] = SAMPLE_TREND
 for v in data['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
 (out / 'sample-data.json').write_text(json.dumps(data, indent=1), encoding='utf-8')
@@ -135,7 +168,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '0.3.0'
+w['meta']['version'] = '0.5.0'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),

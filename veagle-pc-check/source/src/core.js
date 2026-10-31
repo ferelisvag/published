@@ -211,6 +211,7 @@ function Engine(RAW) {
     'perf-fast': [60, 'Medium', 'Back up first'], 'perf-power': [2, 'Easy', 'Safe'], 'perf-services': [10, 'Medium', 'Safe'], 'soft-emu': [10, 'Easy', 'Safe'], 'soft-xtu': [10, 'Easy', 'Safe'], 'soft-opt': [10, 'Medium', 'Safe'],
     'sto-where': [5, 'Easy', 'Safe'], 'sto-installers': [10, 'Easy', 'Safe'], 'sto-winold': [10, 'Easy', 'Safe'], 'sto-wucache': [5, 'Easy', 'Safe'], 'sto-recycle': [3, 'Easy', 'Safe'], 'sto-bigfiles': [10, 'Easy', 'Safe'],
     'soft-pup': [15, 'Medium', 'Safe'], 'soft-avmany': [10, 'Medium', 'Safe'], 'gam-mode': [2, 'Easy', 'Safe'], 'gam-hags': [5, 'Easy', 'Safe'], 'gam-dvr': [2, 'Easy', 'Safe'],
+    'cor-start': [20, 'Medium', 'Back up first'], 'cor-wake': [20, 'Medium', 'Safe'], 'cor-disk': [30, 'Ask a pro', 'Back up first'], 'cor-gpu': [15, 'Medium', 'Safe'], 'cor-hours': [10, 'Easy', 'Safe'], 'cor-boot': [10, 'Easy', 'Safe'], 'cor-power': [5, 'Easy', 'Safe'], 'cor-burst': [3, 'Easy', 'Safe'],
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe']
   };
   var PROFILES = {
@@ -740,6 +741,7 @@ function Engine(RAW) {
 
     R(function () {
       var codes = arr(REL.bugchecks).filter(function (b) { return b.code; });
+      if (!codes.length) codes = arr(EX.dumps).filter(function (b) { return b.code; });
       if (!codes.length) return null;
       var seen = {}, lines = [];
       codes.forEach(function (b) {
@@ -1054,6 +1056,130 @@ function Engine(RAW) {
       return F('gam-dvr', 'Performance', 'info', 'Xbox game recording is switched on in the background',
         'Windows can quietly record gameplay clips in the background. This costs a little speed in games. If you never use it, you can switch it off.',
         [S('Open Settings, Gaming, Captures, and switch "Record what happened" off.')], '');
+    });
+
+    /* ================= v0.5: connecting the dots between events and problems ================= */
+    var TL = arr(EX.timeline).map(function (e) { return { t: new Date(e.t).getTime(), k: e.k, x: String(e.x || '') }; }).filter(function (e) { return isFinite(e.t); }).sort(function (a, b) { return a.t - b.t; });
+    var H = 3600000, MIN = 60000;
+    var BAD = { crash: 1, unclean: 1, bsod: 1, hang: 1, gpu: 1, disk: 1, svc: 1, whea: 1 };
+    function ofKind() { var ks = Array.prototype.slice.call(arguments); return TL.filter(function (e) { return ks.indexOf(e.k) >= 0; }); }
+    function when(ms) { return fmtDT(new Date(ms).toISOString()); }
+    function within(ms, list, before, after) { return list.filter(function (e) { return e.t >= ms - before && e.t <= ms + after; }); }
+    function trigName(e) { return (e.k === 'update' ? 'a Windows update' : e.k === 'install' ? 'the installation of ' : e.k === 'svcinst' ? 'a new background service' : 'the removal of ') + (e.k === 'update' ? ' (' + e.x + ')' : e.x ? e.x : ''); }
+    var NICE = { crash: 'program crashes', unclean: 'unexpected shutdowns', bsod: 'blue screens', hang: 'programs that froze', gpu: 'graphics driver errors', disk: 'drive errors', svc: 'service crashes', whea: 'hardware errors' };
+
+    R(function () {
+      if (TL.length < 10) return null;
+      var best = null;
+      Object.keys(BAD).forEach(function (kind) {
+        var evs = ofKind(kind); if (evs.length < 4) return;
+        var first = evs[0].t;
+        var trig = TL.filter(function (e) { return (e.k === 'update' || e.k === 'install' || e.k === 'svcinst') && e.t <= first && first - e.t <= 72 * H; }).pop();
+        if (!trig) return;
+        var before = evs.filter(function (e) { return e.t < trig.t; }).length;
+        var after = evs.length - before;
+        if (after < 4 || before > after * 0.2) return;
+        if (!best || after > best.after) best = { kind: kind, trig: trig, first: first, after: after, before: before };
+      });
+      if (!best) return null;
+      var isWU = best.trig.k === 'update';
+      return F('cor-start', 'Stability', best.after >= 12 ? 'medium' : 'low', 'The ' + NICE[best.kind] + ' started right after ' + trigName(best.trig),
+        'Looking at the time of each event, ' + NICE[best.kind] + ' first appeared ' + Math.round((best.first - best.trig.t) / H) + ' hour(s) after ' + trigName(best.trig) + ' and happened ' + best.after + ' times since. Before that, it was almost never there. That is a strong clue about the cause.',
+        isWU ? [S('Do not panic. This does not prove the update is to blame, but it is the first thing to check.'), S('Create a restore point first: press the Windows key, type "Create a restore point", click Create.'),
+               S('Open Settings, Windows Update, Update history, scroll down and click "Uninstall updates". Find the update from that day and click Uninstall. Restart and see if the problem is gone.'), S('If it is gone, pause updates for a week (Settings, Windows Update, Pause) and ask someone before you update again.')]
+             : [S('This does not prove the program is to blame, but it is the first thing to check.'), S('Open Settings, Apps, Installed apps. Find the program installed around that time, click the three dots and choose Uninstall. Restart and see if the problem is gone.'),
+               S('If you need the program, install the newest version from the maker\'s website, or tell the AI help tab what you see.')],
+        'First ' + NICE[best.kind] + ': ' + when(best.first) + '\nThe change: ' + trigName(best.trig) + ' on ' + when(best.trig.t) + '\nBefore the change: ' + best.before + ' events. After: ' + best.after + ' events.');
+    });
+
+    R(function () {
+      var crashes = ofKind('bsod', 'unclean'); if (crashes.length < 2) return null;
+      var wakes = ofKind('wake', 'sleep'); if (!wakes.length) return null;
+      var hit = crashes.filter(function (c) { return within(c.t, wakes, 15 * MIN, 0).length > 0; });
+      if (hit.length < 2 || hit.length < crashes.length * 0.4) return null;
+      return F('cor-wake', 'Stability', 'medium', hit.length + ' of ' + crashes.length + ' crashes happened right after the PC woke from sleep',
+        'The PC crashed within minutes of waking up from sleep, again and again. The usual cause is a driver (graphics, network, USB or chipset) that does not wake up properly, or a power setting.',
+        [S('Do not use Sleep for now: Settings, System, Power, set "Screen and sleep" to Never for the sleep options. See if the crashes stop.'),
+         S('Update the graphics, network and chipset drivers from the website of the PC or motherboard maker (not from a "driver updater" program).'),
+         S('Turn off Fast Startup: Control Panel, Power Options, "Choose what the power buttons do", untick "Turn on fast startup".'),
+         S('If it still happens, copy the dates shown below into the AI help tab and ask.')],
+        hit.slice(-6).map(function (c) { return when(c.t) + ' ' + (c.k === 'bsod' ? 'blue screen' : 'unexpected shutdown'); }).join('\n'));
+    });
+
+    R(function () {
+      var crashes = ofKind('bsod', 'unclean'); if (crashes.length < 2) return null;
+      var disk = ofKind('disk'); if (!disk.length) return null;
+      var hit = crashes.filter(function (c) { return within(c.t, disk, 15 * MIN, 0).length > 0; });
+      if (hit.length < 2) return null;
+      return F('cor-disk', 'Storage', 'high', 'Drive errors came right before ' + hit.length + ' crashes',
+        'Just before the PC crashed or switched off by itself, Windows wrote an error about a drive. A drive or its cable that is failing can freeze the whole PC. This is serious because it can also lose your files.',
+        [S('Copy your important files to another drive or to the cloud, today.'), S('Open the Hardware tab and look at the drive health and temperature.'),
+         S('If the drive is an old SATA one, shut down, unplug the power, and reseat the thin data cable at both ends (or ask someone to do it).'), S('Run the check from the matching "Drive or file system errors" finding. If errors keep coming, plan to replace the drive.')],
+        hit.slice(-6).map(function (c) { return when(c.t); }).join('\n'));
+    });
+
+    R(function () {
+      var bad = ofKind('crash', 'hang', 'bsod'); if (bad.length < 3) return null;
+      var gpu = ofKind('gpu'); if (!gpu.length) return null;
+      var hit = bad.filter(function (c) { return within(c.t, gpu, 5 * MIN, 0).length > 0; });
+      if (hit.length < 3 || hit.length < bad.length * 0.3) return null;
+      return F('cor-gpu', 'Stability', 'medium', hit.length + ' crashes came right after a graphics driver error',
+        'Right before a program crashed or froze, the graphics driver had a problem. That points to the graphics driver (or heat or power for the graphics card) as the real cause, not the program that crashed.',
+        [S('Install the newest stable driver from nvidia.com, amd.com or intel.com (the website of the maker of your graphics card).'), S('If it keeps happening, do a clean install: in the driver installer choose "Custom" and tick "Perform a clean installation".'),
+         S('Check that the graphics card is not too hot: clean the dust, make sure its fans spin.')],
+        hit.slice(-6).map(function (c) { return when(c.t) + ' ' + (c.k === 'bsod' ? 'blue screen' : c.k === 'hang' ? 'froze: ' + c.x : 'crash: ' + c.x); }).join('\n'));
+    });
+
+    R(function () {
+      var bad = ofKind('crash', 'unclean', 'bsod', 'hang'); if (bad.length < 6) return null;
+      var hours = []; for (var i = 0; i < 24; i++) hours.push(0);
+      bad.forEach(function (e) { hours[new Date(e.t).getHours()]++; });
+      var best = 0, bh = 0;
+      for (var h = 0; h < 24; h++) { var s = hours[h] + hours[(h + 1) % 24] + hours[(h + 2) % 24]; if (s > best) { best = s; bh = h; } }
+      if (best < bad.length * 0.6) return null;
+      var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+      return F('cor-hours', 'Stability', 'low', 'Most crashes (' + best + ' of ' + bad.length + ') happen between ' + pad(bh) + ':00 and ' + pad((bh + 3) % 24) + ':00',
+        'Problems that always happen at the same time of day usually come from something that starts at that time: a scheduled task, a backup, a Windows update, a game or program you open every day, or the PC going to sleep.',
+        [S('Think: what do you do, or what runs by itself, at that time? Backup? Antivirus scan? A game?'), S('Open Task Scheduler (press the Windows key, type "Task Scheduler") and look at the tasks that run around that time.'),
+         S('Try moving that activity to another time of day and see if the problems follow it.')], '');
+    });
+
+    R(function () {
+      var boots = ofKind('boot'); var ups = ofKind('update'); if (boots.length < 6 || !ups.length) return null;
+      var up = ups[ups.length - 1];
+      var b4 = boots.filter(function (b) { return b.t < up.t; }), af = boots.filter(function (b) { return b.t >= up.t; });
+      if (b4.length < 3 || af.length < 3) return null;
+      var avg = function (a) { return a.reduce(function (s, b) { return s + parseFloat(b.x); }, 0) / a.length; };
+      var x = avg(b4), y = avg(af);
+      if (!(y > x * 1.4 && y - x > 10)) return null;
+      return F('cor-boot', 'Performance', 'low', 'Windows starts slower since the update on ' + when(up.t).split(',')[0],
+        'Before that update the PC started in about ' + Math.round(x) + ' seconds. Since then it takes about ' + Math.round(y) + ' seconds. A new background program or driver that came with the update, or a program that now starts with Windows, is the usual cause.',
+        [S('Open Task Manager (Ctrl + Shift + Esc), click "Startup apps", and switch off what you do not need.'), S('Restart twice. The first start after an update is slower.'), S('If it is still slow, see the "Windows takes about N seconds to start" finding for the list of slow programs.')],
+        'Average start before the update: ' + Math.round(x) + ' s (' + b4.length + ' starts). After: ' + Math.round(y) + ' s (' + af.length + ' starts).');
+    });
+
+    R(function () {
+      var un = ofKind('unclean'); if (un.length < 2) return null;
+      var sd = ofKind('shutdown', 'wake');
+      var forced = un.filter(function (u) { return within(u.t, sd, 6 * MIN, 0).length === 0 && within(u.t, ofKind('bsod'), 0, 6 * MIN).length === 0; });
+      if (forced.length < 2) return null;
+      return F('cor-power', 'Stability', 'low', forced.length + ' times the PC lost power or was switched off with the button',
+        'These ' + forced.length + ' restarts were not preceded by a normal shutdown, a wake from sleep or a blue screen. That means the power was cut, the power button was held, or the PC shut itself off because of heat.',
+        [S('Was it a power cut or did you hold the button? If yes, ignore this.'), S('If not, check the PC for dust and heat (is it very hot to touch?), and the power cable or the laptop charger.'), S('Consider a small UPS (battery backup) if power cuts are common where you live.')],
+        forced.slice(-6).map(function (u) { return when(u.t); }).join('\n'));
+    });
+
+    R(function () {
+      var bad = ofKind('crash', 'unclean', 'bsod', 'hang', 'gpu', 'disk', 'svc'); if (bad.length < 10) return null;
+      var perDay = {}; bad.forEach(function (e) { var d = new Date(e.t).toDateString(); perDay[d] = (perDay[d] || 0) + 1; });
+      var top = Object.keys(perDay).sort(function (a, b) { return perDay[b] - perDay[a]; })[0];
+      if (perDay[top] < bad.length * 0.5) return null;
+      var dayStart = new Date(top).getTime();
+      var that = TL.filter(function (e) { return e.t >= dayStart - 12 * H && e.t < dayStart + 36 * H && (e.k === 'update' || e.k === 'install' || e.k === 'svcinst' || e.k === 'uninstall'); });
+      return F('cor-burst', 'Stability', 'info', 'Most problems (' + perDay[top] + ' of ' + bad.length + ') happened on one day: ' + new Date(top).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+        'When almost everything went wrong on a single day, something happened that day. A one-day burst is often harmless and does not come back. It is more worrying if it repeats.',
+        [S('Do you remember what you did that day (new program, update, travel, power cut)?'), S('If the problems have stopped since, there is nothing to do. If they come back, run the scan again in a few days.')],
+        that.length ? that.map(function (e) { return when(e.t) + ' ' + trigName(e); }).join('\n') : 'No install or update events were found around that day.');
     });
 
     out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });

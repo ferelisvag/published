@@ -46,6 +46,12 @@ READING THE REPORT
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
 
+COMFORT
+-------
+Top right of the report: the sun button switches to a light theme, "Aa" makes everything bigger. Both are
+remembered on your PC. In every problem you can tick each step when you have done it, and the Summary
+page counts your progress (this only marks your progress, nothing is run).
+
 LANGUAGE
 --------
 The report starts in your browser's language (English or Greek). Use the button EN / ΕΛ at the
@@ -53,12 +59,12 @@ top right to switch. Greek Windows are supported.
 
 TABS IN THE REPORT
 ------------------
-Summary     one page: a traffic light, what changed since your last scan, and the 3 things to do.
+Summary     one page: a health ring, a timeline of the last 30 days, your progress charts, what changed since your last scan, and the 3 things to do.
 Dashboard   the score and the most important things, with all the details.
 Findings    every problem, in plain words, with the fix.
 Hardware / Software / Events   all the details, for people who want them.
 Compare     compare with an older scan to see your progress.
-Tools       beginner guide, summary for a helper, safe fix script, Excel/CSV export,
+Tools       beginner guide, summary for a helper, safe fix script (you tick what goes in), Excel/CSV export,
             many PCs in one table, an optional monthly check (you decide), Windows secrets, explained words.
 AI help     ask an AI (Claude first) to explain things to you. Personal data is removed.
 PC type     top right: Home, Work or Gaming. It changes which problems count more.
@@ -71,7 +77,9 @@ Hardware, drives and their health, where your disk space went, blue screens and 
 antivirus status and threats, firewall, risky settings (shared folders, open ports,
 remote access), unwanted programs, Windows updates, programs that need updating, drivers and BIOS age,
 internet and Wi-Fi quality, backups and System Restore, battery (laptops),
-and whether the PC can run Windows 11.
+and whether the PC can run Windows 11 (with a step-by-step guide). The report also connects the dots between
+Event Viewer events and problems: for example crashes that began right after an update or install, crashes
+right after waking from sleep, or drive errors right before a crash.
 
 WHERE ARE MY RESULTS?
 ---------------------

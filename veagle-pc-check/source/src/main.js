@@ -27,7 +27,10 @@
     $('#findQ').addEventListener('input', function (e) { UI.state.q = e.target.value; UI.drawFindings(); });
     document.addEventListener('input', function (e) { if (e.target && e.target.id === 'appQ') { UI.setAppQ(e.target.value); UI.drawApps(); } });
     $('#btnPrint').addEventListener('click', function () { window.print(); });
-    $('#btnLang').addEventListener('click', function () { I18N.set(V.lang === 'el' ? 'en' : 'el'); UI.renderAll(); CMP.init(); TOOLS.init(); I18N.apply(); });
+    $('#btnTheme').addEventListener('click', function () { VIZ.toggle('light'); });
+    $('#btnBig').addEventListener('click', function () { VIZ.toggle('big'); });
+    document.addEventListener('change', function (e) { var c = e.target && e.target.getAttribute && e.target.getAttribute('data-chk'); if (!c) return; var p = c.split('|'); VIZ.chkSet(p[0], +p[1], e.target.checked); var li = e.target.closest('li'); if (li) li.classList.toggle('done', e.target.checked); var fi = e.target.closest('.finding'); var f = findFinding(p[0]); if (fi && f) fi.classList.toggle('fdone', VIZ.findingDone(f)); var st = VIZ.chkStats(), tx = $('#progTxt'); if (tx) tx.textContent = V.I('You have done ' + st.done + ' of ' + st.total + ' steps', 'Έχεις κάνει ' + st.done + ' από ' + st.total + ' βήματα'); var pb = $('.pbar i'); if (pb) pb.style.width = Math.round(st.done / Math.max(1, st.total) * 100) + '%'; });
+    $('#btnLang').addEventListener('click', function () { I18N.set(V.lang === 'el' ? 'en' : 'el'); UI.renderAll(); CMP.init(); TOOLS.init(); VIZ.applyPrefs(); I18N.apply(); });
     $('#btnShare').addEventListener('click', function () { SHARE.download(); });
     document.addEventListener('keydown', function (e) {
       if (e.target && /^(input|textarea)$/i.test(e.target.tagName)) return;
@@ -72,7 +75,7 @@
     if (g(D, 'meta.mode', 'full') === 'quick') { var qc = document.createElement('span'); qc.className = 'chip warn'; qc.textContent = 'quick scan'; $('.topright').insertBefore(qc, $('#btnShare')); }
     if (g(D, 'meta.shareSafe', false)) { var sc = document.createElement('span'); sc.className = 'chip'; sc.textContent = 'share-safe copy: personal details removed'; $('.topright').insertBefore(sc, $('#btnShare')); var sb = $('#btnShare'); if (sb) sb.style.display = 'none'; }
     $('#footL').textContent = 'VEAGLE PC Check v' + g(D, 'meta.version', '?') + ' - read-only scan in ' + g(D, 'meta.durationSec', '?') + ' s, nothing was changed on this PC';
-    I18N.apply();
+    VIZ.applyPrefs(); I18N.apply();
     if (window.MutationObserver) { var pend = false; new MutationObserver(function () { if (pend || V.lang !== 'el') return; pend = true; requestAnimationFrame(function () { pend = false; I18N.apply(); }); }).observe(document.body, { childList: true, subtree: true }); }
     bootIntro(function () { UI.countUp(); });
   }

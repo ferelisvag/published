@@ -54,7 +54,7 @@ var AI = (function (V) {
     var lang = ($('#aiLang') ? $('#aiLang').value.trim() : '') || 'English';
 
     t += 'You are an expert Windows 11 technician. Below is a read-only scan of my PC. All of this data was collected by the VEAGLE PC Check app (VEAGLE - ferelis.gr), which was built with the help of Claude. Personal data (user name, PC name, IP and MAC addresses, e-mail addresses) was replaced with placeholders.\n\n';
-    t += 'Please:\n1. Summarise the real condition of this PC in plain language.\n2. Rank the problems by impact, explain the likely root cause of each, and say clearly when something is probably harmless noise.\n3. Give me a step-by-step plan, safest and highest-impact steps first, with exact commands or menu paths.\n4. Ask me before any step that could cause data loss or change security settings.\n5. Tell me what extra information you need (for example a specific log or command output) and how to get it.\n\n';
+    t += 'I am NOT technical. Explain everything like I am a complete beginner: simple words, no jargon (or explain each term in one sentence), and tell me exactly where to click.\n\nPlease:\n1. Summarise the real condition of this PC in plain language.\n2. Rank the problems by impact, explain the likely root cause of each, and say clearly when something is probably harmless noise.\n3. Give me a step-by-step plan, safest and highest-impact steps first, with exact commands or menu paths.\n4. Ask me before any step that could cause data loss or change security settings.\n5. Tell me what extra information you need (for example a specific log or command output) and how to get it.\n\n';
     if (focusFinding) t += 'Please start with this finding: ' + focusFinding + '\n';
     t += 'What I need help with: ' + (focus || 'general health, stability and speed of the PC') + '\n';
     t += 'Reply in: ' + lang + '\n\n';
@@ -82,6 +82,16 @@ var AI = (function (V) {
       if (g(D, 'meta.mode', 'full') === 'quick') t += line('Scan mode', 'QUICK scan (DISM, winget, optional features and old-driver checks were skipped)');
       var hist = arr(g(D, 'boot.history', [])).slice(0, 8);
       if (hist.length) t += line('Boot times (s), newest first', hist.map(function (x) { return x.seconds; }).join(', '));
+      var ex = D.extras;
+      if (ex) {
+        var rl = ex.reliability || {}, sm = ex.securityMore || {}, nt = ex.networkTest || {}, bk = ex.backup || {}, df = sm.defender || null;
+        if (rl.stabilityIndex != null) t += line('Reliability', 'Windows stability index ' + rl.stabilityIndex + '/10 (7-day average)' + (arr(rl.bugchecks).length ? '; blue screen codes: ' + arr(rl.bugchecks).map(function (b) { return b.code; }).join(', ') : ''));
+        if (df) t += line('Defender', 'definitions ' + df.signatureAgeDays + ' days old, quick scan ' + (df.quickScanAgeDays == null ? 'never/unknown' : df.quickScanAgeDays + ' days ago') + ', tamper protection=' + df.tamperProtected + ', threats in 30 days=' + df.threats30d);
+        t += line('Security details', 'NLA=' + sm.nlaRequired + ', autologon=' + sm.autoLogon + ', UAC prompt level=' + sm.uacPromptLevel + ', SMB1=' + sm.smb1Enabled + ', activation status=' + sm.activation + ', non-admin shares=' + arr(sm.shares).length + ', unsigned drivers=' + arr(sm.unsignedDrivers).length);
+        if (arr(sm.listening).length) t += line('Open ports (listening)', arr(sm.listening).slice(0, 25).map(function (p) { return p.port + '/' + (p.process || '?'); }).join(', '));
+        if (nt.ping || nt.dns) t += line('Network test', 'router ping ' + g(nt, 'ping.avgMs', '?') + ' ms, lost ' + g(nt, 'ping.lost', '?') + '/' + g(nt, 'ping.sent', '?') + '; DNS ' + (g(nt, 'dns.ok', null) ? g(nt, 'dns.ms', '?') + ' ms' : 'failed') + '; time source ' + g(nt, 'timeSync.source', '?') + '; Wi-Fi ' + (nt.wifi ? nt.wifi.signalPct + '% ' + nt.wifi.band : 'n/a') + '; proxy=' + nt.proxyEnabled);
+        t += line('Backups', 'restore points ' + g(bk, 'restorePoints.count', '?') + ', File History=' + bk.fileHistory + ', OneDrive folder backup (docs/desktop/pictures)=' + [g(bk, 'oneDriveFolders.documents', false), g(bk, 'oneDriveFolders.desktop', false), g(bk, 'oneDriveFolders.pictures', false)].join('/') + ', Windows RE=' + bk.winRE);
+      }
       t += '\n';
     }
     if (opt.findings) {

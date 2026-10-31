@@ -236,6 +236,22 @@ footer.foot { max-width: 1360px; margin: 0 auto; padding: 18px 28px 40px; border
 .chg { display: flex; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line2); align-items: baseline; flex-wrap: wrap; }
 .chg:first-child { border-top: 0; }
 
+/* v0.3 beginner helpers */
+.startbox { margin: 0 0 18px; padding: 14px 16px; border: 1px solid var(--red); background: rgba(223,40,41,.08); font-size: 15px; line-height: 1.6; }
+.startbox .btn { margin-left: 8px; }
+abbr.gl { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
+.metachips { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 2px; }
+.metachips .chip { padding: 3px 9px; font-size: 12px; }
+.chip.ok { border-color: #2f5c3a; color: #86e0a0; } .chip.bad { border-color: #5a2526; color: #ff8d8e; } .chip.warn { border-color: #5a4a1e; color: #f2c96b; }
+.finding .lbl, .fb > .lbl { color: var(--dim, #8a8a94); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin-top: 14px; }
+.chip select { background: #0c0c0e; color: #ececf0; border: 1px solid var(--line); font: inherit; padding: 2px 4px; margin-left: 4px; }
+#tab-tools textarea { background: #0b0b0d; color: #d4d4d8; border: 1px solid var(--line); padding: 10px; font-size: 12px; }
+@media print { .startbox, #profileSel { display: none; } }
+#tab-tools .steps3 li { display: block; }
+#tab-tools .steps3 li b { display: inline; border: 0; padding: 0; background: none; font-weight: 700; color: #fff; }
+#tab-tools ol.steps3 { list-style: decimal; padding-left: 28px; display: block; }
+#tab-tools ol.steps3 li { margin: 8px 0; padding-left: 4px; }
+
 </style>
 </head>
 <body>
@@ -260,10 +276,12 @@ footer.foot { max-width: 1360px; margin: 0 auto; padding: 18px 28px 40px; border
       <button role="tab" data-tab="software" aria-selected="false">Software</button>
       <button role="tab" data-tab="events" aria-selected="false">Events</button>
       <button role="tab" data-tab="compare" aria-selected="false">Compare</button>
+      <button role="tab" data-tab="tools" aria-selected="false">Tools</button>
       <button role="tab" data-tab="ai" aria-selected="false">AI help</button>
     </nav>
     <div class="topright">
       <a class="chip" href="https://ferelis.gr" target="_blank" rel="noopener" title="VEAGLE - ferelis.gr">ferelis.gr</a>
+      <label class="chip" for="profileSel">PC type <select id="profileSel" aria-label="Type of PC"></select></label>
       <span class="chip" id="chipOs"></span>
       <span class="chip" id="chipDate"></span>
       <button class="btn sm" id="btnShare" type="button" title="Download a copy of this report with your personal details removed">Share-safe copy</button>
@@ -276,6 +294,7 @@ footer.foot { max-width: 1360px; margin: 0 auto; padding: 18px 28px 40px; border
   <div id="demo"></div>
 
   <section class="tabpane on" id="tab-dashboard" role="tabpanel" aria-label="Dashboard">
+    <div id="startBox"></div>
     <div class="grid">
       <div class="win s4" id="wHealth"></div>
       <div class="win s4" id="wRadar"></div>
@@ -319,6 +338,8 @@ footer.foot { max-width: 1360px; margin: 0 auto; padding: 18px 28px 40px; border
   <section class="tabpane" id="tab-events" role="tabpanel" aria-label="Events"></section>
 
   <section class="tabpane" id="tab-compare" role="tabpanel" aria-label="Compare scans"></section>
+
+  <section class="tabpane" id="tab-tools" role="tabpanel" aria-label="Tools"></section>
 
   <section class="tabpane" id="tab-ai" role="tabpanel" aria-label="AI help">
     <div class="sect"><h2>Get expert help from an AI</h2><span>you stay in control of what is shared</span></div>
@@ -383,7 +404,7 @@ footer.foot { max-width: 1360px; margin: 0 auto; padding: 18px 28px 40px; border
 </footer>
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script>window.__PCDATA__ = {"meta":{"mode":"full","tool":"VEAGLE PC Check","version":"0.2.0","generated":"2026-10-31T16:35:00","isAdmin":true,"psVersion":"5.1.26100.9549","user":"demo","computer":"DEMO-PC","domain":"DEMO-PC","durationSec":214,"warnings":["winget: first run may be slow"]},"system":{"manufacturer":"Gigabyte Technology Co., Ltd.","model":"Z590 AORUS PRO AX","chassis":"Desktop","isLaptop":false,"firmware":"UEFI","board":{"manufacturer":"Gigabyte Technology Co., Ltd.","product":"Z590 AORUS PRO AX"},"bios":{"vendor":"American Megatrends International, LLC.","version":"ALASKA - 1072009","date":"2025-06-10T00:00:00","smbios":"3.4"},"cpu":{"name":"11th Gen Intel(R) Core(TM) i7-11700K @ 3.60GHz","manufacturer":"GenuineIntel","sockets":1,"cores":8,"threads":16,"baseMHz":3600,"currentMHz":3600,"l2KB":4096,"l3KB":16384,"socket":"U3E1","virtualizationEnabled":false,"loadPercent":7},"ram":{"totalGB":31.9,"freeGB":17.4,"slots":4,"maxGB":128,"modules":[{"slot":"DIMM_A1","gb":16,"speedMHz":3500,"configuredMHz":3500,"manufacturer":"Crucial Technology","partNumber":"","type":"DDR4","formFactor":"DIMM"},{"slot":"DIMM_B1","gb":16,"speedMHz":3500,"configuredMHz":3500,"manufacturer":"Crucial Technology","partNumber":"","type":"DDR4","formFactor":"DIMM"}]},"os":{"caption":"Microsoft Windows 11 Pro","productName":"Windows 11 Pro","edition":"Professional","displayVersion":"","version":"10.0.26300","build":26300,"ubr":9711,"arch":"64-bit","installDate":"2026-06-22T16:44:15","lastBoot":"2026-10-31T16:01:34","uptimeHours":0.6,"language":"el-GR","timeZone":"GTB Standard Time"}},"gpus":[{"name":"NVIDIA GeForce RTX 3070","vramGB":8,"driverVersion":"32.0.16.1088","driverFriendly":"610.88","driverDate":"2026-07-22T00:00:00","width":1920,"height":1080,"refreshHz":60,"status":"OK"}],"disks":[{"name":"KINGSTON SFYRD2000G","mediaType":"SSD","busType":"NVMe","health":"Healthy","status":"OK","sizeGB":1863,"firmware":"","reliability":{"temperatureC":38,"wearPercent":0,"powerOnHours":null,"readErrors":null,"writeErrors":null}},{"name":"Samsung SSD 860 EVO 1TB","mediaType":"SSD","busType":"SATA","health":"Healthy","status":"OK","sizeGB":932,"firmware":"","reliability":{"temperatureC":51,"wearPercent":0,"powerOnHours":20797,"readErrors":0,"writeErrors":null}},{"name":"Msft Virtual Disk","mediaType":"SSD","busType":"File Backed Virtual","health":"Healthy","status":"OK","sizeGB":0,"firmware":"","reliability":null}],"volumes":[{"letter":"C:","label":"","fs":"NTFS","health":"Healthy","driveType":"Fixed","sizeGB":1862,"freeGB":289,"bitlocker":{"protection":"On","percent":100}},{"letter":"D:","label":"","fs":"NTFS","health":"Healthy","driveType":"Fixed","sizeGB":931,"freeGB":213,"bitlocker":{"protection":"On","percent":100}}],"network":{"adapters":[{"name":"Ethernet","description":"Intel(R) Ethernet Controller (3) I225-V","status":"Up","linkSpeed":"1 Gbps","virtual":false},{"name":"vEthernet (Default Switch)","description":"Hyper-V Virtual Ethernet Adapter","status":"Up","linkSpeed":"10 Gbps","virtual":true},{"name":"NordLynx","description":"NordLynx Tunnel","status":"Disconnected","linkSpeed":"100 Gbps","virtual":true},{"name":"Wi-Fi","description":"Intel(R) Wi-Fi 6 AX200 160MHz","status":"Not Present","linkSpeed":"0 bps","virtual":false}],"dns":["1.1.1.1","8.8.8.8"]},"security":{"secureBoot":true,"tpm":{"present":true,"ready":true,"specVersion":"2.0"},"antivirus":[{"name":"Bitdefender Antivirus","enabled":true,"upToDate":true},{"name":"Windows Defender","enabled":false,"upToDate":true}],"defender":{"serviceEnabled":false,"realTime":false,"signaturesUpdated":null},"firewall":{"domain":true,"private":true,"public":true},"uac":true,"pendingReboot":false,"rdpEnabled":false,"localAdmins":2,"memoryIntegrity":null,"vbsStatus":2,"hypervisorPresent":true,"optionalFeatures":["Microsoft-Hyper-V-All","VirtualMachinePlatform","Microsoft-Windows-Subsystem-Linux"]},"settings":{"powerPlan":"Balanced","fastStartup":true,"hibernation":true,"pagefileAuto":false,"pagefiles":[{"name":"C:\\pagefile.sys","allocatedMB":35000,"usedMB":32}],"trim":true,"gpuScheduling":null,"gameMode":null,"storageSense":true,"tempMB":{"user":797,"windows":381},"hasBattery":false},"updates":{"hotfixes":[{"id":"KB5127648","description":"Security Update","installedOn":"2026-10-18T00:00:00"},{"id":"KB5127647","description":"Security Update","installedOn":"2026-10-16T00:00:00"}],"lastPatchDaysAgo":13},"crashDumps":{"dumps":0,"liveKernelReports":0},"events":{"days":30,"system":{"total":1379,"errors":700,"warnings":679,"groups":[{"provider":"nvlddmkm","id":153,"level":"Error","count":466,"sample":"","lastSeen":"2026-10-03T16:35:00"},{"provider":"Microsoft-Windows-DistributedCOM","id":10016,"level":"Warning","count":447,"sample":"The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID","lastSeen":"2026-10-28T16:35:00"},{"provider":"Microsoft-Windows-DistributedCOM","id":10010,"level":"Error","count":163,"sample":"The server did not register with DCOM within the required timeout.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Microsoft-Windows-BitLocker-Driver","id":24641,"level":"Error","count":95,"sample":"An unexpected error was encountered attempting to retrieve the BitLocker volume master key during restart.","lastSeen":"2026-10-28T16:35:00"},{"provider":"e2fexpress","id":27,"level":"Warning","count":45,"sample":"Intel(R) Ethernet Controller (3) I225-V","lastSeen":"2026-10-28T16:35:00"},{"provider":"Service Control Manager","id":7034,"level":"Error","count":39,"sample":"The MEmuSVC service terminated unexpectedly.  It has done this 1 time(s).","lastSeen":"2026-10-09T16:35:00"},{"provider":"Microsoft-Windows-Hyper-V-Hypervisor","id":167,"level":"Warning","count":39,"sample":"The hypervisor did not enable mitigations for side channel vulnerabilities because HyperThreading is enabled.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Tcpip","id":4266,"level":"Warning","count":17,"sample":"A request to allocate an ephemeral port number from the global UDP port space has failed due to all such ports being in use.","lastSeen":"2026-10-11T16:35:00"},{"provider":"winsrvext","id":100,"level":"Warning","count":16,"sample":"Process nvcontainer.exe is delaying system shutdown after 5172 milliseconds.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Microsoft-Windows-DistributedCOM","id":10005,"level":"Error","count":12,"sample":"DCOM got error \"87\" attempting to start the service GamingServices","lastSeen":"2026-10-27T16:35:00"},{"provider":"VMnetDHCP","id":1,"level":"Warning","count":9,"sample":"dispatch: Timeout waiting for input data","lastSeen":"2026-10-28T16:35:00"},{"provider":"Microsoft-Windows-FilterManager","id":3,"level":"Error","count":8,"sample":"Filter Manager failed to attach to volume. This volume will be unavailable for filtering until a reboot.","lastSeen":"2026-10-29T16:35:00"},{"provider":"Service Control Manager","id":7024,"level":"Error","count":6,"sample":"The XboxService service terminated with a service-specific error.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Tcpip","id":4231,"level":"Warning","count":4,"sample":"A request to allocate an ephemeral port number from the global TCP port space has failed due to all such ports being in use.","lastSeen":"2026-10-11T16:35:00"},{"provider":"Microsoft-Windows-WindowsUpdateClient","id":20,"level":"Error","count":2,"sample":"Installation Failure: Windows failed to install the following update with error 0x8024200B: LG Electronics Inc. - Extension","lastSeen":"2026-10-27T16:35:00"},{"provider":"Volsnap","id":36,"level":"Error","count":1,"sample":"The shadow copies of volume C: were aborted because the shadow copy storage could not grow due to a user imposed limit.","lastSeen":"2026-10-06T16:35:00"},{"provider":"disk","id":153,"level":"Warning","count":1,"sample":"The IO operation at logical block address was retried.","lastSeen":"2026-10-06T16:35:00"}],"perDay":[{"date":"2026-10-02","errors":4,"warnings":8},{"date":"2026-10-03","errors":14,"warnings":36},{"date":"2026-10-04","errors":471,"warnings":39},{"date":"2026-10-05","errors":3,"warnings":25},{"date":"2026-10-06","errors":3,"warnings":34},{"date":"2026-10-07","errors":2,"warnings":24},{"date":"2026-10-08","errors":1,"warnings":16},{"date":"2026-10-09","errors":5,"warnings":20},{"date":"2026-10-10","errors":10,"warnings":24},{"date":"2026-10-11","errors":4,"warnings":36},{"date":"2026-10-12","errors":2,"warnings":33},{"date":"2026-10-13","errors":2,"warnings":9},{"date":"2026-10-14","errors":0,"warnings":37},{"date":"2026-10-15","errors":3,"warnings":15},{"date":"2026-10-16","errors":6,"warnings":26},{"date":"2026-10-17","errors":12,"warnings":36},{"date":"2026-10-18","errors":3,"warnings":7},{"date":"2026-10-19","errors":5,"warnings":9},{"date":"2026-10-20","errors":6,"warnings":40},{"date":"2026-10-21","errors":4,"warnings":25},{"date":"2026-10-22","errors":2,"warnings":27},{"date":"2026-10-23","errors":4,"warnings":36},{"date":"2026-10-24","errors":22,"warnings":9},{"date":"2026-10-25","errors":6,"warnings":10},{"date":"2026-10-26","errors":2,"warnings":35},{"date":"2026-10-27","errors":5,"warnings":9},{"date":"2026-10-28","errors":0,"warnings":24},{"date":"2026-10-29","errors":5,"warnings":33},{"date":"2026-10-30","errors":2,"warnings":29},{"date":"2026-10-31","errors":19,"warnings":6}]},"application":{"total":871,"errors":520,"warnings":351,"groups":[{"provider":"Microsoft-Windows-CAPI2","id":4176,"level":"Error","count":443,"sample":"PFX operation failed as AuthSafes count doesn't lie in expected range. Maximum permissible value: 200. Erroneous value: 202.","lastSeen":"2026-10-07T16:35:00"},{"provider":"Microsoft-Windows-WMI","id":63,"level":"Warning","count":117,"sample":"A provider, IntelMEProv, has been registered in the WMI namespace to use the LocalSystem account.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Telemetry 3.0 x64","id":259,"level":"Error","count":60,"sample":"Policy not available","lastSeen":"2026-10-28T16:35:00"},{"provider":"Application Error","id":1000,"level":"Error","count":54,"sample":"Faulting application name: MemuService.exe","lastSeen":"2026-10-09T16:35:00"},{"provider":"Microsoft-Windows-Perflib","id":2003,"level":"Warning","count":42,"sample":"The configuration information of the performance library perfts.dll does not match the trusted information.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Microsoft-Windows-Search","id":10024,"level":"Warning","count":40,"sample":"The filter host process did not respond and is being forcibly terminated.","lastSeen":"2026-10-28T16:35:00"},{"provider":".NET Runtime","id":1022,"level":"Error","count":36,"sample":"There was a failure initializing profiling API attach infrastructure.","lastSeen":"2026-10-09T16:35:00"},{"provider":"VSS","id":13,"level":"Error","count":7,"sample":"The COM Server CEventSystem cannot be started. A system shutdown is in progress.","lastSeen":"2026-10-22T16:35:00"},{"provider":"Application Hang","id":1002,"level":"Error","count":2,"sample":"The program dllhost.exe stopped interacting with Windows and was closed.","lastSeen":"2026-10-09T16:35:00"}],"perDay":[{"date":"2026-10-02","errors":3,"warnings":27},{"date":"2026-10-03","errors":13,"warnings":12},{"date":"2026-10-04","errors":3,"warnings":8},{"date":"2026-10-05","errors":1,"warnings":23},{"date":"2026-10-06","errors":444,"warnings":20},{"date":"2026-10-07","errors":3,"warnings":30},{"date":"2026-10-08","errors":6,"warnings":36},{"date":"2026-10-09","errors":0,"warnings":15},{"date":"2026-10-10","errors":22,"warnings":30},{"date":"2026-10-11","errors":4,"warnings":22},{"date":"2026-10-12","errors":1,"warnings":32},{"date":"2026-10-13","errors":6,"warnings":40},{"date":"2026-10-14","errors":2,"warnings":31},{"date":"2026-10-15","errors":2,"warnings":29},{"date":"2026-10-16","errors":1,"warnings":14},{"date":"2026-10-17","errors":10,"warnings":16},{"date":"2026-10-18","errors":1,"warnings":19},{"date":"2026-10-19","errors":5,"warnings":19},{"date":"2026-10-20","errors":0,"warnings":36},{"date":"2026-10-21","errors":6,"warnings":16},{"date":"2026-10-22","errors":2,"warnings":23},{"date":"2026-10-23","errors":0,"warnings":14},{"date":"2026-10-24","errors":21,"warnings":39},{"date":"2026-10-25","errors":2,"warnings":25},{"date":"2026-10-26","errors":1,"warnings":37},{"date":"2026-10-27","errors":4,"warnings":8},{"date":"2026-10-28","errors":3,"warnings":40},{"date":"2026-10-29","errors":3,"warnings":30},{"date":"2026-10-30","errors":3,"warnings":30},{"date":"2026-10-31","errors":11,"warnings":35}]},"appCrashes":[{"app":"MemuService.exe","count":39},{"app":"OnScreen Control.exe","count":3},{"app":"nordvpn-service.exe","count":2},{"app":"vmware-vmx.exe","count":2},{"app":"GalaxyClient.exe","count":2}],"appHangs":2},"boot":{"history":[{"time":"2026-10-31T16:35:00","seconds":64.6},{"time":"2026-10-30T16:35:00","seconds":65.0},{"time":"2026-10-29T16:35:00","seconds":78.8},{"time":"2026-10-28T16:35:00","seconds":103.7},{"time":"2026-10-27T16:35:00","seconds":79.6},{"time":"2026-10-26T16:35:00","seconds":88.2},{"time":"2026-10-25T16:35:00","seconds":71.4},{"time":"2026-10-24T16:35:00","seconds":69.9}],"slowStarters":[{"name":"Discord.exe","times":4},{"name":"Microsoft.CmdPal.UI.exe","times":4},{"name":"nvcontainer.exe","times":3},{"name":"bdservicehost.exe","times":3},{"name":"Agent.exe","times":3},{"name":"nordvpn-service.exe","times":2}]},"apps":{"count":212,"storeCount":60,"list":[{"name":"@BIOS","version":"1.0","publisher":"","sizeMB":120},{"name":"ACDSee Free","version":"1.0","publisher":"","sizeMB":20},{"name":"Adobe Acrobat (64-bit)","version":"1.0","publisher":"","sizeMB":540},{"name":"AnyDesk","version":"1.0","publisher":"","sizeMB":0},{"name":"Bitdefender Total Security","version":"1.0","publisher":"","sizeMB":0},{"name":"Brave","version":"1.0","publisher":"","sizeMB":0},{"name":"Discord","version":"1.0","publisher":"","sizeMB":120},{"name":"EA app","version":"1.0","publisher":"","sizeMB":0},{"name":"Epic Games Launcher","version":"1.0","publisher":"","sizeMB":20},{"name":"FileZilla","version":"1.0","publisher":"","sizeMB":0},{"name":"GitHub Desktop","version":"1.0","publisher":"","sizeMB":0},{"name":"GOG GALAXY","version":"1.0","publisher":"","sizeMB":540},{"name":"Google Chrome","version":"1.0","publisher":"","sizeMB":540},{"name":"HandBrake 1.9.2","version":"1.0","publisher":"","sizeMB":0},{"name":"HWiNFO 64","version":"1.0","publisher":"","sizeMB":20},{"name":"Intel(R) Extreme Tuning Utility","version":"1.0","publisher":"","sizeMB":0},{"name":"MEmu","version":"1.0","publisher":"","sizeMB":540},{"name":"Microsoft Edge","version":"1.0","publisher":"","sizeMB":0},{"name":"Microsoft Office Professional Plus 2021","version":"1.0","publisher":"","sizeMB":0},{"name":"Microsoft OneDrive","version":"1.0","publisher":"","sizeMB":20},{"name":"NordVPN","version":"1.0","publisher":"","sizeMB":0},{"name":"Notepad++ (64-bit x64)","version":"1.0","publisher":"","sizeMB":540},{"name":"NVIDIA App","version":"1.0","publisher":"","sizeMB":0},{"name":"NVIDIA Graphics Driver","version":"1.0","publisher":"","sizeMB":20},{"name":"OpenVPN","version":"1.0","publisher":"","sizeMB":0},{"name":"PowerShell 7-x64","version":"1.0","publisher":"","sizeMB":20},{"name":"PowerToys (Preview)","version":"1.0","publisher":"","sizeMB":120},{"name":"RustDesk","version":"1.0","publisher":"","sizeMB":540},{"name":"Steam","version":"1.0","publisher":"","sizeMB":20},{"name":"SteelSeries GG","version":"1.0","publisher":"","sizeMB":0},{"name":"Ubisoft Connect","version":"1.0","publisher":"","sizeMB":120},{"name":"VLC media player","version":"1.0","publisher":"","sizeMB":20},{"name":"VMware Workstation","version":"1.0","publisher":"","sizeMB":0},{"name":"Viber","version":"1.0","publisher":"","sizeMB":20},{"name":"WinDirStat","version":"1.0","publisher":"","sizeMB":120},{"name":"WinRAR 7.10 (64-bit)","version":"1.0","publisher":"","sizeMB":0},{"name":"Wondershare Filmora 16","version":"1.0","publisher":"","sizeMB":0}],"wingetAvailable":true,"outdated":[{"name":"@BIOS","id":"GIGABYTE.BIOS","version":"4.24.0130.1","available":"4.26.0930.1","source":"winget"},{"name":"AnyDesk","id":"AnyDesk.AnyDesk","version":"ad 9.0.4","available":"9.8.3","source":"winget"},{"name":"CapCut","id":"XP9KN75RRB9NHS","version":"9.1.0.3879","available":"9.7.0.4153","source":"msstore"},{"name":"EA app","id":"ElectronicArts.EADesktop","version":"13.700.0.6213","available":"13.813.1.6327","source":"winget"},{"name":"Epic Games Launcher","id":"XP99VR1BPSBQJ2","version":"1.3.189.0","available":"1.3.210.0","source":"msstore"},{"name":"GitHub Desktop","id":"GitHub.GitHubDesktop","version":"3.6.7","available":"3.6.10","source":"winget"},{"name":"HandBrake 1.9.2","id":"HandBrake.HandBrake","version":"1.9.2","available":"1.11.2","source":"winget"},{"name":"Ledger Wallet 2.133.0","id":"LedgerHQ.LedgerLive","version":"2.133.0","available":"4.24.1","source":"winget"},{"name":"Microsoft Edge","id":"Microsoft.Edge","version":"156.0.4314.50","available":"156.0.4314.58","source":"winget"},{"name":"Notepad++ (64-bit x64)","id":"Notepad++.Notepad++","version":"8.7.8","available":"8.9.8.1","source":"winget"},{"name":"OpenVPN 2.6.14-I001 amd64","id":"OpenVPNTechnologies.OpenVPN","version":"2.6.1401","available":"2.7.701","source":"winget"},{"name":"Windows Terminal","id":"Microsoft.WindowsTerminal","version":"1.24.11911.0","available":"1.25.2733.0","source":"winget"},{"name":"WinRAR 7.10 (64-bit)","id":"RARLab.WinRAR","version":"7.10.0","available":"7.23.0","source":"winget"},{"name":"Viber","id":"XPFM5P5KDWF0JP","version":"28.2.0.0","available":"29.1.0.0","source":"msstore"},{"name":"Sample app 0","id":"Vendor.App0","version":"1.0","available":"2.0","source":"winget"},{"name":"Sample app 1","id":"Vendor.App1","version":"1.1","available":"2.1","source":"winget"},{"name":"Sample app 2","id":"Vendor.App2","version":"1.2","available":"2.2","source":"winget"},{"name":"Sample app 3","id":"Vendor.App3","version":"1.3","available":"2.3","source":"winget"},{"name":"Sample app 4","id":"Vendor.App4","version":"1.4","available":"2.4","source":"winget"},{"name":"Sample app 5","id":"Vendor.App5","version":"1.5","available":"2.5","source":"winget"},{"name":"Sample app 6","id":"Vendor.App6","version":"1.6","available":"2.6","source":"winget"},{"name":"Sample app 7","id":"Vendor.App7","version":"1.7","available":"2.7","source":"winget"},{"name":"Sample app 8","id":"Vendor.App8","version":"1.8","available":"2.8","source":"winget"},{"name":"Sample app 9","id":"Vendor.App9","version":"1.9","available":"2.9","source":"winget"},{"name":"Sample app 10","id":"Vendor.App10","version":"1.10","available":"2.10","source":"winget"},{"name":"Sample app 11","id":"Vendor.App11","version":"1.11","available":"2.11","source":"winget"},{"name":"Sample app 12","id":"Vendor.App12","version":"1.12","available":"2.12","source":"winget"},{"name":"Sample app 13","id":"Vendor.App13","version":"1.13","available":"2.13","source":"winget"},{"name":"Sample app 14","id":"Vendor.App14","version":"1.14","available":"2.14","source":"winget"},{"name":"Sample app 15","id":"Vendor.App15","version":"1.15","available":"2.15","source":"winget"},{"name":"Sample app 16","id":"Vendor.App16","version":"1.16","available":"2.16","source":"winget"}]},"startup":{"items":[{"name":"GoogleDriveFS","command":"C:\\Users\\demo\\AppData\\Local\\GoogleDriveFS\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"OneDrive","command":"C:\\Users\\demo\\AppData\\Local\\OneDrive\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Discord","command":"C:\\Users\\demo\\AppData\\Local\\Discord\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"EpicGamesLauncher","command":"C:\\Users\\demo\\AppData\\Local\\EpicGamesLauncher\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"CCXProcess","command":"C:\\Users\\demo\\AppData\\Local\\CCXProcess\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"BraveSoftware Update","command":"C:\\Users\\demo\\AppData\\Local\\BraveSoftware Update\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Adobe Acrobat Synchronizer","command":"C:\\Users\\demo\\AppData\\Local\\Adobe Acrobat Synchronizer\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Agent Tray","command":"C:\\Users\\demo\\AppData\\Local\\Agent Tray\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"ACDSeeCommanderFree","command":"C:\\Users\\demo\\AppData\\Local\\ACDSeeCommanderFree\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Wargaming.net Game Center","command":"C:\\Users\\demo\\AppData\\Local\\Wargaming.net Game Center\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Studio.QuickLook","command":"C:\\Users\\demo\\AppData\\Local\\Studio.QuickLook\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"EADM","command":"C:\\Users\\demo\\AppData\\Local\\EADM\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"FilmoraTray","command":"C:\\Users\\demo\\AppData\\Local\\FilmoraTray\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"NVIDIA Broadcast","command":"C:\\Users\\demo\\AppData\\Local\\NVIDIA Broadcast\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"GogGalaxy","command":"C:\\Users\\demo\\AppData\\Local\\GogGalaxy\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"MicrosoftEdgeAutoLaunch","command":"C:\\Users\\demo\\AppData\\Local\\MicrosoftEdgeAutoLaunch\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"AnyDesk","command":"C:\\Users\\demo\\AppData\\Local\\AnyDesk\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"SecurityHealth","command":"C:\\Users\\demo\\AppData\\Local\\SecurityHealth\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"RtkAudUService","command":"C:\\Users\\demo\\AppData\\Local\\RtkAudUService\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"SteelSeriesGG","command":"C:\\Users\\demo\\AppData\\Local\\SteelSeriesGG\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Bdagent","command":"C:\\Users\\demo\\AppData\\Local\\Bdagent\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"ACFW02EN","command":"C:\\Users\\demo\\AppData\\Local\\ACFW02EN\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"BdVpnApp","command":"C:\\Users\\demo\\AppData\\Local\\BdVpnApp\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Steam","command":"C:\\Users\\demo\\AppData\\Local\\Steam\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Viber","command":"C:\\Users\\demo\\AppData\\Local\\Viber\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Spotify","command":"C:\\Users\\demo\\AppData\\Local\\Spotify\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Zoom","command":"C:\\Users\\demo\\AppData\\Local\\Zoom\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Dropbox","command":"C:\\Users\\demo\\AppData\\Local\\Dropbox\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"}],"thirdPartyServices":[{"name":"AnyDesk","display":"AnyDesk Service","state":"Running"},{"name":"Agent","display":"Agent Service","state":"Running"},{"name":"BDAppSrv","display":"BDAppSrv Service","state":"Running"},{"name":"BDAuxSrv","display":"BDAuxSrv Service","state":"Running"},{"name":"BDProtSrv","display":"BDProtSrv Service","state":"Running"},{"name":"bdredline","display":"bdredline Service","state":"Running"},{"name":"bdvpnservice","display":"bdvpnservice Service","state":"Running"},{"name":"nordvpn-service","display":"nordvpn-service Service","state":"Running"},{"name":"OpenVPNService","display":"OpenVPNService Service","state":"Running"},{"name":"VMAuthdService","display":"VMAuthdService Service","state":"Running"},{"name":"NvContainerLocalSystem","display":"NvContainerLocalSystem Service","state":"Running"},{"name":"WSLService","display":"WSLService Service","state":"Running"}],"failedAutoServices":[{"name":"MEmuSVC","display":"MEmuSVC","exitCode":1067},{"name":"XboxService","display":"Xbox Service","exitCode":1066}],"scheduledTasks":[{"name":"Adobe Acrobat Update Task","state":"Ready"},{"name":"GCC","state":"Ready"}],"topRam":[{"name":"NVIDIA Broadcast","instances":2,"ramMB":950,"cpuSeconds":226},{"name":"Discord","instances":3,"ramMB":923,"cpuSeconds":1087},{"name":"Agent","instances":1,"ramMB":737,"cpuSeconds":972},{"name":"bdservicehost","instances":4,"ramMB":737,"cpuSeconds":84},{"name":"claude","instances":3,"ramMB":1100,"cpuSeconds":274},{"name":"steamwebhelper","instances":2,"ramMB":717,"cpuSeconds":40},{"name":"chrome","instances":14,"ramMB":1260,"cpuSeconds":65}],"topCpu":[]},"drivers":{"problemDevices":[{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"Net","name":"VMware Virtual Ethernet Adapter for VMnet1","status":"Error","problem":"CM_PROB_DISABLED","disabled":true},{"class":"Net","name":"Intel(R) Wi-Fi 6 AX200 160MHz","status":"Error","problem":"CM_PROB_DISABLED","disabled":true}],"oldDrivers":[{"device":"TP-LINK Wireless USB Adapter","provider":"TP-LINK","version":"2.0.0.62","date":"2011-04-20T00:00:00"},{"device":"Wintun Userspace Tunnel","provider":"WireGuard LLC","version":"0.8.0.0","date":"2019-12-10T00:00:00"}]},"dism":{"state":"repairable","text":"The component store is repairable. | The operation completed successfully."}};</script>
+<script>window.__PCDATA__ = {"meta":{"mode":"full","tool":"VEAGLE PC Check","version":"0.3.0","generated":"2026-10-31T16:35:00","isAdmin":true,"psVersion":"5.1.26100.9549","user":"demo","computer":"DEMO-PC","domain":"DEMO-PC","durationSec":214,"warnings":["winget: first run may be slow"]},"system":{"manufacturer":"Gigabyte Technology Co., Ltd.","model":"Z590 AORUS PRO AX","chassis":"Desktop","isLaptop":false,"firmware":"UEFI","board":{"manufacturer":"Gigabyte Technology Co., Ltd.","product":"Z590 AORUS PRO AX"},"bios":{"vendor":"American Megatrends International, LLC.","version":"ALASKA - 1072009","date":"2025-06-10T00:00:00","smbios":"3.4"},"cpu":{"name":"11th Gen Intel(R) Core(TM) i7-11700K @ 3.60GHz","manufacturer":"GenuineIntel","sockets":1,"cores":8,"threads":16,"baseMHz":3600,"currentMHz":3600,"l2KB":4096,"l3KB":16384,"socket":"U3E1","virtualizationEnabled":false,"loadPercent":7},"ram":{"totalGB":31.9,"freeGB":17.4,"slots":4,"maxGB":128,"modules":[{"slot":"DIMM_A1","gb":16,"speedMHz":3500,"configuredMHz":3500,"manufacturer":"Crucial Technology","partNumber":"","type":"DDR4","formFactor":"DIMM"},{"slot":"DIMM_B1","gb":16,"speedMHz":3500,"configuredMHz":3500,"manufacturer":"Crucial Technology","partNumber":"","type":"DDR4","formFactor":"DIMM"}]},"os":{"caption":"Microsoft Windows 11 Pro","productName":"Windows 11 Pro","edition":"Professional","displayVersion":"","version":"10.0.26300","build":26300,"ubr":9711,"arch":"64-bit","installDate":"2026-06-22T16:44:15","lastBoot":"2026-10-31T16:01:34","uptimeHours":0.6,"language":"el-GR","timeZone":"GTB Standard Time"}},"gpus":[{"name":"NVIDIA GeForce RTX 3070","vramGB":8,"driverVersion":"32.0.16.1088","driverFriendly":"610.88","driverDate":"2026-07-22T00:00:00","width":1920,"height":1080,"refreshHz":60,"status":"OK"}],"disks":[{"name":"KINGSTON SFYRD2000G","mediaType":"SSD","busType":"NVMe","health":"Healthy","status":"OK","sizeGB":1863,"firmware":"","reliability":{"temperatureC":38,"wearPercent":0,"powerOnHours":null,"readErrors":null,"writeErrors":null}},{"name":"Samsung SSD 860 EVO 1TB","mediaType":"SSD","busType":"SATA","health":"Healthy","status":"OK","sizeGB":932,"firmware":"","reliability":{"temperatureC":51,"wearPercent":0,"powerOnHours":20797,"readErrors":0,"writeErrors":null}},{"name":"Msft Virtual Disk","mediaType":"SSD","busType":"File Backed Virtual","health":"Healthy","status":"OK","sizeGB":0,"firmware":"","reliability":null}],"volumes":[{"letter":"C:","label":"","fs":"NTFS","health":"Healthy","driveType":"Fixed","sizeGB":1862,"freeGB":289,"bitlocker":{"protection":"On","percent":100}},{"letter":"D:","label":"","fs":"NTFS","health":"Healthy","driveType":"Fixed","sizeGB":931,"freeGB":213,"bitlocker":{"protection":"On","percent":100}}],"network":{"adapters":[{"name":"Ethernet","description":"Intel(R) Ethernet Controller (3) I225-V","status":"Up","linkSpeed":"100 Mbps","virtual":false},{"name":"vEthernet (Default Switch)","description":"Hyper-V Virtual Ethernet Adapter","status":"Up","linkSpeed":"10 Gbps","virtual":true},{"name":"NordLynx","description":"NordLynx Tunnel","status":"Disconnected","linkSpeed":"100 Gbps","virtual":true},{"name":"Wi-Fi","description":"Intel(R) Wi-Fi 6 AX200 160MHz","status":"Not Present","linkSpeed":"0 bps","virtual":false}],"dns":["1.1.1.1","8.8.8.8"]},"security":{"secureBoot":true,"tpm":{"present":true,"ready":true,"specVersion":"2.0"},"antivirus":[{"name":"Bitdefender Antivirus","enabled":true,"upToDate":true},{"name":"Windows Defender","enabled":false,"upToDate":true}],"defender":{"serviceEnabled":false,"realTime":false,"signaturesUpdated":null},"firewall":{"domain":true,"private":true,"public":true},"uac":true,"pendingReboot":false,"rdpEnabled":false,"localAdmins":2,"memoryIntegrity":null,"vbsStatus":2,"hypervisorPresent":true,"optionalFeatures":["Microsoft-Hyper-V-All","VirtualMachinePlatform","Microsoft-Windows-Subsystem-Linux"]},"settings":{"powerPlan":"Balanced","fastStartup":true,"hibernation":true,"pagefileAuto":false,"pagefiles":[{"name":"C:\\pagefile.sys","allocatedMB":35000,"usedMB":32}],"trim":true,"gpuScheduling":null,"gameMode":null,"storageSense":true,"tempMB":{"user":797,"windows":381},"hasBattery":false},"updates":{"hotfixes":[{"id":"KB5127648","description":"Security Update","installedOn":"2026-10-18T00:00:00"},{"id":"KB5127647","description":"Security Update","installedOn":"2026-10-16T00:00:00"}],"lastPatchDaysAgo":13},"crashDumps":{"dumps":0,"liveKernelReports":0},"events":{"days":30,"system":{"total":1379,"errors":700,"warnings":679,"groups":[{"provider":"nvlddmkm","id":153,"level":"Error","count":466,"sample":"","lastSeen":"2026-10-03T16:35:00"},{"provider":"Microsoft-Windows-DistributedCOM","id":10016,"level":"Warning","count":447,"sample":"The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID","lastSeen":"2026-10-28T16:35:00"},{"provider":"Microsoft-Windows-DistributedCOM","id":10010,"level":"Error","count":163,"sample":"The server did not register with DCOM within the required timeout.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Microsoft-Windows-BitLocker-Driver","id":24641,"level":"Error","count":95,"sample":"An unexpected error was encountered attempting to retrieve the BitLocker volume master key during restart.","lastSeen":"2026-10-28T16:35:00"},{"provider":"e2fexpress","id":27,"level":"Warning","count":45,"sample":"Intel(R) Ethernet Controller (3) I225-V","lastSeen":"2026-10-28T16:35:00"},{"provider":"Service Control Manager","id":7034,"level":"Error","count":39,"sample":"The MEmuSVC service terminated unexpectedly.  It has done this 1 time(s).","lastSeen":"2026-10-09T16:35:00"},{"provider":"Microsoft-Windows-Hyper-V-Hypervisor","id":167,"level":"Warning","count":39,"sample":"The hypervisor did not enable mitigations for side channel vulnerabilities because HyperThreading is enabled.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Tcpip","id":4266,"level":"Warning","count":17,"sample":"A request to allocate an ephemeral port number from the global UDP port space has failed due to all such ports being in use.","lastSeen":"2026-10-11T16:35:00"},{"provider":"winsrvext","id":100,"level":"Warning","count":16,"sample":"Process nvcontainer.exe is delaying system shutdown after 5172 milliseconds.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Microsoft-Windows-DistributedCOM","id":10005,"level":"Error","count":12,"sample":"DCOM got error \"87\" attempting to start the service GamingServices","lastSeen":"2026-10-27T16:35:00"},{"provider":"VMnetDHCP","id":1,"level":"Warning","count":9,"sample":"dispatch: Timeout waiting for input data","lastSeen":"2026-10-28T16:35:00"},{"provider":"Microsoft-Windows-FilterManager","id":3,"level":"Error","count":8,"sample":"Filter Manager failed to attach to volume. This volume will be unavailable for filtering until a reboot.","lastSeen":"2026-10-29T16:35:00"},{"provider":"Service Control Manager","id":7024,"level":"Error","count":6,"sample":"The XboxService service terminated with a service-specific error.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Tcpip","id":4231,"level":"Warning","count":4,"sample":"A request to allocate an ephemeral port number from the global TCP port space has failed due to all such ports being in use.","lastSeen":"2026-10-11T16:35:00"},{"provider":"Microsoft-Windows-WindowsUpdateClient","id":20,"level":"Error","count":2,"sample":"Installation Failure: Windows failed to install the following update with error 0x8024200B: LG Electronics Inc. - Extension","lastSeen":"2026-10-27T16:35:00"},{"provider":"Volsnap","id":36,"level":"Error","count":1,"sample":"The shadow copies of volume C: were aborted because the shadow copy storage could not grow due to a user imposed limit.","lastSeen":"2026-10-06T16:35:00"},{"provider":"disk","id":153,"level":"Warning","count":1,"sample":"The IO operation at logical block address was retried.","lastSeen":"2026-10-06T16:35:00"}],"perDay":[{"date":"2026-10-02","errors":4,"warnings":8},{"date":"2026-10-03","errors":14,"warnings":36},{"date":"2026-10-04","errors":471,"warnings":39},{"date":"2026-10-05","errors":3,"warnings":25},{"date":"2026-10-06","errors":3,"warnings":34},{"date":"2026-10-07","errors":2,"warnings":24},{"date":"2026-10-08","errors":1,"warnings":16},{"date":"2026-10-09","errors":5,"warnings":20},{"date":"2026-10-10","errors":10,"warnings":24},{"date":"2026-10-11","errors":4,"warnings":36},{"date":"2026-10-12","errors":2,"warnings":33},{"date":"2026-10-13","errors":2,"warnings":9},{"date":"2026-10-14","errors":0,"warnings":37},{"date":"2026-10-15","errors":3,"warnings":15},{"date":"2026-10-16","errors":6,"warnings":26},{"date":"2026-10-17","errors":12,"warnings":36},{"date":"2026-10-18","errors":3,"warnings":7},{"date":"2026-10-19","errors":5,"warnings":9},{"date":"2026-10-20","errors":6,"warnings":40},{"date":"2026-10-21","errors":4,"warnings":25},{"date":"2026-10-22","errors":2,"warnings":27},{"date":"2026-10-23","errors":4,"warnings":36},{"date":"2026-10-24","errors":22,"warnings":9},{"date":"2026-10-25","errors":6,"warnings":10},{"date":"2026-10-26","errors":2,"warnings":35},{"date":"2026-10-27","errors":5,"warnings":9},{"date":"2026-10-28","errors":0,"warnings":24},{"date":"2026-10-29","errors":5,"warnings":33},{"date":"2026-10-30","errors":2,"warnings":29},{"date":"2026-10-31","errors":19,"warnings":6}]},"application":{"total":871,"errors":520,"warnings":351,"groups":[{"provider":"Microsoft-Windows-CAPI2","id":4176,"level":"Error","count":443,"sample":"PFX operation failed as AuthSafes count doesn't lie in expected range. Maximum permissible value: 200. Erroneous value: 202.","lastSeen":"2026-10-07T16:35:00"},{"provider":"Microsoft-Windows-WMI","id":63,"level":"Warning","count":117,"sample":"A provider, IntelMEProv, has been registered in the WMI namespace to use the LocalSystem account.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Telemetry 3.0 x64","id":259,"level":"Error","count":60,"sample":"Policy not available","lastSeen":"2026-10-28T16:35:00"},{"provider":"Application Error","id":1000,"level":"Error","count":54,"sample":"Faulting application name: MemuService.exe","lastSeen":"2026-10-09T16:35:00"},{"provider":"Microsoft-Windows-Perflib","id":2003,"level":"Warning","count":42,"sample":"The configuration information of the performance library perfts.dll does not match the trusted information.","lastSeen":"2026-10-28T16:35:00"},{"provider":"Microsoft-Windows-Search","id":10024,"level":"Warning","count":40,"sample":"The filter host process did not respond and is being forcibly terminated.","lastSeen":"2026-10-28T16:35:00"},{"provider":".NET Runtime","id":1022,"level":"Error","count":36,"sample":"There was a failure initializing profiling API attach infrastructure.","lastSeen":"2026-10-09T16:35:00"},{"provider":"VSS","id":13,"level":"Error","count":7,"sample":"The COM Server CEventSystem cannot be started. A system shutdown is in progress.","lastSeen":"2026-10-22T16:35:00"},{"provider":"Application Hang","id":1002,"level":"Error","count":2,"sample":"The program dllhost.exe stopped interacting with Windows and was closed.","lastSeen":"2026-10-09T16:35:00"}],"perDay":[{"date":"2026-10-02","errors":3,"warnings":27},{"date":"2026-10-03","errors":13,"warnings":12},{"date":"2026-10-04","errors":3,"warnings":8},{"date":"2026-10-05","errors":1,"warnings":23},{"date":"2026-10-06","errors":444,"warnings":20},{"date":"2026-10-07","errors":3,"warnings":30},{"date":"2026-10-08","errors":6,"warnings":36},{"date":"2026-10-09","errors":0,"warnings":15},{"date":"2026-10-10","errors":22,"warnings":30},{"date":"2026-10-11","errors":4,"warnings":22},{"date":"2026-10-12","errors":1,"warnings":32},{"date":"2026-10-13","errors":6,"warnings":40},{"date":"2026-10-14","errors":2,"warnings":31},{"date":"2026-10-15","errors":2,"warnings":29},{"date":"2026-10-16","errors":1,"warnings":14},{"date":"2026-10-17","errors":10,"warnings":16},{"date":"2026-10-18","errors":1,"warnings":19},{"date":"2026-10-19","errors":5,"warnings":19},{"date":"2026-10-20","errors":0,"warnings":36},{"date":"2026-10-21","errors":6,"warnings":16},{"date":"2026-10-22","errors":2,"warnings":23},{"date":"2026-10-23","errors":0,"warnings":14},{"date":"2026-10-24","errors":21,"warnings":39},{"date":"2026-10-25","errors":2,"warnings":25},{"date":"2026-10-26","errors":1,"warnings":37},{"date":"2026-10-27","errors":4,"warnings":8},{"date":"2026-10-28","errors":3,"warnings":40},{"date":"2026-10-29","errors":3,"warnings":30},{"date":"2026-10-30","errors":3,"warnings":30},{"date":"2026-10-31","errors":11,"warnings":35}]},"appCrashes":[{"app":"MemuService.exe","count":39},{"app":"OnScreen Control.exe","count":3},{"app":"nordvpn-service.exe","count":2},{"app":"vmware-vmx.exe","count":2},{"app":"GalaxyClient.exe","count":2}],"appHangs":2},"boot":{"history":[{"time":"2026-10-31T16:35:00","seconds":64.6},{"time":"2026-10-30T16:35:00","seconds":65.0},{"time":"2026-10-29T16:35:00","seconds":78.8},{"time":"2026-10-28T16:35:00","seconds":103.7},{"time":"2026-10-27T16:35:00","seconds":79.6},{"time":"2026-10-26T16:35:00","seconds":88.2},{"time":"2026-10-25T16:35:00","seconds":71.4},{"time":"2026-10-24T16:35:00","seconds":69.9}],"slowStarters":[{"name":"Discord.exe","times":4},{"name":"Microsoft.CmdPal.UI.exe","times":4},{"name":"nvcontainer.exe","times":3},{"name":"bdservicehost.exe","times":3},{"name":"Agent.exe","times":3},{"name":"nordvpn-service.exe","times":2}]},"apps":{"count":212,"storeCount":60,"list":[{"name":"@BIOS","version":"1.0","publisher":"","sizeMB":120},{"name":"ACDSee Free","version":"1.0","publisher":"","sizeMB":20},{"name":"Adobe Acrobat (64-bit)","version":"1.0","publisher":"","sizeMB":540},{"name":"AnyDesk","version":"1.0","publisher":"","sizeMB":0},{"name":"Bitdefender Total Security","version":"1.0","publisher":"","sizeMB":0},{"name":"Brave","version":"1.0","publisher":"","sizeMB":0},{"name":"Discord","version":"1.0","publisher":"","sizeMB":120},{"name":"EA app","version":"1.0","publisher":"","sizeMB":0},{"name":"Epic Games Launcher","version":"1.0","publisher":"","sizeMB":20},{"name":"FileZilla","version":"1.0","publisher":"","sizeMB":0},{"name":"GitHub Desktop","version":"1.0","publisher":"","sizeMB":0},{"name":"GOG GALAXY","version":"1.0","publisher":"","sizeMB":540},{"name":"Google Chrome","version":"1.0","publisher":"","sizeMB":540},{"name":"HandBrake 1.9.2","version":"1.0","publisher":"","sizeMB":0},{"name":"HWiNFO 64","version":"1.0","publisher":"","sizeMB":20},{"name":"Intel(R) Extreme Tuning Utility","version":"1.0","publisher":"","sizeMB":0},{"name":"MEmu","version":"1.0","publisher":"","sizeMB":540},{"name":"Microsoft Edge","version":"1.0","publisher":"","sizeMB":0},{"name":"Microsoft Office Professional Plus 2021","version":"1.0","publisher":"","sizeMB":0},{"name":"Microsoft OneDrive","version":"1.0","publisher":"","sizeMB":20},{"name":"NordVPN","version":"1.0","publisher":"","sizeMB":0},{"name":"Notepad++ (64-bit x64)","version":"1.0","publisher":"","sizeMB":540},{"name":"NVIDIA App","version":"1.0","publisher":"","sizeMB":0},{"name":"NVIDIA Graphics Driver","version":"1.0","publisher":"","sizeMB":20},{"name":"OpenVPN","version":"1.0","publisher":"","sizeMB":0},{"name":"PowerShell 7-x64","version":"1.0","publisher":"","sizeMB":20},{"name":"PowerToys (Preview)","version":"1.0","publisher":"","sizeMB":120},{"name":"RustDesk","version":"1.0","publisher":"","sizeMB":540},{"name":"Steam","version":"1.0","publisher":"","sizeMB":20},{"name":"SteelSeries GG","version":"1.0","publisher":"","sizeMB":0},{"name":"Ubisoft Connect","version":"1.0","publisher":"","sizeMB":120},{"name":"VLC media player","version":"1.0","publisher":"","sizeMB":20},{"name":"VMware Workstation","version":"1.0","publisher":"","sizeMB":0},{"name":"Viber","version":"1.0","publisher":"","sizeMB":20},{"name":"WinDirStat","version":"1.0","publisher":"","sizeMB":120},{"name":"WinRAR 7.10 (64-bit)","version":"1.0","publisher":"","sizeMB":0},{"name":"Wondershare Filmora 16","version":"1.0","publisher":"","sizeMB":0}],"wingetAvailable":true,"outdated":[{"name":"@BIOS","id":"GIGABYTE.BIOS","version":"4.24.0130.1","available":"4.26.0930.1","source":"winget"},{"name":"AnyDesk","id":"AnyDesk.AnyDesk","version":"ad 9.0.4","available":"9.8.3","source":"winget"},{"name":"CapCut","id":"XP9KN75RRB9NHS","version":"9.1.0.3879","available":"9.7.0.4153","source":"msstore"},{"name":"EA app","id":"ElectronicArts.EADesktop","version":"13.700.0.6213","available":"13.813.1.6327","source":"winget"},{"name":"Epic Games Launcher","id":"XP99VR1BPSBQJ2","version":"1.3.189.0","available":"1.3.210.0","source":"msstore"},{"name":"GitHub Desktop","id":"GitHub.GitHubDesktop","version":"3.6.7","available":"3.6.10","source":"winget"},{"name":"HandBrake 1.9.2","id":"HandBrake.HandBrake","version":"1.9.2","available":"1.11.2","source":"winget"},{"name":"Ledger Wallet 2.133.0","id":"LedgerHQ.LedgerLive","version":"2.133.0","available":"4.24.1","source":"winget"},{"name":"Microsoft Edge","id":"Microsoft.Edge","version":"156.0.4314.50","available":"156.0.4314.58","source":"winget"},{"name":"Notepad++ (64-bit x64)","id":"Notepad++.Notepad++","version":"8.7.8","available":"8.9.8.1","source":"winget"},{"name":"OpenVPN 2.6.14-I001 amd64","id":"OpenVPNTechnologies.OpenVPN","version":"2.6.1401","available":"2.7.701","source":"winget"},{"name":"Windows Terminal","id":"Microsoft.WindowsTerminal","version":"1.24.11911.0","available":"1.25.2733.0","source":"winget"},{"name":"WinRAR 7.10 (64-bit)","id":"RARLab.WinRAR","version":"7.10.0","available":"7.23.0","source":"winget"},{"name":"Viber","id":"XPFM5P5KDWF0JP","version":"28.2.0.0","available":"29.1.0.0","source":"msstore"},{"name":"Sample app 0","id":"Vendor.App0","version":"1.0","available":"2.0","source":"winget"},{"name":"Sample app 1","id":"Vendor.App1","version":"1.1","available":"2.1","source":"winget"},{"name":"Sample app 2","id":"Vendor.App2","version":"1.2","available":"2.2","source":"winget"},{"name":"Sample app 3","id":"Vendor.App3","version":"1.3","available":"2.3","source":"winget"},{"name":"Sample app 4","id":"Vendor.App4","version":"1.4","available":"2.4","source":"winget"},{"name":"Sample app 5","id":"Vendor.App5","version":"1.5","available":"2.5","source":"winget"},{"name":"Sample app 6","id":"Vendor.App6","version":"1.6","available":"2.6","source":"winget"},{"name":"Sample app 7","id":"Vendor.App7","version":"1.7","available":"2.7","source":"winget"},{"name":"Sample app 8","id":"Vendor.App8","version":"1.8","available":"2.8","source":"winget"},{"name":"Sample app 9","id":"Vendor.App9","version":"1.9","available":"2.9","source":"winget"},{"name":"Sample app 10","id":"Vendor.App10","version":"1.10","available":"2.10","source":"winget"},{"name":"Sample app 11","id":"Vendor.App11","version":"1.11","available":"2.11","source":"winget"},{"name":"Sample app 12","id":"Vendor.App12","version":"1.12","available":"2.12","source":"winget"},{"name":"Sample app 13","id":"Vendor.App13","version":"1.13","available":"2.13","source":"winget"},{"name":"Sample app 14","id":"Vendor.App14","version":"1.14","available":"2.14","source":"winget"},{"name":"Sample app 15","id":"Vendor.App15","version":"1.15","available":"2.15","source":"winget"},{"name":"Sample app 16","id":"Vendor.App16","version":"1.16","available":"2.16","source":"winget"}]},"startup":{"items":[{"name":"GoogleDriveFS","command":"C:\\Users\\demo\\AppData\\Local\\GoogleDriveFS\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"OneDrive","command":"C:\\Users\\demo\\AppData\\Local\\OneDrive\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Discord","command":"C:\\Users\\demo\\AppData\\Local\\Discord\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"EpicGamesLauncher","command":"C:\\Users\\demo\\AppData\\Local\\EpicGamesLauncher\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"CCXProcess","command":"C:\\Users\\demo\\AppData\\Local\\CCXProcess\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"BraveSoftware Update","command":"C:\\Users\\demo\\AppData\\Local\\BraveSoftware Update\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Adobe Acrobat Synchronizer","command":"C:\\Users\\demo\\AppData\\Local\\Adobe Acrobat Synchronizer\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Agent Tray","command":"C:\\Users\\demo\\AppData\\Local\\Agent Tray\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"ACDSeeCommanderFree","command":"C:\\Users\\demo\\AppData\\Local\\ACDSeeCommanderFree\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Wargaming.net Game Center","command":"C:\\Users\\demo\\AppData\\Local\\Wargaming.net Game Center\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Studio.QuickLook","command":"C:\\Users\\demo\\AppData\\Local\\Studio.QuickLook\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"EADM","command":"C:\\Users\\demo\\AppData\\Local\\EADM\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"FilmoraTray","command":"C:\\Users\\demo\\AppData\\Local\\FilmoraTray\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"NVIDIA Broadcast","command":"C:\\Users\\demo\\AppData\\Local\\NVIDIA Broadcast\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"GogGalaxy","command":"C:\\Users\\demo\\AppData\\Local\\GogGalaxy\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"MicrosoftEdgeAutoLaunch","command":"C:\\Users\\demo\\AppData\\Local\\MicrosoftEdgeAutoLaunch\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"AnyDesk","command":"C:\\Users\\demo\\AppData\\Local\\AnyDesk\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"SecurityHealth","command":"C:\\Users\\demo\\AppData\\Local\\SecurityHealth\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"RtkAudUService","command":"C:\\Users\\demo\\AppData\\Local\\RtkAudUService\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"SteelSeriesGG","command":"C:\\Users\\demo\\AppData\\Local\\SteelSeriesGG\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Bdagent","command":"C:\\Users\\demo\\AppData\\Local\\Bdagent\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"ACFW02EN","command":"C:\\Users\\demo\\AppData\\Local\\ACFW02EN\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"BdVpnApp","command":"C:\\Users\\demo\\AppData\\Local\\BdVpnApp\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Steam","command":"C:\\Users\\demo\\AppData\\Local\\Steam\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Viber","command":"C:\\Users\\demo\\AppData\\Local\\Viber\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Spotify","command":"C:\\Users\\demo\\AppData\\Local\\Spotify\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Zoom","command":"C:\\Users\\demo\\AppData\\Local\\Zoom\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"},{"name":"Dropbox","command":"C:\\Users\\demo\\AppData\\Local\\Dropbox\\run.exe --background","location":"HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"}],"thirdPartyServices":[{"name":"AnyDesk","display":"AnyDesk Service","state":"Running"},{"name":"Agent","display":"Agent Service","state":"Running"},{"name":"BDAppSrv","display":"BDAppSrv Service","state":"Running"},{"name":"BDAuxSrv","display":"BDAuxSrv Service","state":"Running"},{"name":"BDProtSrv","display":"BDProtSrv Service","state":"Running"},{"name":"bdredline","display":"bdredline Service","state":"Running"},{"name":"bdvpnservice","display":"bdvpnservice Service","state":"Running"},{"name":"nordvpn-service","display":"nordvpn-service Service","state":"Running"},{"name":"OpenVPNService","display":"OpenVPNService Service","state":"Running"},{"name":"VMAuthdService","display":"VMAuthdService Service","state":"Running"},{"name":"NvContainerLocalSystem","display":"NvContainerLocalSystem Service","state":"Running"},{"name":"WSLService","display":"WSLService Service","state":"Running"}],"failedAutoServices":[{"name":"MEmuSVC","display":"MEmuSVC","exitCode":1067},{"name":"XboxService","display":"Xbox Service","exitCode":1066}],"scheduledTasks":[{"name":"Adobe Acrobat Update Task","state":"Ready"},{"name":"GCC","state":"Ready"}],"topRam":[{"name":"NVIDIA Broadcast","instances":2,"ramMB":950,"cpuSeconds":226},{"name":"Discord","instances":3,"ramMB":923,"cpuSeconds":1087},{"name":"Agent","instances":1,"ramMB":737,"cpuSeconds":972},{"name":"bdservicehost","instances":4,"ramMB":737,"cpuSeconds":84},{"name":"claude","instances":3,"ramMB":1100,"cpuSeconds":274},{"name":"steamwebhelper","instances":2,"ramMB":717,"cpuSeconds":40},{"name":"chrome","instances":14,"ramMB":1260,"cpuSeconds":65}],"topCpu":[]},"drivers":{"problemDevices":[{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"SoftwareComponent","name":"Intel(R) XTU Component Device","status":"Degraded","problem":"CM_PROB_NONE","disabled":false},{"class":"Net","name":"VMware Virtual Ethernet Adapter for VMnet1","status":"Error","problem":"CM_PROB_DISABLED","disabled":true},{"class":"Net","name":"Intel(R) Wi-Fi 6 AX200 160MHz","status":"Error","problem":"CM_PROB_DISABLED","disabled":true}],"oldDrivers":[{"device":"TP-LINK Wireless USB Adapter","provider":"TP-LINK","version":"2.0.0.62","date":"2011-04-20T00:00:00"},{"device":"Wintun Userspace Tunnel","provider":"WireGuard LLC","version":"0.8.0.0","date":"2019-12-10T00:00:00"}]},"dism":{"state":"repairable","text":"The component store is repairable. | The operation completed successfully."},"extras":{"reliability":{"stabilityIndex":6.8,"stabilityLatest":7.4,"bugchecks":[{"time":"2026-10-12T16:35:00","code":"0x00000116"}]},"securityMore":{"defender":{"signatureAgeDays":2,"quickScanAgeDays":3,"fullScanAgeDays":30,"tamperProtected":true,"threats30d":0,"lastThreat":null},"nlaRequired":true,"autoLogon":false,"uacPromptLevel":5,"smb1Enabled":false,"adminNames":["DEMO-PC\\demo","DEMO-PC\\Administrator"],"shares":[{"name":"Photos","path":"D:\\Photos"}],"listening":[{"port":135,"process":"svchost","allInterfaces":true},{"port":445,"process":"System","allInterfaces":true},{"port":49664,"process":"lsass","allInterfaces":true}],"activation":1,"unsignedDrivers":[]},"networkTest":{"gateway":true,"ping":{"target":"router","sent":5,"lost":0,"avgMs":2.1},"dns":{"ok":true,"ms":38},"timeSync":{"source":"time.windows.com","local":false},"wifi":null,"proxyEnabled":false,"pacUrl":false,"hostsEntries":[]},"backup":{"restorePoints":{"readable":true,"count":2,"lastDaysAgo":20},"fileHistory":false,"oneDriveFolders":{"documents":true,"desktop":true,"pictures":false},"winRE":true}}};</script>
 <script>
 /* VEAGLE PC Check - core: helpers, data access, rules engine */
 
@@ -500,11 +521,76 @@ function Engine(RAW) {
   /* ---------------- finding builder ---------------- */
   var SEV_ORDER = { high: 0, medium: 1, low: 2, info: 3 };
   var PEN = { high: 8, medium: 3, low: 0.8, info: 0 };
-  var AREAS = ['Stability', 'Storage', 'Security', 'Performance', 'Updates', 'Software'];
+  var AREAS = ['Stability', 'Storage', 'Security', 'Network', 'Backup', 'Performance', 'Updates', 'Software'];
   function F(id, area, sev, title, why, steps, evidence) {
     return { id: id, area: area, sev: sev, title: title, why: why, steps: arr(steps), evidence: evidence || '' };
   }
   function S(t, cmd) { return { t: t, cmd: cmd || '' }; }
+
+  /* ---------------- plain-language helpers (v0.3) ---------------- */
+  function bugKey(c) { var n = parseInt(String(c).replace(/^0x/i, ''), 16); return isFinite(n) ? '0x' + n.toString(16) : String(c).toLowerCase(); }
+  var BUGCODES = {
+    '0x1a': ['MEMORY_MANAGEMENT', 'Windows found a problem with memory (RAM). Often bad RAM or a driver.'],
+    '0x19': ['BAD_POOL_HEADER', 'A driver or bad RAM damaged Windows memory.'],
+    '0xa': ['IRQL_NOT_LESS_OR_EQUAL', 'A driver touched memory it should not. Usually a faulty driver, sometimes RAM.'],
+    '0xd1': ['DRIVER_IRQL_NOT_LESS_OR_EQUAL', 'A driver misbehaved, often network or Wi-Fi.'],
+    '0x1e': ['KMODE_EXCEPTION_NOT_HANDLED', 'A program running deep inside Windows (usually a driver) crashed.'],
+    '0x24': ['NTFS_FILE_SYSTEM', 'A problem reading the drive. Check the drive health.'],
+    '0x3b': ['SYSTEM_SERVICE_EXCEPTION', 'A driver or security program clashed with Windows.'],
+    '0x4e': ['PFN_LIST_CORRUPT', 'Bad RAM or a driver.'],
+    '0x50': ['PAGE_FAULT_IN_NONPAGED_AREA', 'Windows asked for memory that was not there. Bad RAM or driver.'],
+    '0x7a': ['KERNEL_DATA_INPAGE_ERROR', 'Windows could not read something from the drive. Failing drive, loose cable or bad RAM.'],
+    '0x7e': ['SYSTEM_THREAD_EXCEPTION_NOT_HANDLED', 'A driver crashed.'],
+    '0x7f': ['UNEXPECTED_KERNEL_MODE_TRAP', 'Hardware trouble: RAM, an overclock or overheating.'],
+    '0x9f': ['DRIVER_POWER_STATE_FAILURE', 'A device did not wake up or go to sleep correctly. Often a laptop sleep or USB driver problem.'],
+    '0xbe': ['ATTEMPTED_WRITE_TO_READONLY_MEMORY', 'A driver tried to write where it must not.'],
+    '0xc2': ['BAD_POOL_CALLER', 'A driver asked for memory in a wrong way.'],
+    '0xc5': ['DRIVER_CORRUPTED_EXPOOL', 'A driver damaged memory.'],
+    '0xea': ['THREAD_STUCK_IN_DEVICE_DRIVER', 'The graphics driver got stuck.'],
+    '0xef': ['CRITICAL_PROCESS_DIED', 'An essential part of Windows stopped. Damaged system files, a bad update or a failing drive.'],
+    '0xf4': ['CRITICAL_OBJECT_TERMINATION', 'An essential process died, often because the drive stopped answering.'],
+    '0x101': ['CLOCK_WATCHDOG_TIMEOUT', 'A CPU core stopped responding. Overclock, BIOS settings or a hot CPU.'],
+    '0x109': ['CRITICAL_STRUCTURE_CORRUPTION', 'Memory was changed where it must not be. Driver or bad RAM.'],
+    '0x116': ['VIDEO_TDR_FAILURE', 'The graphics card or its driver stopped answering.'],
+    '0x117': ['VIDEO_TDR_TIMEOUT_DETECTED', 'The graphics card took too long to answer.'],
+    '0x119': ['VIDEO_SCHEDULER_INTERNAL_ERROR', 'The graphics driver or card has an internal problem.'],
+    '0x124': ['WHEA_UNCORRECTABLE_ERROR', 'The hardware itself reported a fatal error: CPU, RAM, or a device on the motherboard. Often an overclock or unstable memory settings.'],
+    '0x133': ['DPC_WATCHDOG_VIOLATION', 'A driver or an SSD got stuck and froze Windows. Update the SSD firmware and drivers.'],
+    '0x139': ['KERNEL_SECURITY_CHECK_FAILURE', 'Windows found damaged data. A driver or bad RAM.'],
+    '0x154': ['UNEXPECTED_STORE_EXCEPTION', 'The drive (often an SSD) stopped answering.']
+  };
+  var META = {
+    'stab-shutdown': [10, 'Easy', 'Safe'], 'stab-bsod': [20, 'Medium', 'Safe'], 'stab-bsod-codes': [5, 'Easy', 'Safe'], 'stab-whea': [30, 'Ask a pro', 'Careful'], 'stab-gpu': [10, 'Easy', 'Safe'],
+    'stab-disk': [20, 'Medium', 'Back up first'], 'stab-dism': [60, 'Medium', 'Safe'], 'stab-crashes': [10, 'Easy', 'Safe'], 'stab-services': [10, 'Easy', 'Safe'], 'stab-ports': [15, 'Ask a pro', 'Safe'],
+    'stab-hangs': [5, 'Easy', 'Safe'], 'stab-search': [10, 'Easy', 'Safe'], 'stab-vss': [5, 'Medium', 'Safe'], 'stab-wu': [10, 'Easy', 'Safe'], 'stab-pending': [2, 'Easy', 'Safe'], 'stab-uptime': [2, 'Easy', 'Safe'], 'stab-index': [10, 'Easy', 'Safe'],
+    'sto-health': [5, 'Ask a pro', 'Back up first'], 'sto-smart': [5, 'Ask a pro', 'Back up first'], 'sto-space': [15, 'Easy', 'Safe'], 'sto-trim': [5, 'Medium', 'Safe'], 'sto-hdd': [60, 'Medium', 'Back up first'], 'sto-temp': [10, 'Easy', 'Safe'],
+    'sec-av': [10, 'Easy', 'Safe'], 'sec-av2': [15, 'Medium', 'Safe'], 'sec-avold': [5, 'Easy', 'Safe'], 'sec-fw': [2, 'Easy', 'Safe'], 'sec-uac': [2, 'Easy', 'Safe'], 'sec-sb': [15, 'Ask a pro', 'Careful'], 'sec-tpm': [15, 'Ask a pro', 'Careful'], 'sec-tpm2': [5, 'Medium', 'Safe'],
+    'sec-legacy': [5, 'Medium', 'Safe'], 'sec-rdp': [3, 'Easy', 'Safe'], 'sec-remote': [10, 'Easy', 'Safe'], 'soft-vpn': [5, 'Easy', 'Safe'], 'sec-admins': [10, 'Medium', 'Safe'], 'sec-mi': [10, 'Medium', 'Safe'], 'sec-bl': [5, 'Easy', 'Safe'],
+    'sec-def-sigs': [5, 'Easy', 'Safe'], 'sec-def-threats': [30, 'Medium', 'Safe'], 'sec-def-tamper': [2, 'Easy', 'Safe'], 'sec-def-scan': [5, 'Easy', 'Safe'], 'sec-rdp-nla': [3, 'Easy', 'Safe'], 'sec-autologon': [3, 'Easy', 'Safe'], 'sec-uac-level': [3, 'Easy', 'Safe'],
+    'sec-smb1': [5, 'Medium', 'Safe'], 'sec-shares': [10, 'Medium', 'Safe'], 'sec-ports': [15, 'Ask a pro', 'Safe'], 'sec-activation': [10, 'Medium', 'Safe'], 'sec-unsigned': [20, 'Medium', 'Safe'],
+    'net-link': [5, 'Easy', 'Safe'], 'net-gw': [10, 'Easy', 'Safe'], 'net-dns': [5, 'Easy', 'Safe'], 'net-time': [2, 'Easy', 'Safe'], 'net-wifi': [10, 'Easy', 'Safe'], 'net-proxy': [3, 'Easy', 'Safe'], 'net-hosts': [10, 'Medium', 'Safe'],
+    'bak-none': [20, 'Easy', 'Safe'], 'bak-restore': [5, 'Easy', 'Safe'], 'bak-winre': [3, 'Medium', 'Safe'],
+    'upd-patch': [15, 'Easy', 'Safe'], 'upd-apps': [15, 'Easy', 'Safe'], 'upd-bios': [30, 'Ask a pro', 'Careful'], 'upd-gpu': [10, 'Easy', 'Safe'], 'upd-devices': [10, 'Medium', 'Safe'], 'drv-bios-age': [10, 'Medium', 'Safe'],
+    'perf-boot': [15, 'Easy', 'Safe'], 'perf-startup': [10, 'Easy', 'Safe'], 'perf-ram': [5, 'Easy', 'Safe'], 'perf-ramfull': [15, 'Medium', 'Safe'], 'perf-xmp': [15, 'Ask a pro', 'Careful'], 'perf-dual': [20, 'Medium', 'Safe'],
+    'perf-fast': [60, 'Medium', 'Back up first'], 'perf-power': [2, 'Easy', 'Safe'], 'perf-services': [10, 'Medium', 'Safe'], 'soft-emu': [10, 'Easy', 'Safe'], 'soft-xtu': [10, 'Easy', 'Safe'], 'soft-opt': [10, 'Medium', 'Safe'],
+    'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe']
+  };
+  var PROFILES = {
+    home: { label: 'Home PC', note: 'Balanced advice for a normal home computer.' },
+    work: { label: 'Work or clinic PC', note: 'Security, backups and time sync count one level more.', areas: ['Security', 'Backup'], ids: ['net-time', 'sec-def-sigs'] },
+    gaming: { label: 'Gaming PC', note: 'Graphics, memory speed and storage speed count one level more.', ids: ['perf-xmp', 'stab-gpu', 'perf-power', 'upd-gpu', 'perf-dual', 'perf-fast', 'perf-boot', 'sto-hdd', 'sto-temp'] }
+  };
+  function bump(sev) { return sev === 'info' ? 'low' : (sev === 'low' ? 'medium' : 'high'); }
+  function withProfile(base, key) {
+    var p = PROFILES[key] || PROFILES.home;
+    var out = base.map(function (f) {
+      var hit = (p.areas && p.areas.indexOf(f.area) >= 0) || (p.ids && p.ids.indexOf(f.id) >= 0);
+      if (!hit || f.sev === 'high') return f;
+      var c = {}; Object.keys(f).forEach(function (k) { c[k] = f[k]; }); c.sev = bump(f.sev); c.raised = true; return c;
+    });
+    out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });
+    return out;
+  }
 
   /* ---------------- rules ---------------- */
   function runRules() {
@@ -596,7 +682,7 @@ function Engine(RAW) {
       if (st !== 'repairable' && st !== 'corrupt') return null;
       return F('stab-dism', 'Stability', 'high', 'Windows component store ' + (st === 'corrupt' ? 'is damaged' : 'needs repair'),
         'DISM reports damage in the Windows component store. Updates and system repair can fail until it is fixed.',
-        [S('Open PowerShell or Command Prompt as Administrator and run the repair (10 to 20 minutes, needs internet).', 'DISM /Online /Cleanup-Image /RestoreHealth'),
+        [S('Open PowerShell as administrator (press the Windows key, type PowerShell, right-click it, choose Run as administrator). Paste this and press Enter. It needs internet and takes 20 to 60 minutes on some PCs. The percentage often looks frozen at 20, 40 or 62 percent: that is normal, wait at least an hour before you worry. Do not switch the PC off.', 'DISM /Online /Cleanup-Image /RestoreHealth'),
          S('Then check system files.', 'sfc /scannow'),
          S('Restart, then run Windows Update again.')],
         g(D, 'dism.text', ''));
@@ -824,7 +910,7 @@ function Engine(RAW) {
       var n = g(D, 'security.localAdmins', null);
       if (n == null || n <= 2) return null;
       return F('sec-admins', 'Security', 'low', n + ' accounts are local administrators', 'Fewer admin accounts mean less risk.',
-        [S('Review them.', 'Get-LocalGroupMember -SID S-1-5-32-544'), S('Use a standard account for daily work.')], '');
+        [S('Review them.', 'Get-LocalGroupMember -SID S-1-5-32-544'), S('Use a standard account for daily work.')], arr(g(D, 'extras.securityMore.adminNames', [])).join(', '));
     });
     R(function () {
       if (g(D, 'security.memoryIntegrity', null) !== false) return null;
@@ -999,6 +1085,238 @@ function Engine(RAW) {
         [S('Run VEAGLE-PC-Check.bat (the full scan) when you have 3 to 5 minutes.')], '');
     });
 
+    /* ================= v0.3: reliability, security details, network, backups ================= */
+    function ids2(id) { return out.some(function (f) { return f.id === id; }); }
+    var EX = g(D, 'extras', null) || {};
+    var ADMINHOW = 'Press the Windows key, type PowerShell, right-click "Windows PowerShell" and choose "Run as administrator". Click Yes.';
+    var SEC = EX.securityMore || {}, NT = EX.networkTest || {}, BK = EX.backup || {}, REL = EX.reliability || {};
+
+    R(function () {
+      var codes = arr(REL.bugchecks).filter(function (b) { return b.code; });
+      if (!codes.length) return null;
+      var seen = {}, lines = [];
+      codes.forEach(function (b) {
+        var k = bugKey(b.code); if (seen[k]) { seen[k].n++; return; }
+        seen[k] = { n: 1 }; lines.push({ k: k, code: b.code });
+      });
+      var plain = lines.map(function (l) { var d = BUGCODES[l.k]; return l.code + (seen[l.k].n > 1 ? ' (x' + seen[l.k].n + ')' : '') + ': ' + (d ? d[0] + '. ' + d[1] : 'Windows did not record a name for this code, search the code on the internet.'); });
+      return F('stab-bsod-codes', 'Stability', 'info', 'What your blue screens meant',
+        'Every blue screen has a code. The code is a clue to what went wrong. Here is what yours say in plain words.',
+        [S('Read the list under "Evidence" below. The part after the code is the likely cause.'),
+         S('Start with the first fix of the matching finding above (drivers first, then memory test).'),
+         S('If the same code keeps coming back, copy it into the AI help tab and ask.')],
+        plain.join('\n'));
+    });
+    R(function () {
+      var idx = REL.stabilityIndex; if (idx == null) return null;
+      if (idx >= 5) return null;
+      return F('stab-index', 'Stability', idx < 3 ? 'medium' : 'low', 'Windows gives its own reliability a low mark (' + idx + ' out of 10)',
+        'Windows keeps a score of how stable it has been over the last week. 10 means no problems, 1 means a lot of crashes and errors. Yours is low.',
+        [S('Open Reliability Monitor. It shows a calendar with a red X on each day something failed.', 'perfmon /rel'),
+         S('Click a red day and read what failed. Often it is one program or one driver.'),
+         S('Fix the matching finding from this report, then check again in a week.')],
+        'Average this week ' + idx + ', latest ' + (REL.stabilityLatest != null ? REL.stabilityLatest : '?') + ' (10 is best).');
+    });
+
+    R(function () {
+      var d = SEC.defender; if (!d || d.signatureAgeDays == null || d.signatureAgeDays < 7) return null;
+      var onlyWD = arr(g(D, 'security.antivirus', [])).filter(function (a) { return a.enabled && !/windows defender|microsoft defender/i.test(a.name || ''); }).length === 0;
+      if (!onlyWD) return null;
+      return F('sec-def-sigs', 'Security', d.signatureAgeDays >= 14 ? 'high' : 'medium', 'Your antivirus does not know the newest viruses (' + d.signatureAgeDays + ' days old)',
+        'An antivirus compares files against a list of known viruses. The list is updated almost every day. Yours is ' + d.signatureAgeDays + ' days old, so new viruses can slip through.',
+        [S('Open Start, type "Windows Security" and open it.'), S('Click "Virus & threat protection". Under "Protection updates" click "Check for updates", then "Check for updates" again.'),
+         S('If it fails, run Windows Update (Settings, Windows Update, Check for updates) and restart.')],
+        'Definitions are ' + d.signatureAgeDays + ' days old.');
+    });
+    R(function () {
+      var d = SEC.defender; if (!d || d.threats30d == null || d.threats30d < 1) return null;
+      return F('sec-def-threats', 'Security', 'high', 'Windows Security found ' + d.threats30d + ' threat' + (d.threats30d > 1 ? 's' : '') + ' in the last 30 days',
+        'The built-in antivirus caught something dangerous. Most of the time it already removed or blocked it. Still, you should look at what it was and make sure it is really gone.',
+        [S('Open Start, type "Windows Security" and open it. Click "Virus & threat protection", then "Protection history".'),
+         S('Read each entry. If it says "Removed" or "Quarantined", it is handled. If it says "Action needed", click it and choose Remove.'),
+         S('Run a full scan: in "Virus & threat protection" click "Scan options", choose "Full scan", click "Scan now". It can take an hour. You can keep working.'),
+         S('If threats keep coming back, change your important passwords from a different, clean device.')],
+        'Last detection: ' + (d.lastThreat ? fmtDT(d.lastThreat) : 'unknown'));
+    });
+    R(function () {
+      var d = SEC.defender; if (!d || d.tamperProtected !== false) return null;
+      return F('sec-def-tamper', 'Security', 'low', 'Tamper protection is off',
+        'Tamper protection stops viruses from switching your antivirus off. It should be on.',
+        [S('Open Windows Security, "Virus & threat protection", then "Manage settings".'), S('Scroll down and turn "Tamper Protection" on.')], '');
+    });
+    R(function () {
+      var d = SEC.defender; if (!d) return null;
+      var q = d.quickScanAgeDays, f = d.fullScanAgeDays;
+      if (q == null && f == null) return null;
+      var age = Math.min(q == null ? 9999 : q, f == null ? 9999 : f);
+      if (age < 30) return null;
+      return F('sec-def-scan', 'Security', 'low', 'No antivirus scan for ' + (age === 9999 ? 'a long time' : age + ' days'),
+        'Windows Security normally scans by itself when the PC is idle. Long gaps usually mean the PC is always busy or switched off at night.',
+        [S('Open Windows Security, "Virus & threat protection", click "Quick scan".'), S('Leave the PC switched on and plugged in some night so it can scan.')], '');
+    });
+    R(function () {
+      if (g(D, 'security.rdpEnabled', null) !== true || SEC.nlaRequired !== false) return null;
+      return F('sec-rdp-nla', 'Security', 'high', 'Remote Desktop is on and does not ask for a login first',
+        'Remote Desktop lets other people use this PC over the network. "Network Level Authentication" makes them prove who they are before they even see the login screen. It is off here, which is the setting attackers hope for.',
+        [S('Best: switch Remote Desktop off if you do not use it. Settings, System, Remote Desktop, switch it off.'),
+         S('If you need it: in the same page click "Remote Desktop" arrow, and turn on "Require devices to use Network Level Authentication".')], '');
+    });
+    R(function () {
+      if (SEC.autoLogon !== true) return null;
+      return F('sec-autologon', 'Security', 'medium', 'Windows logs in by itself without a password',
+        'Anyone who switches this PC on gets straight into your files and saved passwords. On a laptop that is stolen, that is very bad.',
+        [S('Press Windows key + R, type netplwiz and press Enter.', 'netplwiz'),
+         S('Tick "Users must enter a user name and password to use this computer", click OK and type your password if asked.')], '');
+    });
+    R(function () {
+      if (SEC.uacPromptLevel !== 0 || g(D, 'security.uac', null) === false) return null;
+      return F('sec-uac-level', 'Security', 'high', 'Windows never asks before programs change the system',
+        'User Account Control is the box that asks "Do you want to allow this app to make changes?". It is set to "never ask", so a virus can change the system silently.',
+        [S('Press the Windows key, type "Change User Account Control settings" and open it.'), S('Move the slider up to the second position from the top (the default) and click OK.')], '');
+    });
+    R(function () {
+      if (SEC.smb1Enabled !== true || ids2('sec-legacy')) return null;
+      return F('sec-smb1', 'Security', 'high', 'An old and unsafe file-sharing protocol (SMBv1) is on',
+        'SMBv1 is about 30 years old and was used by famous viruses like WannaCry. Nothing modern needs it.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter.', 'Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force'), S('Restart the PC.')], '');
+    });
+    R(function () {
+      var s = arr(SEC.shares); if (!s.length) return null;
+      return F('sec-shares', 'Security', 'low', s.length + ' folder' + (s.length > 1 ? 's are' : ' is') + ' shared on your network',
+        'These folders can be opened by other computers on your network. That is fine at home if you did it on purpose. At work or on public Wi-Fi it can leak files.',
+        [S('See the list under "Evidence". Do you recognise every folder and do you need it?'),
+         S('To stop sharing, open File Explorer, right-click the folder, choose Properties, then the Sharing tab, then "Advanced Sharing" and untick "Share this folder".')],
+        s.map(function (x) { return x.name + ' -> ' + x.path; }).join('\n'));
+    });
+    R(function () {
+      var risky = { 21: 'FTP (old file transfer)', 23: 'Telnet (old remote login, no encryption)', 3389: 'Remote Desktop', 5900: 'VNC remote screen', 5985: 'Windows remote management', 1433: 'SQL Server database', 3306: 'MySQL database', 5432: 'PostgreSQL database', 27017: 'MongoDB database', 6379: 'Redis database' };
+      var hits = arr(SEC.listening).filter(function (p) { return p.allInterfaces && risky[p.port]; });
+      if (!hits.length) return null;
+      return F('sec-ports', 'Security', 'medium', hits.length + ' risky network door' + (hits.length > 1 ? 's are' : ' is') + ' open',
+        'A program on this PC is waiting for connections from the network on a "port" (think of a door). These doors are common targets for attackers. If you set them up on purpose, fine. If not, close them.',
+        [S('Look at the list under "Evidence". For each line decide: do I use this?'),
+         S('If not, uninstall the program named in the line (Settings, Apps, Installed apps).'),
+         S('Make sure the Windows Firewall is on (see the Firewall check) so the internet cannot reach these doors.')],
+        hits.map(function (p) { return 'port ' + p.port + ' - ' + risky[p.port] + ' - program: ' + (p.process || 'unknown'); }).join('\n'));
+    });
+    R(function () {
+      var a = SEC.activation; if (a == null || a === 1) return null;
+      return F('sec-activation', 'Security', 'medium', 'Windows is not properly activated',
+        'An activated Windows gets all updates and has no watermark. Yours says it is not fully activated (status ' + a + ').',
+        [S('Open Settings, System, Activation and read what it says.'), S('If you have a licence key, click "Change product key". If the PC came with Windows, sign in with the Microsoft account you used before and click "Troubleshoot".')], 'Licence status code ' + a + ' (1 means activated).');
+    });
+    R(function () {
+      var u = arr(SEC.unsignedDrivers); if (!u.length) return null;
+      return F('sec-unsigned', 'Security', 'medium', u.length + ' driver' + (u.length > 1 ? 's' : '') + ' without a digital signature',
+        'A driver is a small program that runs with full power over the hardware. A signature proves it came from a real company and was not changed. Unsigned drivers are a risk and can cause blue screens.',
+        [S('See the names under "Evidence".'), S('Go to the website of the maker, download the newest driver from there and install it over the old one.'), S('If you do not recognise the device, ask an AI in the AI help tab before you remove anything.')],
+        u.map(function (x) { return x.device + (x.provider ? ' (' + x.provider + ')' : ''); }).join('\n'));
+    });
+
+    R(function () {
+      var bad = [];
+      arr(D.network && D.network.adapters).forEach(function (a) {
+        if (a.virtual || !/^up$/i.test(a.status)) return;
+        if (/wi-?fi|wireless|wlan|802\.11|bluetooth/i.test(a.name + ' ' + a.description)) return;
+        var m = /([\d.]+)\s*(m|g)bps/i.exec(a.linkSpeed || ''); if (!m) return;
+        var mb = parseFloat(m[1]) * (/g/i.test(m[2]) ? 1000 : 1);
+        if (mb <= 100) bad.push(a.name + ' runs at ' + a.linkSpeed);
+      });
+      if (!bad.length) return null;
+      return F('net-link', 'Network', 'low', 'Your network cable only runs at 100 Mbps',
+        'Modern cables and routers run at 1000 Mbps (1 Gbps), ten times faster. A bad cable, a worn plug or an old switch drops the speed to 100.',
+        [S('Unplug the cable at both ends and plug it back in firmly.'), S('Try a different network cable. A flat or thin old cable is often the cause (look for "Cat5e" or "Cat6" printed on it).'), S('Try another port on the router or switch.')],
+        bad.join('; '));
+    });
+    R(function () {
+      var p = NT.ping; if (!NT.gateway || !p) return null;
+      if (p.lost >= p.sent) return F('net-gw', 'Network', 'high', 'This PC cannot reach your router',
+        'Your PC sent 5 test messages to your router (the box that gives you internet) and got no answer. Either the network is down or something blocks it.',
+        [S('Check the cable or the Wi-Fi connection.'), S('Restart the router: unplug it for 30 seconds, plug it back in, wait 2 minutes.'), S('Restart this PC.')], '5 of 5 test messages lost.');
+      if (p.lost >= 2 || (p.avgMs != null && p.avgMs > 30)) return F('net-gw', 'Network', 'low', 'The connection to your router is slow or drops messages',
+        'The test messages to your router took ' + (p.avgMs != null ? p.avgMs + ' ms' : 'long') + ' and ' + p.lost + ' of ' + p.sent + ' got lost. Good is under 5 ms on cable and under 20 ms on Wi-Fi.',
+        [S('If you use Wi-Fi, move closer to the router or use a cable to test.'), S('Restart the router (unplug 30 seconds).'), S('Close downloads, streaming and cloud backups, then scan again.')],
+        'Router reply time ' + p.avgMs + ' ms, lost ' + p.lost + ' of ' + p.sent + '.');
+      return null;
+    });
+    R(function () {
+      var d = NT.dns; if (!d) return null;
+      if (d.ok === false) return F('net-dns', 'Network', 'medium', 'This PC could not look up a website name',
+        'Before opening a site, the PC asks a "DNS server" for its address. That did not work now. It can mean you were offline during the scan, or the DNS setting is broken.',
+        [S('Open a website in your browser. If it opens, ignore this (you were probably offline during the scan).'), S('If not: restart the router, then restart the PC.'),
+         S('Still broken? Open PowerShell and run this, then try again.', 'ipconfig /flushdns')], '');
+      if (d.ms != null && d.ms > 800) return F('net-dns', 'Network', 'low', 'Looking up website names is slow (' + d.ms + ' ms)',
+        'Websites feel slow to start when the DNS server is slow. A fast one answers in under 100 ms.',
+        [S('Open Settings, Network and internet, your connection, "DNS server assignment", Edit, choose Manual, turn on IPv4 and type 1.1.1.1 and 8.8.8.8.')], 'Lookup took ' + d.ms + ' ms.');
+      return null;
+    });
+    R(function () {
+      var t = NT.timeSync; if (!t || !t.local) return null;
+      return F('net-time', 'Network', 'low', 'The PC clock is not synced with internet time',
+        'Windows should check the time online. When it does not, the clock drifts, and then websites, email sign-in and security certificates start to fail.',
+        [S('Open Settings, Time and language, Date and time, and click "Sync now".'), S('Make sure "Set time automatically" is turned on.')], 'Time source: ' + t.source);
+    });
+    R(function () {
+      var w = NT.wifi; if (!w) return null;
+      if (w.signalPct < 50) return F('net-wifi', 'Network', 'low', 'The Wi-Fi signal is weak (' + w.signalPct + '%)',
+        'A weak signal means slow internet and dropped video calls.',
+        [S('Move the PC or the router closer, with fewer walls in between.'), S('If your router has a 5 GHz network, connect to that one when you are close to it. It is faster.'), S('Switching the router to a higher location (a shelf) often helps more than anything else.')], 'Signal ' + w.signalPct + '%, ' + (w.band || 'band unknown') + ' ' + (w.radio || ''));
+      if (/2\.4/.test(w.band || '')) return F('net-wifi', 'Network', 'info', 'You are on the slow 2.4 GHz Wi-Fi band',
+        '2.4 GHz reaches far but is slow and crowded. 5 GHz is much faster at short distance.',
+        [S('Open the Wi-Fi list (click the Wi-Fi icon near the clock) and connect to the network whose name ends with 5G, if you have one.')], 'Signal ' + w.signalPct + '%, ' + w.band);
+      return null;
+    });
+    R(function () {
+      if (NT.proxyEnabled !== true && NT.pacUrl !== true) return null;
+      return F('net-proxy', 'Network', 'low', 'Your internet goes through a proxy',
+        'A proxy is a middleman for all your web traffic. Companies use it on purpose. At home you normally have none, and some malware sets one up to watch or redirect your browsing.',
+        [S('At work: ignore this, it is normal.'), S('At home: open Settings, Network and internet, Proxy. Turn off "Use a proxy server" and "Use setup script" unless you set them yourself.')], '');
+    });
+    R(function () {
+      var h = arr(NT.hostsEntries); if (!h.length) return null;
+      return F('net-hosts', 'Network', 'low', 'The "hosts" file has custom entries (' + h.length + ')',
+        'The hosts file overrides website addresses on this PC. Developers and ad blockers use it on purpose. Malware also uses it to send you to fake websites.',
+        [S('Read the lines under "Evidence". Do you recognise them?'), S('If a famous website (bank, Google, Microsoft) is in the list, that is suspicious: run a full antivirus scan and ask an AI in the AI help tab.')], h.join('\n'));
+    });
+
+    R(function () {
+      var rp = BK.restorePoints || {}, apps = appNames.join(' | ');
+      var cloud = BK.oneDriveFolders && (BK.oneDriveFolders.documents || BK.oneDriveFolders.desktop || BK.oneDriveFolders.pictures);
+      var tool = /acronis|veeam|macrium|backblaze|idrive|duplicati|carbonite|cobian|freefilesync|easeus todo|syncthing|crashplan|aomei backupper|nas sync|synology drive|google drive|dropbox/i.test(apps);
+      if (cloud || tool || BK.fileHistory === true) return null;
+      if (BK.fileHistory == null && !BK.restorePoints) return null;
+      return F('bak-none', 'Backup', 'medium', 'We could not find any backup of your files',
+        'If this drive died today, could you get your photos and documents back? We found no File History, no OneDrive folder backup and no backup program. A backup on an external disk that we cannot see does not count here, so ignore this if you have one.',
+        [S('Easiest: sign in to OneDrive and let it protect Desktop, Documents and Pictures. Click the OneDrive cloud icon near the clock, Settings, Sync and backup, "Manage backup".'),
+         S('Or plug in an external disk: Settings, System, Storage, "Advanced storage settings", "Backup options", and follow the steps.'),
+         S('Test it once: open a backed-up file from the backup, not from the PC.')], '');
+    });
+    R(function () {
+      var rp = BK.restorePoints; if (!rp || !rp.readable) return null;
+      if (rp.count > 0 && (rp.lastDaysAgo == null || rp.lastDaysAgo <= 90)) return null;
+      return F('bak-restore', 'Backup', 'low', rp.count === 0 ? 'System Restore has no restore points' : 'The last restore point is ' + rp.lastDaysAgo + ' days old',
+        'A restore point lets you go back to a time when Windows worked, after a bad update or driver. It is not a backup of your files, but it is a cheap safety net.',
+        [S('Press the Windows key, type "Create a restore point" and open it.'), S('Select drive C:, click "Configure", choose "Turn on system protection", set about 5% and click OK.'), S('Click "Create", name it "Today" and click Create.')], '');
+    });
+    R(function () {
+      if (BK.winRE !== false) return null;
+      return F('bak-winre', 'Backup', 'medium', 'The Windows recovery environment is switched off',
+        'This is the blue "Troubleshoot" menu that appears when Windows cannot start, and it is where Reset this PC and Startup Repair live. It is off, so when Windows breaks you might have no easy repair.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter.', 'reagentc /enable'), S('Check it with the next command. It should say Enabled.', 'reagentc /info')], '');
+    });
+
+    R(function () {
+      var d = g(D, 'system.bios.date', null); if (!d) return null;
+      var yrs = (Date.now() - new Date(d).getTime()) / 31557600000;
+      if (!isFinite(yrs) || yrs < 4) return null;
+      return F('drv-bios-age', 'Updates', yrs >= 6 ? 'low' : 'info', 'The BIOS is ' + Math.floor(yrs) + ' years old',
+        'The BIOS is the first program that runs when the PC starts. Makers release new versions to fix bugs, security holes and support for new parts. Old ones are not always a problem, but it is worth a look.',
+        [S('Find your exact model: press Windows key + R, type msinfo32 and read "System Model" and "BIOS Version".', 'msinfo32'),
+         S('Go to the support page of the maker (Dell, HP, Lenovo, ASUS, MSI, Gigabyte) and search your model.'),
+         S('Only update if the notes mention a fix that matters to you. Never switch the PC off during a BIOS update, and plug in a laptop first.')],
+        'BIOS ' + g(D, 'system.bios.version', '') + ' dated ' + fmtDate(d));
+    });
+
     out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });
     return out;
   }
@@ -1025,6 +1343,19 @@ function Engine(RAW) {
     var pd = g(D, 'updates.lastPatchDaysAgo', null);
     if (pd != null && pd <= 45) ok('Windows updates are recent', 'last update ' + pd + ' days ago');
     if (!ids['stab-shutdown'] && !ids['stab-bsod'] && !ids['stab-whea']) ok('No unexpected shutdowns, blue screens or hardware errors', 'last ' + g(D, 'events.days', 30) + ' days');
+    var ex2 = g(D, 'extras', null);
+    if (ex2) {
+      var dd = g(ex2, 'securityMore.defender', null);
+      if (dd && dd.signatureAgeDays != null && dd.signatureAgeDays < 7 && !ids['sec-def-sigs']) ok('Antivirus knows the newest viruses', 'definitions ' + dd.signatureAgeDays + ' days old');
+      if (dd && dd.threats30d === 0) ok('No threats found in the last 30 days');
+      if (g(ex2, 'networkTest.ping.lost', null) === 0 && !ids['net-gw']) ok('Your router answers quickly', g(ex2, 'networkTest.ping.avgMs', '?') + ' ms');
+      if (g(ex2, 'networkTest.dns.ok', null) === true && !ids['net-dns']) ok('Website names are looked up fine');
+      if (g(ex2, 'networkTest.timeSync.local', null) === false) ok('The clock syncs with internet time');
+      if (!ids['bak-none'] && (g(ex2, 'backup.fileHistory', false) || g(ex2, 'backup.oneDriveFolders.documents', false) || g(ex2, 'backup.oneDriveFolders.desktop', false))) ok('Some form of backup is in place');
+      if (g(ex2, 'backup.winRE', null) === true) ok('Windows recovery menu is available');
+      var ri = g(ex2, 'reliability.stabilityIndex', null);
+      if (ri != null && ri >= 8) ok('Windows reliability score is high', ri + ' out of 10');
+    }
     var ram = num(g(D, 'system.ram.totalGB', 0));
     if (ram >= 16) ok('Plenty of memory', fmtGB(ram));
     if (arr(g(D, 'system.ram.modules', [])).length >= 2 && !ids['perf-xmp']) ok('Memory runs in dual channel');
@@ -1104,11 +1435,19 @@ function Engine(RAW) {
     RAW: RAW, D: D, $: $, $$: $$, esc: esc, arr: arr, num: num, g: g, sum: sum, uniq: uniq, words: words,
     fmtNum: fmtNum, fmtGB: fmtGB, fmtDate: fmtDate, fmtDT: fmtDT, fmtUptime: fmtUptime, ageDays: ageDays,
     evGroups: evGroups, evCount: evCount, RE: RE, findings: findings, good: good, score: sc, counts: counts,
-    SEV_ORDER: SEV_ORDER, AREAS: AREAS, readiness: readiness(), battery: g(D, 'battery', null)
+    SEV_ORDER: SEV_ORDER, AREAS: AREAS, readiness: readiness(), battery: g(D, 'battery', null),
+    withProfile: withProfile, scoreOf: score, META: META, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
   };
 }
 var V = Engine(window.__PCDATA__ || null);
 V.Engine = Engine;
+V.setProfile = function (key) {
+  V.profile = V.PROFILES[key] ? key : 'home';
+  V.findings = V.withProfile(V.baseFindings, V.profile);
+  V.counts = { high: 0, medium: 0, low: 0, info: 0 };
+  V.findings.forEach(function (x) { V.counts[x.sev]++; });
+  V.score = V.scoreOf(V.findings);
+};
 
 /* VEAGLE PC Check - renderers */
 var UI = (function (V) {
@@ -1142,6 +1481,32 @@ var UI = (function (V) {
   function mark(state, text) { return '<div><span class="mark ' + state + '">' + (state === 'ok' ? '&#10003;' : state === 'bad' ? '!' : '-') + '</span><span>' + text + '</span></div>'; }
   function cmdBox(cmd) { return '<div class="cmd"><code>' + esc(cmd) + '</code><button class="btn sm" type="button" data-copy="' + esc(cmd) + '">Copy</button></div>'; }
   function tf(v) { return v === true ? 'yes' : v === false ? 'no' : 'unknown'; }
+  var GL = [
+    ['BIOS', 'The first program that runs when the PC starts, before Windows.'], ['UEFI', 'The modern BIOS.'], ['SMART', 'A health report that every drive keeps about itself.'],
+    ['SSD', 'A fast drive with no moving parts.'], ['HDD', 'An older spinning hard disk. Slower than an SSD.'], ['NVMe', 'A very fast type of SSD.'], ['TPM', 'A small security chip on the motherboard.'],
+    ['BitLocker', 'Windows disk encryption.'], ['DISM', 'A Windows tool that repairs the system files.'], ['drivers', 'Small programs that let Windows talk to the hardware.'], ['driver', 'A small program that lets Windows talk to a part of the PC.'],
+    ['firmware', 'The built-in software of a device.'], ['RAM', 'The short-term memory of the PC.'], ['XMP', 'A BIOS setting that makes memory run at its labelled speed.'], ['EXPO', 'The AMD version of XMP.'],
+    ['Secure Boot', 'Stops harmful programs from starting before Windows.'], ['firewall', 'A guard that decides which network traffic may reach your PC.'], ['DNS', 'The phone book of the internet: turns names into addresses.'],
+    ['proxy', 'A middleman server for your web traffic.'], ['WHEA', 'A message where the hardware reports its own error.'], ['restore point', 'A snapshot of Windows you can go back to.'], ['VPN', 'A private tunnel for your internet traffic.'],
+    ['GPU', 'The graphics card.'], ['CPU', 'The processor, the brain of the PC.'], ['PowerShell', 'A text window where you type commands.'], ['port', 'A numbered network door of the PC.'], ['Remote Desktop', 'Lets someone control this PC over the network.'], ['UAC', 'The box that asks before programs change the system.']
+  ];
+  function gloss(escaped) {
+    var used = {};
+    return String(escaped).split(/(<[^>]*>)/).map(function (seg) {
+      if (seg.charAt(0) === '<') return seg;
+      GL.forEach(function (t) {
+        if (used[t[0]]) return;
+        var re = new RegExp('(^|[^A-Za-z0-9-])(' + t[0].replace(/ /g, '\\s') + ')(?![A-Za-z0-9-])');
+        if (re.test(seg)) { used[t[0]] = 1; seg = seg.replace(re, '$1<abbr class="gl" title="' + t[1].replace(/"/g, '&quot;') + '">$2</abbr>'); }
+      });
+      return seg;
+    }).join('');
+  }
+  function metaChips(f) {
+    var m = V.META[f.id] || [10, 'Medium', 'Safe'];
+    var rk = m[2] === 'Safe' ? 'ok' : (m[2] === 'Careful' ? 'bad' : 'warn');
+    return '<div class="metachips"><span class="chip">About ' + m[0] + ' min</span><span class="chip">' + esc(m[1]) + '</span><span class="chip ' + rk + '">' + esc(m[2]) + '</span>' + (f.raised ? '<span class="chip">raised for your PC type</span>' : '') + '</div>';
+  }
   function reduceMotion() { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
 
   /* ---------------- dashboard ---------------- */
@@ -1165,9 +1530,9 @@ var UI = (function (V) {
       '<div class="counts"><div class="h"><b>' + c.high + '</b><small>HIGH</small></div><div><b>' + c.medium + '</b><small>MEDIUM</small></div><div><b>' + c.low + '</b><small>LOW</small></div><div><b>' + V.good.length + '</b><small>ALL CLEAR</small></div></div>');
   }
   function rRadar() {
-    var A = V.score.areas, cx = 150, cy = 138, R = 90, n = A.length;
+    var A = V.score.areas, cx = 190, cy = 140, R = 88, n = A.length;
     function pt(i, r) { var a = (-90 + i * 360 / n) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; }
-    var svg = '<svg viewBox="0 0 300 280" width="100%" role="img" aria-label="Score per area: ' + A.map(function (a) { return a.name + ' ' + a.score; }).join(', ') + '">';
+    var svg = '<svg viewBox="0 0 380 290" width="100%" role="img" aria-label="Score per area: ' + A.map(function (a) { return a.name + ' ' + a.score; }).join(', ') + '">';
     [0.25, 0.5, 0.75, 1].forEach(function (k) { svg += '<polygon points="' + A.map(function (_, i) { return pt(i, R * k).join(','); }).join(' ') + '" fill="none" stroke="#2a2a30" stroke-width="1"/>'; });
     A.forEach(function (_, i) { var p = pt(i, R); svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="#2a2a30"/>'; });
     svg += '<polygon points="' + A.map(function (a, i) { return pt(i, R * Math.max(0.04, a.score / 100)).join(','); }).join(' ') + '" fill="rgba(232,44,45,.28)" stroke="#E82C2D" stroke-width="2"/>';
@@ -1187,9 +1552,15 @@ var UI = (function (V) {
     else h = top.map(function (f, i) {
       return '<div class="action"><div class="num">' + (i + 1) + '</div><div style="min-width:0"><div class="row" style="gap:8px">' + tag(f.sev) + '<span class="area">' + esc(f.area) + '</span></div>' +
         '<div style="font-family:var(--head);font-weight:700;font-size:16px;margin:4px 0">' + esc(f.title) + '</div>' +
-        '<button class="btn sm" type="button" data-open="' + esc(f.id) + '">Show how to fix</button></div></div>';
+        metaChips(f) + '<button class="btn sm" type="button" data-open="' + esc(f.id) + '">Show me how, step by step</button></div></div>';
     }).join('');
     win('wActions', 'do_first.log', 'top ' + top.length, h);
+  }
+  function rStart() {
+    var el = $('#startBox'); if (!el) return;
+    var n = V.counts.high + V.counts.medium + V.counts.low;
+    var msg = n ? 'Your PC has <b>' + n + ' thing' + (n > 1 ? 's' : '') + '</b> worth looking at. You do not need to fix them all. Start with the "Do this first" box: it has the 3 that matter most.' : 'Nothing needs fixing right now. You can close this page.';
+    el.innerHTML = '<div class="startbox"><b>New to this?</b> ' + msg + ' Every problem is explained in plain words, with exact clicks. <button class="btn sm" type="button" data-tab-go="tools">Beginner guide</button></div>';
   }
   function rCpu() {
     var c = g(D, 'system.cpu', null);
@@ -1351,9 +1722,9 @@ var UI = (function (V) {
     var q = state.q.toLowerCase();
     var list = V.findings.filter(function (f) { return (state.sev === 'all' || f.sev === state.sev) && (!q || (f.title + ' ' + f.why + ' ' + f.area + ' ' + f.evidence).toLowerCase().indexOf(q) >= 0); });
     $('#findList').innerHTML = list.length ? list.map(function (f, i) {
-      var steps = f.steps.length ? '<ol class="steps">' + f.steps.map(function (s) { return '<li><span>' + esc(s.t) + '</span>' + (s.cmd ? cmdBox(s.cmd) : '') + '</li>'; }).join('') + '</ol>' : '';
+      var steps = f.steps.length ? '<ol class="steps">' + f.steps.map(function (s) { return '<li><span>' + gloss(esc(s.t)) + '</span>' + (s.cmd ? cmdBox(s.cmd) : '') + '</li>'; }).join('') + '</ol>' : '';
       return '<div class="finding' + (f.id === openId ? ' open' : '') + '" data-id="' + esc(f.id) + '"><button class="fh" type="button" aria-expanded="' + (f.id === openId) + '"><span class="fid">#' + String(V.findings.indexOf(f) + 1).padStart(2, '0') + '</span>' + tag(f.sev) + '<span class="t">' + esc(f.title) + '</span><span class="area">' + esc(f.area) + '</span></button>' +
-        '<div class="fb"><p class="why">' + esc(f.why) + '</p>' + (f.evidence ? '<div class="ev"><span class="lbl">Evidence</span><br>' + esc(f.evidence) + '</div>' : '') + steps +
+        '<div class="fb">' + metaChips(f) + '<div class="lbl">In plain words</div><p class="why">' + gloss(esc(f.why)) + '</p>' + (f.evidence ? '<div class="ev"><span class="lbl">What we found</span><br>' + esc(f.evidence).replace(/\n/g, '<br>') + '</div>' : '') + steps +
         '<div class="btns" style="margin-top:14px"><button class="btn sm" type="button" data-ask="' + esc(f.id) + '">Ask an AI about this</button></div></div></div>';
     }).join('') : '<div class="win"><div class="body sub">No findings match.</div></div>';
     if (openId) { var el = $('.finding[data-id="' + openId + '"]'); if (el) el.scrollIntoView({ block: 'center' }); }
@@ -1464,7 +1835,7 @@ var UI = (function (V) {
     $('#chipDate').textContent = 'Scanned ' + fmtDT(g(D, 'meta.generated', null));
     var n = V.counts.high + V.counts.medium + V.counts.low;
     $('#navcount').textContent = n ? n : '';
-    rHealth(); rRadar(); rActions(); rCpu(); rMem(); rGpu(); rBoard(); rOs(); rNet(); rExtras(); rStorage(); rSecurity(); rBoot(); rHeat(); rUplink();
+    rStart(); rHealth(); rRadar(); rActions(); rCpu(); rMem(); rGpu(); rBoard(); rOs(); rNet(); rExtras(); rStorage(); rSecurity(); rBoot(); rHeat(); rUplink();
     rFindings(); rHardware(); rSoftware(); rEvents();
     countUp();
   }
@@ -1528,7 +1899,7 @@ var AI = (function (V) {
     var lang = ($('#aiLang') ? $('#aiLang').value.trim() : '') || 'English';
 
     t += 'You are an expert Windows 11 technician. Below is a read-only scan of my PC. All of this data was collected by the VEAGLE PC Check app (VEAGLE - ferelis.gr), which was built with the help of Claude. Personal data (user name, PC name, IP and MAC addresses, e-mail addresses) was replaced with placeholders.\n\n';
-    t += 'Please:\n1. Summarise the real condition of this PC in plain language.\n2. Rank the problems by impact, explain the likely root cause of each, and say clearly when something is probably harmless noise.\n3. Give me a step-by-step plan, safest and highest-impact steps first, with exact commands or menu paths.\n4. Ask me before any step that could cause data loss or change security settings.\n5. Tell me what extra information you need (for example a specific log or command output) and how to get it.\n\n';
+    t += 'I am NOT technical. Explain everything like I am a complete beginner: simple words, no jargon (or explain each term in one sentence), and tell me exactly where to click.\n\nPlease:\n1. Summarise the real condition of this PC in plain language.\n2. Rank the problems by impact, explain the likely root cause of each, and say clearly when something is probably harmless noise.\n3. Give me a step-by-step plan, safest and highest-impact steps first, with exact commands or menu paths.\n4. Ask me before any step that could cause data loss or change security settings.\n5. Tell me what extra information you need (for example a specific log or command output) and how to get it.\n\n';
     if (focusFinding) t += 'Please start with this finding: ' + focusFinding + '\n';
     t += 'What I need help with: ' + (focus || 'general health, stability and speed of the PC') + '\n';
     t += 'Reply in: ' + lang + '\n\n';
@@ -1556,6 +1927,16 @@ var AI = (function (V) {
       if (g(D, 'meta.mode', 'full') === 'quick') t += line('Scan mode', 'QUICK scan (DISM, winget, optional features and old-driver checks were skipped)');
       var hist = arr(g(D, 'boot.history', [])).slice(0, 8);
       if (hist.length) t += line('Boot times (s), newest first', hist.map(function (x) { return x.seconds; }).join(', '));
+      var ex = D.extras;
+      if (ex) {
+        var rl = ex.reliability || {}, sm = ex.securityMore || {}, nt = ex.networkTest || {}, bk = ex.backup || {}, df = sm.defender || null;
+        if (rl.stabilityIndex != null) t += line('Reliability', 'Windows stability index ' + rl.stabilityIndex + '/10 (7-day average)' + (arr(rl.bugchecks).length ? '; blue screen codes: ' + arr(rl.bugchecks).map(function (b) { return b.code; }).join(', ') : ''));
+        if (df) t += line('Defender', 'definitions ' + df.signatureAgeDays + ' days old, quick scan ' + (df.quickScanAgeDays == null ? 'never/unknown' : df.quickScanAgeDays + ' days ago') + ', tamper protection=' + df.tamperProtected + ', threats in 30 days=' + df.threats30d);
+        t += line('Security details', 'NLA=' + sm.nlaRequired + ', autologon=' + sm.autoLogon + ', UAC prompt level=' + sm.uacPromptLevel + ', SMB1=' + sm.smb1Enabled + ', activation status=' + sm.activation + ', non-admin shares=' + arr(sm.shares).length + ', unsigned drivers=' + arr(sm.unsignedDrivers).length);
+        if (arr(sm.listening).length) t += line('Open ports (listening)', arr(sm.listening).slice(0, 25).map(function (p) { return p.port + '/' + (p.process || '?'); }).join(', '));
+        if (nt.ping || nt.dns) t += line('Network test', 'router ping ' + g(nt, 'ping.avgMs', '?') + ' ms, lost ' + g(nt, 'ping.lost', '?') + '/' + g(nt, 'ping.sent', '?') + '; DNS ' + (g(nt, 'dns.ok', null) ? g(nt, 'dns.ms', '?') + ' ms' : 'failed') + '; time source ' + g(nt, 'timeSync.source', '?') + '; Wi-Fi ' + (nt.wifi ? nt.wifi.signalPct + '% ' + nt.wifi.band : 'n/a') + '; proxy=' + nt.proxyEnabled);
+        t += line('Backups', 'restore points ' + g(bk, 'restorePoints.count', '?') + ', File History=' + bk.fileHistory + ', OneDrive folder backup (docs/desktop/pictures)=' + [g(bk, 'oneDriveFolders.documents', false), g(bk, 'oneDriveFolders.desktop', false), g(bk, 'oneDriveFolders.pictures', false)].join('/') + ', Windows RE=' + bk.winRE);
+      }
       t += '\n';
     }
     if (opt.findings) {
@@ -1783,6 +2164,227 @@ var CMP = (function (V) {
   return { init: init, parse: parse, show: show };
 })(V);
 
+/* VEAGLE PC Check - Tools tab: beginner guide, PC type, ticket summary, safe fix script, CSV, many-PC table, glossary */
+var TOOLS = (function (V, AI, CMP) {
+  'use strict';
+  var $ = V.$, $$ = V.$$, esc = V.esc, arr = V.arr, num = V.num, g = V.g, D = V.D;
+
+  var GLOSSARY = [
+    ['Administrator', 'A Windows login that is allowed to change the system. Some fixes only work when a program is started "as administrator".'],
+    ['BIOS / UEFI', 'The first program that runs when the PC starts, before Windows. You open it with a key (often Del or F2) while the PC starts.'],
+    ['Driver', 'A small program that lets Windows talk to a part of the PC (graphics card, Wi-Fi, printer).'],
+    ['Firmware', 'The built-in software of a device, for example of an SSD or router.'],
+    ['SSD / HDD', 'Two kinds of storage. An SSD is fast and has no moving parts. An HDD is the older spinning disk, cheaper and slower.'],
+    ['SMART', 'A health report that every drive keeps about itself.'],
+    ['RAM', 'The short-term memory of the PC. More RAM means more programs open at once without slowing down.'],
+    ['XMP / EXPO', 'A BIOS setting that makes memory run at the speed printed on its label. It is often off by default.'],
+    ['TPM', 'A small security chip on the motherboard. Windows 11 and BitLocker use it.'],
+    ['Secure Boot', 'A BIOS setting that stops harmful programs from starting before Windows.'],
+    ['BitLocker', 'Windows disk encryption. If someone steals the laptop they cannot read the files without the key.'],
+    ['Firewall', 'A guard that decides which network traffic may reach your PC.'],
+    ['DNS', 'The phone book of the internet. It turns a name like google.com into an address.'],
+    ['Proxy', 'A middleman server that all your web traffic goes through.'],
+    ['Restore point', 'A snapshot of Windows settings and system files that you can go back to. It does not save your own files.'],
+    ['DISM / SFC', 'Two Windows tools that check and repair the system files.'],
+    ['WHEA', 'Windows Hardware Error Architecture. A WHEA message means the hardware reported its own problem.'],
+    ['Blue screen (BSOD)', 'The blue crash screen. Windows stops on purpose to protect itself and shows a code.'],
+    ['Port', 'A numbered door on your PC through which network programs talk.'],
+    ['Registry', 'The big settings database of Windows. Do not edit it unless a guide tells you exactly what to change.']
+  ];
+
+  function stamp() { var d = new Date(); function p(n) { return (n < 10 ? '0' : '') + n; } return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()); }
+  function ascii(s) { return String(s == null ? '' : s).replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"').replace(/[\u2013\u2014]/g, '-').replace(/[^\x09\x0a\x0d\x20-\x7e]/g, '?'); }
+  function saveFile(name, text, type, bom) {
+    var blob = new Blob([(bom ? '\uFEFF' : '') + text], { type: type + ';charset=utf-8' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  /* ---------- text builders ---------- */
+  function ticket() {
+    var f = V.findings.filter(function (x) { return x.sev !== 'info'; });
+    var L = [];
+    L.push('PC HEALTH SUMMARY (VEAGLE PC Check v' + g(D, 'meta.version', '?') + ')');
+    L.push('PC: ' + g(D, 'meta.computer', '?') + ' | ' + g(D, 'system.os.productName', 'Windows') + ' ' + g(D, 'system.os.displayVersion', '') + ' | ' + g(D, 'system.cpu.name', '?') + ' | ' + V.fmtGB(num(g(D, 'system.ram.totalGB', 0))) + ' RAM');
+    L.push('Scanned: ' + V.fmtDT(g(D, 'meta.generated', null)) + ' (' + g(D, 'meta.mode', 'full') + ' scan' + (g(D, 'meta.isAdmin', true) === false ? ', NOT as administrator' : '') + ')');
+    L.push('Health score: ' + V.score.score + '/100 - ' + V.score.label);
+    L.push('Findings: ' + V.counts.high + ' high, ' + V.counts.medium + ' medium, ' + V.counts.low + ' low');
+    L.push('');
+    if (!f.length) L.push('No problems found.');
+    f.slice(0, 12).forEach(function (x, i) { L.push((i + 1) + '. [' + x.sev.toUpperCase() + '] ' + x.title + ' (' + x.area + ')'); });
+    if (f.length > 12) L.push('... and ' + (f.length - 12) + ' more in the full report.');
+    L.push('');
+    L.push('Details: the full report.html is attached or available on request.');
+    return ascii(L.join('\n'));
+  }
+
+  function fixScript() {
+    var L = [];
+    L.push('# VEAGLE PC Check - fix script for ' + g(D, 'meta.computer', 'this PC'));
+    L.push('# Made ' + new Date().toISOString().slice(0, 10) + ' from your scan. Nothing in this file runs yet.');
+    L.push('#');
+    L.push('# EVERY command below is switched OFF (it starts with "# ").');
+    L.push('# HOW TO USE IT:');
+    L.push('#  1. Read a section. Understand what it does. If unsure, skip it.');
+    L.push('#  2. To switch a command ON, delete the "# " in front of it.');
+    L.push('#  3. Press the Windows key, type PowerShell, right-click it, choose Run as administrator.');
+    L.push('#  4. Type:  Set-ExecutionPolicy -Scope Process Bypass   and press Enter (this only lasts for this window).');
+    L.push('#  5. Type the path of this file, for example  & "C:\\Users\\You\\Downloads\\veagle-fix-script.ps1"');
+    L.push('#  6. Restart the PC when done, then run VEAGLE PC Check again to see the result.');
+    L.push('#');
+    L.push('# Back up your important files before you change anything. Sections marked CAREFUL can break things if done wrong.');
+    L.push('');
+    var n = 0;
+    V.findings.forEach(function (f) {
+      var cmds = f.steps.filter(function (s) { return s.cmd; });
+      if (!cmds.length || f.sev === 'info') return;
+      n++;
+      var m = V.META[f.id] || [10, 'Medium', 'Safe'];
+      L.push('# ' + new Array(70).join('='));
+      L.push('# ' + n + '. [' + f.sev.toUpperCase() + '] ' + f.title);
+      L.push('#    ' + m[2].toUpperCase() + ', about ' + m[0] + ' min, difficulty: ' + m[1]);
+      f.why.split(/\.\s+/).forEach(function (line) { if (line) L.push('#    ' + line.replace(/\.?$/, '.')); });
+      f.steps.forEach(function (s, i) {
+        L.push('#    Step ' + (i + 1) + ': ' + s.t);
+        if (s.cmd) L.push('# ' + s.cmd);
+      });
+      L.push('');
+    });
+    if (!n) L.push('# No findings with commands. Nothing to do here.');
+    return ascii(L.join('\r\n'));
+  }
+
+  function csvCell(v) { v = String(v == null ? '' : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function findingsCsv() {
+    var rows = [['No', 'Severity', 'Area', 'Title', 'Why', 'Evidence', 'Steps', 'Minutes', 'Difficulty', 'Risk']];
+    V.findings.forEach(function (f, i) {
+      var m = V.META[f.id] || [10, 'Medium', 'Safe'];
+      rows.push([i + 1, f.sev, f.area, f.title, f.why, f.evidence, f.steps.map(function (s) { return s.t + (s.cmd ? ' [' + s.cmd + ']' : ''); }).join(' | '), m[0], m[1], m[2]]);
+    });
+    rows.push([]); rows.push(['Created with VEAGLE PC Check v' + g(D, 'meta.version', '?') + ' - ferelis.gr']);
+    return rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n');
+  }
+
+  /* ---------- many PCs ---------- */
+  var fleet = [];
+  function rowOf(E, name) {
+    var cvol = arr(E.D.volumes).filter(function (v) { return /^C:/i.test(v.letter); })[0];
+    var bad = arr(E.D.disks).filter(function (d) { return d.health && !/healthy/i.test(d.health); }).length;
+    return {
+      pc: name || E.g(E.D, 'meta.computer', '?'), os: (E.g(E.D, 'system.os.productName', '') + ' ' + E.g(E.D, 'system.os.displayVersion', '')).trim(),
+      date: E.g(E.D, 'meta.generated', null), score: E.score.score, high: E.counts.high, medium: E.counts.medium, low: E.counts.low,
+      free: cvol ? Math.round(num(cvol.freeGB)) : null, patch: E.g(E.D, 'updates.lastPatchDaysAgo', null), ram: Math.round(num(E.g(E.D, 'system.ram.totalGB', 0))), disks: bad ? bad + ' bad' : 'ok'
+    };
+  }
+  function fleetHtml() {
+    var rows = [rowOf(V)].concat(fleet).sort(function (a, b) { return a.score - b.score; });
+    var h = '<div class="tablewrap"><table><thead><tr><th>PC</th><th>Windows</th><th>Scanned</th><th class="num">Score</th><th class="num">High</th><th class="num">Med</th><th class="num">Low</th><th class="num">C: free GB</th><th class="num">Last update (days)</th><th class="num">RAM GB</th><th>Drives</th></tr></thead><tbody>';
+    rows.forEach(function (r) {
+      h += '<tr><td>' + esc(r.pc) + '</td><td>' + esc(r.os) + '</td><td>' + esc(V.fmtDate(r.date)) + '</td><td class="num"><b>' + r.score + '</b></td><td class="num">' + r.high + '</td><td class="num">' + r.medium + '</td><td class="num">' + r.low + '</td><td class="num">' + (r.free == null ? '-' : r.free) + '</td><td class="num">' + (r.patch == null ? '-' : r.patch) + '</td><td class="num">' + r.ram + '</td><td>' + esc(r.disks) + '</td></tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
+  function fleetCsv() {
+    var rows = [['PC', 'Windows', 'Scanned', 'Score', 'High', 'Medium', 'Low', 'C free GB', 'Days since update', 'RAM GB', 'Drives']];
+    [rowOf(V)].concat(fleet).sort(function (a, b) { return a.score - b.score; }).forEach(function (r) { rows.push([r.pc, r.os, V.fmtDate(r.date), r.score, r.high, r.medium, r.low, r.free, r.patch, r.ram, r.disks]); });
+    return rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n');
+  }
+  function addFiles(files) {
+    var list = Array.prototype.slice.call(files || []), left = list.length, msg = [];
+    if (!left) return;
+    list.forEach(function (f) {
+      var r = new FileReader();
+      r.onload = function () { try { var d = CMP.parse(r.result); fleet.push(rowOf(V.Engine(d), g(d, 'meta.computer', f.name))); } catch (e) { msg.push(f.name + ': ' + (e.message || e)); } done(); };
+      r.onerror = function () { msg.push(f.name + ': could not be read'); done(); };
+      r.readAsText(f);
+    });
+    function done() { if (--left > 0) return; $('#fleetOut').innerHTML = fleetHtml() + (msg.length ? '<div class="demo" style="margin-top:12px">' + esc(msg.join('\n')) + '</div>' : ''); }
+  }
+
+  /* ---------- render ---------- */
+  function sect(t, n) { return '<div class="sect"><h2>' + esc(t) + '</h2><span>' + esc(n || '') + '</span></div>'; }
+  function box(name, st, inner) { return '<div class="win" style="margin-bottom:18px"><header><span>' + esc(name) + '</span><span class="st">' + esc(st || '') + '</span></header><div class="body">' + inner + '</div></div>'; }
+
+  function render() {
+    var root = $('#tab-tools'); if (!root) return;
+    var h = '';
+    h += sect('New here? Start with this', 'no computer knowledge needed');
+    h += box('how_to.txt', '3 minutes',
+      '<ol class="steps3"><li><b>Look at the "Do this first" box</b> on the Dashboard. It shows the 3 most important things.</li>' +
+      '<li><b>Open the Findings tab</b> and click one problem. Read "In plain words", then follow the numbered steps one by one. Each step says exactly what to click.</li>' +
+      '<li><b>Do one thing at a time.</b> Restart the PC, then run the scan again. The Compare tab shows what got better.</li></ol>' +
+      '<p class="sub" style="margin-top:12px">Words next to a dotted underline have a hint: hold the mouse over them. The list at the bottom of this page explains every technical word.</p>');
+    h += box('run_a_command.txt', 'the one skill you need',
+      '<p><b>Some steps show a grey box with a command.</b> That is text you copy and paste, you do not have to understand it.</p>' +
+      '<ol class="steps3"><li>Click <b>Copy</b> next to the command.</li>' +
+      '<li>Press the <b>Windows key</b>, type <b>PowerShell</b>. Right-click "Windows PowerShell" and choose <b>Run as administrator</b>. Click <b>Yes</b>. A blue or black window opens.</li>' +
+      '<li>Right-click inside the window (this pastes the text), then press <b>Enter</b>. Wait until the cursor comes back.</li></ol>' +
+      '<p class="sub" style="margin-top:12px"><b>Safe</b> means you cannot break anything. <b>Back up first</b> means copy your important files somewhere safe before you start. <b>Careful</b> means the change is in a sensitive place (BIOS or system): if you are not sure, ask someone or use the AI help tab.</p>');
+    h += sect('Pick your type of PC', 'changes which findings count more');
+    h += '<div class="win" style="margin-bottom:18px"><div class="body"><div class="seg" id="profileSeg">' +
+      Object.keys(V.PROFILES).map(function (k) { return '<button type="button" class="btn sm" data-profile="' + k + '" aria-pressed="' + (V.profile === k) + '">' + esc(V.PROFILES[k].label) + '</button>'; }).join(' ') +
+      '</div><p class="sub" id="profileNote" style="margin-top:10px">' + esc(V.PROFILES[V.profile].note) + '</p></div></div>';
+
+    h += sect('Message for someone who helps you', 'copy and paste into an email or ticket');
+    h += box('ticket.txt', 'short summary', '<textarea id="ticketText" class="mono" rows="12" readonly style="width:100%"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="tkCopy">Copy summary</button></div><p class="sub" style="margin-top:8px">It contains the PC name. Remove that line if you do not want to share it.</p>');
+
+    h += sect('Fix script you can read first', 'every command is switched off');
+    h += box('veagle-fix-script.ps1', 'safe by design', '<p class="sub">This file collects all the commands from the findings. <b>Nothing runs by itself:</b> every line starts with "# ", which makes Windows ignore it. You switch on only the lines you want (the file explains how).</p><textarea id="fixText" class="mono" rows="10" readonly style="width:100%;margin-top:10px"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="fxCopy">Copy</button><button class="btn sm" type="button" id="fxSave">Save as file</button></div>');
+
+    h += sect('Export', 'for Excel or a helpdesk');
+    h += box('findings.csv', 'opens in Excel', '<div class="btns"><button class="btn sm" type="button" id="csvSave">Save findings as CSV</button><button class="btn sm" type="button" id="csvCopy">Copy as text</button></div>');
+
+    h += sect('Many PCs in one table', 'for family, friends or an office');
+    h += box('many_pcs.csv', 'optional',
+      '<p class="sub">Run the scan on each PC. Then open one report here and add the others: choose their <span class="mono">report.html</span> or <span class="mono">data.json</span> files (you can select many at once). The PCs are sorted with the sickest first.</p>' +
+      '<label class="drop" for="fleetFile" id="fleetDrop"><b>Choose or drop the other reports here</b></label><input class="sr" type="file" id="fleetFile" multiple accept=".json,.html,application/json,text/html">' +
+      '<div id="fleetOut" style="margin-top:14px">' + fleetHtml() + '</div><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="fleetSave">Save table as CSV</button></div>');
+
+    h += sect('Words explained', 'in plain language');
+    h += box('glossary.txt', GLOSSARY.length + ' words', '<dl class="kv" style="grid-template-columns:180px 1fr">' + GLOSSARY.map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>');
+    root.innerHTML = h;
+    refreshTexts();
+    wire();
+  }
+
+  function refreshTexts() {
+    var a = $('#ticketText'); if (a) a.value = ticket();
+    var b = $('#fixText'); if (b) b.value = fixScript();
+    var n = $('#profileNote'); if (n) n.textContent = V.PROFILES[V.profile].note;
+    $$('#profileSeg button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-profile') === V.profile)); });
+    var s = $('#profileSel'); if (s) s.value = V.profile;
+  }
+
+  function wire() {
+    function on(id, fn) { var el = $(id); if (el) el.addEventListener('click', fn); }
+    on('#tkCopy', function () { AI.toast(AI.copyText($('#ticketText').value) ? 'Summary copied.' : 'Copy failed. Select the text and press Ctrl+C.'); });
+    on('#fxCopy', function () { AI.toast(AI.copyText($('#fixText').value) ? 'Fix script copied.' : 'Copy failed. Select the text and press Ctrl+C.'); });
+    on('#fxSave', function () { saveFile('veagle-fix-script.ps1', $('#fixText').value, 'text/plain', true); AI.toast('Saved veagle-fix-script.ps1. All commands inside are switched off.'); });
+    on('#csvSave', function () { saveFile('veagle-findings-' + stamp() + '.csv', findingsCsv(), 'text/csv', true); AI.toast('Saved the findings as CSV.'); });
+    on('#csvCopy', function () { AI.toast(AI.copyText(findingsCsv()) ? 'Copied.' : 'Copy failed.'); });
+    on('#fleetSave', function () { saveFile('veagle-many-pcs-' + stamp() + '.csv', fleetCsv(), 'text/csv', true); AI.toast('Saved the table as CSV.'); });
+    var ff = $('#fleetFile'); if (ff) ff.addEventListener('change', function (e) { addFiles(e.target.files); });
+    var dr = $('#fleetDrop');
+    if (dr) { ['dragenter', 'dragover'].forEach(function (ev) { dr.addEventListener(ev, function (e) { e.preventDefault(); dr.classList.add('over'); }); });
+      ['dragleave', 'drop'].forEach(function (ev) { dr.addEventListener(ev, function (e) { e.preventDefault(); dr.classList.remove('over'); }); });
+      dr.addEventListener('drop', function (e) { addFiles(e.dataTransfer && e.dataTransfer.files); }); }
+    $$('#profileSeg button').forEach(function (b) { b.addEventListener('click', function () { setProfile(b.getAttribute('data-profile')); }); });
+  }
+
+  function setProfile(k) {
+    V.setProfile(k);
+    UI.renderAll(); refreshTexts();
+    AI.toast('PC type: ' + V.PROFILES[V.profile].label + '. Findings were re-ordered.');
+  }
+
+  function init() {
+    var sel = $('#profileSel');
+    if (sel) { sel.innerHTML = Object.keys(V.PROFILES).map(function (k) { return '<option value="' + k + '">' + esc(V.PROFILES[k].label) + '</option>'; }).join(''); sel.addEventListener('change', function () { setProfile(sel.value); }); }
+    render();
+  }
+  return { init: init, glossary: GLOSSARY };
+})(V, AI, CMP);
+
 /* VEAGLE PC Check - "share-safe copy": the same report with personal details removed from the data */
 var SHARE = (function (V, AI) {
   'use strict';
@@ -1851,7 +2453,7 @@ var SHARE = (function (V, AI) {
       if (e.target && /^(input|textarea)$/i.test(e.target.tagName)) return;
       if (e.key === '/') { e.preventDefault(); go('findings'); $('#findQ').focus(); }
     });
-    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (/^(dashboard|findings|hardware|software|events|compare|ai)$/.test(h)) go(h, true); });
+    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (/^(dashboard|findings|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true); });
   }
 
   /* ---------- boot intro ---------- */
@@ -1883,9 +2485,9 @@ var SHARE = (function (V, AI) {
       $('#demo').innerHTML = '<div class="demo"><b>No scan data in this file.</b> Open the report that <span class="mono">VEAGLE-PC-Check.bat</span> creates inside the <span class="mono">Reports</span> folder. This is only the empty template.</div>';
       return;
     }
-    wire(); UI.renderAll(); AI.init(); CMP.init();
+    wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init();
     var h = location.hash.replace('#', '');
-    if (/^(dashboard|findings|hardware|software|events|compare|ai)$/.test(h)) go(h, true);
+    if (/^(dashboard|findings|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true);
     var dm = g(D, 'meta.isAdmin', true) === false; if (dm) { var chip = document.createElement('span'); chip.className = 'chip warn'; chip.textContent = 'not run as admin: partial'; $('.topright').insertBefore(chip, $('#btnPrint')); }
     if (g(D, 'meta.mode', 'full') === 'quick') { var qc = document.createElement('span'); qc.className = 'chip warn'; qc.textContent = 'quick scan'; $('.topright').insertBefore(qc, $('#btnShare')); }
     if (g(D, 'meta.shareSafe', false)) { var sc = document.createElement('span'); sc.className = 'chip'; sc.textContent = 'share-safe copy: personal details removed'; $('.topright').insertBefore(sc, $('#btnShare')); var sb = $('#btnShare'); if (sb) sb.style.display = 'none'; }

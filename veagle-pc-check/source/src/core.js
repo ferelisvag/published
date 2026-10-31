@@ -113,11 +113,76 @@ function Engine(RAW) {
   /* ---------------- finding builder ---------------- */
   var SEV_ORDER = { high: 0, medium: 1, low: 2, info: 3 };
   var PEN = { high: 8, medium: 3, low: 0.8, info: 0 };
-  var AREAS = ['Stability', 'Storage', 'Security', 'Performance', 'Updates', 'Software'];
+  var AREAS = ['Stability', 'Storage', 'Security', 'Network', 'Backup', 'Performance', 'Updates', 'Software'];
   function F(id, area, sev, title, why, steps, evidence) {
     return { id: id, area: area, sev: sev, title: title, why: why, steps: arr(steps), evidence: evidence || '' };
   }
   function S(t, cmd) { return { t: t, cmd: cmd || '' }; }
+
+  /* ---------------- plain-language helpers (v0.3) ---------------- */
+  function bugKey(c) { var n = parseInt(String(c).replace(/^0x/i, ''), 16); return isFinite(n) ? '0x' + n.toString(16) : String(c).toLowerCase(); }
+  var BUGCODES = {
+    '0x1a': ['MEMORY_MANAGEMENT', 'Windows found a problem with memory (RAM). Often bad RAM or a driver.'],
+    '0x19': ['BAD_POOL_HEADER', 'A driver or bad RAM damaged Windows memory.'],
+    '0xa': ['IRQL_NOT_LESS_OR_EQUAL', 'A driver touched memory it should not. Usually a faulty driver, sometimes RAM.'],
+    '0xd1': ['DRIVER_IRQL_NOT_LESS_OR_EQUAL', 'A driver misbehaved, often network or Wi-Fi.'],
+    '0x1e': ['KMODE_EXCEPTION_NOT_HANDLED', 'A program running deep inside Windows (usually a driver) crashed.'],
+    '0x24': ['NTFS_FILE_SYSTEM', 'A problem reading the drive. Check the drive health.'],
+    '0x3b': ['SYSTEM_SERVICE_EXCEPTION', 'A driver or security program clashed with Windows.'],
+    '0x4e': ['PFN_LIST_CORRUPT', 'Bad RAM or a driver.'],
+    '0x50': ['PAGE_FAULT_IN_NONPAGED_AREA', 'Windows asked for memory that was not there. Bad RAM or driver.'],
+    '0x7a': ['KERNEL_DATA_INPAGE_ERROR', 'Windows could not read something from the drive. Failing drive, loose cable or bad RAM.'],
+    '0x7e': ['SYSTEM_THREAD_EXCEPTION_NOT_HANDLED', 'A driver crashed.'],
+    '0x7f': ['UNEXPECTED_KERNEL_MODE_TRAP', 'Hardware trouble: RAM, an overclock or overheating.'],
+    '0x9f': ['DRIVER_POWER_STATE_FAILURE', 'A device did not wake up or go to sleep correctly. Often a laptop sleep or USB driver problem.'],
+    '0xbe': ['ATTEMPTED_WRITE_TO_READONLY_MEMORY', 'A driver tried to write where it must not.'],
+    '0xc2': ['BAD_POOL_CALLER', 'A driver asked for memory in a wrong way.'],
+    '0xc5': ['DRIVER_CORRUPTED_EXPOOL', 'A driver damaged memory.'],
+    '0xea': ['THREAD_STUCK_IN_DEVICE_DRIVER', 'The graphics driver got stuck.'],
+    '0xef': ['CRITICAL_PROCESS_DIED', 'An essential part of Windows stopped. Damaged system files, a bad update or a failing drive.'],
+    '0xf4': ['CRITICAL_OBJECT_TERMINATION', 'An essential process died, often because the drive stopped answering.'],
+    '0x101': ['CLOCK_WATCHDOG_TIMEOUT', 'A CPU core stopped responding. Overclock, BIOS settings or a hot CPU.'],
+    '0x109': ['CRITICAL_STRUCTURE_CORRUPTION', 'Memory was changed where it must not be. Driver or bad RAM.'],
+    '0x116': ['VIDEO_TDR_FAILURE', 'The graphics card or its driver stopped answering.'],
+    '0x117': ['VIDEO_TDR_TIMEOUT_DETECTED', 'The graphics card took too long to answer.'],
+    '0x119': ['VIDEO_SCHEDULER_INTERNAL_ERROR', 'The graphics driver or card has an internal problem.'],
+    '0x124': ['WHEA_UNCORRECTABLE_ERROR', 'The hardware itself reported a fatal error: CPU, RAM, or a device on the motherboard. Often an overclock or unstable memory settings.'],
+    '0x133': ['DPC_WATCHDOG_VIOLATION', 'A driver or an SSD got stuck and froze Windows. Update the SSD firmware and drivers.'],
+    '0x139': ['KERNEL_SECURITY_CHECK_FAILURE', 'Windows found damaged data. A driver or bad RAM.'],
+    '0x154': ['UNEXPECTED_STORE_EXCEPTION', 'The drive (often an SSD) stopped answering.']
+  };
+  var META = {
+    'stab-shutdown': [10, 'Easy', 'Safe'], 'stab-bsod': [20, 'Medium', 'Safe'], 'stab-bsod-codes': [5, 'Easy', 'Safe'], 'stab-whea': [30, 'Ask a pro', 'Careful'], 'stab-gpu': [10, 'Easy', 'Safe'],
+    'stab-disk': [20, 'Medium', 'Back up first'], 'stab-dism': [60, 'Medium', 'Safe'], 'stab-crashes': [10, 'Easy', 'Safe'], 'stab-services': [10, 'Easy', 'Safe'], 'stab-ports': [15, 'Ask a pro', 'Safe'],
+    'stab-hangs': [5, 'Easy', 'Safe'], 'stab-search': [10, 'Easy', 'Safe'], 'stab-vss': [5, 'Medium', 'Safe'], 'stab-wu': [10, 'Easy', 'Safe'], 'stab-pending': [2, 'Easy', 'Safe'], 'stab-uptime': [2, 'Easy', 'Safe'], 'stab-index': [10, 'Easy', 'Safe'],
+    'sto-health': [5, 'Ask a pro', 'Back up first'], 'sto-smart': [5, 'Ask a pro', 'Back up first'], 'sto-space': [15, 'Easy', 'Safe'], 'sto-trim': [5, 'Medium', 'Safe'], 'sto-hdd': [60, 'Medium', 'Back up first'], 'sto-temp': [10, 'Easy', 'Safe'],
+    'sec-av': [10, 'Easy', 'Safe'], 'sec-av2': [15, 'Medium', 'Safe'], 'sec-avold': [5, 'Easy', 'Safe'], 'sec-fw': [2, 'Easy', 'Safe'], 'sec-uac': [2, 'Easy', 'Safe'], 'sec-sb': [15, 'Ask a pro', 'Careful'], 'sec-tpm': [15, 'Ask a pro', 'Careful'], 'sec-tpm2': [5, 'Medium', 'Safe'],
+    'sec-legacy': [5, 'Medium', 'Safe'], 'sec-rdp': [3, 'Easy', 'Safe'], 'sec-remote': [10, 'Easy', 'Safe'], 'soft-vpn': [5, 'Easy', 'Safe'], 'sec-admins': [10, 'Medium', 'Safe'], 'sec-mi': [10, 'Medium', 'Safe'], 'sec-bl': [5, 'Easy', 'Safe'],
+    'sec-def-sigs': [5, 'Easy', 'Safe'], 'sec-def-threats': [30, 'Medium', 'Safe'], 'sec-def-tamper': [2, 'Easy', 'Safe'], 'sec-def-scan': [5, 'Easy', 'Safe'], 'sec-rdp-nla': [3, 'Easy', 'Safe'], 'sec-autologon': [3, 'Easy', 'Safe'], 'sec-uac-level': [3, 'Easy', 'Safe'],
+    'sec-smb1': [5, 'Medium', 'Safe'], 'sec-shares': [10, 'Medium', 'Safe'], 'sec-ports': [15, 'Ask a pro', 'Safe'], 'sec-activation': [10, 'Medium', 'Safe'], 'sec-unsigned': [20, 'Medium', 'Safe'],
+    'net-link': [5, 'Easy', 'Safe'], 'net-gw': [10, 'Easy', 'Safe'], 'net-dns': [5, 'Easy', 'Safe'], 'net-time': [2, 'Easy', 'Safe'], 'net-wifi': [10, 'Easy', 'Safe'], 'net-proxy': [3, 'Easy', 'Safe'], 'net-hosts': [10, 'Medium', 'Safe'],
+    'bak-none': [20, 'Easy', 'Safe'], 'bak-restore': [5, 'Easy', 'Safe'], 'bak-winre': [3, 'Medium', 'Safe'],
+    'upd-patch': [15, 'Easy', 'Safe'], 'upd-apps': [15, 'Easy', 'Safe'], 'upd-bios': [30, 'Ask a pro', 'Careful'], 'upd-gpu': [10, 'Easy', 'Safe'], 'upd-devices': [10, 'Medium', 'Safe'], 'drv-bios-age': [10, 'Medium', 'Safe'],
+    'perf-boot': [15, 'Easy', 'Safe'], 'perf-startup': [10, 'Easy', 'Safe'], 'perf-ram': [5, 'Easy', 'Safe'], 'perf-ramfull': [15, 'Medium', 'Safe'], 'perf-xmp': [15, 'Ask a pro', 'Careful'], 'perf-dual': [20, 'Medium', 'Safe'],
+    'perf-fast': [60, 'Medium', 'Back up first'], 'perf-power': [2, 'Easy', 'Safe'], 'perf-services': [10, 'Medium', 'Safe'], 'soft-emu': [10, 'Easy', 'Safe'], 'soft-xtu': [10, 'Easy', 'Safe'], 'soft-opt': [10, 'Medium', 'Safe'],
+    'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe']
+  };
+  var PROFILES = {
+    home: { label: 'Home PC', note: 'Balanced advice for a normal home computer.' },
+    work: { label: 'Work or clinic PC', note: 'Security, backups and time sync count one level more.', areas: ['Security', 'Backup'], ids: ['net-time', 'sec-def-sigs'] },
+    gaming: { label: 'Gaming PC', note: 'Graphics, memory speed and storage speed count one level more.', ids: ['perf-xmp', 'stab-gpu', 'perf-power', 'upd-gpu', 'perf-dual', 'perf-fast', 'perf-boot', 'sto-hdd', 'sto-temp'] }
+  };
+  function bump(sev) { return sev === 'info' ? 'low' : (sev === 'low' ? 'medium' : 'high'); }
+  function withProfile(base, key) {
+    var p = PROFILES[key] || PROFILES.home;
+    var out = base.map(function (f) {
+      var hit = (p.areas && p.areas.indexOf(f.area) >= 0) || (p.ids && p.ids.indexOf(f.id) >= 0);
+      if (!hit || f.sev === 'high') return f;
+      var c = {}; Object.keys(f).forEach(function (k) { c[k] = f[k]; }); c.sev = bump(f.sev); c.raised = true; return c;
+    });
+    out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });
+    return out;
+  }
 
   /* ---------------- rules ---------------- */
   function runRules() {
@@ -209,7 +274,7 @@ function Engine(RAW) {
       if (st !== 'repairable' && st !== 'corrupt') return null;
       return F('stab-dism', 'Stability', 'high', 'Windows component store ' + (st === 'corrupt' ? 'is damaged' : 'needs repair'),
         'DISM reports damage in the Windows component store. Updates and system repair can fail until it is fixed.',
-        [S('Open PowerShell or Command Prompt as Administrator and run the repair (10 to 20 minutes, needs internet).', 'DISM /Online /Cleanup-Image /RestoreHealth'),
+        [S('Open PowerShell as administrator (press the Windows key, type PowerShell, right-click it, choose Run as administrator). Paste this and press Enter. It needs internet and takes 20 to 60 minutes on some PCs. The percentage often looks frozen at 20, 40 or 62 percent: that is normal, wait at least an hour before you worry. Do not switch the PC off.', 'DISM /Online /Cleanup-Image /RestoreHealth'),
          S('Then check system files.', 'sfc /scannow'),
          S('Restart, then run Windows Update again.')],
         g(D, 'dism.text', ''));
@@ -437,7 +502,7 @@ function Engine(RAW) {
       var n = g(D, 'security.localAdmins', null);
       if (n == null || n <= 2) return null;
       return F('sec-admins', 'Security', 'low', n + ' accounts are local administrators', 'Fewer admin accounts mean less risk.',
-        [S('Review them.', 'Get-LocalGroupMember -SID S-1-5-32-544'), S('Use a standard account for daily work.')], '');
+        [S('Review them.', 'Get-LocalGroupMember -SID S-1-5-32-544'), S('Use a standard account for daily work.')], arr(g(D, 'extras.securityMore.adminNames', [])).join(', '));
     });
     R(function () {
       if (g(D, 'security.memoryIntegrity', null) !== false) return null;
@@ -612,6 +677,238 @@ function Engine(RAW) {
         [S('Run VEAGLE-PC-Check.bat (the full scan) when you have 3 to 5 minutes.')], '');
     });
 
+    /* ================= v0.3: reliability, security details, network, backups ================= */
+    function ids2(id) { return out.some(function (f) { return f.id === id; }); }
+    var EX = g(D, 'extras', null) || {};
+    var ADMINHOW = 'Press the Windows key, type PowerShell, right-click "Windows PowerShell" and choose "Run as administrator". Click Yes.';
+    var SEC = EX.securityMore || {}, NT = EX.networkTest || {}, BK = EX.backup || {}, REL = EX.reliability || {};
+
+    R(function () {
+      var codes = arr(REL.bugchecks).filter(function (b) { return b.code; });
+      if (!codes.length) return null;
+      var seen = {}, lines = [];
+      codes.forEach(function (b) {
+        var k = bugKey(b.code); if (seen[k]) { seen[k].n++; return; }
+        seen[k] = { n: 1 }; lines.push({ k: k, code: b.code });
+      });
+      var plain = lines.map(function (l) { var d = BUGCODES[l.k]; return l.code + (seen[l.k].n > 1 ? ' (x' + seen[l.k].n + ')' : '') + ': ' + (d ? d[0] + '. ' + d[1] : 'Windows did not record a name for this code, search the code on the internet.'); });
+      return F('stab-bsod-codes', 'Stability', 'info', 'What your blue screens meant',
+        'Every blue screen has a code. The code is a clue to what went wrong. Here is what yours say in plain words.',
+        [S('Read the list under "Evidence" below. The part after the code is the likely cause.'),
+         S('Start with the first fix of the matching finding above (drivers first, then memory test).'),
+         S('If the same code keeps coming back, copy it into the AI help tab and ask.')],
+        plain.join('\n'));
+    });
+    R(function () {
+      var idx = REL.stabilityIndex; if (idx == null) return null;
+      if (idx >= 5) return null;
+      return F('stab-index', 'Stability', idx < 3 ? 'medium' : 'low', 'Windows gives its own reliability a low mark (' + idx + ' out of 10)',
+        'Windows keeps a score of how stable it has been over the last week. 10 means no problems, 1 means a lot of crashes and errors. Yours is low.',
+        [S('Open Reliability Monitor. It shows a calendar with a red X on each day something failed.', 'perfmon /rel'),
+         S('Click a red day and read what failed. Often it is one program or one driver.'),
+         S('Fix the matching finding from this report, then check again in a week.')],
+        'Average this week ' + idx + ', latest ' + (REL.stabilityLatest != null ? REL.stabilityLatest : '?') + ' (10 is best).');
+    });
+
+    R(function () {
+      var d = SEC.defender; if (!d || d.signatureAgeDays == null || d.signatureAgeDays < 7) return null;
+      var onlyWD = arr(g(D, 'security.antivirus', [])).filter(function (a) { return a.enabled && !/windows defender|microsoft defender/i.test(a.name || ''); }).length === 0;
+      if (!onlyWD) return null;
+      return F('sec-def-sigs', 'Security', d.signatureAgeDays >= 14 ? 'high' : 'medium', 'Your antivirus does not know the newest viruses (' + d.signatureAgeDays + ' days old)',
+        'An antivirus compares files against a list of known viruses. The list is updated almost every day. Yours is ' + d.signatureAgeDays + ' days old, so new viruses can slip through.',
+        [S('Open Start, type "Windows Security" and open it.'), S('Click "Virus & threat protection". Under "Protection updates" click "Check for updates", then "Check for updates" again.'),
+         S('If it fails, run Windows Update (Settings, Windows Update, Check for updates) and restart.')],
+        'Definitions are ' + d.signatureAgeDays + ' days old.');
+    });
+    R(function () {
+      var d = SEC.defender; if (!d || d.threats30d == null || d.threats30d < 1) return null;
+      return F('sec-def-threats', 'Security', 'high', 'Windows Security found ' + d.threats30d + ' threat' + (d.threats30d > 1 ? 's' : '') + ' in the last 30 days',
+        'The built-in antivirus caught something dangerous. Most of the time it already removed or blocked it. Still, you should look at what it was and make sure it is really gone.',
+        [S('Open Start, type "Windows Security" and open it. Click "Virus & threat protection", then "Protection history".'),
+         S('Read each entry. If it says "Removed" or "Quarantined", it is handled. If it says "Action needed", click it and choose Remove.'),
+         S('Run a full scan: in "Virus & threat protection" click "Scan options", choose "Full scan", click "Scan now". It can take an hour. You can keep working.'),
+         S('If threats keep coming back, change your important passwords from a different, clean device.')],
+        'Last detection: ' + (d.lastThreat ? fmtDT(d.lastThreat) : 'unknown'));
+    });
+    R(function () {
+      var d = SEC.defender; if (!d || d.tamperProtected !== false) return null;
+      return F('sec-def-tamper', 'Security', 'low', 'Tamper protection is off',
+        'Tamper protection stops viruses from switching your antivirus off. It should be on.',
+        [S('Open Windows Security, "Virus & threat protection", then "Manage settings".'), S('Scroll down and turn "Tamper Protection" on.')], '');
+    });
+    R(function () {
+      var d = SEC.defender; if (!d) return null;
+      var q = d.quickScanAgeDays, f = d.fullScanAgeDays;
+      if (q == null && f == null) return null;
+      var age = Math.min(q == null ? 9999 : q, f == null ? 9999 : f);
+      if (age < 30) return null;
+      return F('sec-def-scan', 'Security', 'low', 'No antivirus scan for ' + (age === 9999 ? 'a long time' : age + ' days'),
+        'Windows Security normally scans by itself when the PC is idle. Long gaps usually mean the PC is always busy or switched off at night.',
+        [S('Open Windows Security, "Virus & threat protection", click "Quick scan".'), S('Leave the PC switched on and plugged in some night so it can scan.')], '');
+    });
+    R(function () {
+      if (g(D, 'security.rdpEnabled', null) !== true || SEC.nlaRequired !== false) return null;
+      return F('sec-rdp-nla', 'Security', 'high', 'Remote Desktop is on and does not ask for a login first',
+        'Remote Desktop lets other people use this PC over the network. "Network Level Authentication" makes them prove who they are before they even see the login screen. It is off here, which is the setting attackers hope for.',
+        [S('Best: switch Remote Desktop off if you do not use it. Settings, System, Remote Desktop, switch it off.'),
+         S('If you need it: in the same page click "Remote Desktop" arrow, and turn on "Require devices to use Network Level Authentication".')], '');
+    });
+    R(function () {
+      if (SEC.autoLogon !== true) return null;
+      return F('sec-autologon', 'Security', 'medium', 'Windows logs in by itself without a password',
+        'Anyone who switches this PC on gets straight into your files and saved passwords. On a laptop that is stolen, that is very bad.',
+        [S('Press Windows key + R, type netplwiz and press Enter.', 'netplwiz'),
+         S('Tick "Users must enter a user name and password to use this computer", click OK and type your password if asked.')], '');
+    });
+    R(function () {
+      if (SEC.uacPromptLevel !== 0 || g(D, 'security.uac', null) === false) return null;
+      return F('sec-uac-level', 'Security', 'high', 'Windows never asks before programs change the system',
+        'User Account Control is the box that asks "Do you want to allow this app to make changes?". It is set to "never ask", so a virus can change the system silently.',
+        [S('Press the Windows key, type "Change User Account Control settings" and open it.'), S('Move the slider up to the second position from the top (the default) and click OK.')], '');
+    });
+    R(function () {
+      if (SEC.smb1Enabled !== true || ids2('sec-legacy')) return null;
+      return F('sec-smb1', 'Security', 'high', 'An old and unsafe file-sharing protocol (SMBv1) is on',
+        'SMBv1 is about 30 years old and was used by famous viruses like WannaCry. Nothing modern needs it.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter.', 'Set-SmbServerConfiguration -EnableSMB1Protocol $false -Force'), S('Restart the PC.')], '');
+    });
+    R(function () {
+      var s = arr(SEC.shares); if (!s.length) return null;
+      return F('sec-shares', 'Security', 'low', s.length + ' folder' + (s.length > 1 ? 's are' : ' is') + ' shared on your network',
+        'These folders can be opened by other computers on your network. That is fine at home if you did it on purpose. At work or on public Wi-Fi it can leak files.',
+        [S('See the list under "Evidence". Do you recognise every folder and do you need it?'),
+         S('To stop sharing, open File Explorer, right-click the folder, choose Properties, then the Sharing tab, then "Advanced Sharing" and untick "Share this folder".')],
+        s.map(function (x) { return x.name + ' -> ' + x.path; }).join('\n'));
+    });
+    R(function () {
+      var risky = { 21: 'FTP (old file transfer)', 23: 'Telnet (old remote login, no encryption)', 3389: 'Remote Desktop', 5900: 'VNC remote screen', 5985: 'Windows remote management', 1433: 'SQL Server database', 3306: 'MySQL database', 5432: 'PostgreSQL database', 27017: 'MongoDB database', 6379: 'Redis database' };
+      var hits = arr(SEC.listening).filter(function (p) { return p.allInterfaces && risky[p.port]; });
+      if (!hits.length) return null;
+      return F('sec-ports', 'Security', 'medium', hits.length + ' risky network door' + (hits.length > 1 ? 's are' : ' is') + ' open',
+        'A program on this PC is waiting for connections from the network on a "port" (think of a door). These doors are common targets for attackers. If you set them up on purpose, fine. If not, close them.',
+        [S('Look at the list under "Evidence". For each line decide: do I use this?'),
+         S('If not, uninstall the program named in the line (Settings, Apps, Installed apps).'),
+         S('Make sure the Windows Firewall is on (see the Firewall check) so the internet cannot reach these doors.')],
+        hits.map(function (p) { return 'port ' + p.port + ' - ' + risky[p.port] + ' - program: ' + (p.process || 'unknown'); }).join('\n'));
+    });
+    R(function () {
+      var a = SEC.activation; if (a == null || a === 1) return null;
+      return F('sec-activation', 'Security', 'medium', 'Windows is not properly activated',
+        'An activated Windows gets all updates and has no watermark. Yours says it is not fully activated (status ' + a + ').',
+        [S('Open Settings, System, Activation and read what it says.'), S('If you have a licence key, click "Change product key". If the PC came with Windows, sign in with the Microsoft account you used before and click "Troubleshoot".')], 'Licence status code ' + a + ' (1 means activated).');
+    });
+    R(function () {
+      var u = arr(SEC.unsignedDrivers); if (!u.length) return null;
+      return F('sec-unsigned', 'Security', 'medium', u.length + ' driver' + (u.length > 1 ? 's' : '') + ' without a digital signature',
+        'A driver is a small program that runs with full power over the hardware. A signature proves it came from a real company and was not changed. Unsigned drivers are a risk and can cause blue screens.',
+        [S('See the names under "Evidence".'), S('Go to the website of the maker, download the newest driver from there and install it over the old one.'), S('If you do not recognise the device, ask an AI in the AI help tab before you remove anything.')],
+        u.map(function (x) { return x.device + (x.provider ? ' (' + x.provider + ')' : ''); }).join('\n'));
+    });
+
+    R(function () {
+      var bad = [];
+      arr(D.network && D.network.adapters).forEach(function (a) {
+        if (a.virtual || !/^up$/i.test(a.status)) return;
+        if (/wi-?fi|wireless|wlan|802\.11|bluetooth/i.test(a.name + ' ' + a.description)) return;
+        var m = /([\d.]+)\s*(m|g)bps/i.exec(a.linkSpeed || ''); if (!m) return;
+        var mb = parseFloat(m[1]) * (/g/i.test(m[2]) ? 1000 : 1);
+        if (mb <= 100) bad.push(a.name + ' runs at ' + a.linkSpeed);
+      });
+      if (!bad.length) return null;
+      return F('net-link', 'Network', 'low', 'Your network cable only runs at 100 Mbps',
+        'Modern cables and routers run at 1000 Mbps (1 Gbps), ten times faster. A bad cable, a worn plug or an old switch drops the speed to 100.',
+        [S('Unplug the cable at both ends and plug it back in firmly.'), S('Try a different network cable. A flat or thin old cable is often the cause (look for "Cat5e" or "Cat6" printed on it).'), S('Try another port on the router or switch.')],
+        bad.join('; '));
+    });
+    R(function () {
+      var p = NT.ping; if (!NT.gateway || !p) return null;
+      if (p.lost >= p.sent) return F('net-gw', 'Network', 'high', 'This PC cannot reach your router',
+        'Your PC sent 5 test messages to your router (the box that gives you internet) and got no answer. Either the network is down or something blocks it.',
+        [S('Check the cable or the Wi-Fi connection.'), S('Restart the router: unplug it for 30 seconds, plug it back in, wait 2 minutes.'), S('Restart this PC.')], '5 of 5 test messages lost.');
+      if (p.lost >= 2 || (p.avgMs != null && p.avgMs > 30)) return F('net-gw', 'Network', 'low', 'The connection to your router is slow or drops messages',
+        'The test messages to your router took ' + (p.avgMs != null ? p.avgMs + ' ms' : 'long') + ' and ' + p.lost + ' of ' + p.sent + ' got lost. Good is under 5 ms on cable and under 20 ms on Wi-Fi.',
+        [S('If you use Wi-Fi, move closer to the router or use a cable to test.'), S('Restart the router (unplug 30 seconds).'), S('Close downloads, streaming and cloud backups, then scan again.')],
+        'Router reply time ' + p.avgMs + ' ms, lost ' + p.lost + ' of ' + p.sent + '.');
+      return null;
+    });
+    R(function () {
+      var d = NT.dns; if (!d) return null;
+      if (d.ok === false) return F('net-dns', 'Network', 'medium', 'This PC could not look up a website name',
+        'Before opening a site, the PC asks a "DNS server" for its address. That did not work now. It can mean you were offline during the scan, or the DNS setting is broken.',
+        [S('Open a website in your browser. If it opens, ignore this (you were probably offline during the scan).'), S('If not: restart the router, then restart the PC.'),
+         S('Still broken? Open PowerShell and run this, then try again.', 'ipconfig /flushdns')], '');
+      if (d.ms != null && d.ms > 800) return F('net-dns', 'Network', 'low', 'Looking up website names is slow (' + d.ms + ' ms)',
+        'Websites feel slow to start when the DNS server is slow. A fast one answers in under 100 ms.',
+        [S('Open Settings, Network and internet, your connection, "DNS server assignment", Edit, choose Manual, turn on IPv4 and type 1.1.1.1 and 8.8.8.8.')], 'Lookup took ' + d.ms + ' ms.');
+      return null;
+    });
+    R(function () {
+      var t = NT.timeSync; if (!t || !t.local) return null;
+      return F('net-time', 'Network', 'low', 'The PC clock is not synced with internet time',
+        'Windows should check the time online. When it does not, the clock drifts, and then websites, email sign-in and security certificates start to fail.',
+        [S('Open Settings, Time and language, Date and time, and click "Sync now".'), S('Make sure "Set time automatically" is turned on.')], 'Time source: ' + t.source);
+    });
+    R(function () {
+      var w = NT.wifi; if (!w) return null;
+      if (w.signalPct < 50) return F('net-wifi', 'Network', 'low', 'The Wi-Fi signal is weak (' + w.signalPct + '%)',
+        'A weak signal means slow internet and dropped video calls.',
+        [S('Move the PC or the router closer, with fewer walls in between.'), S('If your router has a 5 GHz network, connect to that one when you are close to it. It is faster.'), S('Switching the router to a higher location (a shelf) often helps more than anything else.')], 'Signal ' + w.signalPct + '%, ' + (w.band || 'band unknown') + ' ' + (w.radio || ''));
+      if (/2\.4/.test(w.band || '')) return F('net-wifi', 'Network', 'info', 'You are on the slow 2.4 GHz Wi-Fi band',
+        '2.4 GHz reaches far but is slow and crowded. 5 GHz is much faster at short distance.',
+        [S('Open the Wi-Fi list (click the Wi-Fi icon near the clock) and connect to the network whose name ends with 5G, if you have one.')], 'Signal ' + w.signalPct + '%, ' + w.band);
+      return null;
+    });
+    R(function () {
+      if (NT.proxyEnabled !== true && NT.pacUrl !== true) return null;
+      return F('net-proxy', 'Network', 'low', 'Your internet goes through a proxy',
+        'A proxy is a middleman for all your web traffic. Companies use it on purpose. At home you normally have none, and some malware sets one up to watch or redirect your browsing.',
+        [S('At work: ignore this, it is normal.'), S('At home: open Settings, Network and internet, Proxy. Turn off "Use a proxy server" and "Use setup script" unless you set them yourself.')], '');
+    });
+    R(function () {
+      var h = arr(NT.hostsEntries); if (!h.length) return null;
+      return F('net-hosts', 'Network', 'low', 'The "hosts" file has custom entries (' + h.length + ')',
+        'The hosts file overrides website addresses on this PC. Developers and ad blockers use it on purpose. Malware also uses it to send you to fake websites.',
+        [S('Read the lines under "Evidence". Do you recognise them?'), S('If a famous website (bank, Google, Microsoft) is in the list, that is suspicious: run a full antivirus scan and ask an AI in the AI help tab.')], h.join('\n'));
+    });
+
+    R(function () {
+      var rp = BK.restorePoints || {}, apps = appNames.join(' | ');
+      var cloud = BK.oneDriveFolders && (BK.oneDriveFolders.documents || BK.oneDriveFolders.desktop || BK.oneDriveFolders.pictures);
+      var tool = /acronis|veeam|macrium|backblaze|idrive|duplicati|carbonite|cobian|freefilesync|easeus todo|syncthing|crashplan|aomei backupper|nas sync|synology drive|google drive|dropbox/i.test(apps);
+      if (cloud || tool || BK.fileHistory === true) return null;
+      if (BK.fileHistory == null && !BK.restorePoints) return null;
+      return F('bak-none', 'Backup', 'medium', 'We could not find any backup of your files',
+        'If this drive died today, could you get your photos and documents back? We found no File History, no OneDrive folder backup and no backup program. A backup on an external disk that we cannot see does not count here, so ignore this if you have one.',
+        [S('Easiest: sign in to OneDrive and let it protect Desktop, Documents and Pictures. Click the OneDrive cloud icon near the clock, Settings, Sync and backup, "Manage backup".'),
+         S('Or plug in an external disk: Settings, System, Storage, "Advanced storage settings", "Backup options", and follow the steps.'),
+         S('Test it once: open a backed-up file from the backup, not from the PC.')], '');
+    });
+    R(function () {
+      var rp = BK.restorePoints; if (!rp || !rp.readable) return null;
+      if (rp.count > 0 && (rp.lastDaysAgo == null || rp.lastDaysAgo <= 90)) return null;
+      return F('bak-restore', 'Backup', 'low', rp.count === 0 ? 'System Restore has no restore points' : 'The last restore point is ' + rp.lastDaysAgo + ' days old',
+        'A restore point lets you go back to a time when Windows worked, after a bad update or driver. It is not a backup of your files, but it is a cheap safety net.',
+        [S('Press the Windows key, type "Create a restore point" and open it.'), S('Select drive C:, click "Configure", choose "Turn on system protection", set about 5% and click OK.'), S('Click "Create", name it "Today" and click Create.')], '');
+    });
+    R(function () {
+      if (BK.winRE !== false) return null;
+      return F('bak-winre', 'Backup', 'medium', 'The Windows recovery environment is switched off',
+        'This is the blue "Troubleshoot" menu that appears when Windows cannot start, and it is where Reset this PC and Startup Repair live. It is off, so when Windows breaks you might have no easy repair.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter.', 'reagentc /enable'), S('Check it with the next command. It should say Enabled.', 'reagentc /info')], '');
+    });
+
+    R(function () {
+      var d = g(D, 'system.bios.date', null); if (!d) return null;
+      var yrs = (Date.now() - new Date(d).getTime()) / 31557600000;
+      if (!isFinite(yrs) || yrs < 4) return null;
+      return F('drv-bios-age', 'Updates', yrs >= 6 ? 'low' : 'info', 'The BIOS is ' + Math.floor(yrs) + ' years old',
+        'The BIOS is the first program that runs when the PC starts. Makers release new versions to fix bugs, security holes and support for new parts. Old ones are not always a problem, but it is worth a look.',
+        [S('Find your exact model: press Windows key + R, type msinfo32 and read "System Model" and "BIOS Version".', 'msinfo32'),
+         S('Go to the support page of the maker (Dell, HP, Lenovo, ASUS, MSI, Gigabyte) and search your model.'),
+         S('Only update if the notes mention a fix that matters to you. Never switch the PC off during a BIOS update, and plug in a laptop first.')],
+        'BIOS ' + g(D, 'system.bios.version', '') + ' dated ' + fmtDate(d));
+    });
+
     out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });
     return out;
   }
@@ -638,6 +935,19 @@ function Engine(RAW) {
     var pd = g(D, 'updates.lastPatchDaysAgo', null);
     if (pd != null && pd <= 45) ok('Windows updates are recent', 'last update ' + pd + ' days ago');
     if (!ids['stab-shutdown'] && !ids['stab-bsod'] && !ids['stab-whea']) ok('No unexpected shutdowns, blue screens or hardware errors', 'last ' + g(D, 'events.days', 30) + ' days');
+    var ex2 = g(D, 'extras', null);
+    if (ex2) {
+      var dd = g(ex2, 'securityMore.defender', null);
+      if (dd && dd.signatureAgeDays != null && dd.signatureAgeDays < 7 && !ids['sec-def-sigs']) ok('Antivirus knows the newest viruses', 'definitions ' + dd.signatureAgeDays + ' days old');
+      if (dd && dd.threats30d === 0) ok('No threats found in the last 30 days');
+      if (g(ex2, 'networkTest.ping.lost', null) === 0 && !ids['net-gw']) ok('Your router answers quickly', g(ex2, 'networkTest.ping.avgMs', '?') + ' ms');
+      if (g(ex2, 'networkTest.dns.ok', null) === true && !ids['net-dns']) ok('Website names are looked up fine');
+      if (g(ex2, 'networkTest.timeSync.local', null) === false) ok('The clock syncs with internet time');
+      if (!ids['bak-none'] && (g(ex2, 'backup.fileHistory', false) || g(ex2, 'backup.oneDriveFolders.documents', false) || g(ex2, 'backup.oneDriveFolders.desktop', false))) ok('Some form of backup is in place');
+      if (g(ex2, 'backup.winRE', null) === true) ok('Windows recovery menu is available');
+      var ri = g(ex2, 'reliability.stabilityIndex', null);
+      if (ri != null && ri >= 8) ok('Windows reliability score is high', ri + ' out of 10');
+    }
     var ram = num(g(D, 'system.ram.totalGB', 0));
     if (ram >= 16) ok('Plenty of memory', fmtGB(ram));
     if (arr(g(D, 'system.ram.modules', [])).length >= 2 && !ids['perf-xmp']) ok('Memory runs in dual channel');
@@ -717,8 +1027,16 @@ function Engine(RAW) {
     RAW: RAW, D: D, $: $, $$: $$, esc: esc, arr: arr, num: num, g: g, sum: sum, uniq: uniq, words: words,
     fmtNum: fmtNum, fmtGB: fmtGB, fmtDate: fmtDate, fmtDT: fmtDT, fmtUptime: fmtUptime, ageDays: ageDays,
     evGroups: evGroups, evCount: evCount, RE: RE, findings: findings, good: good, score: sc, counts: counts,
-    SEV_ORDER: SEV_ORDER, AREAS: AREAS, readiness: readiness(), battery: g(D, 'battery', null)
+    SEV_ORDER: SEV_ORDER, AREAS: AREAS, readiness: readiness(), battery: g(D, 'battery', null),
+    withProfile: withProfile, scoreOf: score, META: META, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
   };
 }
 var V = Engine(window.__PCDATA__ || null);
 V.Engine = Engine;
+V.setProfile = function (key) {
+  V.profile = V.PROFILES[key] ? key : 'home';
+  V.findings = V.withProfile(V.baseFindings, V.profile);
+  V.counts = { high: 0, medium: 0, low: 0, info: 0 };
+  V.findings.forEach(function (x) { V.counts[x.sev]++; });
+  V.score = V.scoreOf(V.findings);
+};

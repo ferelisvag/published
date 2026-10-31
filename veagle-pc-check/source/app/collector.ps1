@@ -1,6 +1,7 @@
 # VEAGLE PC Check - collector
 # READ-ONLY: this script only reads system information. It does not change any setting,
-# install anything or send anything over the network (winget is only asked what is outdated).
+# install anything or send your data anywhere. The only network actions: winget asks what is outdated,
+# one ping to your own router, and one DNS lookup of www.microsoft.com.
 # Output: Reports\<timestamp>\report.html, data.json and a raw\ folder with the exported files.
 # -Quick skips the slow parts (msinfo32, winget, DISM, optional features, old drivers, folder sizes).
 
@@ -8,7 +9,7 @@ param([switch]$Quick)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.2.0'
+$script:Version = '0.3.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -165,7 +166,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 13
+$TOTAL = 14
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -657,6 +658,169 @@ if ($isAdmin -and -not $Quick) {
     } catch { Warn ('dism: ' + $_.Exception.Message) }
 }
 
+# ---------------------------------------------------------------- 14. extras
+Step 14 $TOTAL 'Reliability, security details, network test, backups'
+
+# --- reliability (stability index, blue screen codes)
+$relIndex = $null; $relLatest = $null
+try {
+    $rm = @(Get-CimInstance -ClassName Win32_ReliabilityStabilityMetrics -ErrorAction Stop | Sort-Object TimeGenerated -Descending | Select-Object -First 7)
+    if ($rm.Count -gt 0) {
+        $relLatest = [math]::Round([double]$rm[0].SystemStabilityIndex, 1)
+        $relIndex = [math]::Round((($rm | Measure-Object -Property SystemStabilityIndex -Average).Average), 1)
+    }
+} catch { }
+$bugchecks = @()
+try {
+    $bugchecks = @($sysEv | Where-Object { $_.Id -eq 1001 -and $_.ProviderName -match 'WER-SystemErrorReporting|BugCheck' } | Select-Object -First 10 | ForEach-Object {
+        $code = ''
+        $bm = [regex]::Match([string]$_.Message, '0x[0-9a-fA-F]{2,8}')
+        if ($bm.Success) { $code = $bm.Value.ToLower() }
+        [pscustomobject]@{ time = Iso $_.TimeCreated; code = $code }
+    })
+} catch { }
+$reliability = [pscustomobject]@{ stabilityIndex = $relIndex; stabilityLatest = $relLatest; bugchecks = $bugchecks }
+
+# --- security details
+$defExtra = $null
+try {
+    $mp2 = Get-MpComputerStatus -ErrorAction Stop
+    $threats = 0; $lastThreat = $null
+    try {
+        $td = @(Get-MpThreatDetection -ErrorAction Stop | Where-Object { $_.InitialDetectionTime -gt $since })
+        $threats = $td.Count
+        if ($td.Count -gt 0) { $lastThreat = Iso ($td | Sort-Object InitialDetectionTime -Descending | Select-Object -First 1).InitialDetectionTime }
+    } catch { }
+    $defExtra = [pscustomobject]@{
+        signatureAgeDays = [int]$mp2.AntivirusSignatureAge
+        quickScanAgeDays = $(if ($mp2.QuickScanAge -ge 0 -and $mp2.QuickScanAge -lt 99999) { [int]$mp2.QuickScanAge } else { $null })
+        fullScanAgeDays  = $(if ($mp2.FullScanAge -ge 0 -and $mp2.FullScanAge -lt 99999) { [int]$mp2.FullScanAge } else { $null })
+        tamperProtected  = [bool]$mp2.IsTamperProtected
+        threats30d       = $threats
+        lastThreat       = $lastThreat
+    }
+} catch { }
+
+$nla = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' 'UserAuthentication'
+$autoLogon = Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' 'AutoAdminLogon'
+$uacPrompt = Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' 'ConsentPromptBehaviorAdmin'
+$smb1 = $null
+try { $smb1 = [bool](Get-SmbServerConfiguration -ErrorAction Stop).EnableSMB1Protocol } catch { }
+$adminNames = @()
+try { $adminNames = @(Get-LocalGroupMember -SID 'S-1-5-32-544' -ErrorAction Stop | ForEach-Object { [string]$_.Name }) } catch { }
+$shares = @()
+try { $shares = @(Get-SmbShare -ErrorAction Stop | Where-Object { $_.Name -notmatch '\$$' } | ForEach-Object { [pscustomobject]@{ name = [string]$_.Name; path = [string]$_.Path } }) } catch { }
+$listening = @()
+try {
+    $procMap = @{}
+    foreach ($pp in @(Get-Process)) { $procMap[[int]$pp.Id] = [string]$pp.ProcessName }
+    $seen = @{}
+    foreach ($c in @(Get-NetTCPConnection -State Listen -ErrorAction Stop)) {
+        if ($c.LocalAddress -eq '127.0.0.1' -or $c.LocalAddress -eq '::1') { continue }
+        $pn = [string]$procMap[[int]$c.OwningProcess]
+        $k = [string]$c.LocalPort + '|' + $pn
+        if (-not $seen.ContainsKey($k)) {
+            $seen[$k] = 1
+            $listening += [pscustomobject]@{ port = [int]$c.LocalPort; process = $pn; allInterfaces = ($c.LocalAddress -eq '0.0.0.0' -or $c.LocalAddress -eq '::') }
+        }
+    }
+    $listening = @($listening | Sort-Object port | Select-Object -First 40)
+} catch { }
+$activation = $null
+try {
+    $lic = @(Get-CimInstance -ClassName SoftwareLicensingProduct -Filter "PartialProductKey IS NOT NULL AND ApplicationId='55c92734-d682-4d71-983e-d6ec3f16059f'" -ErrorAction Stop | Select-Object -First 1)
+    if ($lic.Count -gt 0) { $activation = [int]$lic[0].LicenseStatus }
+} catch { }
+$unsigned = @()
+if (-not $Quick) {
+    try { $unsigned = @(Get-CimInstance Win32_PnPSignedDriver -ErrorAction Stop | Where-Object { $_.IsSigned -eq $false -and $_.DeviceName } | Select-Object -First 15 | ForEach-Object { [pscustomobject]@{ device = [string]$_.DeviceName; provider = [string]$_.DriverProviderName } }) } catch { }
+}
+$securityMore = [pscustomobject]@{
+    defender = $defExtra; nlaRequired = $(if ($null -ne $nla) { ([int]$nla -eq 1) } else { $null })
+    autoLogon = $(if ($null -ne $autoLogon) { ([string]$autoLogon -eq '1') } else { $null })
+    uacPromptLevel = $(if ($null -ne $uacPrompt) { [int]$uacPrompt } else { $null })
+    smb1Enabled = $smb1; adminNames = $adminNames; shares = $shares; listening = $listening
+    activation = $activation; unsignedDrivers = $unsigned
+}
+
+# --- network test: ping the router, one DNS lookup, time sync, Wi-Fi, proxy, hosts file
+$gateway = ''
+try { $gateway = [string](@(Get-NetIPConfiguration -ErrorAction Stop | Where-Object { $_.IPv4DefaultGateway -and $_.NetAdapter.Status -eq 'Up' } | Select-Object -First 1).IPv4DefaultGateway.NextHop) } catch { }
+$ping = $null
+if ($gateway) {
+    try {
+        $png = New-Object System.Net.NetworkInformation.Ping
+        $ms = @(); $lost = 0
+        for ($i = 0; $i -lt 5; $i++) {
+            $r = $png.Send($gateway, 1500)
+            if ($r.Status -eq 'Success') { $ms += [double]$r.RoundtripTime } else { $lost++ }
+        }
+        $avg = $null; if ($ms.Count -gt 0) { $avg = [math]::Round((($ms | Measure-Object -Average).Average), 1) }
+        $ping = [pscustomobject]@{ target = 'router'; sent = 5; lost = $lost; avgMs = $avg }
+    } catch { }
+}
+$dnsTest = $null
+try {
+    $sw = [Diagnostics.Stopwatch]::StartNew()
+    $ips = @([System.Net.Dns]::GetHostAddresses('www.microsoft.com'))
+    $sw.Stop()
+    $dnsTest = [pscustomobject]@{ ok = ($ips.Count -gt 0); ms = [int]$sw.ElapsedMilliseconds }
+} catch { $dnsTest = [pscustomobject]@{ ok = $false; ms = $null } }
+$timeSync = $null
+try {
+    $wt = (& w32tm.exe /query /status 2>&1 | Out-String)
+    $src = ''; $m1 = [regex]::Match($wt, '(?im)^\s*Source:\s*(.+)$'); if ($m1.Success) { $src = $m1.Groups[1].Value.Trim() }
+    if ($src) { $timeSync = [pscustomobject]@{ source = $src; local = ($src -match 'Local CMOS|Free-running') } }
+} catch { }
+$wifi = $null
+try {
+    $wl = (& netsh.exe wlan show interfaces 2>&1 | Out-String)
+    $sg = [regex]::Match($wl, '(?im)^\s*Signal\s*:\s*(\d+)%')
+    if ($sg.Success) {
+        $band = ''; $bm2 = [regex]::Match($wl, '(?im)^\s*Band\s*:\s*(.+)$'); if ($bm2.Success) { $band = $bm2.Groups[1].Value.Trim() }
+        $rt = ''; $rm2 = [regex]::Match($wl, '(?im)^\s*Radio type\s*:\s*(.+)$'); if ($rm2.Success) { $rt = $rm2.Groups[1].Value.Trim() }
+        $wifi = [pscustomobject]@{ signalPct = [int]$sg.Groups[1].Value; band = $band; radio = $rt }
+    }
+} catch { }
+$ie = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
+$proxyOn = $null; $pe = Read-Reg $ie 'ProxyEnable'; if ($null -ne $pe) { $proxyOn = ([int]$pe -eq 1) }
+$pac = [string](Read-Reg $ie 'AutoConfigURL')
+$hostsExtra = @()
+try {
+    $hostsExtra = @(Get-Content -Path (Join-Path $env:windir 'System32\drivers\etc\hosts') -ErrorAction Stop | ForEach-Object { $_.Trim() } | Where-Object { $_ -and -not $_.StartsWith('#') -and $_ -notmatch '^\S+\s+localhost\s*$' } | Select-Object -First 10)
+} catch { }
+$networkTest = [pscustomobject]@{ gateway = [bool]$gateway; ping = $ping; dns = $dnsTest; timeSync = $timeSync; wifi = $wifi; proxyEnabled = $proxyOn; pacUrl = [bool]$pac; hostsEntries = $hostsExtra }
+
+# --- backups and recovery
+$restore = [pscustomobject]@{ readable = $false; count = 0; lastDaysAgo = $null }
+if ($isAdmin) {
+    try {
+        $rp = @(Get-ComputerRestorePoint -ErrorAction Stop)
+        $last = $null; if ($rp.Count -gt 0) { $last = [int]((Get-Date) - [Management.ManagementDateTimeConverter]::ToDateTime($rp[$rp.Count - 1].CreationTime)).TotalDays }
+        $restore = [pscustomobject]@{ readable = $true; count = $rp.Count; lastDaysAgo = $last }
+    } catch { }
+}
+$fileHistory = $false
+try { $fileHistory = (Test-Path (Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\FileHistory\Configuration\Config1.xml')) } catch { }
+$oneDrive = [pscustomobject]@{ documents = $false; desktop = $false; pictures = $false }
+try {
+    $oneDrive = [pscustomobject]@{
+        documents = ([Environment]::GetFolderPath('MyDocuments') -match 'OneDrive')
+        desktop   = ([Environment]::GetFolderPath('Desktop') -match 'OneDrive')
+        pictures  = ([Environment]::GetFolderPath('MyPictures') -match 'OneDrive')
+    }
+} catch { }
+$winre = $null
+if ($isAdmin) {
+    try {
+        $re = (& reagentc.exe /info 2>&1 | Out-String)
+        if ($re -match '(?im)Windows RE status:\s*Enabled') { $winre = $true } elseif ($re -match '(?im)Windows RE status:\s*Disabled') { $winre = $false }
+    } catch { }
+}
+$backup = [pscustomobject]@{ restorePoints = $restore; fileHistory = $fileHistory; oneDriveFolders = $oneDrive; winRE = $winre }
+
+$extras = [pscustomobject]@{ reliability = $reliability; securityMore = $securityMore; networkTest = $networkTest; backup = $backup }
+
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }
 
@@ -698,6 +862,7 @@ $data = [ordered]@{
     startup  = $startup
     drivers  = $drivers
     dism     = $dism
+    extras   = $extras
 }
 
 $json = $data | ConvertTo-Json -Depth 9 -Compress

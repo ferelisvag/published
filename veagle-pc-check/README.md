@@ -22,8 +22,8 @@ https://ferelisvag.github.io/published/veagle-pc-check/
 - `VEAGLE-PC-Check.bat`: πλήρης σάρωση (3–5 λεπτά). Ζητά δικαιώματα διαχειριστή και τρέχει το `app/collector.ps1`.
 - `VEAGLE-PC-Check-Quick.bat`: γρήγορη σάρωση (~30 δευτ.), χωρίς msinfo32, winget, DISM.
 - Φτιάχνει φάκελο `Reports\<ημερομηνία-ώρα>` με `report.html`, `data.json` και `raw\`.
-- Η αναφορά: Dashboard, Findings (περίπου 45 έλεγχοι), Hardware, Software, Events, Compare (πριν/μετά), AI help, Share-safe copy, Windows 11 readiness, υγεία μπαταρίας.
-- Όλα τοπικά. Δεν ανεβαίνει τίποτα. Ο μόνος δικτυακός έλεγχος είναι το `winget upgrade` (ποια προγράμματα έχουν ενημέρωση).
+- Η αναφορά: Dashboard, Findings (περίπου 75 έλεγχοι, με απλά λόγια, χρόνο, δυσκολία και ρίσκο), Hardware, Software, Events, Compare (πριν/μετά), Tools (οδηγός για αρχάριους, μήνυμα για βοηθό, script διορθώσεων με κλειστές εντολές, CSV, πολλά PC σε έναν πίνακα), AI help, Share-safe copy, τύπος PC (Home/Work/Gaming), Windows 11 readiness, υγεία μπαταρίας.
+- Όλα τοπικά. Δεν ανεβαίνει τίποτα. Δικτυακά: το `winget upgrade` (ποια προγράμματα έχουν ενημέρωση), ένα ping στο router και μία αναζήτηση του www.microsoft.com.
 - Οι εξαγωγές και το πακέτο για AI γράφουν «VEAGLE - ferelis.gr» και ότι φτιάχτηκε με τη βοήθεια του Claude.
 
 ## Πώς φτιάχνεται νέα έκδοση

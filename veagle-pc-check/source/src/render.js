@@ -30,6 +30,32 @@ var UI = (function (V) {
   function mark(state, text) { return '<div><span class="mark ' + state + '">' + (state === 'ok' ? '&#10003;' : state === 'bad' ? '!' : '-') + '</span><span>' + text + '</span></div>'; }
   function cmdBox(cmd) { return '<div class="cmd"><code>' + esc(cmd) + '</code><button class="btn sm" type="button" data-copy="' + esc(cmd) + '">Copy</button></div>'; }
   function tf(v) { return v === true ? 'yes' : v === false ? 'no' : 'unknown'; }
+  var GL = [
+    ['BIOS', 'The first program that runs when the PC starts, before Windows.'], ['UEFI', 'The modern BIOS.'], ['SMART', 'A health report that every drive keeps about itself.'],
+    ['SSD', 'A fast drive with no moving parts.'], ['HDD', 'An older spinning hard disk. Slower than an SSD.'], ['NVMe', 'A very fast type of SSD.'], ['TPM', 'A small security chip on the motherboard.'],
+    ['BitLocker', 'Windows disk encryption.'], ['DISM', 'A Windows tool that repairs the system files.'], ['drivers', 'Small programs that let Windows talk to the hardware.'], ['driver', 'A small program that lets Windows talk to a part of the PC.'],
+    ['firmware', 'The built-in software of a device.'], ['RAM', 'The short-term memory of the PC.'], ['XMP', 'A BIOS setting that makes memory run at its labelled speed.'], ['EXPO', 'The AMD version of XMP.'],
+    ['Secure Boot', 'Stops harmful programs from starting before Windows.'], ['firewall', 'A guard that decides which network traffic may reach your PC.'], ['DNS', 'The phone book of the internet: turns names into addresses.'],
+    ['proxy', 'A middleman server for your web traffic.'], ['WHEA', 'A message where the hardware reports its own error.'], ['restore point', 'A snapshot of Windows you can go back to.'], ['VPN', 'A private tunnel for your internet traffic.'],
+    ['GPU', 'The graphics card.'], ['CPU', 'The processor, the brain of the PC.'], ['PowerShell', 'A text window where you type commands.'], ['port', 'A numbered network door of the PC.'], ['Remote Desktop', 'Lets someone control this PC over the network.'], ['UAC', 'The box that asks before programs change the system.']
+  ];
+  function gloss(escaped) {
+    var used = {};
+    return String(escaped).split(/(<[^>]*>)/).map(function (seg) {
+      if (seg.charAt(0) === '<') return seg;
+      GL.forEach(function (t) {
+        if (used[t[0]]) return;
+        var re = new RegExp('(^|[^A-Za-z0-9-])(' + t[0].replace(/ /g, '\\s') + ')(?![A-Za-z0-9-])');
+        if (re.test(seg)) { used[t[0]] = 1; seg = seg.replace(re, '$1<abbr class="gl" title="' + t[1].replace(/"/g, '&quot;') + '">$2</abbr>'); }
+      });
+      return seg;
+    }).join('');
+  }
+  function metaChips(f) {
+    var m = V.META[f.id] || [10, 'Medium', 'Safe'];
+    var rk = m[2] === 'Safe' ? 'ok' : (m[2] === 'Careful' ? 'bad' : 'warn');
+    return '<div class="metachips"><span class="chip">About ' + m[0] + ' min</span><span class="chip">' + esc(m[1]) + '</span><span class="chip ' + rk + '">' + esc(m[2]) + '</span>' + (f.raised ? '<span class="chip">raised for your PC type</span>' : '') + '</div>';
+  }
   function reduceMotion() { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
 
   /* ---------------- dashboard ---------------- */
@@ -53,9 +79,9 @@ var UI = (function (V) {
       '<div class="counts"><div class="h"><b>' + c.high + '</b><small>HIGH</small></div><div><b>' + c.medium + '</b><small>MEDIUM</small></div><div><b>' + c.low + '</b><small>LOW</small></div><div><b>' + V.good.length + '</b><small>ALL CLEAR</small></div></div>');
   }
   function rRadar() {
-    var A = V.score.areas, cx = 150, cy = 138, R = 90, n = A.length;
+    var A = V.score.areas, cx = 190, cy = 140, R = 88, n = A.length;
     function pt(i, r) { var a = (-90 + i * 360 / n) * Math.PI / 180; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; }
-    var svg = '<svg viewBox="0 0 300 280" width="100%" role="img" aria-label="Score per area: ' + A.map(function (a) { return a.name + ' ' + a.score; }).join(', ') + '">';
+    var svg = '<svg viewBox="0 0 380 290" width="100%" role="img" aria-label="Score per area: ' + A.map(function (a) { return a.name + ' ' + a.score; }).join(', ') + '">';
     [0.25, 0.5, 0.75, 1].forEach(function (k) { svg += '<polygon points="' + A.map(function (_, i) { return pt(i, R * k).join(','); }).join(' ') + '" fill="none" stroke="#2a2a30" stroke-width="1"/>'; });
     A.forEach(function (_, i) { var p = pt(i, R); svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="#2a2a30"/>'; });
     svg += '<polygon points="' + A.map(function (a, i) { return pt(i, R * Math.max(0.04, a.score / 100)).join(','); }).join(' ') + '" fill="rgba(232,44,45,.28)" stroke="#E82C2D" stroke-width="2"/>';
@@ -75,9 +101,15 @@ var UI = (function (V) {
     else h = top.map(function (f, i) {
       return '<div class="action"><div class="num">' + (i + 1) + '</div><div style="min-width:0"><div class="row" style="gap:8px">' + tag(f.sev) + '<span class="area">' + esc(f.area) + '</span></div>' +
         '<div style="font-family:var(--head);font-weight:700;font-size:16px;margin:4px 0">' + esc(f.title) + '</div>' +
-        '<button class="btn sm" type="button" data-open="' + esc(f.id) + '">Show how to fix</button></div></div>';
+        metaChips(f) + '<button class="btn sm" type="button" data-open="' + esc(f.id) + '">Show me how, step by step</button></div></div>';
     }).join('');
     win('wActions', 'do_first.log', 'top ' + top.length, h);
+  }
+  function rStart() {
+    var el = $('#startBox'); if (!el) return;
+    var n = V.counts.high + V.counts.medium + V.counts.low;
+    var msg = n ? 'Your PC has <b>' + n + ' thing' + (n > 1 ? 's' : '') + '</b> worth looking at. You do not need to fix them all. Start with the "Do this first" box: it has the 3 that matter most.' : 'Nothing needs fixing right now. You can close this page.';
+    el.innerHTML = '<div class="startbox"><b>New to this?</b> ' + msg + ' Every problem is explained in plain words, with exact clicks. <button class="btn sm" type="button" data-tab-go="tools">Beginner guide</button></div>';
   }
   function rCpu() {
     var c = g(D, 'system.cpu', null);
@@ -239,9 +271,9 @@ var UI = (function (V) {
     var q = state.q.toLowerCase();
     var list = V.findings.filter(function (f) { return (state.sev === 'all' || f.sev === state.sev) && (!q || (f.title + ' ' + f.why + ' ' + f.area + ' ' + f.evidence).toLowerCase().indexOf(q) >= 0); });
     $('#findList').innerHTML = list.length ? list.map(function (f, i) {
-      var steps = f.steps.length ? '<ol class="steps">' + f.steps.map(function (s) { return '<li><span>' + esc(s.t) + '</span>' + (s.cmd ? cmdBox(s.cmd) : '') + '</li>'; }).join('') + '</ol>' : '';
+      var steps = f.steps.length ? '<ol class="steps">' + f.steps.map(function (s) { return '<li><span>' + gloss(esc(s.t)) + '</span>' + (s.cmd ? cmdBox(s.cmd) : '') + '</li>'; }).join('') + '</ol>' : '';
       return '<div class="finding' + (f.id === openId ? ' open' : '') + '" data-id="' + esc(f.id) + '"><button class="fh" type="button" aria-expanded="' + (f.id === openId) + '"><span class="fid">#' + String(V.findings.indexOf(f) + 1).padStart(2, '0') + '</span>' + tag(f.sev) + '<span class="t">' + esc(f.title) + '</span><span class="area">' + esc(f.area) + '</span></button>' +
-        '<div class="fb"><p class="why">' + esc(f.why) + '</p>' + (f.evidence ? '<div class="ev"><span class="lbl">Evidence</span><br>' + esc(f.evidence) + '</div>' : '') + steps +
+        '<div class="fb">' + metaChips(f) + '<div class="lbl">In plain words</div><p class="why">' + gloss(esc(f.why)) + '</p>' + (f.evidence ? '<div class="ev"><span class="lbl">What we found</span><br>' + esc(f.evidence).replace(/\n/g, '<br>') + '</div>' : '') + steps +
         '<div class="btns" style="margin-top:14px"><button class="btn sm" type="button" data-ask="' + esc(f.id) + '">Ask an AI about this</button></div></div></div>';
     }).join('') : '<div class="win"><div class="body sub">No findings match.</div></div>';
     if (openId) { var el = $('.finding[data-id="' + openId + '"]'); if (el) el.scrollIntoView({ block: 'center' }); }
@@ -352,7 +384,7 @@ var UI = (function (V) {
     $('#chipDate').textContent = 'Scanned ' + fmtDT(g(D, 'meta.generated', null));
     var n = V.counts.high + V.counts.medium + V.counts.low;
     $('#navcount').textContent = n ? n : '';
-    rHealth(); rRadar(); rActions(); rCpu(); rMem(); rGpu(); rBoard(); rOs(); rNet(); rExtras(); rStorage(); rSecurity(); rBoot(); rHeat(); rUplink();
+    rStart(); rHealth(); rRadar(); rActions(); rCpu(); rMem(); rGpu(); rBoard(); rOs(); rNet(); rExtras(); rStorage(); rSecurity(); rBoot(); rHeat(); rUplink();
     rFindings(); rHardware(); rSoftware(); rEvents();
     countUp();
   }

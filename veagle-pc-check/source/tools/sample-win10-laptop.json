@@ -2,7 +2,7 @@
  "meta": {
   "mode": "quick",
   "tool": "VEAGLE PC Check",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "generated": "2026-10-31T16:35:00",
   "isAdmin": true,
   "psVersion": "5.1.26100.9549",
@@ -121,7 +121,7 @@
     "name": "Ethernet",
     "description": "Intel(R) Ethernet Controller (3) I225-V",
     "status": "Up",
-    "linkSpeed": "1 Gbps",
+    "linkSpeed": "100 Mbps",
     "virtual": false
    },
    {
@@ -1475,6 +1475,130 @@
  "dism": {
   "state": "skipped",
   "text": ""
+ },
+ "extras": {
+  "reliability": {
+   "stabilityIndex": 4.2,
+   "stabilityLatest": 3.1,
+   "bugchecks": [
+    {
+     "time": "2026-10-25T16:35:00",
+     "code": "0x00000133"
+    },
+    {
+     "time": "2026-10-22T16:35:00",
+     "code": "0x00000116"
+    },
+    {
+     "time": "2026-10-19T16:35:00",
+     "code": "0x00000133"
+    }
+   ]
+  },
+  "securityMore": {
+   "defender": {
+    "signatureAgeDays": 9,
+    "quickScanAgeDays": 41,
+    "fullScanAgeDays": null,
+    "tamperProtected": false,
+    "threats30d": 2,
+    "lastThreat": "2026-10-26T16:35:00"
+   },
+   "nlaRequired": false,
+   "autoLogon": true,
+   "uacPromptLevel": 5,
+   "smb1Enabled": false,
+   "adminNames": [
+    "DEMO-PC\\demo",
+    "DEMO-PC\\Administrator",
+    "DEMO-PC\\guest-admin"
+   ],
+   "shares": [
+    {
+     "name": "Photos",
+     "path": "D:\\Photos"
+    },
+    {
+     "name": "Scans",
+     "path": "C:\\Scans"
+    }
+   ],
+   "listening": [
+    {
+     "port": 135,
+     "process": "svchost",
+     "allInterfaces": true
+    },
+    {
+     "port": 445,
+     "process": "System",
+     "allInterfaces": true
+    },
+    {
+     "port": 3389,
+     "process": "svchost",
+     "allInterfaces": true
+    },
+    {
+     "port": 5900,
+     "process": "tvnserver",
+     "allInterfaces": true
+    },
+    {
+     "port": 49664,
+     "process": "lsass",
+     "allInterfaces": true
+    }
+   ],
+   "activation": 1,
+   "unsignedDrivers": [
+    {
+     "device": "Virtual Audio Cable",
+     "provider": "Unknown"
+    }
+   ]
+  },
+  "networkTest": {
+   "gateway": true,
+   "ping": {
+    "target": "router",
+    "sent": 5,
+    "lost": 1,
+    "avgMs": 38.4
+   },
+   "dns": {
+    "ok": true,
+    "ms": 1240
+   },
+   "timeSync": {
+    "source": "Local CMOS Clock",
+    "local": true
+   },
+   "wifi": {
+    "signalPct": 42,
+    "band": "2.4 GHz",
+    "radio": "802.11n"
+   },
+   "proxyEnabled": true,
+   "pacUrl": false,
+   "hostsEntries": [
+    "0.0.0.0 ads.example.com"
+   ]
+  },
+  "backup": {
+   "restorePoints": {
+    "readable": true,
+    "count": 0,
+    "lastDaysAgo": null
+   },
+   "fileHistory": false,
+   "oneDriveFolders": {
+    "documents": false,
+    "desktop": false,
+    "pictures": false
+   },
+   "winRE": false
+  }
  },
  "battery": {
   "present": true,

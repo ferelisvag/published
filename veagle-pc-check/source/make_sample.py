@@ -98,6 +98,19 @@ data = {
 out = pathlib.Path(__file__).resolve().parent / 'tools'; out.mkdir(exist_ok=True)
 
 import copy
+# --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
+data['meta']['version'] = '0.3.0'
+data['extras'] = dict(
+  reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
+  securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
+    nlaRequired=True, autoLogon=False, uacPromptLevel=5, smb1Enabled=False, adminNames=['DEMO-PC\\demo', 'DEMO-PC\\Administrator'],
+    shares=[dict(name='Photos', path='D:\\Photos')],
+    listening=[dict(port=135, process='svchost', allInterfaces=True), dict(port=445, process='System', allInterfaces=True), dict(port=49664, process='lsass', allInterfaces=True)],
+    activation=1, unsignedDrivers=[]),
+  networkTest=dict(gateway=True, ping=dict(target='router', sent=5, lost=0, avgMs=2.1), dns=dict(ok=True, ms=38), timeSync=dict(source='time.windows.com', local=False), wifi=None, proxyEnabled=False, pacUrl=False, hostsEntries=[]),
+  backup=dict(restorePoints=dict(readable=True, count=2, lastDaysAgo=20), fileHistory=False, oneDriveFolders=dict(documents=True, desktop=True, pictures=False), winRE=True))
+for v in data['network']['adapters']:
+    if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
 (out / 'sample-data.json').write_text(json.dumps(data, indent=1), encoding='utf-8')
 
 # --- variant: Windows 10 laptop, quick scan
@@ -116,6 +129,19 @@ w['battery'] = dict(present=True, designMWh=48000, fullChargeMWh=27800, cycleCou
 w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
+# --- v0.3 extras (reliability, security details, network test, backups)
+w['meta']['version'] = '0.3.0'
+w['extras'] = dict(
+  reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
+  securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),
+    nlaRequired=False, autoLogon=True, uacPromptLevel=5, smb1Enabled=False, adminNames=['DEMO-PC\\demo', 'DEMO-PC\\Administrator', 'DEMO-PC\\guest-admin'],
+    shares=[dict(name='Photos', path='D:\\Photos'), dict(name='Scans', path='C:\\Scans')],
+    listening=[dict(port=135, process='svchost', allInterfaces=True), dict(port=445, process='System', allInterfaces=True), dict(port=3389, process='svchost', allInterfaces=True), dict(port=5900, process='tvnserver', allInterfaces=True), dict(port=49664, process='lsass', allInterfaces=True)],
+    activation=1, unsignedDrivers=[dict(device='Virtual Audio Cable', provider='Unknown')]),
+  networkTest=dict(gateway=True, ping=dict(target='router', sent=5, lost=1, avgMs=38.4), dns=dict(ok=True, ms=1240), timeSync=dict(source='Local CMOS Clock', local=True), wifi=dict(signalPct=42, band='2.4 GHz', radio='802.11n'), proxyEnabled=True, pacUrl=False, hostsEntries=['0.0.0.0 ads.example.com']),
+  backup=dict(restorePoints=dict(readable=True, count=0, lastDaysAgo=None), fileHistory=False, oneDriveFolders=dict(documents=False, desktop=False, pictures=False), winRE=False))
+for v in w['network']['adapters']:
+    if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
 (out / 'sample-win10-laptop.json').write_text(json.dumps(w, indent=1), encoding='utf-8')
 
 # --- variant: an older, worse scan of the desktop (for Compare)

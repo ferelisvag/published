@@ -2,7 +2,7 @@
  "meta": {
   "mode": "full",
   "tool": "VEAGLE PC Check",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "generated": "2026-10-31T16:35:00",
   "isAdmin": true,
   "psVersion": "5.1.26100.9549",
@@ -179,7 +179,7 @@
     "name": "Ethernet",
     "description": "Intel(R) Ethernet Controller (3) I225-V",
     "status": "Up",
-    "linkSpeed": "1 Gbps",
+    "linkSpeed": "100 Mbps",
     "virtual": false
    },
    {
@@ -1767,5 +1767,95 @@
  "dism": {
   "state": "repairable",
   "text": "The component store is repairable. | The operation completed successfully."
+ },
+ "extras": {
+  "reliability": {
+   "stabilityIndex": 6.8,
+   "stabilityLatest": 7.4,
+   "bugchecks": [
+    {
+     "time": "2026-10-12T16:35:00",
+     "code": "0x00000116"
+    }
+   ]
+  },
+  "securityMore": {
+   "defender": {
+    "signatureAgeDays": 2,
+    "quickScanAgeDays": 3,
+    "fullScanAgeDays": 30,
+    "tamperProtected": true,
+    "threats30d": 0,
+    "lastThreat": null
+   },
+   "nlaRequired": true,
+   "autoLogon": false,
+   "uacPromptLevel": 5,
+   "smb1Enabled": false,
+   "adminNames": [
+    "DEMO-PC\\demo",
+    "DEMO-PC\\Administrator"
+   ],
+   "shares": [
+    {
+     "name": "Photos",
+     "path": "D:\\Photos"
+    }
+   ],
+   "listening": [
+    {
+     "port": 135,
+     "process": "svchost",
+     "allInterfaces": true
+    },
+    {
+     "port": 445,
+     "process": "System",
+     "allInterfaces": true
+    },
+    {
+     "port": 49664,
+     "process": "lsass",
+     "allInterfaces": true
+    }
+   ],
+   "activation": 1,
+   "unsignedDrivers": []
+  },
+  "networkTest": {
+   "gateway": true,
+   "ping": {
+    "target": "router",
+    "sent": 5,
+    "lost": 0,
+    "avgMs": 2.1
+   },
+   "dns": {
+    "ok": true,
+    "ms": 38
+   },
+   "timeSync": {
+    "source": "time.windows.com",
+    "local": false
+   },
+   "wifi": null,
+   "proxyEnabled": false,
+   "pacUrl": false,
+   "hostsEntries": []
+  },
+  "backup": {
+   "restorePoints": {
+    "readable": true,
+    "count": 2,
+    "lastDaysAgo": 20
+   },
+   "fileHistory": false,
+   "oneDriveFolders": {
+    "documents": true,
+    "desktop": true,
+    "pictures": false
+   },
+   "winRE": true
+  }
  }
 }

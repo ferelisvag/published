@@ -223,3 +223,19 @@ footer.foot { max-width: 1360px; margin: 0 auto; padding: 18px 28px 40px; border
 .delta.up { color: var(--redtext); } .delta.down { color: #ececf0; } .delta.same { color: var(--dim); }
 .chg { display: flex; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line2); align-items: baseline; flex-wrap: wrap; }
 .chg:first-child { border-top: 0; }
+
+/* v0.3 beginner helpers */
+.startbox { margin: 0 0 18px; padding: 14px 16px; border: 1px solid var(--red); background: rgba(223,40,41,.08); font-size: 15px; line-height: 1.6; }
+.startbox .btn { margin-left: 8px; }
+abbr.gl { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
+.metachips { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 2px; }
+.metachips .chip { padding: 3px 9px; font-size: 12px; }
+.chip.ok { border-color: #2f5c3a; color: #86e0a0; } .chip.bad { border-color: #5a2526; color: #ff8d8e; } .chip.warn { border-color: #5a4a1e; color: #f2c96b; }
+.finding .lbl, .fb > .lbl { color: var(--dim, #8a8a94); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin-top: 14px; }
+.chip select { background: #0c0c0e; color: #ececf0; border: 1px solid var(--line); font: inherit; padding: 2px 4px; margin-left: 4px; }
+#tab-tools textarea { background: #0b0b0d; color: #d4d4d8; border: 1px solid var(--line); padding: 10px; font-size: 12px; }
+@media print { .startbox, #profileSel { display: none; } }
+#tab-tools .steps3 li { display: block; }
+#tab-tools .steps3 li b { display: inline; border: 0; padding: 0; background: none; font-weight: 700; color: #fff; }
+#tab-tools ol.steps3 { list-style: decimal; padding-left: 28px; display: block; }
+#tab-tools ol.steps3 li { margin: 8px 0; padding-left: 4px; }

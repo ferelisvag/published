@@ -20,7 +20,7 @@ css_fonts = (
 
 css = (src / 'style.css').read_text(encoding='utf-8')
 body = (src / 'body.html').read_text(encoding='utf-8').replace('%%LOGO%%', logo)
-js = '\n'.join((src / n).read_text(encoding='utf-8') for n in ('core.js', 'render.js', 'ai.js', 'compare.js', 'share.js', 'main.js'))
+js = '\n'.join((src / n).read_text(encoding='utf-8') for n in ('core.js', 'render.js', 'ai.js', 'compare.js', 'tools.js', 'share.js', 'main.js'))
 
 csp = "default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'"
 html = f"""<!doctype html>

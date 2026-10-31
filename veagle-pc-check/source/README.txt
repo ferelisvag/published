@@ -1,68 +1,93 @@
-VEAGLE PC CHECK  v0.2.0
+VEAGLE PC CHECK  v0.3.0
 =======================
 VEAGLE - ferelis.gr
 
-A free, read-only health check for your Windows 10/11 PC.
-It looks at your hardware, drives, security settings, installed programs, startup items and
-the Windows Event Viewer, then builds a report you open in your browser.
-
-HOW TO USE
-----------
-1. Right-click the ZIP file, choose Properties, tick "Unblock" if you see it, click OK.
-2. Extract the WHOLE ZIP to a normal folder (for example your Desktop).
-3. Double-click  VEAGLE-PC-Check.bat   (full scan, 3 to 5 minutes)
-   or  VEAGLE-PC-Check-Quick.bat   (quick scan, about 30 seconds: skips msinfo32, app updates
-   via winget, the Windows image check and a few slow checks).
-4. Click "Yes" when Windows asks for administrator rights (needed to read drive health,
-   BitLocker status and the Windows image check).
-5. Wait 3 to 5 minutes. A black window shows the progress. When it finishes, the report
-   opens in your browser.
-
-Want to see what the report looks like first?  Open SAMPLE-REPORT.html (demo data).
-
-IN THE REPORT
+WHAT IS THIS?
 -------------
-Dashboard   health score, areas, the three things to do first, hardware overview.
-Findings    every problem with the reason, evidence and copy-paste fixes.
-Hardware / Software / Events   the full details.
-Compare     drop an older scan (data.json or report.html) to see what got better or worse.
-AI help     get a second opinion from an AI (see below).
-Share-safe copy (top right)   downloads the report with your name, PC name, IP/MAC addresses
-            and e-mail addresses removed, so you can send it to someone.
-Also: Windows 11 readiness (for Windows 10 PCs) and battery health (for laptops).
+A free program that looks at your Windows PC and tells you, in plain words, if something is
+wrong and exactly how to fix it. Think of it as a check-up at the doctor.
+You do not need to know anything about computers.
 
-WHAT IT DOES NOT DO
--------------------
-- It does not change any setting, install anything or delete anything.
-- It does not upload anything. The report is a single file on your PC and works offline.
-- It does not collect passwords, product keys or serial numbers.
-- The only network use is "winget", the Windows package tool, which is asked which of
-  your programs have updates.
+IT IS SAFE
+----------
+- It only LOOKS. It does not change, install or delete anything on your PC.
+- It does not send your files, passwords or personal data anywhere. The report stays on your PC.
+- The only things it asks the internet: which of your programs have updates (winget), one
+  "ping" to your own router, and one lookup of the website name www.microsoft.com.
+- You can read every line of the program: app\collector.ps1 opens in Notepad.
+
+HOW TO USE IT (5 steps, about 5 minutes)
+----------------------------------------
+1. Find the ZIP file you downloaded (usually in the Downloads folder).
+   Right-click it, click "Properties". If you see a box that says "Unblock", tick it and click OK.
+2. Right-click the ZIP again and choose "Extract All...". Click "Extract".
+   IMPORTANT: do not run the program from inside the ZIP. Always extract first.
+3. Open the new folder and double-click  VEAGLE-PC-Check.bat
+   (Short on time? Double-click VEAGLE-PC-Check-Quick.bat instead. It takes about 30 seconds.)
+4. Windows asks: "Do you want to allow this app to make changes?" Click YES.
+   (It needs this only to READ things like drive health. It still changes nothing.)
+5. A black window shows the progress. Do not close it. After about 3 to 5 minutes your
+   browser opens with the report. That is all.
+
+If a blue window says "Windows protected your PC": click "More info", then "Run anyway".
+That message appears for every new program. The file is plain text and you can read it first.
+
+READING THE REPORT
+------------------
+- Look at the big number (health score) and the box called "Do this first".
+- Click "Show me how, step by step" on a problem. Each problem has:
+    IN PLAIN WORDS   what it means, without technical talk
+    time, difficulty and risk   how long it takes and whether you can break anything
+    numbered steps   exactly what to click or type
+- Words with a dotted underline show an explanation when you hold the mouse over them.
+- You never have to fix everything. Start with the red HIGH ones, one at a time.
+  After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
+- The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
+
+TABS IN THE REPORT
+------------------
+Dashboard   the score and the 3 most important things.
+Findings    every problem, in plain words, with the fix.
+Hardware / Software / Events   all the details, for people who want them.
+Compare     compare with an older scan to see your progress.
+Tools       beginner guide, summary for a helper, safe fix script, Excel/CSV export,
+            many PCs in one table, list of explained words.
+AI help     ask an AI (Claude first) to explain things to you. Personal data is removed.
+PC type     top right: Home, Work or Gaming. It changes which problems count more.
+Share-safe copy   saves the report without your name, PC name, IP and e-mail, so you can send it.
+
+WHAT THE CHECK LOOKS AT
+-----------------------
+Hardware, drives and their health, blue screens and crashes, Windows reliability score,
+antivirus status and threats, firewall, risky settings (shared folders, open ports,
+remote access), Windows updates, programs that need updating, drivers and BIOS age,
+internet and Wi-Fi quality, backups and System Restore, battery (laptops),
+and whether the PC can run Windows 11.
 
 WHERE ARE MY RESULTS?
 ---------------------
-Reports\<date-time>\report.html   the report
-Reports\<date-time>\data.json     the same data, in machine-readable form
-Reports\<date-time>\raw\          exported files (msinfo32, systeminfo, event logs, app list, battery report)
-These stay on your PC. Delete the folder whenever you like.
+In the folder where you extracted the ZIP, inside "Reports", in a folder named with the date and time:
+  report.html   the report (open it with any browser, it works without internet)
+  data.json     the same information as data (used by the Compare tab)
+  raw\          extra files (msinfo32, systeminfo, event logs, app list)
+Delete the folder any time you like.
 
 GETTING HELP FROM AN AI
 -----------------------
-In the report, open the "AI help" tab. It builds a text package from the scan with your user
-name, PC name, IP/MAC addresses and e-mail addresses removed, and shows you exactly what will
-be copied. "Copy and open Claude" copies it and opens Claude, where you paste it with Ctrl+V.
-ChatGPT, Gemini and Copilot buttons are there for a second opinion.
-Please read the preview before you paste: program names and file paths can still say
-something about you.
+Open the "AI help" tab. The app prepares a text with your scan. Your user name, PC name,
+IP addresses and e-mail addresses are removed first, and you can read exactly what will be
+copied. Click "Copy and open Claude", then press Ctrl + V in the Claude window and send.
+Read the text before you paste it: program names and file paths can still say something about you.
 
 IF SOMETHING GOES WRONG
 -----------------------
-- Windows SmartScreen or your antivirus complains about the .bat file: it is a plain text
-  file you can open in Notepad. It only starts app\collector.ps1 (also plain text).
-  Click "More info" then "Run anyway", or ask your antivirus to allow it.
-- The window closes at once: right-click the .bat, "Run as administrator".
-- The report is empty or part of it is missing: the report has a "Scan notes" section at the
-  bottom of the Events tab that says which check did not work.
+- The black window closes immediately: right-click the .bat file and choose "Run as administrator".
+- It says it cannot find app\collector.ps1: you did not extract the whole ZIP. Extract all, try again.
+- Your antivirus complains: the .bat file only starts app\collector.ps1. Both are plain text. Allow them.
+- A part of the report is empty: the "Events" tab has a "Scan notes" box at the bottom that
+  says which check did not work. The most common reason is that you clicked "No" at the
+  administrator question.
+- The scan seems stuck: some checks take a few minutes. Wait up to 10 minutes. Do not switch the PC off.
 
 Brand, idea and design: VEAGLE - https://ferelis.gr
 Built with the help of Claude (Anthropic).

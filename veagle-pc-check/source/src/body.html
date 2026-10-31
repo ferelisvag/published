@@ -19,10 +19,12 @@
       <button role="tab" data-tab="software" aria-selected="false">Software</button>
       <button role="tab" data-tab="events" aria-selected="false">Events</button>
       <button role="tab" data-tab="compare" aria-selected="false">Compare</button>
+      <button role="tab" data-tab="tools" aria-selected="false">Tools</button>
       <button role="tab" data-tab="ai" aria-selected="false">AI help</button>
     </nav>
     <div class="topright">
       <a class="chip" href="https://ferelis.gr" target="_blank" rel="noopener" title="VEAGLE - ferelis.gr">ferelis.gr</a>
+      <label class="chip" for="profileSel">PC type <select id="profileSel" aria-label="Type of PC"></select></label>
       <span class="chip" id="chipOs"></span>
       <span class="chip" id="chipDate"></span>
       <button class="btn sm" id="btnShare" type="button" title="Download a copy of this report with your personal details removed">Share-safe copy</button>
@@ -35,6 +37,7 @@
   <div id="demo"></div>
 
   <section class="tabpane on" id="tab-dashboard" role="tabpanel" aria-label="Dashboard">
+    <div id="startBox"></div>
     <div class="grid">
       <div class="win s4" id="wHealth"></div>
       <div class="win s4" id="wRadar"></div>
@@ -78,6 +81,8 @@
   <section class="tabpane" id="tab-events" role="tabpanel" aria-label="Events"></section>
 
   <section class="tabpane" id="tab-compare" role="tabpanel" aria-label="Compare scans"></section>
+
+  <section class="tabpane" id="tab-tools" role="tabpanel" aria-label="Tools"></section>
 
   <section class="tabpane" id="tab-ai" role="tabpanel" aria-label="AI help">
     <div class="sect"><h2>Get expert help from an AI</h2><span>you stay in control of what is shared</span></div>

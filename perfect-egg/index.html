@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Το Τέλειο Αυγό · χρονόμετρο, memes και μυστικά</title>
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://ferelisvag.github.io/published/perfect-egg/">
+<meta property="og:title" content="Το Τέλειο Αυγό">
+<meta property="og:description" content="Χρονόμετρο για τέλειο βρασμό αυγού, memes και οδηγός μαγειρέματος.">
+<meta property="og:type" content="website">
+<meta name="description" content="Λειτουργικός υπολογιστής για τον τέλειο βρασμό αυγού, με χρονόμετρο, παγόλουτρο, memes και οδηγός για βραστό, μάτι, scrambled και ποσέ.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&family=Fira+Sans+Extra+Condensed:wght@700;800;900&family=Comfortaa:wght@600;700&display=swap&subset=greek" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b1208; --cream:#fff6dc; --yolk:#ffb703; --yolk2:#fb8500; --red:#e63946; --blue:#2ec4ff; --mint:#3ddc97;
+  --card:#fffdf4; --line:#1b1208;
+  --meme:'Fira Sans Extra Condensed','Impact',sans-serif; --body:'Fira Sans',system-ui,sans-serif; --fun:'Comfortaa',var(--body);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:17px/1.6 var(--body);color:var(--ink);background:var(--cream);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-2;
+  background:
+   radial-gradient(circle at 15% 10%,#ffe7a1 0,transparent 40%),
+   radial-gradient(circle at 90% 30%,#ffd1c2 0,transparent 38%),
+   radial-gradient(circle at 40% 100%,#c9f1ff 0,transparent 45%),var(--cream)}
+.dots{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(#1b120812 2px,transparent 2px);background-size:26px 26px}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.shake{animation:shake .6s}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(4px,-2px)}30%,50%,70%{transform:translate(-8px,3px)}40%,60%{transform:translate(8px,-3px)}}
+
+/* ticker */
+.ticker{background:var(--ink);color:var(--yolk);overflow:hidden;white-space:nowrap;font:800 15px var(--meme);letter-spacing:.08em;text-transform:uppercase;border-bottom:4px solid var(--yolk)}
+.ticker div{display:inline-block;padding:9px 0;animation:tick 45s linear infinite}
+.ticker span{margin:0 26px}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* hero */
+.hero{text-align:center;padding:46px 0 10px;position:relative}
+.kicker{display:inline-block;background:var(--red);color:#fff;font:800 14px var(--meme);letter-spacing:.14em;text-transform:uppercase;padding:5px 14px;transform:rotate(-3deg);box-shadow:4px 4px 0 var(--ink);border:3px solid var(--ink)}
+h1{font:900 clamp(54px,11vw,138px)/.86 var(--meme);text-transform:uppercase;margin:18px 0 6px;letter-spacing:-.01em;
+  background:linear-gradient(90deg,#ff3d00,#ffb703,#ffe66d,#3ddc97,#2ec4ff,#ff3d00);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:rainbow 6s linear infinite;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;filter:drop-shadow(6px 6px 0 var(--ink))}
+@keyframes rainbow{to{background-position:300% 0}}
+.sub{font:700 clamp(17px,2.4vw,24px) var(--fun);max-width:720px;margin:14px auto 0}
+.hero-egg{width:min(220px,48vw);margin:22px auto 0;display:block;cursor:pointer;filter:drop-shadow(0 18px 0 #1b120822)}
+.hero-egg:active{transform:scale(.96)}
+.bounce{animation:bounce 2.2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-16px) rotate(3deg)}}
+.clicks{font:700 13px var(--fun);opacity:.7;margin-top:4px;min-height:20px}
+.nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:26px 0 4px}
+.pill{border:3px solid var(--ink);background:#fff;border-radius:999px;padding:8px 18px;font:700 15px var(--fun);text-decoration:none;box-shadow:4px 4px 0 var(--ink);transition:transform .12s,box-shadow .12s;cursor:pointer}
+.pill:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink);background:var(--yolk)}
+
+/* sections */
+section{padding:54px 0 10px}
+.sec-h{font:900 clamp(34px,6vw,64px)/.95 var(--meme);text-transform:uppercase;margin:0 0 6px}
+.sec-h em{font-style:normal;background:var(--yolk);padding:0 10px;border:3px solid var(--ink);display:inline-block;transform:rotate(-1.5deg);box-shadow:5px 5px 0 var(--ink)}
+.sec-p{font:600 18px var(--fun);margin:8px 0 26px;max-width:760px}
+.card{background:var(--card);border:4px solid var(--ink);border-radius:22px;box-shadow:8px 8px 0 var(--ink);padding:22px}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:26px}
+@media(max-width:900px){.lab{grid-template-columns:1fr}}
+.ctl-h{font:800 15px var(--meme);letter-spacing:.12em;text-transform:uppercase;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+.ctl-h:first-child{margin-top:0}
+.ctl-h b{background:var(--ink);color:var(--yolk);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:800 14px var(--meme)}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{flex:1 1 auto;min-width:92px;border:3px solid var(--ink);background:#fff;border-radius:14px;padding:9px 10px;font:700 15px var(--body);cursor:pointer;transition:.12s;text-align:center;line-height:1.2}
+.seg button small{display:block;font:600 12px var(--body);opacity:.65;margin-top:2px}
+.seg button:hover{transform:translateY(-2px);background:#fff1b8}
+.seg button.on{background:var(--yolk);box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
+.seg button .e{font-size:22px;display:block}
+input[type=range]{width:100%;accent-color:var(--yolk2);height:28px}
+.alt-note{font:600 14px var(--fun);opacity:.8}
+
+/* result + timer */
+.stage{display:flex;flex-direction:column;gap:14px;align-items:center}
+.memebox{position:relative;width:100%;aspect-ratio:1/1;max-width:440px;border:4px solid var(--ink);border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#7fd3ff 0%,#c8f0ff 55%,#ffe9a8 100%);box-shadow:6px 6px 0 var(--ink)}
+.memebox.hot{background:linear-gradient(180deg,#ff9a76 0%,#ffd2a1 60%,#ffe9a8 100%)}
+.memebox.done{background:linear-gradient(180deg,#3ddc97 0%,#b8ffd9 60%,#fff6dc 100%)}
+.mt{position:absolute;left:0;right:0;text-align:center;font:900 clamp(24px,5.4vw,40px)/1 var(--meme);color:#fff;text-transform:uppercase;padding:0 12px;
+  -webkit-text-stroke:2px #000;paint-order:stroke fill;text-shadow:3px 3px 0 #000,-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000;z-index:3;letter-spacing:.01em}
+.mt.top{top:10px}.mt.bot{bottom:10px}
+.pot{position:absolute;left:50%;bottom:62px;transform:translateX(-50%);width:76%}
+.egg-wrap{position:absolute;left:50%;top:50%;transform:translate(-50%,-48%);width:34%;z-index:2;transition:transform .5s}
+.memebox.boil .egg-wrap{animation:wob .5s ease-in-out infinite}
+@keyframes wob{0%,100%{transform:translate(-50%,-48%) rotate(-5deg)}50%{transform:translate(-50%,-44%) rotate(5deg)}}
+.bub{position:absolute;bottom:0;border-radius:50%;background:#ffffffaa;border:2px solid #fff;opacity:0;z-index:1}
+.memebox.boil .bub{animation:rise var(--d) linear infinite}
+@keyframes rise{0%{transform:translateY(0) scale(.4);opacity:0}15%{opacity:.9}100%{transform:translateY(-190px) scale(1.2);opacity:0}}
+.steam{position:absolute;top:26%;width:10px;height:50px;border-radius:50%;background:#ffffff99;filter:blur(5px);opacity:0}
+.memebox.boil .steam{animation:steam 2.4s ease-in infinite}
+@keyframes steam{0%{transform:translateY(40px) scaleX(1);opacity:0}30%{opacity:.8}100%{transform:translateY(-60px) scaleX(3);opacity:0}}
+
+.clock{font:900 clamp(64px,13vw,108px)/1 var(--meme);letter-spacing:.02em;font-variant-numeric:tabular-nums;margin:2px 0 0;text-align:center}
+.clock.warn{color:var(--red);animation:pulse .5s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.phase{font:800 16px var(--meme);letter-spacing:.14em;text-transform:uppercase;text-align:center;background:var(--ink);color:var(--yolk);padding:4px 14px;border-radius:999px}
+.bar{width:100%;height:18px;border:3px solid var(--ink);border-radius:999px;overflow:hidden;background:#fff}
+.bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,var(--yolk2) 0 12px,var(--yolk) 12px 24px);transition:width .3s linear}
+.quip{font:700 16px var(--fun);text-align:center;min-height:50px;max-width:420px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:100%}
+.big{border:4px solid var(--ink);background:var(--red);color:#fff;border-radius:16px;font:900 24px var(--meme);letter-spacing:.06em;text-transform:uppercase;padding:12px 26px;cursor:pointer;box-shadow:6px 6px 0 var(--ink);transition:.1s;flex:1 1 auto}
+.big:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ink)}
+.big:active{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--ink)}
+.big.alt{background:#fff;color:var(--ink);flex:0 0 auto;font-size:20px}
+.big.ice{background:var(--blue)}
+.read{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.read div{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:6px 8px;text-align:center;font:600 12px var(--body)}
+.read b{display:block;font:900 22px var(--meme)}
+
+/* yolk section */
+.cs-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:6px}
+@media(max-width:760px){.cs-grid{grid-template-columns:repeat(2,1fr)}}
+.cs{background:#fff;border:3px solid var(--ink);border-radius:16px;padding:8px 6px 10px;text-align:center;cursor:pointer;transition:.15s}
+.cs:hover{transform:translateY(-4px) rotate(-1deg)}
+.cs.on{background:var(--yolk);box-shadow:4px 4px 0 var(--ink)}
+.cs svg{width:100%;max-width:120px}
+.cs b{display:block;font:800 17px var(--meme);text-transform:uppercase}
+.cs small{font:600 12px var(--body);opacity:.75}
+
+/* tabs */
+.tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.tabs button{border:3px solid var(--ink);background:#fff;border-radius:14px;padding:10px 18px;font:800 18px var(--meme);text-transform:uppercase;letter-spacing:.05em;cursor:pointer;box-shadow:4px 4px 0 var(--ink);transition:.12s}
+.tabs button.on{background:var(--yolk);transform:translate(-1px,-1px) rotate(-1deg)}
+.tabs button:hover{background:#fff1b8}
+.recipe{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px}
+@media(max-width:900px){.recipe{grid-template-columns:1fr}}
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{counter-increment:s;position:relative;padding:10px 0 10px 56px;border-bottom:2px dashed #1b120833}
+.steps li:last-child{border:0}
+.steps li::before{content:counter(s);position:absolute;left:0;top:8px;width:40px;height:40px;border-radius:50%;background:var(--yolk);border:3px solid var(--ink);display:grid;place-items:center;font:900 20px var(--meme);box-shadow:3px 3px 0 var(--ink)}
+.steps b{font-weight:700}
+.tipbox{background:var(--ink);color:#fff;border-radius:18px;padding:18px;position:relative}
+.tipbox h4{margin:0 0 8px;font:900 22px var(--meme);text-transform:uppercase;color:var(--yolk)}
+.tipbox ul{margin:0;padding-left:20px}
+.tipbox li{margin:6px 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.chip{background:#fff;border:3px solid var(--ink);border-radius:999px;padding:3px 12px;font:700 13px var(--fun)}
+.rmeme{margin-top:14px;text-align:center;background:linear-gradient(135deg,#ff9a76,#ffd166);border:3px solid var(--ink);border-radius:14px;padding:14px;font:900 24px/1.05 var(--meme);text-transform:uppercase;-webkit-text-stroke:1px #000;color:#fff;text-shadow:2px 2px 0 #000}
+
+/* myths */
+.myths{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
+.myth{perspective:900px;height:200px;cursor:pointer}
+.myth .in{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.myth.flip .in{transform:rotateY(180deg)}
+.myth .f,.myth .b{position:absolute;inset:0;backface-visibility:hidden;border:4px solid var(--ink);border-radius:18px;padding:16px;display:flex;flex-direction:column;justify-content:center;box-shadow:6px 6px 0 var(--ink)}
+.myth .f{background:#fff;font:800 20px/1.15 var(--meme);text-transform:uppercase;text-align:center}
+.myth .f small{display:block;margin-top:10px;font:700 12px var(--fun);text-transform:none;opacity:.6}
+.myth .b{transform:rotateY(180deg);font:500 15px/1.4 var(--body)}
+.myth .b b{font:900 24px var(--meme);text-transform:uppercase;display:block;margin-bottom:4px}
+.myth.t .b{background:#c9f7de}.myth.m .b{background:#ffd0d0}.myth.h .b{background:#fff0b3}
+
+/* float test */
+.float{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:center}
+@media(max-width:800px){.float{grid-template-columns:1fr}}
+.glass{position:relative;height:300px;border:4px solid var(--ink);border-top:0;border-radius:0 0 40px 40px;background:linear-gradient(180deg,#d7f3ff,#8fd8ff);overflow:hidden}
+.glass .egg{position:absolute;left:50%;width:70px;transition:all .9s cubic-bezier(.3,1.4,.5,1);transform:translateX(-50%)}
+.verdict{font:700 17px var(--body);min-height:96px}
+.verdict b{font:900 26px var(--meme);text-transform:uppercase;display:block}
+
+.dedic{margin-top:50px;background:linear-gradient(135deg,#fff0b3,#ffd1c2);text-align:center;position:relative}
+.dedic h3{font:900 clamp(28px,5vw,46px)/1 var(--meme);text-transform:uppercase;margin:0 0 10px}
+.dedic p{font:700 18px/1.5 var(--fun);max-width:700px;margin:8px auto}
+.dedic .hearts{font-size:30px;letter-spacing:8px}
+.disc{margin-top:26px;border:3px dashed var(--ink);border-radius:16px;padding:16px 20px;background:#fffdf4}
+.disc h4{margin:0 0 6px;font:900 20px var(--meme);text-transform:uppercase}
+.disc ul{margin:0;padding-left:20px;font-size:15px}
+.disc li{margin:4px 0}
+.app-foot{margin-top:14px;font:600 14px var(--fun)}
+footer{margin-top:60px;background:var(--ink);color:#fff;text-align:center;padding:34px 20px 44px;font:600 15px var(--fun)}
+footer a{color:var(--yolk)}
+footer small{display:block;opacity:.65;max-width:720px;margin:12px auto 0;font:500 13px var(--body)}
+.fx{position:fixed;pointer-events:none;z-index:99;font-size:30px;will-change:transform}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--ink);color:var(--yolk);border:3px solid var(--yolk);border-radius:14px;padding:12px 20px;font:800 18px var(--meme);text-transform:uppercase;z-index:100;transition:transform .4s;max-width:92vw;text-align:center}
+.toast.on{transform:translate(-50%,0)}
+.reveal{opacity:0;transform:translateY(28px);transition:.7s}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="dots"></div>
+
+<div class="ticker"><div id="tick"></div></div>
+
+<header class="hero wrap">
+  <span class="kicker">Επιστημονικά αποδεδειγμένο* · *από εμένα</span>
+  <h1>Το τέλειο<br>αυγό</h1>
+  <p class="sub">Ένα σοβαρό εργαλείο με τη σοβαρότητα ενός meme. Διάλεξε κρόκο, πάτα το κουμπί, και μην αφήσεις ποτέ ξανά ένα αυγό να σε προδώσει.</p>
+  <svg id="heroEgg" class="hero-egg bounce" viewBox="0 0 200 260" aria-label="Αυγό" role="img"></svg>
+  <div class="clicks" id="clicks">Πάτα το αυγό. Εντάξει, πάτα το πέντε φορές.</div>
+  <nav class="nav">
+    <a class="pill" href="#lab">🧪 Το Εργαστήριο</a>
+    <a class="pill" href="#kroko">🍳 Ποιος κρόκος;</a>
+    <a class="pill" href="#odigos">📖 Οδηγός μαγειρέματος</a>
+    <a class="pill" href="#mythoi">🔮 Μύθοι</a>
+    <a class="pill" href="#fresh">🥛 Τεστ φρεσκάδας</a>
+  </nav>
+</header>
+
+<main class="wrap">
+
+<section id="lab" class="reveal">
+  <h2 class="sec-h"><em>Εργαστήριο</em> βρασμού</h2>
+  <p class="sec-p">Ο χρόνος υπολογίζεται με τον φυσικό τύπο θερμικής διάχυσης (Williams), όχι με «πέντε λεπτά περίπου». Παίρνει υπόψη μέγεθος, αρχική θερμοκρασία και υψόμετρο.</p>
+  <div class="lab">
+    <div class="card">
+      <div class="ctl-h"><b>1</b> Πόσο ψημένος κρόκος;</div>
+      <div class="seg" id="segDone"></div>
+      <div class="ctl-h"><b>2</b> Μέγεθος αυγού</div>
+      <div class="seg" id="segSize"></div>
+      <div class="ctl-h"><b>3</b> Από πού το βγάζεις;</div>
+      <div class="seg" id="segStart"></div>
+      <div class="ctl-h"><b>4</b> Υψόμετρο: <span id="altV">0</span> m</div>
+      <input type="range" id="alt" min="0" max="2500" step="50" value="0" aria-label="Υψόμετρο">
+      <div class="alt-note" id="altN">Αθήνα, παραλία: το νερό βράζει στους 100°C.</div>
+      <div class="read">
+        <div><b id="rT">68°C</b>κρόκος στόχος</div>
+        <div><b id="rW">100°C</b>νερό που βράζει</div>
+        <div><b id="rM">58 g</b>μάζα αυγού</div>
+      </div>
+    </div>
+
+    <div class="card stage">
+      <div class="memebox" id="meme">
+        <div class="mt top" id="mTop"></div>
+        <svg class="pot" viewBox="0 0 300 170" aria-hidden="true">
+          <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6ccbff"/><stop offset="1" stop-color="#2b8fd6"/></linearGradient></defs>
+          <path d="M20 20 H280 L262 150 Q260 165 245 165 H55 Q40 165 38 150 Z" fill="#b9bec7" stroke="#1b1208" stroke-width="6"/>
+          <path d="M30 60 H270 L262 150 Q260 160 245 160 H55 Q40 160 38 150 Z" fill="url(#wg)"/>
+          <rect x="2" y="12" width="296" height="14" rx="7" fill="#d6dae1" stroke="#1b1208" stroke-width="5"/>
+          <path d="M280 50 H298 Q306 50 306 60 V74" fill="none" stroke="#1b1208" stroke-width="6" stroke-linecap="round"/>
+        </svg>
+        <div class="steam" style="left:30%;animation-delay:0s"></div>
+        <div class="steam" style="left:48%;animation-delay:.8s"></div>
+        <div class="steam" style="left:64%;animation-delay:1.5s"></div>
+        <div id="bubs"></div>
+        <div class="egg-wrap"><svg id="mainEgg" viewBox="0 0 200 260" aria-label="Αυγό που μαγειρεύεται"></svg></div>
+        <div class="mt bot" id="mBot"></div>
+      </div>
+      <div class="phase" id="phase">Έτοιμο για δράση</div>
+      <div class="clock" id="clock">00:00</div>
+      <div class="bar"><i id="barI"></i></div>
+      <div class="quip" id="quip"></div>
+      <div class="btns">
+        <button class="big" id="go">Ρίξε το αυγό</button>
+        <button class="big alt" id="rst" title="Επαναφορά">↺</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="kroko" class="reveal">
+  <h2 class="sec-h"><em>Ο κρόκος</em> δεν ψεύδεται</h2>
+  <p class="sec-p">Έτσι θα μοιάζει το αυγό σου μέσα. Πάτα μια κάρτα και το εργαστήριο ρυθμίζεται μόνο του.</p>
+  <div class="cs-grid" id="csGrid"></div>
+</section>
+
+<section id="odigos" class="reveal">
+  <h2 class="sec-h"><em>Πώς φτιάχνεις</em> το τέλειο αυγό</h2>
+  <p class="sec-p">Πέντε τρόποι, ένα μοναδικό υλικό. Διάλεξε τον δικό σου.</p>
+  <div class="card">
+    <div class="tabs" id="tabs"></div>
+    <div id="recipe" class="recipe"></div>
+  </div>
+</section>
+
+<section id="mythoi" class="reveal">
+  <h2 class="sec-h"><em>Μύθοι</em> vs αλήθειες</h2>
+  <p class="sec-p">Ό,τι σου είπε η γιαγιά, ο θείος και ένα βίντεο με 2 εκατομμύρια προβολές. Πάτα για να δεις την ετυμηγορία.</p>
+  <div class="myths" id="myths"></div>
+</section>
+
+<section id="fresh" class="reveal">
+  <h2 class="sec-h"><em>Τεστ</em> φρεσκάδας</h2>
+  <p class="sec-p">Βάλε το αυγό σε ποτήρι με κρύο νερό και δες πού καταλήγει. Διάλεξε τι έκανε το δικό σου.</p>
+  <div class="card float">
+    <div>
+      <div class="seg" id="segFresh"></div>
+      <div class="verdict" id="fV" style="margin-top:16px">Διάλεξε μια θέση για να δεις την ετυμηγορία.</div>
+    </div>
+    <div class="glass" id="glass"><svg id="fEgg" class="egg" viewBox="0 0 200 260" style="top:200px"></svg></div>
+  </div>
+</section>
+<section class="reveal" id="dedication">
+  <div class="card dedic">
+    <div class="hearts">🥚 ❤️ 🥚</div>
+    <h3>Για την κυρία Σπυριδούλα</h3>
+    <p>Αυτή η σελίδα έγινε για τη μαμά του Αντώνη, την κυρία Σπυριδούλα.</p>
+    <p>Σπυριδούλα, σου εύχομαι υγεία, χαμόγελο και αυγά πάντα στο σωστό σημείο ψησίματος. Ένα τέλειο αυγό ξεκινά πάντα από κάποιον που φροντίζει τους άλλους, και ευχαριστούμε που φροντίζεις.</p>
+  </div>
+  <div class="disc">
+    <h4>Σημαντικό: disclaimer</h4>
+    <ul>
+      <li>Οι χρόνοι είναι <b>υπολογισμός</b> και όχι εγγύηση. Εξαρτώνται από το αυγό, την κατσαρόλα, την κουζίνα και το υψόμετρο. Δοκίμασε και προσάρμοσε.</li>
+      <li>Τα ρευστά, μελάτα και μισοψημένα αυγά περιέχουν ωμό ή μερικώς ψημένο κρόκο, με μικρό κίνδυνο σαλμονέλλας. Για <b>μωρά, εγκύους, ηλικιωμένους και ανοσοκατεσταλμένους</b> προτίμησε καλά ψημένο αυγό (σφιχτός κρόκος) και αυγά από αξιόπιστη πηγή, ψυγμένα.</li>
+      <li>Μην τρως αυγά με ραγισμένο κέλυφος που έμειναν εκτός ψυγείου, ή που μυρίζουν άσχημα. Τα βραστά αυγά κρατούν μέχρι 7 μέρες στο ψυγείο.</li>
+      <li>Προσοχή στο καυτό νερό και στον ατμό. Μην αφήνεις παιδιά χωρίς επίβλεψη στην κουζίνα.</li>
+      <li>Η σελίδα είναι ψυχαγωγική και ενημερωτική, δεν αποτελεί διατροφική ή ιατρική συμβουλή. Αν έχεις αλλεργία στο αυγό ή ειδική διατροφική ανάγκη, ρώτα τον γιατρό ή τον διατροφολόγο σου.</li>
+      <li>Τα memes είναι αστεία και ο ήχος του χρονομέτρου ίσως ακούγεται δυνατά. Δεν συλλέγονται δεδομένα, δεν υπάρχει παρακολούθηση.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Easter egg: γράψε <b>egg</b> ή <b>αυγό</b> οπουδήποτε στη σελίδα.
+  <div class="app-foot">Το Τέλειο Αυγό · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 31.10 · 21:30</div>
+  <small>Οι χρόνοι είναι υπολογισμός, όχι εγγύηση. Δες το πλήρες disclaimer πιο πάνω.</small>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+
+/* ------------------------------------------------------------- data */
+var DONE=[
+  {id:'runny', name:'Ρευστό', emo:'💦', T:62, sub:'σαλτσάκι', mood:'drool',
+   top:'ΜΑΜΑ, ΕΜΕΙΣ ΕΧΟΥΜΕ ΣΑΛΤΣΑ', bot:'ΣΑΛΤΣΑ ΕΧΟΥΜΕ ΣΤΟ ΣΠΙΤΙ: Ο ΚΡΟΚΟΣ', desc:'Κρόκος σαν σάλτσα, ασπράδι μόλις δεμένο. Για ψωμί και βούτηγμα.'},
+  {id:'jammy', name:'Μελάτο', emo:'🍯', T:68, sub:'σαν μαρμελάδα', mood:'wink',
+   top:'ΤΟ ΜΕΛΑΤΟ ΤΟΥ INSTAGRAM', bot:'ΧΡΥΣΟ ΚΕΝΤΡΟ, ΧΡΥΣΗ ΚΑΡΔΙΑ', desc:'Κρόκος κρεμώδης και λαμπερός. Το αγαπημένο του ramen και της σαλάτας.'},
+  {id:'medium', name:'Μέτριο', emo:'⚖️', T:74, sub:'ισορροπία', mood:'meh',
+   top:'ΔΕΝ ΕΙΜΑΙ ΣΚΛΗΡΟ, ΔΕΝ ΕΙΜΑΙ ΜΑΛΑΚΟ', bot:'ΕΙΜΑΙ ΙΣΟΡΡΟΠΗΜΕΝΟΣ ΟΠΩΣ ΤΟ ΖΩΔΙΟ ΜΟΥ', desc:'Κρόκος ντεμί: δεμένος στην άκρη, μαλακός στο κέντρο.'},
+  {id:'hard', name:'Σφιχτό', emo:'🥚', T:82, sub:'κλασικό', mood:'cool',
+   top:'ΑΠΟ ΕΞΩ ΣΚΛΗΡΟ', bot:'ΑΠΟ ΜΕΣΑ ΣΑΛΑΤΑ ΜΕ ΜΑΓΙΟΝΕΖΑ', desc:'Κρόκος δεμένος αλλά ακόμα υγρός και κίτρινος. Για αυγοσαλάτα και κουτί φαγητού.'},
+  {id:'brick', name:'Τούβλο', emo:'🧱', T:92, sub:'μην το κάνεις', mood:'dead',
+   top:'ΑΥΤΟ ΔΕΝ ΕΙΝΑΙ ΑΥΓΟ', bot:'ΕΙΝΑΙ ΥΛΙΚΟ ΟΙΚΟΔΟΜΗΣ', desc:'Κρόκος ξερός, κιμωλιακός, με πρασινωπό δαχτυλίδι. Ο λόγος που μισείς τα βραστά.'}
+];
+var SIZES=[{n:'S',g:48,s:'< 53 g'},{n:'M',g:58,s:'53–63 g'},{n:'L',g:68,s:'63–73 g'},{n:'XL',g:78,s:'> 73 g'}];
+var STARTS=[{n:'Ψυγείο',e:'🧊',t:4},{n:'Δωματίου',e:'🏠',t:20}];
+var st={done:1,size:1,start:0,alt:0};
+
+var QUIPS={
+  idle:['Το αυγό περιμένει. Έχει όλη τη μέρα.','Σκέψου θετικά: δεν θα είναι τούβλο.','Πάτα το κουμπί. Ή πάτα το αυγό. Ή και τα δύο.'],
+  boil:['Μην φύγεις. Το αυγό σε βλέπει.','Μην ανοίξεις το καπάκι, η κατσαρόλα έχει τα δικαιώματά της.','Κάθε δευτερόλεπτο μετράει. Κυριολεκτικά.','Αυτή τη στιγμή το ασπράδι ετοιμάζει μια ομιλία.','Ο κρόκος: «ΠΙΟ ΣΙΓΑ ΜΕ ΤΟ ΝΕΡΟ ΡΕ ΦΙΛΕ».','Αν πας για Instagram τώρα, θα βγει τούβλο.','Θερμική διάχυση σε εξέλιξη. Μπορείς να πεις ότι το κάνεις για την επιστήμη.','Σιγά μη χρειαζόταν ΚΑΙ Wi-Fi για ένα αυγό.'],
+  done:['ΤΕΛΟΣ! Βγάλ’ το. Τώρα. ΤΩΡΑ.','Παγόλουτρο, ΑΜΕΣΩΣ. Το αυγό ακόμη μαγειρεύεται από μέσα.'],
+  ice:['Το κρύο νερό σταματά το μαγείρεμα και ξεκολλά το κέλυφος.','Λίγα παγάκια ακόμη. Το αυγό χαλαρώνει.','Στο τέλος σπάσε το κέλυφος απαλά και ξεφλούδισε κάτω από νερό.'],
+  fin:['Ξεφλούδισε με ευλάβεια. Έφτιαξες τέλειο αυγό.','Ευχαριστώ για τη συνεργασία, αυγέ.']
+};
+
+/* ------------------------------------------------------------- egg svg */
+var EGG='M100 10 C150 10 185 90 185 150 C185 210 150 250 100 250 C50 250 15 210 15 150 C15 90 50 10 100 10 Z';
+function eggSvg(id,mood){
+  var mouths={
+    idle:'<path d="M78 172 Q100 188 122 172" fill="none" stroke="#1b1208" stroke-width="6" stroke-linecap="round"/>',
+    sweat:'<path d="M82 178 Q100 168 118 178" fill="none" stroke="#1b1208" stroke-width="6" stroke-linecap="round"/><path d="M156 96 q10 18 0 26 q-10 -8 0 -26z" fill="#52c7ff" stroke="#1b1208" stroke-width="3"/>',
+    cool:'<path d="M76 170 Q100 192 124 170 Z" fill="#fff" stroke="#1b1208" stroke-width="6" stroke-linejoin="round"/>',
+    dead:'<path d="M80 182 Q100 168 120 182" fill="none" stroke="#1b1208" stroke-width="6" stroke-linecap="round"/>',
+    drool:'<path d="M78 170 Q100 190 122 170" fill="none" stroke="#1b1208" stroke-width="6" stroke-linecap="round"/><path d="M112 178 v26 q0 8 8 0 v-20" fill="#8fe0ff" stroke="#1b1208" stroke-width="3"/>',
+    wink:'<path d="M76 168 Q100 192 128 166" fill="none" stroke="#1b1208" stroke-width="6" stroke-linecap="round"/>',
+    meh:'<path d="M82 178 H118" stroke="#1b1208" stroke-width="6" stroke-linecap="round"/>'
+  };
+  var eyes;
+  if(mood==='dead'){
+    eyes='<g stroke="#1b1208" stroke-width="6" stroke-linecap="round"><path d="M64 110 l22 22 M86 110 l-22 22 M114 110 l22 22 M136 110 l-22 22"/></g>';
+  } else if(mood==='cool'){
+    eyes='<g><rect x="48" y="104" width="46" height="30" rx="10" fill="#111"/><rect x="106" y="104" width="46" height="30" rx="10" fill="#111"/><rect x="92" y="112" width="16" height="6" fill="#111"/><path d="M54 110 l14 0" stroke="#fff" stroke-width="3" opacity=".5"/></g>';
+  } else if(mood==='wink'){
+    eyes='<g><circle cx="76" cy="120" r="16" fill="#fff" stroke="#1b1208" stroke-width="5"/><circle class="pup" data-cx="76" data-cy="120" cx="76" cy="120" r="7" fill="#1b1208"/><path d="M112 122 q14 -12 28 0" fill="none" stroke="#1b1208" stroke-width="6" stroke-linecap="round"/></g>';
+  } else {
+    eyes='<g><circle cx="76" cy="120" r="16" fill="#fff" stroke="#1b1208" stroke-width="5"/><circle cx="124" cy="120" r="16" fill="#fff" stroke="#1b1208" stroke-width="5"/><circle class="pup" data-cx="76" data-cy="120" cx="76" cy="120" r="7" fill="#1b1208"/><circle class="pup" data-cx="124" data-cy="120" cx="124" cy="120" r="7" fill="#1b1208"/></g>';
+  }
+  var brows=(mood==='sweat')?'<path d="M58 94 l32 6 M142 94 l-32 6" stroke="#1b1208" stroke-width="6" stroke-linecap="round"/>':'';
+  var cheeks='<ellipse cx="52" cy="158" rx="12" ry="7" fill="#ff9aa2" opacity=".6"/><ellipse cx="148" cy="158" rx="12" ry="7" fill="#ff9aa2" opacity=".6"/>';
+  return '<defs><radialGradient id="eg'+id+'" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#fffdf6"/><stop offset=".7" stop-color="#f6ead0"/><stop offset="1" stop-color="#e5cfa3"/></radialGradient></defs>'+
+    '<path d="'+EGG+'" fill="url(#eg'+id+')" stroke="#1b1208" stroke-width="8" stroke-linejoin="round"/>'+
+    '<path d="M44 80 Q58 44 86 30" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".8"/>'+
+    cheeks+eyes+brows+(mouths[mood]||mouths.idle);
+}
+function setEgg(el,id,mood){el.innerHTML=eggSvg(id,mood)}
+
+/* pupils follow the pointer */
+document.addEventListener('pointermove',function(e){
+  $$('.pup').forEach(function(p){
+    var r=p.ownerSVGElement.getBoundingClientRect();
+    var sx=r.left+(+p.getAttribute('data-cx')/200)*r.width, sy=r.top+(+p.getAttribute('data-cy')/260)*r.height;
+    var a=Math.atan2(e.clientY-sy,e.clientX-sx), d=Math.min(7,Math.hypot(e.clientX-sx,e.clientY-sy)/40);
+    p.setAttribute('cx',+p.getAttribute('data-cx')+Math.cos(a)*d);
+    p.setAttribute('cy',+p.getAttribute('data-cy')+Math.sin(a)*d);
+  });
+});
+
+/* ------------------------------------------------------------- yolk cross-section */
+function lerp(a,b,t){return a+(b-a)*t}
+function hex(c){return [1,3,5].map(function(i){return parseInt(c.substr(i,2),16)})}
+function mix(stops,t){
+  var n=stops.length-1,i=Math.min(n-1,Math.floor(t*n)),f=t*n-i,a=hex(stops[i]),b=hex(stops[i+1]);
+  return 'rgb('+a.map(function(v,k){return Math.round(lerp(v,b[k],f))}).join(',')+')';
+}
+function cross(T,uid){
+  var c=Math.max(0,Math.min(1,(T-60)/32));
+  var col=mix(['#ff8a00','#ffb200','#f9c82e','#f2d96b','#e4dfa8'],c);
+  var core=mix(['#ff6a00','#ff9d00','#f4bf2a','#efd45f','#dfd79a'],c);
+  var runny=T<66, ring=T>=88;
+  var yr=lerp(40,46,c);
+  return '<svg viewBox="0 0 200 260" aria-hidden="true"><defs>'+
+    '<radialGradient id="y'+uid+'" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="'+core+'"/><stop offset="1" stop-color="'+col+'"/></radialGradient>'+
+    '<clipPath id="c'+uid+'"><path d="'+EGG+'"/></clipPath></defs>'+
+    '<path d="'+EGG+'" fill="#fffef8" stroke="#1b1208" stroke-width="8" stroke-linejoin="round"/>'+
+    '<g clip-path="url(#c'+uid+')"><path d="'+EGG+'" fill="none" stroke="#f1ecd9" stroke-width="22"/></g>'+
+    (ring?'<circle cx="100" cy="148" r="'+(yr+7)+'" fill="#9fb06a" opacity=".9"/><circle cx="100" cy="148" r="'+(yr+3)+'" fill="#c9cf8a"/>':'')+
+    '<circle cx="100" cy="148" r="'+yr+'" fill="url(#y'+uid+')"/>'+
+    (runny?'<path d="M92 190 q-2 30 6 46 q8 -16 4 -46z" fill="'+col+'" opacity=".95"/><ellipse cx="86" cy="132" rx="10" ry="6" fill="#fff" opacity=".6" transform="rotate(-25 86 132)"/>':'')+
+    (!runny&&T<76?'<ellipse cx="86" cy="134" rx="8" ry="5" fill="#fff" opacity=".4" transform="rotate(-25 86 134)"/>':'')+
+    (T>=76?'<g fill="#fff" opacity=".18"><circle cx="90" cy="140" r="3"/><circle cx="112" cy="156" r="4"/><circle cx="98" cy="164" r="2.5"/></g>':'')+
+    '</svg>';
+}
+
+/* ------------------------------------------------------------- calc */
+function calc(){
+  var d=DONE[st.done],M=SIZES[st.size].g,Te=STARTS[st.start].t;
+  var Tw=100-st.alt*0.0033;
+  var Ty=Math.min(d.T,Tw-2);
+  var min=0.451*Math.pow(M,2/3)*Math.log(0.76*(Te-Tw)/(Ty-Tw));
+  var sec=Math.max(60,Math.round(min*60/5)*5);
+  return {sec:sec,Ty:d.T,Tw:Tw,M:M};
+}
+function fmt(s){s=Math.max(0,Math.ceil(s));var m=Math.floor(s/60),r=s%60;return (m<10?'0':'')+m+':'+(r<10?'0':'')+r}
+
+/* ------------------------------------------------------------- build controls */
+function seg(host,items,get,on,label){
+  host.innerHTML='';
+  items.forEach(function(it,i){
+    var b=document.createElement('button');
+    b.type='button';b.innerHTML=label(it);b.addEventListener('click',function(){on(i)});host.appendChild(b);
+  });
+  $$('button',host).forEach(function(b,i){b.classList.toggle('on',i===get())});
+}
+function renderControls(){
+  seg($('#segDone'),DONE,function(){return st.done},function(i){st.done=i;update(true)},function(d){return '<span class="e">'+d.emo+'</span>'+d.name+'<small>'+d.sub+'</small>'});
+  seg($('#segSize'),SIZES,function(){return st.size},function(i){st.size=i;update()},function(s){return s.n+'<small>'+s.s+'</small>'});
+  seg($('#segStart'),STARTS,function(){return st.start},function(i){st.start=i;update()},function(s){return '<span class="e">'+s.e+'</span>'+s.n+'<small>'+s.t+'°C</small>'});
+  $$('#csGrid .cs').forEach(function(c,i){c.classList.toggle('on',i===st.done)});
+}
+function renderYolk(){
+  var g=$('#csGrid');g.innerHTML='';
+  DONE.forEach(function(d,i){
+    var c=document.createElement('div');c.className='cs';c.tabIndex=0;
+    c.innerHTML=cross(d.T,'k'+i)+'<b>'+d.name+'</b><small>'+d.T+'°C · '+d.desc.split('.')[0]+'</small>';
+    function pick(){st.done=i;update(true);toast(d.name+': '+d.desc);$('#lab').scrollIntoView({behavior:'smooth',block:'start'})}
+    c.addEventListener('click',pick);c.addEventListener('keydown',function(e){if(e.key==='Enter')pick()});
+    g.appendChild(c);
+  });
+}
+
+/* ------------------------------------------------------------- timer */
+var T={phase:'idle',end:0,total:0,left:0,running:false,quipAt:0};
+var iv=null;
+function mood(){
+  if(T.phase==='boil')return 'sweat';
+  if(T.phase==='done'||T.phase==='ice')return 'cool';
+  if(T.phase==='fin')return 'wink';
+  return DONE[st.done].mood;
+}
+function setMemeText(){
+  var d=DONE[st.done];
+  if(T.phase==='boil'){$('#mTop').textContent='ΜΗΝ ΠΑΝΙΚΟΒΑΛΛΕΣΑΙ';$('#mBot').textContent='ΑΠΛΑ ΜΑΓΕΙΡΕΥΩ';}
+  else if(T.phase==='done'){$('#mTop').textContent='ΤΕΛΟΣ ΧΡΟΝΟΥ!';$('#mBot').textContent='ΒΓΑΛΤΟ ΠΡΙΝ ΓΙΝΕΙ ΤΟΥΒΛΟ';}
+  else if(T.phase==='ice'){$('#mTop').textContent='ΠΑΓΟΛΟΥΤΡΟ';$('#mBot').textContent='ΧΑΛΑΡΩΣΕ ΦΙΛΕ ΜΟΥ';}
+  else if(T.phase==='fin'){$('#mTop').textContent='ΤΕΛΕΙΟ ΑΥΓΟ';$('#mBot').textContent='ΑΧΙΕΒΜΕΝΤ ΑΝΛΟΚΤ';}
+  else {$('#mTop').textContent=d.top;$('#mBot').textContent=d.bot;}
+}
+function quip(kind){var a=QUIPS[kind];$('#quip').textContent=a[Math.floor(Math.random()*a.length)]}
+function update(fromPick){
+  var r=calc();
+  $('#rT').textContent=r.Ty+'°C';$('#rW').textContent=r.Tw.toFixed(1).replace('.0','')+'°C';$('#rM').textContent=r.M+' g';
+  var a=st.alt;
+  $('#altV').textContent=a;
+  $('#altN').textContent=a<150?'Αθήνα, παραλία: το νερό βράζει στους '+r.Tw.toFixed(0)+'°C.':a<900?'Λίγο ψηλότερα: το νερό βράζει στους '+r.Tw.toFixed(1)+'°C.':'Ψηλά βουνά: το νερό βράζει στους '+r.Tw.toFixed(1)+'°C, οπότε θέλει περισσότερο.';
+  renderControls();
+  if(T.phase==='idle'||T.phase==='fin'){
+    if(T.phase==='fin')T.phase='idle';
+    T.total=r.sec;T.left=r.sec;
+    $('#clock').textContent=fmt(r.sec);$('#barI').style.width='0%';
+    $('#go').textContent='Ρίξε το αυγό';$('#go').className='big';
+    $('#phase').textContent='Έτοιμο για δράση';
+    $('#meme').className='memebox';
+    quip('idle');
+  }
+  setEgg($('#mainEgg'),'m',mood());setMemeText();
+  if(fromPick){}
+}
+function beep(n){
+  try{
+    var C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+    var ctx=beep.ctx||(beep.ctx=new C());if(ctx.state==='suspended')ctx.resume();
+    for(var i=0;i<(n||4);i++){
+      var o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+i*0.22;
+      o.type='square';o.frequency.value=i%2?880:1175;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.18,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.18);
+      o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+.2);
+    }
+  }catch(e){}
+  try{navigator.vibrate&&navigator.vibrate([200,100,200,100,400])}catch(e){}
+}
+function start(kind,sec){
+  T.phase=kind;T.total=sec;T.left=sec;T.end=Date.now()+sec*1000;T.running=true;
+  clearInterval(iv);iv=setInterval(tick,200);tick();
+  var m=$('#meme');m.className='memebox '+(kind==='boil'?'boil hot':kind==='ice'?'boil':'');
+  if(kind==='ice'){m.className='memebox'}
+  $('#phase').textContent=kind==='boil'?'Βράζει! Μην το αγγίξεις':'Παγόλουτρο σε εξέλιξη';
+  $('#go').textContent='Παύση';$('#go').className='big alt';
+  setEgg($('#mainEgg'),'m',mood());setMemeText();quip(kind);
+}
+function tick(){
+  if(!T.running)return;
+  T.left=(T.end-Date.now())/1000;
+  var shown=fmt(T.left);
+  var clk=$('#clock');clk.textContent=shown;clk.classList.toggle('warn',T.left<=10&&T.phase==='boil');
+  $('#barI').style.width=Math.min(100,(1-T.left/T.total)*100)+'%';
+  document.title=(T.phase==='boil'||T.phase==='ice'?shown+' · ':'')+'Το Τέλειο Αυγό';
+  if(Date.now()>T.quipAt&&T.phase!=='done'){T.quipAt=Date.now()+9000;quip(T.phase)}
+  if(T.left<=0){
+    T.running=false;clearInterval(iv);
+    if(T.phase==='boil')finishBoil();else finishIce();
+  }
+}
+function finishBoil(){
+  T.phase='done';beep(6);quip('done');
+  var m=$('#meme');m.className='memebox done';m.classList.add('shake');setTimeout(function(){m.classList.remove('shake')},700);
+  $('#phase').textContent='ΒΓΑΛΤΟ ΤΩΡΑ!';$('#clock').textContent='00:00';$('#clock').classList.remove('warn');
+  $('#go').textContent='Παγόλουτρο 5:00';$('#go').className='big ice';
+  setEgg($('#mainEgg'),'m','cool');setMemeText();confetti(['🥚','🔥','⏰','✨'],34);toast('Τέλος χρόνου! Στο παγόλουτρο, γρήγορα!');
+  document.title='ΤΕΛΟΣ! · Το Τέλειο Αυγό';
+}
+function finishIce(){
+  T.phase='fin';beep(3);quip('fin');
+  $('#meme').className='memebox done';$('#phase').textContent='Τέλειο αυγό ✔';$('#clock').textContent='🥚';
+  $('#go').textContent='Άλλο ένα αυγό';$('#go').className='big';
+  setEgg($('#mainEgg'),'m','wink');setMemeText();confetti(['🥚','🎉','🏆','🍳','⭐'],60);toast('Έτοιμο. Έφτιαξες το τέλειο αυγό!');
+  try{var n=(+localStorage.getItem('egg.count')||0)+1;localStorage.setItem('egg.count',n);$('#clicks').textContent='Τέλεια αυγά που έφτιαξες εδώ: '+n}catch(e){}
+  document.title='Το Τέλειο Αυγό';
+}
+$('#go').addEventListener('click',function(){
+  try{beep.ctx||(beep.ctx=new (window.AudioContext||window.webkitAudioContext)())}catch(e){}
+  if(T.phase==='idle'||T.phase==='fin'){
+    if(T.phase==='fin')T.phase='idle';
+    var r=calc();start('boil',r.sec);
+  } else if(T.phase==='boil'||T.phase==='ice'){
+    if(T.running){T.running=false;clearInterval(iv);T.left=(T.end-Date.now())/1000;$('#go').textContent='Συνέχεια';$('#phase').textContent='Σε παύση';$('#meme').classList.remove('boil')}
+    else{T.end=Date.now()+T.left*1000;T.running=true;iv=setInterval(tick,200);$('#go').textContent='Παύση';$('#phase').textContent=T.phase==='boil'?'Βράζει! Μην το αγγίξεις':'Παγόλουτρο σε εξέλιξη';if(T.phase==='boil')$('#meme').classList.add('boil')}
+  } else if(T.phase==='done'){
+    start('ice',300);
+  }
+});
+$('#rst').addEventListener('click',function(){clearInterval(iv);T.running=false;T.phase='idle';document.title='Το Τέλειο Αυγό';update()});
+
+/* bubbles */
+(function(){
+  var h='';for(var i=0;i<14;i++){var s=6+Math.random()*10;h+='<span class="bub" style="left:'+(16+Math.random()*68)+'%;bottom:'+(66+Math.random()*10)+'px;width:'+s+'px;height:'+s+'px;--d:'+(1.4+Math.random()*1.8)+'s;animation-delay:'+(-Math.random()*3)+'s"></span>'}
+  $('#bubs').innerHTML=h;
+})();
+
+/* ------------------------------------------------------------- guide */
+var GUIDE=[
+ {k:'boil',n:'Βραστό',lvl:'🥚',chips:['⏱ 6–15 λεπτά','🔥 Εύκολο','🧊 Θέλει παγόλουτρο'],
+  steps:['<b>Βγάλε τα αυγά.</b> Από το ψυγείο ή 20 λεπτά πριν: το εργαστήριο παραπάνω ξέρει τη διαφορά.','<b>Βράσε άφθονο νερό</b> σε κατσαρόλα που να τα καλύπτει κατά 2–3 εκ. Έτοιμο όταν κάνει μεγάλες φουσκάλες.','<b>Κατέβασέ τα με κουτάλι</b>, ένα ένα, απαλά. Όχι με ρίξιμο. Το κέλυφος δεν συγχωρεί.','<b>Ρύθμισε σε ζωηρό σιγοβράσιμο</b> και πάτα «Ρίξε το αυγό» στο εργαστήριο.','<b>Έτοιμος ο χρόνος;</b> Βγάλ’ τα αμέσως με τρυπητό κουτάλι. Μην τα αφήσεις να «ξεκουραστούν» στο καυτό νερό.','<b>Παγόλουτρο 5 λεπτά</b> με πολλά παγάκια. Σταματά το μαγείρεμα και μαζεύει το πράσινο δαχτυλίδι.','<b>Σπάσε στο φαρδύ άκρο</b> (εκεί είναι ο αεροθάλαμος), και ξεφλούδισε κάτω από τρεχούμενο νερό.'],
+  tips:['Αυγά 7–10 ημερών ξεφλουδίζουν πιο εύκολα από τα πολύ φρέσκα.','Ένα κουταλάκι σόδα στο νερό ανεβάζει το pH και βοηθά στο ξεφλούδισμα.','Αν ραγίσει ένα αυγό, ρίξε λίγο ξίδι ή αλάτι: το ασπράδι δένει πιο γρήγορα και δεν φεύγει.','Τα βραστά αυγά αντέχουν στο ψυγείο μέχρι 7 μέρες, με το κέλυφος.'],
+  meme:'Ο ΧΡΟΝΟΣ ΕΙΝΑΙ ΧΡΗΜΑ.<br>ΤΟ ΝΕΡΟ ΕΙΝΑΙ ΘΕΡΜΟΚΡΑΣΙΑ.'},
+ {k:'fry',n:'Μάτι',lvl:'🥚🥚',chips:['⏱ 3–4 λεπτά','🔥 Μέτρια φωτιά','🍞 Θέλει ψωμί'],
+  steps:['<b>Αντικολλητικό τηγάνι</b> σε <b>μέτρια</b> φωτιά με λίγο βούτυρο ή λάδι. Όχι στα κόκκινα: ασπράδι τηγανίτα με δαντέλα δεν είναι στόχος.','<b>Σπάσε το αυγό σε μπολάκι</b> πρώτα, ώστε να μη χαλάσεις τον κρόκο και να βγάλεις κομματάκια κελύφους.','<b>Γλίστρα το αυγό</b> στο τηγάνι από κοντά. Άφησέ το ήσυχο.','<b>Σκέπασε με καπάκι για 1 λεπτό</b> ή ρίξε μια κουταλιά νερό δίπλα και κλείσε: ατμός για δεμένο ασπράδι και μελάτο κρόκο.','<b>Αλάτισε στο τέλος.</b> Το αλάτι πάνω στον κρόκο αφήνει λευκές κηλίδες.','<b>Βγάλε με σπάτουλα</b> όταν το ασπράδι έχει δέσει και ο κρόκος κουνιέται ακόμα.'],
+  tips:['Κλασικό μάτι: 2–3 λεπτά. Αναποδογυρισμένο (over easy): γύρνα το για 10 δευτερόλεπτα.','Για τραγανή άκρη ανέβασε ελαφρά τη φωτιά με περισσότερο λάδι.','Φρέσκα αυγά κρατούν το ασπράδι μαζεμένο, παλιά απλώνουν.'],
+  meme:'ΜΕΤΡΙΑ ΦΩΤΙΑ.<br>ΜΕΓΑΛΗ ΥΠΟΜΟΝΗ.'},
+ {k:'scr',n:'Scrambled',lvl:'🥚🥚',chips:['⏱ 4–6 λεπτά','🔥 Χαμηλή φωτιά','🧈 Βούτυρο'],
+  steps:['<b>Σπάσε 2–3 αυγά ανά άτομο</b> σε μπολ. Χτύπα με πιρούνι μέχρι να ενωθούν ασπράδι και κρόκος.','<b>Αλάτι</b> είτε αμέσως είτε 15 λεπτά πριν. Το αλάτι μαλακώνει τις πρωτεΐνες και βγαίνει πιο τρυφερό.','<b>Βούτυρο σε αντικολλητικό</b>, χαμηλή φωτιά. Αν σιγοτσιτσιρίζει δυνατά, είναι πολύ ζεστό.','<b>Ρίξε τα αυγά και ανακάτευε αργά</b> με σπάτουλα, ξύνοντας τον πάτο, να σχηματιστούν μεγάλα κρεμώδη κομμάτια.','<b>Κατέβασε από τη φωτιά ΠΡΙΝ φανούν έτοιμα.</b> Θα συνεχίσουν να στεγνώνουν από τη ζέστη του τηγανιού.','<b>Τελείωμα:</b> μια κουταλιά κρέμα γάλακτος ή ένα κομμάτι βούτυρο, φρεσκοτριμμένο πιπέρι.'],
+  tips:['Αν δεις υγρό να ξεχωρίζει στο πιάτο, τα έψησες παραπάνω.','Γαλλικό στιλ: ακόμα πιο χαμηλά και συνεχές ανακάτεμα, σαν κρέμα.','Ζεστό πιάτο = ζεστά αυγά για περισσότερο.'],
+  meme:'ΑΝΑΚΑΤΕΨΕΣ;<br>ΑΝΑΚΑΤΕΨΕ ΑΚΟΜΑ.'},
+ {k:'poach',n:'Ποσέ',lvl:'🥚🥚🥚',chips:['⏱ 3 λεπτά','🌊 Σιγοβράσιμο','😰 Δύσκολο'],
+  steps:['<b>Πάρε τα πιο φρέσκα αυγά.</b> Εδώ η φρεσκάδα έχει σημασία, τα παλιά απλώνουν.','<b>Νερό 8–10 εκ. βάθος</b> να σιγοβράζει με μικρές φουσκάλες στον πάτο, γύρω στους 80–85°C. Όχι δυνατό βράσιμο.','<b>Σουρωτήρι:</b> σπάσε το αυγό σε μικρό σουρωτήρι ώστε να φύγει το υδαρές ασπράδι και να μη «φουντώσει».','<b>Δίνη (προαιρετικά):</b> ανακίνησε το νερό με κουτάλι και ρίξε το αυγό στο κέντρο.','<b>3 λεπτά</b> για μελάτο κρόκο. Μην ακουμπάς.','<b>Βγάλε με τρυπητή κουτάλα</b>, στέγνωσε στο χαρτί κουζίνας και αλάτισε.'],
+  tips:['Λίγο ξίδι (1 κ.σ. ανά λίτρο) βοηθά το ασπράδι να δέσει, αλλά δεν είναι απαραίτητο.','Μπορείς να τα κάνεις ποσέ από πριν: βάλ’ τα σε κρύο νερό και ξαναζέστανέ τα 30 δευτερόλεπτα.','Ιδανικά πάνω σε τοστ με αβοκάντο ή σπανάκι.'],
+  meme:'ΣΙΓΑ ΤΟ ΝΕΡΟ.<br>ΣΙΓΑ ΤΑ ΝΕΥΡΑ.'},
+ {k:'omel',n:'Ομελέτα',lvl:'🥚🥚🥚',chips:['⏱ 3 λεπτά','🔥 Μέτρια','🧀 Γέμιση'],
+  steps:['<b>Χτύπα 3 αυγά</b> με μια πρέζα αλάτι και λίγο πιπέρι. Χωρίς γάλα: δεν χρειάζεται.','<b>Ζέστανε αντικολλητικό 24 εκ.</b> σε μέτρια φωτιά με βούτυρο. Όταν αφρίσει και ησυχάσει, είσαι έτοιμος.','<b>Ρίξε τα αυγά</b> και ανακίνησε το τηγάνι ενώ τραβάς τις άκρες προς το κέντρο με σπάτουλα.','<b>Όταν το πάνω μέρος είναι ακόμα λίγο υγρό</b>, βάλε τη γέμιση στη μια πλευρά (τυρί, ζαμπόν, μανιτάρια).','<b>Δίπλωσε στη μέση</b> και γύρνα το στο πιάτο. Η ζέστη θα ολοκληρώσει τη δουλειά.'],
+  tips:['Η γέμιση να είναι ήδη μαγειρεμένη και ζεστή.','Αν σκίσει, πες ότι ήταν «ρουστίκ».','Φρέσκα μυρωδικά στο τέλος, όχι στο τηγάνι.'],
+  meme:'ΕΙΝΑΙ ΟΜΕΛΕΤΑ.<br>ΑΝ ΣΚΙΣΕΙ, ΕΙΝΑΙ SCRAMBLED.'}
+];
+function renderGuide(i){
+  var g=GUIDE[i];
+  $$('#tabs button').forEach(function(b,k){b.classList.toggle('on',k===i)});
+  $('#recipe').innerHTML=
+    '<div><div class="chips">'+g.chips.map(function(c){return '<span class="chip">'+c+'</span>'}).join('')+'<span class="chip">Δυσκολία '+g.lvl+'</span></div><ol class="steps">'+g.steps.map(function(s){return '<li>'+s+'</li>'}).join('')+'</ol></div>'+
+    '<div><div class="tipbox"><h4>Μυστικά του σεφ</h4><ul>'+g.tips.map(function(s){return '<li>'+s+'</li>'}).join('')+'</ul></div><div class="rmeme">'+g.meme+'</div></div>';
+}
+(function(){
+  var t=$('#tabs');
+  GUIDE.forEach(function(g,i){var b=document.createElement('button');b.type='button';b.textContent=g.n;b.addEventListener('click',function(){renderGuide(i)});t.appendChild(b)});
+  renderGuide(0);
+})();
+
+/* ------------------------------------------------------------- myths */
+var MYTHS=[
+ {q:'Το αλάτι στο νερό κάνει το αυγό να ξεφλουδίζει εύκολα',v:'m',a:'ΜΥΘΟΣ',t:'Δεν αλλάζει το ξεφλούδισμα. Βοηθά μόνο όταν ραγίσει το κέλυφος, γιατί δένει το ασπράδι που τρέχει.'},
+ {q:'Το πράσινο δαχτυλίδι γύρω από τον κρόκο είναι επικίνδυνο',v:'m',a:'ΜΥΘΟΣ',t:'Είναι αβλαβές θειούχος σίδηρος, σημάδι ότι το αυγό έβρασε παραπάνω ή δεν ψύχθηκε. Μόνο λίγο λιγότερο νόστιμο.'},
+ {q:'Το παγόλουτρο μετά το βράσιμο βοηθά',v:'t',a:'ΑΛΗΘΕΙΑ',t:'Σταματά το μαγείρεμα από τη θερμότητα που έχει μείνει, περιορίζει το πράσινο δαχτυλίδι και μαζεύει το ασπράδι από το κέλυφος.'},
+ {q:'Τα πιο φρέσκα αυγά είναι τα καλύτερα για βράσιμο',v:'m',a:'ΜΥΘΟΣ',t:'Για βράσιμο τα πολύ φρέσκα κολλούν στο κέλυφος. Για ποσέ και μάτι όμως είναι ιδανικά.'},
+ {q:'Λίγη σόδα στο νερό βοηθά να ξεφλουδίζουν',v:'t',a:'ΑΛΗΘΕΙΑ',t:'Το πιο αλκαλικό νερό χαλαρώνει τη μεμβράνη του κελύφους. Δουλεύει καλύτερα στα φρέσκα αυγά. Μισό κουταλάκι αρκεί.'},
+ {q:'Τρυπάς το αυγό για να μη σπάσει',v:'h',a:'ΜΕΡΙΚΩΣ',t:'Μια μικρή τρύπα στο φαρδύ άκρο αφήνει τον αέρα να βγει και σπάει λιγότερο. Όμως η ρωγμή συνήθως προκαλείται από το απότομο ρίξιμο στο νερό.'},
+ {q:'Τα καφέ αυγά είναι πιο υγιεινά από τα λευκά',v:'m',a:'ΜΥΘΟΣ',t:'Το χρώμα του κελύφους εξαρτάται μόνο από τη φυλή της κότας. Η διατροφική αξία εξαρτάται από τη διατροφή της, όχι από το χρώμα.'},
+ {q:'Αν το αυγό επιπλέει, είναι χαλασμένο',v:'h',a:'ΜΕΡΙΚΩΣ',t:'Επιπλέει επειδή είναι παλιό και ο αεροθάλαμος μεγάλος. Σπάσ’ το σε ξεχωριστό μπολ και μύρισέ το: αν μυρίζει, πέταξέ το.'}
+];
+(function(){
+  var h=$('#myths');
+  MYTHS.forEach(function(m){
+    var d=document.createElement('div');d.className='myth '+m.v;d.tabIndex=0;
+    d.innerHTML='<div class="in"><div class="f"><div>«'+m.q+'»<small>πάτα για την αλήθεια</small></div></div><div class="b"><b>'+m.a+'</b>'+m.t+'</div></div>';
+    function flip(){d.classList.toggle('flip')}
+    d.addEventListener('click',flip);d.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}});
+    h.appendChild(d);
+  });
+})();
+
+/* ------------------------------------------------------------- float test */
+var FRESH=[
+ {n:'Ξαπλωμένο στον πάτο',y:196,rot:90,b:'ΦΡΕΣΚΟ',t:'Ο αεροθάλαμος είναι μικρός: αυγό λίγων ημερών. Τέλειο για μάτι, ποσέ και ομελέτα. Για βράσιμο ίσως δυσκολέψει το ξεφλούδισμα.'},
+ {n:'Όρθιο στον πάτο',y:178,rot:0,b:'ΙΔΑΝΙΚΟ ΓΙΑ ΒΡΑΣΙΜΟ',t:'Κάποιων εβδομάδων: ο αεροθάλαμος μεγάλωσε. Εξαιρετικό για βραστό, γιατί ξεφλουδίζει πιο εύκολα.'},
+ {n:'Επιπλέει',y:8,rot:0,b:'ΠΑΛΙΟ',t:'Μεγάλος αεροθάλαμος: πολύ παλιό αυγό. Σπάσ’ το σε ξεχωριστό μπολ και μύρισέ το πριν το χρησιμοποιήσεις. Αν μυρίζει, πέταξέ το.'}
+];
+(function(){
+  var h=$('#segFresh');
+  FRESH.forEach(function(f,i){
+    var b=document.createElement('button');b.type='button';b.textContent=f.n;
+    b.addEventListener('click',function(){
+      $$('#segFresh button').forEach(function(x,k){x.classList.toggle('on',k===i)});
+      var e=$('#fEgg');e.style.top=f.y+'px';e.style.transform='translateX(-50%) rotate('+f.rot+'deg)';
+      $('#fV').innerHTML='<b>'+f.b+'</b>'+f.t;
+    });
+    h.appendChild(b);
+  });
+  setEgg($('#fEgg'),'f','idle');
+})();
+
+/* ------------------------------------------------------------- fun */
+function toast(t){var e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove('on')},3600)}
+function confetti(list,n){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  for(var i=0;i<n;i++){
+    var s=document.createElement('div');s.className='fx';s.textContent=list[i%list.length];
+    var x=Math.random()*innerWidth,y=-40,vx=(Math.random()-.5)*5,vy=2+Math.random()*4,r=0,vr=(Math.random()-.5)*14,sz=18+Math.random()*28;
+    s.style.fontSize=sz+'px';document.body.appendChild(s);
+    (function(s,x,y,vx,vy,r,vr){
+      function f(){y+=vy;vy+=.12;x+=vx;r+=vr;s.style.transform='translate('+x+'px,'+y+'px) rotate('+r+'deg)';
+        if(y<innerHeight+60)requestAnimationFrame(f);else s.remove()}
+      setTimeout(f,Math.random()*500);
+    })(s,x,y,vx,vy,r,vr);
+  }
+}
+/* hero egg */
+var clicks=0,msgs=['Πάτα το αυγό. Εντάξει, πάτα το πέντε φορές.','Ένα! Το αυγό σε ξέρει.','Δύο! Τσαντίστηκε λίγο.','Τρία! Μην το σπάσεις.','Τέσσερα! Ένα ακόμα.','ΕΠΙΤΕΛΟΥΣ! Βρήκες το easter egg στο egg.'];
+setEgg($('#heroEgg'),'h','idle');
+$('#heroEgg').addEventListener('click',function(){
+  clicks++;var e=$('#heroEgg');
+  if(clicks<5){$('#clicks').textContent=msgs[clicks];setEgg(e,'h',clicks>2?'sweat':'idle')}
+  else{clicks=0;$('#clicks').textContent=msgs[5];setEgg(e,'h','cool');confetti(['🥚','🍳','🐣','🥚','✨','🎉'],90);toast('Egg-celent! 🥚');setTimeout(function(){setEgg(e,'h','idle')},3500)}
+});
+/* typed easter egg */
+var typed='';
+document.addEventListener('keydown',function(e){
+  if(e.target&&/input|textarea/i.test(e.target.tagName))return;
+  typed=(typed+e.key.toLowerCase()).slice(-6);
+  if(/egg$|αυγο$|αυγό$/.test(typed)){typed='';confetti(['🥚','🥚','🐣','🍳'],110);toast('Ο ΚΡΟΚΟΣ ΣΕ ΛΑΤΡΕΥΕΙ');document.body.classList.add('shake');setTimeout(function(){document.body.classList.remove('shake')},700)}
+});
+/* ticker */
+(function(){
+  var h=['ΕΚΤΑΚΤΟ: ΑΥΓΟ ΒΡΕΘΗΚΕ ΣΕ ΚΑΤΣΑΡΟΛΑ','Ο ΚΡΟΚΟΣ ΖΗΤΑ ΣΥΓΝΩΜΗ','ΕΡΕΥΝΑ: 9 ΣΤΑ 10 ΑΥΓΑ ΘΕΛΟΥΝ ΤΟΥΣ ΧΡΟΝΟΥΣ ΤΟΥΣ','ΤΟ ΠΑΓΟΛΟΥΤΡΟ ΔΕΝ ΕΙΝΑΙ ΠΡΟΑΙΡΕΤΙΚΟ','ΜΗΝ ΤΟΥ ΛΕΣ ΤΟΥ ΑΥΓΟΥ ΟΤΙ ΕΙΝΑΙ ΜΟΝΟ ΑΥΓΟ','ΠΡΩΤΑ ΤΟ ΑΥΓΟ: ΜΥΘΟΣ. ΔΕΝ ΞΕΡΕΙ ΚΑΝΕΙΣ.','ΜΕΛΑΤΟ ΕΙΝΑΙ ΤΡΟΠΟΣ ΖΩΗΣ'];
+  var s=h.map(function(x){return '<span>'+x+' ✦</span>'}).join('');$('#tick').innerHTML=s+s;
+})();
+/* reveal on scroll */
+if('IntersectionObserver' in window){
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.08});
+  $$('.reveal').forEach(function(r){io.observe(r)});
+}else{$$('.reveal').forEach(function(r){r.classList.add('in')})}
+/* counter */
+try{var c=+localStorage.getItem('egg.count')||0;if(c)$('#clicks').textContent='Τέλεια αυγά που έφτιαξες εδώ: '+c}catch(e){}
+
+$('#alt').addEventListener('input',function(){st.alt=+this.value;update()});
+renderYolk();update();
+})();
+</script>
+</body>
+</html>

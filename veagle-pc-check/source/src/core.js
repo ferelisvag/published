@@ -197,7 +197,7 @@ function Engine(RAW) {
 
   var META = {
     'stab-shutdown': [10, 'Easy', 'Safe'], 'stab-bsod': [20, 'Medium', 'Safe'], 'stab-bsod-codes': [5, 'Easy', 'Safe'], 'stab-whea': [30, 'Ask a pro', 'Careful'], 'stab-gpu': [10, 'Easy', 'Safe'],
-    'stab-disk': [20, 'Medium', 'Back up first'], 'stab-dism': [60, 'Medium', 'Safe'], 'stab-crashes': [10, 'Easy', 'Safe'], 'stab-services': [10, 'Easy', 'Safe'], 'stab-ports': [15, 'Ask a pro', 'Safe'],
+    'stab-disk': [20, 'Medium', 'Back up first'], 'stab-dism': [60, 'Medium', 'Safe'], 'stab-crashes': [10, 'Easy', 'Safe'], 'stab-crashes-gone': [2, 'Easy', 'Safe'], 'stab-services': [10, 'Easy', 'Safe'], 'stab-ports': [15, 'Ask a pro', 'Safe'],
     'stab-hangs': [5, 'Easy', 'Safe'], 'stab-search': [10, 'Easy', 'Safe'], 'stab-vss': [5, 'Medium', 'Safe'], 'stab-wu': [10, 'Easy', 'Safe'], 'stab-pending': [2, 'Easy', 'Safe'], 'stab-uptime': [2, 'Easy', 'Safe'], 'stab-index': [10, 'Easy', 'Safe'],
     'sto-health': [5, 'Ask a pro', 'Back up first'], 'sto-smart': [5, 'Ask a pro', 'Back up first'], 'sto-space': [15, 'Easy', 'Safe'], 'sto-trim': [5, 'Medium', 'Safe'], 'sto-hdd': [60, 'Medium', 'Back up first'], 'sto-temp': [10, 'Easy', 'Safe'],
     'sec-av': [10, 'Easy', 'Safe'], 'sec-av2': [15, 'Medium', 'Safe'], 'sec-avold': [5, 'Easy', 'Safe'], 'sec-fw': [2, 'Easy', 'Safe'], 'sec-uac': [2, 'Easy', 'Safe'], 'sec-sb': [15, 'Ask a pro', 'Careful'], 'sec-tpm': [15, 'Ask a pro', 'Careful'], 'sec-tpm2': [5, 'Medium', 'Safe'],
@@ -328,6 +328,15 @@ function Engine(RAW) {
     R(function () {
       var top = crashApps[0];
       if (!top || num(top.count) < 5) return null;
+      var stem = String(top.app).replace(/\.exe$/i, '').replace(/(service|svc|helper|updater|launcher)$/i, '').toLowerCase();
+      var stillThere = stem.length >= 4 ? appsMatching(new RegExp(stem.replace(/[^a-z0-9]/g, '.?').slice(0, 14), 'i')).length > 0 : true;
+      var gone = top.exists === false || (top.exists == null && !stillThere && arr(D.apps && D.apps.list).length > 20);
+      if (gone) {
+        return F('stab-crashes-gone', 'Stability', 'info', top.app + ' crashed ' + top.count + ' times in ' + days + ' days, but it is no longer installed',
+          'Windows remembers errors for 30 days. This program is not on your PC any more (you probably removed it), so there is nothing to fix. The old entries disappear by themselves.',
+          [S('Nothing to do. If you removed it on purpose, you are done.'), S('If something odd still happens, look at the finding about services that are not running: leftovers of removed programs are the usual cause.')],
+          crashApps.slice(0, 6).map(function (c) { return c.app + ' x' + c.count + (c.exists === false ? ' (file not found)' : ''); }).join(', '));
+      }
       var isEmu = RE.emulator.test(top.app);
       crashEmitted = isEmu;
       var total = sum(crashApps, function (c) { return c.count; });

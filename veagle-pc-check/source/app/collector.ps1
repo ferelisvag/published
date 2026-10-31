@@ -551,15 +551,21 @@ foreach ($pair in @(@('System', $sysEv), @('Application', $appEv))) {
 }
 
 $crashApps = @{}
+$crashPaths = @{}
 foreach ($e in $appEv) {
     if ($e.ProviderName -eq 'Application Error' -and $e.Id -eq 1000) {
         $n = ''
         try { $n = [string]$e.Properties[0].Value } catch { }
         if (-not $n -and $e.Message -match 'Faulting application name:\s*([^,\r\n]+)') { $n = $Matches[1].Trim() }
-        if ($n) { $crashApps[$n] = 1 + [int]$crashApps[$n] }
+        if ($n) {
+            $crashApps[$n] = 1 + [int]$crashApps[$n]
+            if (-not $crashPaths.ContainsKey($n)) { $pp = ''; try { $pp = [string]$e.Properties[10].Value } catch { }; $crashPaths[$n] = $pp }
+        }
     }
 }
-$crashList = @($crashApps.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 12 | ForEach-Object { [pscustomobject]@{ app = [string]$_.Key; count = [int]$_.Value } })
+$crashList = @($crashApps.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 12 | ForEach-Object { $k = [string]$_.Key; $pth = [string]$crashPaths[$k]; $ex = $null
+    if ($pth -and $pth -match '^[A-Za-z]:\\') { $ex = [bool](Test-Path -LiteralPath $pth -ErrorAction SilentlyContinue) }
+    [pscustomobject]@{ app = $k; count = [int]$_.Value; path = $pth; exists = $ex } })
 $hangCount = @($appEv | Where-Object { $_.ProviderName -eq 'Application Hang' }).Count
 
 $events = [ordered]@{

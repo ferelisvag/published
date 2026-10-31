@@ -618,7 +618,7 @@ function Engine(RAW) {
 
   var META = {
     'stab-shutdown': [10, 'Easy', 'Safe'], 'stab-bsod': [20, 'Medium', 'Safe'], 'stab-bsod-codes': [5, 'Easy', 'Safe'], 'stab-whea': [30, 'Ask a pro', 'Careful'], 'stab-gpu': [10, 'Easy', 'Safe'],
-    'stab-disk': [20, 'Medium', 'Back up first'], 'stab-dism': [60, 'Medium', 'Safe'], 'stab-crashes': [10, 'Easy', 'Safe'], 'stab-services': [10, 'Easy', 'Safe'], 'stab-ports': [15, 'Ask a pro', 'Safe'],
+    'stab-disk': [20, 'Medium', 'Back up first'], 'stab-dism': [60, 'Medium', 'Safe'], 'stab-crashes': [10, 'Easy', 'Safe'], 'stab-crashes-gone': [2, 'Easy', 'Safe'], 'stab-services': [10, 'Easy', 'Safe'], 'stab-ports': [15, 'Ask a pro', 'Safe'],
     'stab-hangs': [5, 'Easy', 'Safe'], 'stab-search': [10, 'Easy', 'Safe'], 'stab-vss': [5, 'Medium', 'Safe'], 'stab-wu': [10, 'Easy', 'Safe'], 'stab-pending': [2, 'Easy', 'Safe'], 'stab-uptime': [2, 'Easy', 'Safe'], 'stab-index': [10, 'Easy', 'Safe'],
     'sto-health': [5, 'Ask a pro', 'Back up first'], 'sto-smart': [5, 'Ask a pro', 'Back up first'], 'sto-space': [15, 'Easy', 'Safe'], 'sto-trim': [5, 'Medium', 'Safe'], 'sto-hdd': [60, 'Medium', 'Back up first'], 'sto-temp': [10, 'Easy', 'Safe'],
     'sec-av': [10, 'Easy', 'Safe'], 'sec-av2': [15, 'Medium', 'Safe'], 'sec-avold': [5, 'Easy', 'Safe'], 'sec-fw': [2, 'Easy', 'Safe'], 'sec-uac': [2, 'Easy', 'Safe'], 'sec-sb': [15, 'Ask a pro', 'Careful'], 'sec-tpm': [15, 'Ask a pro', 'Careful'], 'sec-tpm2': [5, 'Medium', 'Safe'],
@@ -749,6 +749,15 @@ function Engine(RAW) {
     R(function () {
       var top = crashApps[0];
       if (!top || num(top.count) < 5) return null;
+      var stem = String(top.app).replace(/\.exe$/i, '').replace(/(service|svc|helper|updater|launcher)$/i, '').toLowerCase();
+      var stillThere = stem.length >= 4 ? appsMatching(new RegExp(stem.replace(/[^a-z0-9]/g, '.?').slice(0, 14), 'i')).length > 0 : true;
+      var gone = top.exists === false || (top.exists == null && !stillThere && arr(D.apps && D.apps.list).length > 20);
+      if (gone) {
+        return F('stab-crashes-gone', 'Stability', 'info', top.app + ' crashed ' + top.count + ' times in ' + days + ' days, but it is no longer installed',
+          'Windows remembers errors for 30 days. This program is not on your PC any more (you probably removed it), so there is nothing to fix. The old entries disappear by themselves.',
+          [S('Nothing to do. If you removed it on purpose, you are done.'), S('If something odd still happens, look at the finding about services that are not running: leftovers of removed programs are the usual cause.')],
+          crashApps.slice(0, 6).map(function (c) { return c.app + ' x' + c.count + (c.exists === false ? ' (file not found)' : ''); }).join(', '));
+      }
       var isEmu = RE.emulator.test(top.app);
       crashEmitted = isEmu;
       var total = sum(crashApps, function (c) { return c.count; });
@@ -1622,6 +1631,7 @@ var I18N = (function (V) {
     'stab-disk': { t: 'Σφάλματα δίσκου ή συστήματος αρχείων ({0})', w: 'Τα Windows κατέγραψαν επαναλήψεις ανάγνωσης/εγγραφής ή προβλήματα στο σύστημα αρχείων. Λίγα μπορεί να προέρχονται από USB ή εικονικό δίσκο· πολλά δείχνουν δίσκο ή καλώδιο που χαλάει.', s: ['Πρώτα κάνε αντίγραφο ασφαλείας των σημαντικών αρχείων.', 'Τρέξε έλεγχο ανάγνωσης στον δίσκο συστήματος (δεν αλλάζει τίποτα).', 'Δες τα δεδομένα SMART στην καρτέλα Υλικό (φθορά, θερμοκρασία, σφάλματα).', 'Για δίσκους SATA, ξαναβάλε το καλώδιο δεδομένων.'] },
     'stab-dism': { t: function (f) { return /damaged/.test(f.title) ? 'Το component store των Windows είναι κατεστραμμένο' : 'Το component store των Windows χρειάζεται επισκευή'; }, w: 'Το DISM αναφέρει βλάβη στο component store των Windows. Οι ενημερώσεις και η επισκευή συστήματος μπορεί να αποτυγχάνουν μέχρι να διορθωθεί.', s: ['Άνοιξε το PowerShell ως διαχειριστής (πλήκτρο Windows, πληκτρολόγησε PowerShell, δεξί κλικ, Εκτέλεση ως διαχειριστής). Επικόλλησε την εντολή και πάτα Enter. Θέλει internet και παίρνει 20 έως 60 λεπτά σε ορισμένους υπολογιστές. Το ποσοστό συχνά φαίνεται κολλημένο στο 20, 40 ή 62 τοις εκατό: είναι φυσιολογικό, περίμενε τουλάχιστον μία ώρα πριν ανησυχήσεις. Μην σβήσεις τον υπολογιστή.', 'Μετά έλεγξε τα αρχεία συστήματος.', 'Επανεκκίνησε και τρέξε ξανά το Windows Update.'] },
     'stab-crashes': { t: function (f) { var m = /^(.*) crashed (\d+) times in (\d+) days/.exec(f.title); return m ? m[1] + ' κράσαρε ' + m[2] + ' φορές σε ' + m[3] + ' ημέρες' : f.title; }, w: 'Επαναλαμβανόμενα κρασαρίσματα του ίδιου προγράμματος σημαίνουν συνήθως χαλασμένη εγκατάσταση, σύγκρουση με driver ή overlay, ή ασυμβατότητα με αυτή τη ρύθμιση των Windows.', s: ['Ενημέρωσε το πρόγραμμα στην τελευταία έκδοση ή κάνε επανεγκατάσταση.'] },
+    'stab-crashes-gone': { t: function (f) { var m = /^(.*) crashed (\d+) times in (\d+) days/.exec(f.title); return m ? m[1] + ' κράσαρε ' + m[2] + ' φορές σε ' + m[3] + ' ημέρες, αλλά δεν είναι πια εγκατεστημένο' : f.title; }, w: 'Τα Windows θυμούνται τα σφάλματα για 30 ημέρες. Αυτό το πρόγραμμα δεν υπάρχει πια στον υπολογιστή σου (πιθανώς το αφαίρεσες), οπότε δεν χρειάζεται διόρθωση. Οι παλιές εγγραφές φεύγουν μόνες τους.', s: ['Δεν χρειάζεται τίποτα. Αν το αφαίρεσες επίτηδες, τελείωσες.', 'Αν κάτι περίεργο συνεχίζεται, δες το εύρημα για υπηρεσίες που δεν τρέχουν: υπολείμματα αφαιρεμένων προγραμμάτων είναι η συνηθισμένη αιτία.'] },
     'stab-services': { t: '{0} αυτόματες υπηρεσίες δεν τρέχουν', w: 'Αυτές οι υπηρεσίες έχουν οριστεί να ξεκινούν αυτόματα αλλά είναι σταματημένες με κωδικό σφάλματος. Μερικές είναι φυσιολογικές (Xbox, updaters κατασκευαστών). Οι υπόλοιπες μπορεί να δείχνουν χαλασμένο λογισμικό.', s: ['Άνοιξε τη λίστα υπηρεσιών (Win+R, services.msc) και δες όσες αναγνωρίζεις.', 'Απεγκατέστησε λογισμικό που δεν χρησιμοποιείς πια· τα υπολείμματά του είναι η συνηθισμένη αιτία.'] },
     'stab-ports': { t: 'Εξαντλήθηκαν οι θύρες δικτύου ({0} συμβάντα)', w: 'Τα Windows ανέφεραν ότι όλες οι ελεύθερες δυναμικές θύρες ήταν σε χρήση. Ένα πρόγραμμα ή μια εικονική μηχανή «διαρρέει» συνδέσεις. Μπορεί να προκαλέσει τυχαίες αποτυχίες σύνδεσης.', s: ['Δες ποια διεργασία κρατά τις περισσότερες συνδέσεις (τρέξε την εντολή στο PowerShell).', 'Ενημέρωσε ή επανεκκίνησε αυτό το πρόγραμμα. Έλεγξε πρώτα τα VPN και τις εικονικές μηχανές.'] },
     'stab-hangs': { t: 'Προγράμματα έπαψαν να ανταποκρίνονται {0} φορές', w: 'Τα Windows έκλεισαν προγράμματα που δεν απαντούσαν. Συχνά φταίνε αργός δίσκος, πρόσθετα ή υπερφορτωμένο σύστημα.', s: ['Δες ποια προγράμματα κολλούν (καρτέλα Συμβάντα) και ενημέρωσέ τα.'] },

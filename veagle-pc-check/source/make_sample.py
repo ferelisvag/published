@@ -108,7 +108,12 @@ data['extras'] = dict(
     listening=[dict(port=135, process='svchost', allInterfaces=True), dict(port=445, process='System', allInterfaces=True), dict(port=49664, process='lsass', allInterfaces=True)],
     activation=1, unsignedDrivers=[]),
   networkTest=dict(gateway=True, ping=dict(target='router', sent=5, lost=0, avgMs=2.1), dns=dict(ok=True, ms=38), timeSync=dict(source='time.windows.com', local=False), wifi=None, proxyEnabled=False, pacUrl=False, hostsEntries=[]),
-  backup=dict(restorePoints=dict(readable=True, count=2, lastDaysAgo=20), fileHistory=False, oneDriveFolders=dict(documents=True, desktop=True, pictures=False), winRE=True))
+  backup=dict(restorePoints=dict(readable=True, count=2, lastDaysAgo=20), fileHistory=False, oneDriveFolders=dict(documents=True, desktop=True, pictures=False), winRE=True),
+  storage=dict(folders=[dict(name='Downloads', path='C:\\Users\\demo\\Downloads', mb=48210, partial=False), dict(name='Videos', path='C:\\Users\\demo\\Videos', mb=31800, partial=False), dict(name='AppData Local', path='C:\\Users\\demo\\AppData\\Local', mb=22400, partial=False), dict(name='Windows Update downloads', path='C:\\Windows\\SoftwareDistribution\\Download', mb=3100, partial=False), dict(name='Documents', path='C:\\Users\\demo\\Documents', mb=9100, partial=False), dict(name='Temp (user)', path='C:\\Users\\demo\\AppData\\Local\\Temp', mb=1200, partial=False)],
+    systemFiles=[dict(name='hiberfil.sys', mb=12800), dict(name='pagefile.sys', mb=4096)],
+    bigFiles=[dict(path='C:\\Users\\demo\\Downloads\\Win11_Setup.iso', mb=5400, modified='2026-02-11T10:12:00'), dict(path='C:\\Users\\demo\\Videos\\trip2025.mp4', mb=3900, modified='2025-08-20T21:40:00')],
+    oldInstallers=dict(count=23, mb=7400), recycleBinMB=1850),
+  gaming=dict(gameDvr=True, gameMode=False, hags=False))
 for v in data['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
 (out / 'sample-data.json').write_text(json.dumps(data, indent=1), encoding='utf-8')

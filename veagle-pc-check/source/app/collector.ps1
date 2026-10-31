@@ -5,11 +5,11 @@
 # Output: Reports\<timestamp>\report.html, data.json and a raw\ folder with the exported files.
 # -Quick skips the slow parts (msinfo32, winget, DISM, optional features, old drivers, folder sizes).
 
-param([switch]$Quick)
+param([switch]$Quick, [switch]$NoOpen)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.3.0'
+$script:Version = '0.4.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -100,6 +100,16 @@ function ConvertFrom-WingetUpgrade([string]$text) {
     return $rows
 }
 
+# Reads one named field of an event (works in every Windows language, unlike parsing the message text).
+function Get-EvData($ev, [string]$name) {
+    try {
+        $x = [xml]$ev.ToXml()
+        $n = @($x.Event.EventData.Data | Where-Object { $_.Name -eq $name })[0]
+        if ($n) { return [string]$n.'#text' }
+    } catch { }
+    return $null
+}
+
 # Turns the event list into: totals, top groups, per-day counts.
 function Summarize-Events($events, [int]$Days, [int]$Top = 60) {
     $events = @($events)
@@ -166,7 +176,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 14
+$TOTAL = 15
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -450,9 +460,20 @@ $security = [ordered]@{
 # ---------------------------------------------------------------- 6. settings
 Step 6 $TOTAL 'Power, performance settings, updates'
 $planName = ''
+$planKind = ''
 try {
     $pl = (& powercfg /getactivescheme 2>&1 | Out-String)
     if ($pl -match '\(([^)]+)\)') { $planName = $Matches[1] }
+    $pg = [regex]::Match($pl, '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}')
+    if ($pg.Success) {
+        switch ($pg.Value.ToLower()) {
+            '381b4222-f694-41f0-9685-ff5bb260df2e' { $planKind = 'balanced' }
+            '8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c' { $planKind = 'high' }
+            'a1841308-3541-4fab-bc81-f71556f20b4a' { $planKind = 'saver' }
+            'e9a42b02-d5df-448d-aa00-03f14749eb61' { $planKind = 'ultimate' }
+            default { $planKind = 'other' }
+        }
+    }
 } catch { }
 $pf = @(Get-CimInstance Win32_PageFileUsage | ForEach-Object { [pscustomobject]@{ name = [string]$_.Name; allocatedMB = [int]$_.AllocatedBaseSize; usedMB = [int]$_.CurrentUsage } })
 
@@ -477,6 +498,7 @@ $liveKernel = @(Get-ChildItem (Join-Path $env:windir 'LiveKernelReports') -Direc
 
 $settings = [ordered]@{
     powerPlan    = $planName
+    powerPlanKind = $planKind
     fastStartup  = $(if ($null -ne (Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power' 'HiberbootEnabled')) { ([int](Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power' 'HiberbootEnabled') -eq 1) } else { $null })
     hibernation  = [bool](Test-Path (Join-Path $env:SystemDrive 'hiberfil.sys') -ErrorAction SilentlyContinue) -or ($null -ne (Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Power' 'HibernateEnabled'))
     pagefileAuto = [bool]$cs.AutomaticManagedPagefile
@@ -531,7 +553,10 @@ foreach ($pair in @(@('System', $sysEv), @('Application', $appEv))) {
 $crashApps = @{}
 foreach ($e in $appEv) {
     if ($e.ProviderName -eq 'Application Error' -and $e.Id -eq 1000) {
-        if ($e.Message -match 'Faulting application name:\s*([^,\r\n]+)') { $n = $Matches[1].Trim(); $crashApps[$n] = 1 + [int]$crashApps[$n] }
+        $n = ''
+        try { $n = [string]$e.Properties[0].Value } catch { }
+        if (-not $n -and $e.Message -match 'Faulting application name:\s*([^,\r\n]+)') { $n = $Matches[1].Trim() }
+        if ($n) { $crashApps[$n] = 1 + [int]$crashApps[$n] }
     }
 }
 $crashList = @($crashApps.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 12 | ForEach-Object { [pscustomobject]@{ app = [string]$_.Key; count = [int]$_.Value } })
@@ -551,16 +576,20 @@ $boots = @()
 try {
     $bev = @(Get-WinEvent -FilterHashtable @{ LogName = 'Microsoft-Windows-Diagnostics-Performance/Operational'; Id = 100; StartTime = (Get-Date).AddDays(-90) } -MaxEvents 20 -ErrorAction Stop)
     foreach ($b in $bev) {
-        $m = [regex]::Match([string]$b.Message, '(\d+)\s*ms')
-        if ($m.Success) { $boots += [pscustomobject]@{ time = Iso $b.TimeCreated; seconds = [math]::Round([double]$m.Groups[1].Value / 1000, 1) } }
+        $ms = Get-EvData $b 'BootTime'
+        if (-not $ms) { $mm = [regex]::Match([string]$b.Message, '(\d+)\s*ms'); if ($mm.Success) { $ms = $mm.Groups[1].Value } }
+        if ($ms -match '^\d+$') { $boots += [pscustomobject]@{ time = Iso $b.TimeCreated; seconds = [math]::Round([double]$ms / 1000, 1) } }
     }
 } catch { }
 $slowStart = @{}
 try {
     $sev = @(Get-WinEvent -FilterHashtable @{ LogName = 'Microsoft-Windows-Diagnostics-Performance/Operational'; Id = 101; StartTime = (Get-Date).AddDays(-90) } -MaxEvents 120 -ErrorAction Stop)
     foreach ($s in $sev) {
-        $m = [regex]::Match([string]$s.Message, 'File Name\s*:\s*(\S+)')
-        if ($m.Success) { $k = $m.Groups[1].Value; $slowStart[$k] = 1 + [int]$slowStart[$k] }
+        $k = Get-EvData $s 'FileName'
+        if (-not $k) { $k = Get-EvData $s 'FriendlyName' }
+        if (-not $k) { $k = Get-EvData $s 'Name' }
+        if (-not $k) { $m = [regex]::Match([string]$s.Message, 'File Name\s*:\s*(\S+)'); if ($m.Success) { $k = $m.Groups[1].Value } }
+        if ($k) { $slowStart[$k] = 1 + [int]$slowStart[$k] }
     }
 } catch { }
 $slowList = @($slowStart.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 12 | ForEach-Object { [pscustomobject]@{ name = [string]$_.Key; times = [int]$_.Value } })
@@ -649,13 +678,23 @@ Step 13 $TOTAL 'Windows image health (DISM CheckHealth)'
 $dism = [pscustomobject]@{ state = 'skipped'; text = '' }
 if ($isAdmin -and -not $Quick) {
     try {
+        $rw = $null
+        try { $rw = Repair-WindowsImage -Online -CheckHealth -ErrorAction Stop } catch { }
+        if ($rw -and $rw.ImageHealthState) {
+            $hs = [string]$rw.ImageHealthState
+            $st0 = 'unknown'
+            if ($hs -eq 'Healthy') { $st0 = 'healthy' } elseif ($hs -eq 'Repairable') { $st0 = 'repairable' } elseif ($hs -eq 'NonRepairable') { $st0 = 'corrupt' }
+            $dism = [pscustomobject]@{ state = $st0; text = 'ImageHealthState: ' + $hs }
+        }
+    } catch { }
+    if ($dism.state -eq 'skipped') { try {
         $dt = (& dism.exe /Online /Cleanup-Image /CheckHealth 2>&1 | Out-String)
         $st = 'unknown'
         if ($dt -match 'not repairable') { $st = 'corrupt' }
         elseif ($dt -match 'repairable') { $st = 'repairable' }
         elseif ($dt -match 'No component store corruption') { $st = 'healthy' }
         $dism = [pscustomobject]@{ state = $st; text = (($dt -split "`r?`n" | Where-Object { $_.Trim() }) | Select-Object -Last 4) -join ' | ' }
-    } catch { Warn ('dism: ' + $_.Exception.Message) }
+    } catch { Warn ('dism: ' + $_.Exception.Message) } }
 }
 
 # ---------------------------------------------------------------- 14. extras
@@ -674,7 +713,9 @@ $bugchecks = @()
 try {
     $bugchecks = @($sysEv | Where-Object { $_.Id -eq 1001 -and $_.ProviderName -match 'WER-SystemErrorReporting|BugCheck' } | Select-Object -First 10 | ForEach-Object {
         $code = ''
-        $bm = [regex]::Match([string]$_.Message, '0x[0-9a-fA-F]{2,8}')
+        $bsrc = [string]$_.Message
+        try { $bsrc = [string]$_.Properties[0].Value + ' ' + $bsrc } catch { }
+        $bm = [regex]::Match($bsrc, '0x[0-9a-fA-F]{2,8}')
         if ($bm.Success) { $code = $bm.Value.ToLower() }
         [pscustomobject]@{ time = Iso $_.TimeCreated; code = $code }
     })
@@ -768,18 +809,19 @@ try {
 } catch { $dnsTest = [pscustomobject]@{ ok = $false; ms = $null } }
 $timeSync = $null
 try {
-    $wt = (& w32tm.exe /query /status 2>&1 | Out-String)
-    $src = ''; $m1 = [regex]::Match($wt, '(?im)^\s*Source:\s*(.+)$'); if ($m1.Success) { $src = $m1.Groups[1].Value.Trim() }
-    if ($src) { $timeSync = [pscustomobject]@{ source = $src; local = ($src -match 'Local CMOS|Free-running') } }
+    $w32 = Get-Service -Name w32time -ErrorAction Stop
+    $tp = [string](Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters' 'Type')
+    $srv = [string](Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters' 'NtpServer')
+    $timeSync = [pscustomobject]@{ serviceRunning = ([string]$w32.Status -eq 'Running'); type = $tp; source = $(if ($srv) { $srv } else { $tp }); local = ($tp -eq 'NoSync') }
 } catch { }
 $wifi = $null
 try {
     $wl = (& netsh.exe wlan show interfaces 2>&1 | Out-String)
-    $sg = [regex]::Match($wl, '(?im)^\s*Signal\s*:\s*(\d+)%')
+    $sg = [regex]::Match($wl, '(?m)^\s*[^:\r\n]+:\s*(\d{1,3})%\s*$')
     if ($sg.Success) {
-        $band = ''; $bm2 = [regex]::Match($wl, '(?im)^\s*Band\s*:\s*(.+)$'); if ($bm2.Success) { $band = $bm2.Groups[1].Value.Trim() }
-        $rt = ''; $rm2 = [regex]::Match($wl, '(?im)^\s*Radio type\s*:\s*(.+)$'); if ($rm2.Success) { $rt = $rm2.Groups[1].Value.Trim() }
-        $wifi = [pscustomobject]@{ signalPct = [int]$sg.Groups[1].Value; band = $band; radio = $rt }
+        $bnd = [regex]::Match($wl, '([2-7](?:\.\d)?)\s*GHz')
+        $rad = [regex]::Match($wl, '802\.11[a-z]{1,2}')
+        $wifi = [pscustomobject]@{ signalPct = [int]$sg.Groups[1].Value; band = $(if ($bnd.Success) { $bnd.Value } else { '' }); radio = $rad.Value }
     }
 } catch { }
 $ie = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
@@ -814,12 +856,86 @@ $winre = $null
 if ($isAdmin) {
     try {
         $re = (& reagentc.exe /info 2>&1 | Out-String)
-        if ($re -match '(?im)Windows RE status:\s*Enabled') { $winre = $true } elseif ($re -match '(?im)Windows RE status:\s*Disabled') { $winre = $false }
+        if ($re -match 'harddisk\d+\\partition\d+' -or $re -match '(?im)Windows RE status:\s*Enabled') { $winre = $true }
+        elseif ($re -match '00000000-0000-0000-0000-000000000000' -or $re -match '(?im)Windows RE status:\s*Disabled') { $winre = $false }
     } catch { }
 }
 $backup = [pscustomobject]@{ restorePoints = $restore; fileHistory = $fileHistory; oneDriveFolders = $oneDrive; winRE = $winre }
 
 $extras = [pscustomobject]@{ reliability = $reliability; securityMore = $securityMore; networkTest = $networkTest; backup = $backup }
+
+# ---------------------------------------------------------------- 15. where the disk space went
+Step 15 $TOTAL 'Where the disk space went (read-only, can take a few minutes)'
+$spaceInfo = $null
+$gaming = [pscustomobject]@{ gameDvr = $null; gameMode = $settings.gameMode; hags = $settings.gpuScheduling }
+try { $gd = Read-Reg 'HKCU:\System\GameConfigStore' 'GameDVR_Enabled'; if ($null -ne $gd) { $gaming.gameDvr = ([int]$gd -eq 1) } } catch { }
+if (-not $Quick) {
+    try {
+        $script:bigFiles = New-Object System.Collections.ArrayList
+        function Measure-Dir([string]$p, [int]$maxSec, [bool]$trackBig) {
+            $sw = [Diagnostics.Stopwatch]::StartNew(); $sum = [long]0; $partial = $false
+            try {
+                $stack = New-Object System.Collections.Stack; $stack.Push($p)
+                while ($stack.Count -gt 0) {
+                    if ($sw.Elapsed.TotalSeconds -gt $maxSec) { $partial = $true; break }
+                    $d = [string]$stack.Pop()
+                    try {
+                        foreach ($f in [IO.Directory]::EnumerateFiles($d)) {
+                            try {
+                                $fi = New-Object IO.FileInfo $f
+                                $sum += $fi.Length
+                                if ($trackBig -and $fi.Length -gt 300MB) { [void]$script:bigFiles.Add([pscustomobject]@{ path = $f; mb = [int]($fi.Length / 1MB); modified = Iso $fi.LastWriteTime }) }
+                            } catch { }
+                        }
+                    } catch { }
+                    try {
+                        foreach ($s in [IO.Directory]::EnumerateDirectories($d)) {
+                            try { $a = [IO.File]::GetAttributes($s); if (($a -band [IO.FileAttributes]::ReparsePoint) -eq 0) { $stack.Push($s) } } catch { }
+                        }
+                    } catch { }
+                }
+            } catch { }
+            return [pscustomobject]@{ mb = [int]($sum / 1MB); partial = $partial }
+        }
+        $up = $env:USERPROFILE
+        $targets = @(
+            @('Downloads', (Join-Path $up 'Downloads'), $true), @('Documents', (Join-Path $up 'Documents'), $true), @('Desktop', (Join-Path $up 'Desktop'), $true),
+            @('Pictures', (Join-Path $up 'Pictures'), $false), @('Videos', (Join-Path $up 'Videos'), $true), @('Music', (Join-Path $up 'Music'), $false),
+            @('OneDrive', (Join-Path $up 'OneDrive'), $false), @('AppData Local', (Join-Path $up 'AppData\Local'), $false),
+            @('Temp (user)', $env:TEMP, $false), @('Temp (Windows)', (Join-Path $env:windir 'Temp'), $false),
+            @('Windows Update downloads', (Join-Path $env:windir 'SoftwareDistribution\Download'), $false),
+            @('Windows.old', (Join-Path $env:SystemDrive 'Windows.old'), $false),
+            @('Program Files', $env:ProgramFiles, $false), @('ProgramData', $env:ProgramData, $false)
+        )
+        $folders = @(); $swAll = [Diagnostics.Stopwatch]::StartNew()
+        foreach ($t in $targets) {
+            if (-not (Test-Path -LiteralPath $t[1])) { continue }
+            if ($swAll.Elapsed.TotalSeconds -gt 240) { Warn 'space analysis stopped early (time limit)'; break }
+            $m = Measure-Dir $t[1] 30 $t[2]
+            $folders += [pscustomobject]@{ name = [string]$t[0]; path = [string]$t[1]; mb = $m.mb; partial = $m.partial }
+        }
+        $sys = @()
+        foreach ($n in @('hiberfil.sys', 'pagefile.sys', 'swapfile.sys')) {
+            try { $fi = Get-Item -LiteralPath (Join-Path $env:SystemDrive $n) -Force -ErrorAction Stop; $sys += [pscustomobject]@{ name = $n; mb = [int]($fi.Length / 1MB) } } catch { }
+        }
+        $installers = [pscustomobject]@{ count = 0; mb = 0 }
+        try {
+            $old = @(Get-ChildItem -LiteralPath (Join-Path $up 'Downloads') -File -Force -ErrorAction Stop | Where-Object { $_.Extension -match '^\.(exe|msi|iso|zip|7z|rar|msix)$' -and $_.LastWriteTime -lt (Get-Date).AddDays(-60) })
+            $installers = [pscustomobject]@{ count = $old.Count; mb = [int](($old | Measure-Object Length -Sum).Sum / 1MB) }
+        } catch { }
+        $recycle = $null
+        try { $rb = Measure-Dir (Join-Path $env:SystemDrive '$Recycle.Bin') 20 $false; $recycle = $rb.mb } catch { }
+        $spaceInfo = [pscustomobject]@{
+            folders = @($folders | Sort-Object mb -Descending)
+            systemFiles = $sys
+            bigFiles = @($script:bigFiles | Sort-Object mb -Descending | Select-Object -First 10)
+            oldInstallers = $installers
+            recycleBinMB = $recycle
+        }
+    } catch { Warn ('space analysis: ' + $_.Exception.Message) }
+}
+$extras | Add-Member -NotePropertyName storage -NotePropertyValue $spaceInfo -Force
+$extras | Add-Member -NotePropertyName gaming -NotePropertyValue $gaming -Force
 
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }
@@ -840,6 +956,7 @@ $meta = [ordered]@{
     user       = $env:USERNAME
     computer   = $env:COMPUTERNAME
     domain     = $env:USERDOMAIN
+    root       = $root
     durationSec = [int]$swTotal.Elapsed.TotalSeconds
     warnings   = @($script:Warnings)
 }
@@ -870,10 +987,24 @@ $json = $json.Replace('</', '<\/')
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 [IO.File]::WriteAllText((Join-Path $out 'data.json'), $json, $utf8)
 
+# The report also carries your PREVIOUS scan (as raw text, so dates stay intact) to show what changed. data.json stays without it.
+$jsonHtml = $json
+try {
+    $repDir = Split-Path -Parent $out
+    foreach ($c in @(Get-ChildItem -LiteralPath $repDir -Directory -ErrorAction Stop | Where-Object { $_.Name -ne $stamp } | Sort-Object Name -Descending)) {
+        $pj = Join-Path $c.FullName 'data.json'
+        if (Test-Path -LiteralPath $pj) {
+            $prev = [IO.File]::ReadAllText($pj, $utf8).TrimStart([char]0xFEFF).Trim()
+            if ($prev.StartsWith('{') -and $prev.EndsWith('}') -and $prev.Length -lt 3MB) { $jsonHtml = $json.Substring(0, $json.Length - 1) + ',"previous":' + $prev.Replace('</', '<\/') + '}' }
+            break
+        }
+    }
+} catch { }
+
 $templatePath = Join-Path $appDir 'template.html'
 if (Test-Path $templatePath) {
     $tpl = [IO.File]::ReadAllText($templatePath, $utf8)
-    $html = $tpl.Replace('/*__PCDATA__*/null', $json)
+    $html = $tpl.Replace('/*__PCDATA__*/null', $jsonHtml)
     [IO.File]::WriteAllText((Join-Path $out 'report.html'), $html, $utf8)
 } else {
     Write-Host '  template.html is missing next to collector.ps1 - report not built.' -ForegroundColor Red
@@ -885,4 +1016,4 @@ Write-Host ('  Report: ' + (Join-Path $out 'report.html')) -ForegroundColor Whit
 if ($script:Warnings.Count -gt 0) { Write-Host ('  {0} non-critical warning(s) are listed inside the report.' -f $script:Warnings.Count) -ForegroundColor Yellow }
 Write-Host '  Nothing was changed on this PC and nothing was uploaded.' -ForegroundColor Gray
 
-if (Test-Path (Join-Path $out 'report.html')) { try { Start-Process (Join-Path $out 'report.html') } catch { } }
+if (-not $NoOpen -and (Test-Path (Join-Path $out 'report.html'))) { try { Start-Process (Join-Path $out 'report.html') } catch { } }

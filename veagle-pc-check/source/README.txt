@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v0.3.0
+VEAGLE PC CHECK  v0.4.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -14,6 +14,8 @@ IT IS SAFE
 - It does not send your files, passwords or personal data anywhere. The report stays on your PC.
 - The only things it asks the internet: which of your programs have updates (winget), one
   "ping" to your own router, and one lookup of the website name www.microsoft.com.
+- NOTHING IS EVER CHANGED OR TURNED ON FOR YOU. Every fix is something you do yourself, step by step.
+  Even the optional monthly check (see the Tools tab) only exists if you copy its command and run it.
 - You can read every line of the program: app\collector.ps1 opens in Notepad.
 
 HOW TO USE IT (5 steps, about 5 minutes)
@@ -44,23 +46,30 @@ READING THE REPORT
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
 
+LANGUAGE
+--------
+The report starts in your browser's language (English or Greek). Use the button EN / ΕΛ at the
+top right to switch. Greek Windows are supported.
+
 TABS IN THE REPORT
 ------------------
-Dashboard   the score and the 3 most important things.
+Summary     one page: a traffic light, what changed since your last scan, and the 3 things to do.
+Dashboard   the score and the most important things, with all the details.
 Findings    every problem, in plain words, with the fix.
 Hardware / Software / Events   all the details, for people who want them.
 Compare     compare with an older scan to see your progress.
 Tools       beginner guide, summary for a helper, safe fix script, Excel/CSV export,
-            many PCs in one table, list of explained words.
+            many PCs in one table, an optional monthly check (you decide), Windows secrets, explained words.
 AI help     ask an AI (Claude first) to explain things to you. Personal data is removed.
 PC type     top right: Home, Work or Gaming. It changes which problems count more.
+Since last scan   the report remembers your previous scan and shows what got better or worse.
 Share-safe copy   saves the report without your name, PC name, IP and e-mail, so you can send it.
 
 WHAT THE CHECK LOOKS AT
 -----------------------
-Hardware, drives and their health, blue screens and crashes, Windows reliability score,
+Hardware, drives and their health, where your disk space went, blue screens and crashes, Windows reliability score,
 antivirus status and threats, firewall, risky settings (shared folders, open ports,
-remote access), Windows updates, programs that need updating, drivers and BIOS age,
+remote access), unwanted programs, Windows updates, programs that need updating, drivers and BIOS age,
 internet and Wi-Fi quality, backups and System Restore, battery (laptops),
 and whether the PC can run Windows 11.
 

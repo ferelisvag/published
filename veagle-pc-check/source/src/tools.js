@@ -45,7 +45,7 @@ var TOOLS = (function (V, AI, CMP) {
     L.push('Findings: ' + V.counts.high + ' high, ' + V.counts.medium + ' medium, ' + V.counts.low + ' low');
     L.push('');
     if (!f.length) L.push('No problems found.');
-    f.slice(0, 12).forEach(function (x, i) { L.push((i + 1) + '. [' + x.sev.toUpperCase() + '] ' + x.title + ' (' + x.area + ')'); });
+    f.slice(0, 12).forEach(function (x, i) { var y = V.tf(x); L.push((i + 1) + '. [' + x.sev.toUpperCase() + '] ' + y.title + ' (' + x.area + ')'); });
     if (f.length > 12) L.push('... and ' + (f.length - 12) + ' more in the full report.');
     L.push('');
     L.push('Details: the full report.html is attached or available on request.');
@@ -139,43 +139,84 @@ var TOOLS = (function (V, AI, CMP) {
   function sect(t, n) { return '<div class="sect"><h2>' + esc(t) + '</h2><span>' + esc(n || '') + '</span></div>'; }
   function box(name, st, inner) { return '<div class="win" style="margin-bottom:18px"><header><span>' + esc(name) + '</span><span class="st">' + esc(st || '') + '</span></header><div class="body">' + inner + '</div></div>'; }
 
+  var GLOSSARY_EL = [
+    'Ένας λογαριασμός Windows που επιτρέπεται να αλλάζει το σύστημα. Μερικές διορθώσεις δουλεύουν μόνο όταν ένα πρόγραμμα ξεκινά «ως διαχειριστής».',
+    'Το πρώτο πρόγραμμα που τρέχει όταν ξεκινά ο υπολογιστής, πριν από τα Windows. Το ανοίγεις με ένα πλήκτρο (συχνά Del ή F2) στην εκκίνηση.',
+    'Ένα μικρό πρόγραμμα που επιτρέπει στα Windows να μιλούν με ένα μέρος του υπολογιστή (κάρτα γραφικών, Wi-Fi, εκτυπωτή).',
+    'Το ενσωματωμένο λογισμικό μιας συσκευής, για παράδειγμα ενός SSD ή ενός router.',
+    'Δύο είδη αποθήκευσης. Ο SSD είναι γρήγορος και δεν έχει κινούμενα μέρη. Ο HDD είναι ο παλιότερος περιστρεφόμενος δίσκος, φθηνότερος και πιο αργός.',
+    'Μια αναφορά υγείας που κρατά κάθε δίσκος για τον εαυτό του.',
+    'Η βραχυπρόθεσμη μνήμη του υπολογιστή. Περισσότερη RAM σημαίνει περισσότερα προγράμματα ανοιχτά χωρίς επιβράδυνση.',
+    'Μια ρύθμιση του BIOS που κάνει τη μνήμη να τρέχει στην ταχύτητα που γράφει η ετικέτα της. Συχνά είναι κλειστή από προεπιλογή.',
+    'Ένα μικρό τσιπ ασφαλείας στη μητρική. Τα Windows 11 και το BitLocker το χρησιμοποιούν.',
+    'Μια ρύθμιση του BIOS που εμποδίζει επιβλαβή προγράμματα να ξεκινήσουν πριν από τα Windows.',
+    'Η κρυπτογράφηση δίσκου των Windows. Αν κλέψουν το laptop, δεν μπορούν να διαβάσουν τα αρχεία χωρίς το κλειδί.',
+    'Ένας φρουρός που αποφασίζει ποια κίνηση δικτύου επιτρέπεται να φτάσει στον υπολογιστή σου.',
+    'Ο τηλεφωνικός κατάλογος του internet. Μετατρέπει ένα όνομα όπως google.com σε διεύθυνση.',
+    'Ένας ενδιάμεσος διακομιστής από τον οποίο περνά όλη η κίνηση ιστού σου.',
+    'Ένα στιγμιότυπο των ρυθμίσεων και των αρχείων συστήματος των Windows στο οποίο μπορείς να γυρίσεις. Δεν αποθηκεύει τα δικά σου αρχεία.',
+    'Δύο εργαλεία των Windows που ελέγχουν και επισκευάζουν τα αρχεία συστήματος.',
+    'Windows Hardware Error Architecture. Ένα μήνυμα WHEA σημαίνει ότι το ίδιο το υλικό ανέφερε πρόβλημα.',
+    'Η μπλε οθόνη κρασαρίσματος. Τα Windows σταματούν επίτηδες για να προστατευτούν και δείχνουν έναν κωδικό.',
+    'Μια αριθμημένη «πόρτα» του υπολογιστή από την οποία μιλούν τα προγράμματα δικτύου.',
+    'Η μεγάλη βάση ρυθμίσεων των Windows. Μην την επεξεργάζεσαι εκτός αν ένας οδηγός σου λέει ακριβώς τι να αλλάξεις.'
+  ];
+  var GLOSSARY_EL_NAMES = ['Διαχειριστής', 'BIOS / UEFI', 'Driver', 'Firmware', 'SSD / HDD', 'SMART', 'RAM', 'XMP / EXPO', 'TPM', 'Secure Boot', 'BitLocker', 'Firewall (τείχος προστασίας)', 'DNS', 'Proxy', 'Σημείο επαναφοράς', 'DISM / SFC', 'WHEA', 'Μπλε οθόνη (BSOD)', 'Θύρα (port)', 'Registry'];
+
   function render() {
     var root = $('#tab-tools'); if (!root) return;
-    var h = '';
-    h += sect('New here? Start with this', 'no computer knowledge needed');
-    h += box('how_to.txt', '3 minutes',
-      '<ol class="steps3"><li><b>Look at the "Do this first" box</b> on the Dashboard. It shows the 3 most important things.</li>' +
-      '<li><b>Open the Findings tab</b> and click one problem. Read "In plain words", then follow the numbered steps one by one. Each step says exactly what to click.</li>' +
-      '<li><b>Do one thing at a time.</b> Restart the PC, then run the scan again. The Compare tab shows what got better.</li></ol>' +
-      '<p class="sub" style="margin-top:12px">Words next to a dotted underline have a hint: hold the mouse over them. The list at the bottom of this page explains every technical word.</p>');
-    h += box('run_a_command.txt', 'the one skill you need',
-      '<p><b>Some steps show a grey box with a command.</b> That is text you copy and paste, you do not have to understand it.</p>' +
-      '<ol class="steps3"><li>Click <b>Copy</b> next to the command.</li>' +
-      '<li>Press the <b>Windows key</b>, type <b>PowerShell</b>. Right-click "Windows PowerShell" and choose <b>Run as administrator</b>. Click <b>Yes</b>. A blue or black window opens.</li>' +
-      '<li>Right-click inside the window (this pastes the text), then press <b>Enter</b>. Wait until the cursor comes back.</li></ol>' +
-      '<p class="sub" style="margin-top:12px"><b>Safe</b> means you cannot break anything. <b>Back up first</b> means copy your important files somewhere safe before you start. <b>Careful</b> means the change is in a sensitive place (BIOS or system): if you are not sure, ask someone or use the AI help tab.</p>');
-    h += sect('Pick your type of PC', 'changes which findings count more');
+    var I = V.I, h = '';
+    h += sect(I('New here? Start with this', 'Πρώτη φορά εδώ; Ξεκίνα από αυτό'), I('no computer knowledge needed', 'δεν χρειάζονται γνώσεις υπολογιστών'));
+    h += box('how_to.txt', I('3 minutes', '3 λεπτά'),
+      '<ol class="steps3"><li>' + I('<b>Look at the "Do this first" box</b> on the Dashboard. It shows the 3 most important things.', '<b>Κοίταξε το κουτί «Do this first»</b> στον Πίνακα. Δείχνει τα 3 σημαντικότερα πράγματα.') + '</li>' +
+      '<li>' + I('<b>Open the Findings tab</b> and click one problem. Read "In plain words", then follow the numbered steps one by one. Each step says exactly what to click.', '<b>Άνοιξε την καρτέλα Ευρήματα</b> και πάτα ένα πρόβλημα. Διάβασε το «Με απλά λόγια» και μετά ακολούθησε τα αριθμημένα βήματα ένα ένα. Κάθε βήμα λέει ακριβώς τι να πατήσεις.') + '</li>' +
+      '<li>' + I('<b>Do one thing at a time.</b> Restart the PC, then run the scan again. The Compare tab shows what got better.', '<b>Κάνε ένα πράγμα τη φορά.</b> Επανεκκίνησε τον υπολογιστή και τρέξε ξανά τη σάρωση. Η Σύνοψη δείχνει τι βελτιώθηκε.') + '</li></ol>' +
+      '<p class="sub" style="margin-top:12px">' + I('Words next to a dotted underline have a hint: hold the mouse over them. The list at the bottom of this page explains every technical word.', 'Οι λέξεις με διακεκομμένη υπογράμμιση έχουν υπόδειξη: κράτα το ποντίκι πάνω τους. Η λίστα στο τέλος της σελίδας εξηγεί κάθε τεχνικό όρο.') + '</p>');
+    h += box('run_a_command.txt', I('the one skill you need', 'η μία δεξιότητα που χρειάζεσαι'),
+      '<p>' + I('<b>Some steps show a grey box with a command.</b> That is text you copy and paste, you do not have to understand it.', '<b>Κάποια βήματα δείχνουν ένα γκρι κουτί με μια εντολή.</b> Είναι κείμενο που αντιγράφεις και επικολλάς, δεν χρειάζεται να το καταλαβαίνεις.') + '</p>' +
+      '<ol class="steps3"><li>' + I('Click <b>Copy</b> next to the command.', 'Πάτα <b>Αντιγραφή</b> δίπλα στην εντολή.') + '</li>' +
+      '<li>' + I('Press the <b>Windows key</b>, type <b>PowerShell</b>. Right-click "Windows PowerShell" and choose <b>Run as administrator</b>. Click <b>Yes</b>. A blue or black window opens.', 'Πάτα το <b>πλήκτρο Windows</b>, πληκτρολόγησε <b>PowerShell</b>. Δεξί κλικ στο «Windows PowerShell» και διάλεξε <b>Εκτέλεση ως διαχειριστής</b>. Πάτα <b>Ναι</b>. Ανοίγει ένα μπλε ή μαύρο παράθυρο.') + '</li>' +
+      '<li>' + I('Right-click inside the window (this pastes the text), then press <b>Enter</b>. Wait until the cursor comes back.', 'Δεξί κλικ μέσα στο παράθυρο (αυτό επικολλά το κείμενο) και μετά πάτα <b>Enter</b>. Περίμενε μέχρι να επιστρέψει ο δρομέας.') + '</li></ol>' +
+      '<p class="sub" style="margin-top:12px">' + I('<b>Safe</b> means you cannot break anything. <b>Back up first</b> means copy your important files somewhere safe before you start. <b>Careful</b> means the change is in a sensitive place (BIOS or system): if you are not sure, ask someone or use the AI help tab.', '<b>Ασφαλές</b> σημαίνει ότι δεν μπορείς να χαλάσεις τίποτα. <b>Πρώτα αντίγραφο ασφαλείας</b> σημαίνει να αντιγράψεις τα σημαντικά αρχεία σου κάπου ασφαλές πριν ξεκινήσεις. <b>Προσοχή</b> σημαίνει ότι η αλλαγή γίνεται σε ευαίσθητο σημείο (BIOS ή σύστημα): αν δεν είσαι σίγουρος, ρώτα κάποιον ή χρησιμοποίησε την καρτέλα Βοήθεια AI.') + '</p>');
+    h += sect(I('Pick your type of PC', 'Διάλεξε τον τύπο του PC σου'), I('changes which findings count more', 'αλλάζει ποια ευρήματα βαραίνουν περισσότερο'));
     h += '<div class="win" style="margin-bottom:18px"><div class="body"><div class="seg" id="profileSeg">' +
       Object.keys(V.PROFILES).map(function (k) { return '<button type="button" class="btn sm" data-profile="' + k + '" aria-pressed="' + (V.profile === k) + '">' + esc(V.PROFILES[k].label) + '</button>'; }).join(' ') +
       '</div><p class="sub" id="profileNote" style="margin-top:10px">' + esc(V.PROFILES[V.profile].note) + '</p></div></div>';
 
-    h += sect('Message for someone who helps you', 'copy and paste into an email or ticket');
-    h += box('ticket.txt', 'short summary', '<textarea id="ticketText" class="mono" rows="12" readonly style="width:100%"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="tkCopy">Copy summary</button></div><p class="sub" style="margin-top:8px">It contains the PC name. Remove that line if you do not want to share it.</p>');
+    h += sect(I('Message for someone who helps you', 'Μήνυμα για κάποιον που σε βοηθά'), I('copy and paste into an email or ticket', 'αντίγραψε και επικόλλησε σε email ή ticket'));
+    h += box('ticket.txt', I('short summary', 'σύντομη σύνοψη'), '<textarea id="ticketText" class="mono" rows="12" readonly style="width:100%"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="tkCopy">' + I('Copy summary', 'Αντιγραφή σύνοψης') + '</button></div><p class="sub" style="margin-top:8px">' + I('It contains the PC name. Remove that line if you do not want to share it.', 'Περιέχει το όνομα του PC. Σβήσε αυτή τη γραμμή αν δεν θέλεις να το μοιραστείς.') + '</p>');
 
-    h += sect('Fix script you can read first', 'every command is switched off');
-    h += box('veagle-fix-script.ps1', 'safe by design', '<p class="sub">This file collects all the commands from the findings. <b>Nothing runs by itself:</b> every line starts with "# ", which makes Windows ignore it. You switch on only the lines you want (the file explains how).</p><textarea id="fixText" class="mono" rows="10" readonly style="width:100%;margin-top:10px"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="fxCopy">Copy</button><button class="btn sm" type="button" id="fxSave">Save as file</button></div>');
+    h += sect(I('Fix script you can read first', 'Script διορθώσεων που διαβάζεις πρώτα'), I('every command is switched off', 'κάθε εντολή είναι κλειστή'));
+    h += box('veagle-fix-script.ps1', I('safe by design', 'ασφαλές εκ σχεδιασμού'), '<p class="sub">' + I('This file collects all the commands from the findings. <b>Nothing runs by itself:</b> every line starts with "# ", which makes Windows ignore it. You switch on only the lines you want (the file explains how).', 'Αυτό το αρχείο συγκεντρώνει όλες τις εντολές των ευρημάτων. <b>Τίποτα δεν τρέχει μόνο του:</b> κάθε γραμμή ξεκινά με «# », που κάνει τα Windows να την αγνοούν. Ενεργοποιείς μόνο τις γραμμές που θες (το αρχείο εξηγεί πώς).') + '</p><textarea id="fixText" class="mono" rows="10" readonly style="width:100%;margin-top:10px"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="fxCopy">' + I('Copy', 'Αντιγραφή') + '</button><button class="btn sm" type="button" id="fxSave">' + I('Save as file', 'Αποθήκευση ως αρχείο') + '</button></div>');
 
-    h += sect('Export', 'for Excel or a helpdesk');
-    h += box('findings.csv', 'opens in Excel', '<div class="btns"><button class="btn sm" type="button" id="csvSave">Save findings as CSV</button><button class="btn sm" type="button" id="csvCopy">Copy as text</button></div>');
+    h += sect(I('Export', 'Εξαγωγή'), I('for Excel or a helpdesk', 'για Excel ή helpdesk'));
+    h += box('findings.csv', I('opens in Excel', 'ανοίγει στο Excel'), '<div class="btns"><button class="btn sm" type="button" id="csvSave">' + I('Save findings as CSV', 'Αποθήκευση ευρημάτων ως CSV') + '</button><button class="btn sm" type="button" id="csvCopy">' + I('Copy as text', 'Αντιγραφή ως κείμενο') + '</button></div>');
 
-    h += sect('Many PCs in one table', 'for family, friends or an office');
-    h += box('many_pcs.csv', 'optional',
-      '<p class="sub">Run the scan on each PC. Then open one report here and add the others: choose their <span class="mono">report.html</span> or <span class="mono">data.json</span> files (you can select many at once). The PCs are sorted with the sickest first.</p>' +
-      '<label class="drop" for="fleetFile" id="fleetDrop"><b>Choose or drop the other reports here</b></label><input class="sr" type="file" id="fleetFile" multiple accept=".json,.html,application/json,text/html">' +
-      '<div id="fleetOut" style="margin-top:14px">' + fleetHtml() + '</div><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="fleetSave">Save table as CSV</button></div>');
+    h += sect(I('Many PCs in one table', 'Πολλά PC σε έναν πίνακα'), I('for family, friends or an office', 'για οικογένεια, φίλους ή γραφείο'));
+    h += box('many_pcs.csv', I('optional', 'προαιρετικό'),
+      '<p class="sub">' + I('Run the scan on each PC. Then open one report here and add the others: choose their <span class="mono">report.html</span> or <span class="mono">data.json</span> files (you can select many at once). The PCs are sorted with the sickest first.', 'Τρέξε τη σάρωση σε κάθε PC. Μετά άνοιξε εδώ μία αναφορά και πρόσθεσε τις υπόλοιπες: διάλεξε τα αρχεία <span class="mono">report.html</span> ή <span class="mono">data.json</span> τους (μπορείς πολλά μαζί). Τα PC ταξινομούνται με τον πιο «άρρωστο» πρώτο.') + '</p>' +
+      '<label class="drop" for="fleetFile" id="fleetDrop"><b>' + I('Choose or drop the other reports here', 'Διάλεξε ή σύρε εδώ τις άλλες αναφορές') + '</b></label><input class="sr" type="file" id="fleetFile" multiple accept=".json,.html,application/json,text/html">' +
+      '<div id="fleetOut" style="margin-top:14px">' + fleetHtml() + '</div><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="fleetSave">' + I('Save table as CSV', 'Αποθήκευση πίνακα ως CSV') + '</button></div>');
 
-    h += sect('Words explained', 'in plain language');
-    h += box('glossary.txt', GLOSSARY.length + ' words', '<dl class="kv" style="grid-template-columns:180px 1fr">' + GLOSSARY.map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>');
+    h += sect(I('A scan every month? Your choice', 'Σάρωση κάθε μήνα; Δική σου επιλογή'), I('optional, nothing is turned on for you', 'προαιρετικό, τίποτα δεν ενεργοποιείται για σένα'));
+    h += box('monthly_check.txt', I('you decide', 'αποφασίζεις εσύ'),
+      '<p>' + I('<b>Why do it:</b> small problems (a full disk, old antivirus definitions, a failing drive) are easy to fix early. A short check once a month catches them. The report is saved in the <span class="mono">Reports</span> folder and the "Summary" tab then shows what changed since last time.', '<b>Γιατί να το κάνεις:</b> τα μικρά προβλήματα (γεμάτος δίσκος, παλιοί ορισμοί antivirus, δίσκος που χαλάει) διορθώνονται εύκολα νωρίς. Ένας σύντομος έλεγχος μία φορά τον μήνα τα πιάνει. Η αναφορά αποθηκεύεται στον φάκελο <span class="mono">Reports</span> και η καρτέλα «Σύνοψη» δείχνει τι άλλαξε από την προηγούμενη φορά.') + '</p>' +
+      '<p>' + I('<b>What it would do:</b> every 4 weeks, in the background, it runs the <b>quick</b> scan without opening a window and without opening the report. It only reads. It changes nothing and sends nothing anywhere. It only runs if the PC is on and you are logged in (it catches up when the PC starts again).', '<b>Τι θα έκανε:</b> κάθε 4 εβδομάδες, στο παρασκήνιο, τρέχει τη <b>γρήγορη</b> σάρωση χωρίς να ανοίξει παράθυρο και χωρίς να ανοίξει την αναφορά. Μόνο διαβάζει. Δεν αλλάζει τίποτα και δεν στέλνει τίποτα πουθενά. Τρέχει μόνο αν ο υπολογιστής είναι ανοιχτός και είσαι συνδεδεμένος (αναπληρώνει όταν ξαναξεκινήσει).') + '</p>' +
+      '<p>' + I('<b>Nothing happens by itself.</b> This app never creates the task. Only if YOU copy the command below and paste it into PowerShell (as administrator) will Windows create it. Prefer something simpler? Put a repeating reminder in your phone calendar: "Run VEAGLE PC Check".', '<b>Τίποτα δεν γίνεται μόνο του.</b> Αυτή η εφαρμογή δεν δημιουργεί ποτέ την εργασία. Μόνο αν ΕΣΥ αντιγράψεις την εντολή παρακάτω και την επικολλήσεις στο PowerShell (ως διαχειριστής) θα τη δημιουργήσουν τα Windows. Προτιμάς κάτι πιο απλό; Βάλε επαναλαμβανόμενη υπενθύμιση στο ημερολόγιο του κινητού: «Τρέξε VEAGLE PC Check».') + '</p>' +
+      '<div class="lbl" style="margin-top:12px">' + I('1. Turn it on (optional)', '1. Ενεργοποίηση (προαιρετικό)') + '</div><textarea id="schOn" class="mono" rows="6" readonly style="width:100%"></textarea><div class="btns" style="margin-top:8px"><button class="btn sm" type="button" id="schOnCopy">' + I('Copy the "turn on" command', 'Αντιγραφή της εντολής ενεργοποίησης') + '</button></div>' +
+      '<div class="lbl" style="margin-top:14px">' + I('2. Turn it off again any time', '2. Απενεργοποίηση όποτε θες') + '</div><textarea id="schOff" class="mono" rows="2" readonly style="width:100%"></textarea><div class="btns" style="margin-top:8px"><button class="btn sm" type="button" id="schOffCopy">' + I('Copy the "turn off" command', 'Αντιγραφή της εντολής απενεργοποίησης') + '</button></div>' +
+      '<p class="sub" style="margin-top:12px">' + I('To paste: press the Windows key, type PowerShell, right-click it, choose "Run as administrator", right-click inside the window and press Enter. To see if it is on: Start, type "Task Scheduler", look for "VEAGLE PC Check monthly".', 'Για επικόλληση: πάτα το πλήκτρο Windows, πληκτρολόγησε PowerShell, δεξί κλικ, «Εκτέλεση ως διαχειριστής», δεξί κλικ μέσα στο παράθυρο και Enter. Για να δεις αν είναι ενεργό: Έναρξη, πληκτρολόγησε «Χρονοδιάγραμμα εργασιών» και ψάξε το «VEAGLE PC Check monthly».') + '</p>');
+
+    h += sect(I('Windows secrets, just for fun', 'Μυστικά των Windows, για πλάκα'), I('nothing here changes your PC settings', 'τίποτα εδώ δεν αλλάζει τις ρυθμίσεις του PC σου'));
+    h += box('secrets.txt', I('3 easter eggs', '3 easter eggs'),
+      '<p class="sub">' + I('These are harmless extras that Microsoft or its programs hide. You do them yourself, by hand. Nothing in this app does them for you.', 'Είναι αβλαβή «μυστικά» που κρύβουν η Microsoft ή τα προγράμματά της. Τα κάνεις εσύ, με το χέρι. Τίποτα σε αυτή την εφαρμογή δεν τα κάνει για σένα.') + '</p>' +
+      '<ol class="steps3">' +
+      '<li>' + I('<b>God Mode</b>: one folder that lists nearly all Windows settings in one place. <b>Create it:</b> on the Desktop, right-click an empty spot, choose New, then Folder. While the name is highlighted, type exactly <span class="mono">GodMode.{ED7BA470-8E54-465E-825C-99712043E01C}</span> and press Enter. The folder turns into a control-panel icon. <b>Remove it:</b> delete the icon like any folder.', '<b>God Mode</b>: ένας φάκελος που δείχνει σχεδόν όλες τις ρυθμίσεις των Windows σε ένα σημείο. <b>Φτιάξ’ τον:</b> στην Επιφάνεια εργασίας, δεξί κλικ σε κενό σημείο, Δημιουργία, Φάκελος. Όσο το όνομα είναι επιλεγμένο, πληκτρολόγησε ακριβώς <span class="mono">GodMode.{ED7BA470-8E54-465E-825C-99712043E01C}</span> και πάτα Enter. Ο φάκελος γίνεται εικονίδιο πίνακα ελέγχου. <b>Αφαίρεσέ τον:</b> σβήσε το εικονίδιο σαν κάθε φάκελο.') + '</li>' +
+      '<li>' + I('<b>Surf game in Edge</b>: a small hidden game. <b>Start it:</b> open Microsoft Edge, click the address bar, type <span class="mono">edge://surf</span> and press Enter. Steer with the arrow keys. Close the tab to stop.', '<b>Παιχνίδι surf στον Edge</b>: ένα μικρό κρυφό παιχνίδι. <b>Ξεκίνα το:</b> άνοιξε τον Microsoft Edge, πάτα τη γραμμή διευθύνσεων, πληκτρολόγησε <span class="mono">edge://surf</span> και πάτα Enter. Οδήγησε με τα βελάκια. Κλείσε την καρτέλα για να σταματήσεις.') + '</li>' +
+      '<li>' + I('<b>The spinning cog</b>: the gear (Settings) icon in some Windows 11 apps spins like a fidget spinner. <b>Try it:</b> in an app that shows a gear icon, such as Notepad, right-click the gear. It does not work in every version, so it is fine if nothing happens.', '<b>Το γρανάζι που γυρίζει</b>: το εικονίδιο γραναζιού (Ρυθμίσεις) σε κάποιες εφαρμογές των Windows 11 γυρίζει σαν fidget spinner. <b>Δοκίμασέ το:</b> σε μια εφαρμογή με εικονίδιο γραναζιού, όπως το Σημειωματάριο, κάνε δεξί κλικ στο γρανάζι. Δεν δουλεύει σε κάθε έκδοση, οπότε δεν πειράζει αν δεν γίνει τίποτα.') + '</li></ol>');
+
+    h += sect(I('Words explained', 'Εξηγήσεις λέξεων'), I('in plain language', 'με απλή γλώσσα'));
+    h += box('glossary.txt', GLOSSARY.length + I(' words', ' λέξεις'), '<dl class="kv" style="grid-template-columns:180px 1fr">' + GLOSSARY.map(function (x, i) { return V.lang === 'el' ? '<dt>' + esc(GLOSSARY_EL_NAMES[i]) + '</dt><dd>' + esc(GLOSSARY_EL[i]) + '</dd>' : '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>');
     root.innerHTML = h;
     refreshTexts();
     wire();
@@ -184,6 +225,10 @@ var TOOLS = (function (V, AI, CMP) {
   function refreshTexts() {
     var a = $('#ticketText'); if (a) a.value = ticket();
     var b = $('#fixText'); if (b) b.value = fixScript();
+    var root = g(D, 'meta.root', '') || 'C:\\path\\to\\VEAGLE-PC-Check';
+    var rq = String(root).replace(/'/g, "''");
+    var on = $('#schOn'); if (on) on.value = "$a = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File \"" + rq + "\\app\\collector.ps1\" -Quick -NoOpen'\r\n$t = New-ScheduledTaskTrigger -Weekly -WeeksInterval 4 -DaysOfWeek Sunday -At 8pm\r\n$s = New-ScheduledTaskSettingsSet -StartWhenAvailable\r\nRegister-ScheduledTask -TaskName 'VEAGLE PC Check monthly' -Action $a -Trigger $t -Settings $s -RunLevel Highest -Description 'Quick read-only PC health scan (VEAGLE PC Check)'";
+    var off = $('#schOff'); if (off) off.value = "Unregister-ScheduledTask -TaskName 'VEAGLE PC Check monthly' -Confirm:$false";
     var n = $('#profileNote'); if (n) n.textContent = V.PROFILES[V.profile].note;
     $$('#profileSeg button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-profile') === V.profile)); });
     var s = $('#profileSel'); if (s) s.value = V.profile;
@@ -194,6 +239,8 @@ var TOOLS = (function (V, AI, CMP) {
     on('#tkCopy', function () { AI.toast(AI.copyText($('#ticketText').value) ? 'Summary copied.' : 'Copy failed. Select the text and press Ctrl+C.'); });
     on('#fxCopy', function () { AI.toast(AI.copyText($('#fixText').value) ? 'Fix script copied.' : 'Copy failed. Select the text and press Ctrl+C.'); });
     on('#fxSave', function () { saveFile('veagle-fix-script.ps1', $('#fixText').value, 'text/plain', true); AI.toast('Saved veagle-fix-script.ps1. All commands inside are switched off.'); });
+    on('#schOnCopy', function () { AI.toast(AI.copyText($('#schOn').value) ? 'Copied. Paste it into PowerShell (as administrator).' : 'Copy failed.'); });
+    on('#schOffCopy', function () { AI.toast(AI.copyText($('#schOff').value) ? 'Copied. Paste it into PowerShell (as administrator).' : 'Copy failed.'); });
     on('#csvSave', function () { saveFile('veagle-findings-' + stamp() + '.csv', findingsCsv(), 'text/csv', true); AI.toast('Saved the findings as CSV.'); });
     on('#csvCopy', function () { AI.toast(AI.copyText(findingsCsv()) ? 'Copied.' : 'Copy failed.'); });
     on('#fleetSave', function () { saveFile('veagle-many-pcs-' + stamp() + '.csv', fleetCsv(), 'text/csv', true); AI.toast('Saved the table as CSV.'); });

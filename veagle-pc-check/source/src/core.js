@@ -151,6 +151,50 @@ function Engine(RAW) {
     '0x139': ['KERNEL_SECURITY_CHECK_FAILURE', 'Windows found damaged data. A driver or bad RAM.'],
     '0x154': ['UNEXPECTED_STORE_EXCEPTION', 'The drive (often an SSD) stopped answering.']
   };
+  var NOISE = {
+    'Microsoft-Windows-DistributedCOM|10016': 'A harmless permission message. Windows prints it very often. Safe to ignore.',
+    'Microsoft-Windows-DistributedCOM|10010': 'A background program was slow to start. Usually harmless, ignore unless something really does not work.',
+    'Microsoft-Windows-DistributedCOM|10005': 'A Windows service could not start. Harmless if the related app (for example Xbox or Gaming Services) is not needed.',
+    'Service Control Manager|7000': 'A service could not start. Matters only if the named service is something you use.',
+    'Service Control Manager|7001': 'A service did not start because another one it needs did not start.',
+    'Service Control Manager|7009': 'A service was too slow to start. Often seen after a slow boot. Usually harmless.',
+    'Service Control Manager|7023': 'A service stopped with an error. Check the name: if it is a program you no longer use, ignore it.',
+    'Service Control Manager|7031': 'A service crashed and Windows restarted it. A few are normal, many from the same name mean a broken program.',
+    'Service Control Manager|7034': 'A service crashed by itself. Many times from the same name means a broken or incompatible program.',
+    'Microsoft-Windows-Kernel-PnP|219': 'A driver could not load. Usually an old or unused device. Harmless unless a device really does not work.',
+    'Microsoft-Windows-Kernel-Power|41': 'The PC restarted without a clean shutdown (power cut, crash or holding the power button). Not harmless if it repeats.',
+    'Microsoft-Windows-WHEA-Logger|17': 'The hardware reported a small error it could fix. A few are normal. Many in a row can mean overclock or a failing part.',
+    'Microsoft-Windows-WHEA-Logger|18': 'The hardware reported a serious error. Not harmless, see the stability findings.',
+    'Microsoft-Windows-WHEA-Logger|19': 'The hardware reported a corrected error. A few are normal.',
+    'Schannel|36887': 'A secure connection was refused by the other side. Harmless noise from browsers and programs.',
+    'Schannel|36874': 'A program tried an old secure connection type that is no longer accepted. Harmless noise.',
+    'Microsoft-Windows-GroupPolicy|1129': 'The PC could not reach a company network to read its rules. Normal at home.',
+    'Microsoft-Windows-DNS-Client|1014': 'A website name took too long to be looked up. A few are normal on slow or busy networks.',
+    'Microsoft-Windows-Time-Service|134': 'The clock could not sync with the internet time server for a moment. Harmless if rare.',
+    'Microsoft-Windows-Time-Service|36': 'The clock has not synced for a while. Check the time sync finding.',
+    'Microsoft-Windows-CAPI2|4176': 'A certificate file could not be read. Usually harmless background noise.',
+    'Microsoft-Windows-CAPI2|513': 'The certificate service could not make a backup copy of a system file. Usually harmless.',
+    'Microsoft-Windows-Diagnostics-Performance|100': 'Windows noted a slow start. See the boot time finding.',
+    'Microsoft-Windows-Diagnostics-Performance|101': 'A program slowed down the start of Windows.',
+    'Microsoft-Windows-WindowsUpdateClient|20': 'An update failed to install. Vendor driver extensions failing is usually harmless.',
+    'Microsoft-Windows-WindowsUpdateClient|25': 'Windows could not check for updates this time. Try again later.',
+    'Microsoft-Windows-FilterManager|3': 'Windows could not attach a file filter to a drive. Usually a USB drive. Harmless.',
+    'Ntfs|55': 'Windows found a problem in the file system of a drive. Back up and run a drive check.',
+    'Volsnap|36': 'The space reserved for restore points is full. See the System Restore finding.',
+    'disk|7': 'Windows found a bad block on a drive. Not harmless: back up and check the drive health.',
+    'disk|11': 'A drive did not answer correctly. Check the cable and the drive health.',
+    'disk|51': 'A drive had a read or write error. Check the drive health.',
+    'disk|153': 'Windows had to retry a read or write on a drive. A few are normal, many point to a failing drive or cable.',
+    'nvlddmkm|153': 'The NVIDIA graphics driver restarted. A burst in a game is common. Many over time means a driver or heat problem.',
+    'Display|4101': 'The graphics driver stopped responding and recovered. A few are normal, many mean a driver or heat problem.',
+    'Application Error|1000': 'A program crashed. See which one in the crash list.',
+    'Application Hang|1002': 'A program stopped responding and was closed.',
+    'Microsoft-Windows-Search|10024': 'The Windows search indexer was closed. See the Windows Search finding.',
+    'Tcpip|4266': 'Windows ran out of free network ports for a moment. See the network ports finding.',
+    'Microsoft-Windows-BitLocker-Driver|24641': 'A BitLocker message during restart. Usually harmless if BitLocker works.'
+  };
+  function noiseFor(provider, id) { return NOISE[provider + '|' + id] || ''; }
+
   var META = {
     'stab-shutdown': [10, 'Easy', 'Safe'], 'stab-bsod': [20, 'Medium', 'Safe'], 'stab-bsod-codes': [5, 'Easy', 'Safe'], 'stab-whea': [30, 'Ask a pro', 'Careful'], 'stab-gpu': [10, 'Easy', 'Safe'],
     'stab-disk': [20, 'Medium', 'Back up first'], 'stab-dism': [60, 'Medium', 'Safe'], 'stab-crashes': [10, 'Easy', 'Safe'], 'stab-services': [10, 'Easy', 'Safe'], 'stab-ports': [15, 'Ask a pro', 'Safe'],
@@ -165,12 +209,14 @@ function Engine(RAW) {
     'upd-patch': [15, 'Easy', 'Safe'], 'upd-apps': [15, 'Easy', 'Safe'], 'upd-bios': [30, 'Ask a pro', 'Careful'], 'upd-gpu': [10, 'Easy', 'Safe'], 'upd-devices': [10, 'Medium', 'Safe'], 'drv-bios-age': [10, 'Medium', 'Safe'],
     'perf-boot': [15, 'Easy', 'Safe'], 'perf-startup': [10, 'Easy', 'Safe'], 'perf-ram': [5, 'Easy', 'Safe'], 'perf-ramfull': [15, 'Medium', 'Safe'], 'perf-xmp': [15, 'Ask a pro', 'Careful'], 'perf-dual': [20, 'Medium', 'Safe'],
     'perf-fast': [60, 'Medium', 'Back up first'], 'perf-power': [2, 'Easy', 'Safe'], 'perf-services': [10, 'Medium', 'Safe'], 'soft-emu': [10, 'Easy', 'Safe'], 'soft-xtu': [10, 'Easy', 'Safe'], 'soft-opt': [10, 'Medium', 'Safe'],
+    'sto-where': [5, 'Easy', 'Safe'], 'sto-installers': [10, 'Easy', 'Safe'], 'sto-winold': [10, 'Easy', 'Safe'], 'sto-wucache': [5, 'Easy', 'Safe'], 'sto-recycle': [3, 'Easy', 'Safe'], 'sto-bigfiles': [10, 'Easy', 'Safe'],
+    'soft-pup': [15, 'Medium', 'Safe'], 'soft-avmany': [10, 'Medium', 'Safe'], 'gam-mode': [2, 'Easy', 'Safe'], 'gam-hags': [5, 'Easy', 'Safe'], 'gam-dvr': [2, 'Easy', 'Safe'],
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe']
   };
   var PROFILES = {
     home: { label: 'Home PC', note: 'Balanced advice for a normal home computer.' },
     work: { label: 'Work or clinic PC', note: 'Security, backups and time sync count one level more.', areas: ['Security', 'Backup'], ids: ['net-time', 'sec-def-sigs'] },
-    gaming: { label: 'Gaming PC', note: 'Graphics, memory speed and storage speed count one level more.', ids: ['perf-xmp', 'stab-gpu', 'perf-power', 'upd-gpu', 'perf-dual', 'perf-fast', 'perf-boot', 'sto-hdd', 'sto-temp'] }
+    gaming: { label: 'Gaming PC', note: 'Graphics, memory speed and storage speed count one level more.', ids: ['gam-mode', 'gam-hags', 'gam-dvr', 'perf-xmp', 'stab-gpu', 'perf-power', 'upd-gpu', 'perf-dual', 'perf-fast', 'perf-boot', 'sto-hdd', 'sto-temp'] }
   };
   function bump(sev) { return sev === 'info' ? 'low' : (sev === 'low' ? 'medium' : 'high'); }
   function withProfile(base, key) {
@@ -619,7 +665,7 @@ function Engine(RAW) {
         bl ? 'BitLocker volumes found, and event 24641 may appear in your System log.' : '');
     });
     R(function () {
-      if (!/saver/i.test(g(D, 'settings.powerPlan', '')) || g(D, 'settings.hasBattery', false)) return null;
+      var pk = g(D, 'settings.powerPlanKind', ''); if (!(pk === 'saver' || (!pk && /saver/i.test(g(D, 'settings.powerPlan', '')))) || g(D, 'settings.hasBattery', false)) return null;
       return F('perf-power', 'Performance', 'low', 'Power plan is Power saver on a desktop PC', 'Power saver limits CPU speed.', [S('Switch to Balanced or High performance.', 'powercfg /setactive SCHEME_BALANCED')], '');
     });
     R(function () {
@@ -909,6 +955,94 @@ function Engine(RAW) {
         'BIOS ' + g(D, 'system.bios.version', '') + ' dated ' + fmtDate(d));
     });
 
+    /* ================= v0.4: disk space, unwanted software, gaming ================= */
+    var STO = EX.storage || null, GAM = EX.gaming || {};
+    function mbFmt(mb) { return mb >= 1024 ? fmtNum(mb / 1024, 1) + ' GB' : fmtNum(mb) + ' MB'; }
+    function folderMB(name) { var f = arr(STO && STO.folders).filter(function (x) { return x.name === name; })[0]; return f ? num(f.mb) : 0; }
+    R(function () {
+      if (!STO || !arr(STO.folders).length) return null;
+      var top = arr(STO.folders).filter(function (x) { return x.name !== 'Program Files' && x.name !== 'ProgramData'; }).slice(0, 6);
+      var sys = arr(STO.systemFiles).map(function (x) { return x.name + ' ' + mbFmt(x.mb); });
+      return F('sto-where', 'Storage', 'info', 'Where your disk space went',
+        'This is a list of the biggest places on your drive, so you can see what is using space. Nothing here is wrong by itself. It helps you decide what to move or delete.',
+        [S('Look at the list under "What we found". Folders such as Downloads, Videos and Desktop are yours: you decide what to keep.'),
+         S('Do NOT delete anything from Windows or Program Files by hand. Use "Settings, System, Storage, Temporary files" for system leftovers.'),
+         S('Move big things you rarely use (videos, old projects, installers) to an external disk or to OneDrive, then delete the copy on this PC.')],
+        top.map(function (x) { return x.name + ': ' + mbFmt(x.mb) + (x.partial ? ' (at least)' : ''); }).join('\n') + (sys.length ? '\nSystem files: ' + sys.join(', ') : ''));
+    });
+    R(function () {
+      var o = STO && STO.oldInstallers; if (!o || num(o.mb) < 500) return null;
+      return F('sto-installers', 'Storage', 'low', 'Old installers in Downloads take ' + mbFmt(o.mb) + ' (' + o.count + ' files)',
+        'Setup files (.exe, .msi), disk images (.iso) and archives (.zip, .rar) that you downloaded more than 2 months ago are usually not needed any more. The program they installed is already on your PC.',
+        [S('Open File Explorer, then the Downloads folder. Click "Date modified" to sort the oldest first.'), S('Look at each old .exe, .msi, .iso, .zip, .rar file. If you do not need it, right-click it and choose Delete. It goes to the Recycle Bin first, so you can still get it back.'), S('Empty the Recycle Bin only when you are sure.')], '');
+    });
+    R(function () {
+      var w = folderMB('Windows.old'); if (w < 1000) return null;
+      return F('sto-winold', 'Storage', 'low', 'An old Windows copy (Windows.old) takes ' + mbFmt(w),
+        'After a big Windows upgrade, Windows keeps the previous version for a while in case you want to go back. After about 10 days you usually do not need it, and it frees a lot of space. Windows removes it by itself after a month.',
+        [S('Open Start, type "Disk Cleanup" and open it. Choose drive C:.'), S('Click "Clean up system files", wait, then tick "Previous Windows installation(s)" and click OK. You cannot go back to the older Windows afterwards.')], 'Windows.old: ' + mbFmt(w));
+    });
+    R(function () {
+      var u = folderMB('Windows Update downloads'); if (u < 2000) return null;
+      return F('sto-wucache', 'Storage', 'low', 'Windows Update leftovers take ' + mbFmt(u),
+        'Windows keeps the files of past updates in a cache folder. It normally cleans it by itself. When it grows large, it can be cleaned safely.',
+        [S('Open Settings, System, Storage, "Temporary files". Tick "Windows Update Cleanup" and "Delivery Optimization Files" and click Remove files.')], 'Cache: ' + mbFmt(u));
+    });
+    R(function () {
+      var r = STO && STO.recycleBinMB; if (r == null || r < 1000) return null;
+      return F('sto-recycle', 'Storage', 'low', 'The Recycle Bin holds ' + mbFmt(r),
+        'Deleted files are not gone until the Recycle Bin is emptied. They still use space.',
+        [S('Right-click the Recycle Bin on the Desktop and look inside first. Restore what you still need.'), S('Right-click the Recycle Bin again and choose "Empty Recycle Bin".')], '');
+    });
+    R(function () {
+      var b = arr(STO && STO.bigFiles); if (!b.length) return null;
+      var tot = sum(b, function (x) { return x.mb; });
+      if (tot < 3000) return null;
+      return F('sto-bigfiles', 'Storage', 'info', 'The ' + b.length + ' biggest files in your folders add up to ' + mbFmt(tot),
+        'These are single files over 300 MB in Downloads, Documents, Desktop and Videos. Big files are the quickest way to free space.',
+        [S('Read the list under "What we found". Do you still need each one?'), S('Move the ones you want to keep to an external disk. Delete the others (they go to the Recycle Bin first).')],
+        b.map(function (x) { return mbFmt(x.mb) + '  ' + x.path + '  (' + fmtDate(x.modified) + ')'; }).join('\n'));
+    });
+
+    R(function () {
+      var PUP = /driver\s*(booster|updater|easy|talent|genius|pack)|advanced\s*systemcare|iobit|pc\s*(cleaner|optimi[sz]er|speed|tune|accelerat)|reimage|mypc\s*backup|web\s*companion|ask\s*toolbar|conduit|babylon|wajam|opencandy|segurazo|slimware|registry\s*(cleaner|booster|fix)|system\s*mechanic|total\s*av|mackeeper|pc\s*app\s*store|coupon|search\s*protect|yac\b|delta\s*search/i;
+      var hits = appsMatching(PUP); if (!hits.length) return null;
+      return F('soft-pup', 'Software', hits.length >= 3 ? 'medium' : 'low', hits.length + ' program' + (hits.length > 1 ? 's' : '') + ' of the kind that often come bundled or do little good',
+        'Some programs promise to "speed up" or "clean" your PC, update your drivers or protect you, and mostly show ads or scare you into paying. Others come hidden inside free downloads. Not every name on the list is bad, so check each one.',
+        [S('Read the names under "What we found". Do you remember installing each one on purpose?'), S('If not, open Settings, Apps, Installed apps, click the three dots next to the name and choose Uninstall.'), S('Never install "driver updater" or "PC cleaner" programs. Windows Update and your PC maker already update drivers safely.'), S('After removing, restart and run a Quick scan in Windows Security.')],
+        hits.join(', '));
+    });
+    R(function () {
+      var t = appsMatching(/mcafee|norton|trend micro|kaspersky|avast|avg\b|bitdefender|eset|malwarebytes|f-secure|webroot/i);
+      var av = arr(g(D, 'security.antivirus', [])).filter(function (a) { return a.enabled; });
+      var thirdActive = av.filter(function (a) { return !/windows defender|microsoft defender/i.test(a.name || ''); });
+      if (t.length < 2 || ids2('sec-av2')) return null;
+      return F('soft-avmany', 'Software', 'low', t.length + ' antivirus-type programs are installed',
+        'Having several antivirus programs slows the PC and they can fight each other. One good antivirus is enough. Windows Security (Defender) is already included.',
+        [S('Open Settings, Apps, Installed apps. Keep one security program (or none, and use Windows Security), and uninstall the rest.'), S('Some makers offer a removal tool on their website. Use it if a normal uninstall fails.')], t.join(', ') + (thirdActive.length ? ' (active: ' + thirdActive.map(function (a) { return a.name; }).join(', ') + ')' : ''));
+    });
+
+    R(function () {
+      if (GAM.gameMode !== false) return null;
+      return F('gam-mode', 'Performance', 'info', 'Game Mode is switched off',
+        'Game Mode tells Windows to give your game priority and to hold back updates and background work while you play. It is on by default and helps a little, mostly on weaker PCs.',
+        [S('Open Settings, Gaming, Game Mode, and switch it on.')], '');
+    });
+    R(function () {
+      if (GAM.hags !== false) return null;
+      var gp = arr(D.gpus).filter(function (x) { return /nvidia|amd|radeon/i.test(x.name || ''); })[0];
+      if (!gp) return null;
+      return F('gam-hags', 'Performance', 'info', 'Hardware-accelerated GPU scheduling is off',
+        'This setting lets the graphics card manage its own memory. On recent graphics cards and drivers it can make games a little smoother. On some PCs it makes no difference or causes problems, so test it and keep what works.',
+        [S('Open Settings, System, Display, Graphics, "Change default graphics settings".'), S('Switch "Hardware-accelerated GPU scheduling" on and restart. Play your usual game. If it stutters or crashes, switch it back off.')], gp.name);
+    });
+    R(function () {
+      if (GAM.gameDvr !== true) return null;
+      return F('gam-dvr', 'Performance', 'info', 'Xbox game recording is switched on in the background',
+        'Windows can quietly record gameplay clips in the background. This costs a little speed in games. If you never use it, you can switch it off.',
+        [S('Open Settings, Gaming, Captures, and switch "Record what happened" off.')], '');
+    });
+
     out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });
     return out;
   }
@@ -1028,7 +1162,7 @@ function Engine(RAW) {
     fmtNum: fmtNum, fmtGB: fmtGB, fmtDate: fmtDate, fmtDT: fmtDT, fmtUptime: fmtUptime, ageDays: ageDays,
     evGroups: evGroups, evCount: evCount, RE: RE, findings: findings, good: good, score: sc, counts: counts,
     SEV_ORDER: SEV_ORDER, AREAS: AREAS, readiness: readiness(), battery: g(D, 'battery', null),
-    withProfile: withProfile, scoreOf: score, META: META, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
+    withProfile: withProfile, scoreOf: score, META: META, noiseFor: noiseFor, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
   };
 }
 var V = Engine(window.__PCDATA__ || null);

@@ -27,12 +27,13 @@
     $('#findQ').addEventListener('input', function (e) { UI.state.q = e.target.value; UI.drawFindings(); });
     document.addEventListener('input', function (e) { if (e.target && e.target.id === 'appQ') { UI.setAppQ(e.target.value); UI.drawApps(); } });
     $('#btnPrint').addEventListener('click', function () { window.print(); });
+    $('#btnLang').addEventListener('click', function () { I18N.set(V.lang === 'el' ? 'en' : 'el'); UI.renderAll(); CMP.init(); TOOLS.init(); I18N.apply(); });
     $('#btnShare').addEventListener('click', function () { SHARE.download(); });
     document.addEventListener('keydown', function (e) {
       if (e.target && /^(input|textarea)$/i.test(e.target.tagName)) return;
       if (e.key === '/') { e.preventDefault(); go('findings'); $('#findQ').focus(); }
     });
-    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (/^(dashboard|findings|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true); });
+    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (/^(summary|dashboard|findings|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true); });
   }
 
   /* ---------- boot intro ---------- */
@@ -66,11 +67,13 @@
     }
     wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init();
     var h = location.hash.replace('#', '');
-    if (/^(dashboard|findings|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true);
+    if (/^(summary|dashboard|findings|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true);
     var dm = g(D, 'meta.isAdmin', true) === false; if (dm) { var chip = document.createElement('span'); chip.className = 'chip warn'; chip.textContent = 'not run as admin: partial'; $('.topright').insertBefore(chip, $('#btnPrint')); }
     if (g(D, 'meta.mode', 'full') === 'quick') { var qc = document.createElement('span'); qc.className = 'chip warn'; qc.textContent = 'quick scan'; $('.topright').insertBefore(qc, $('#btnShare')); }
     if (g(D, 'meta.shareSafe', false)) { var sc = document.createElement('span'); sc.className = 'chip'; sc.textContent = 'share-safe copy: personal details removed'; $('.topright').insertBefore(sc, $('#btnShare')); var sb = $('#btnShare'); if (sb) sb.style.display = 'none'; }
     $('#footL').textContent = 'VEAGLE PC Check v' + g(D, 'meta.version', '?') + ' - read-only scan in ' + g(D, 'meta.durationSec', '?') + ' s, nothing was changed on this PC';
+    I18N.apply();
+    if (window.MutationObserver) { var pend = false; new MutationObserver(function () { if (pend || V.lang !== 'el') return; pend = true; requestAnimationFrame(function () { pend = false; I18N.apply(); }); }).observe(document.body, { childList: true, subtree: true }); }
     bootIntro(function () { UI.countUp(); });
   }
   init();

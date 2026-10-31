@@ -1856,6 +1856,78 @@
     "pictures": false
    },
    "winRE": true
+  },
+  "storage": {
+   "folders": [
+    {
+     "name": "Downloads",
+     "path": "C:\\Users\\demo\\Downloads",
+     "mb": 48210,
+     "partial": false
+    },
+    {
+     "name": "Videos",
+     "path": "C:\\Users\\demo\\Videos",
+     "mb": 31800,
+     "partial": false
+    },
+    {
+     "name": "AppData Local",
+     "path": "C:\\Users\\demo\\AppData\\Local",
+     "mb": 22400,
+     "partial": false
+    },
+    {
+     "name": "Windows Update downloads",
+     "path": "C:\\Windows\\SoftwareDistribution\\Download",
+     "mb": 3100,
+     "partial": false
+    },
+    {
+     "name": "Documents",
+     "path": "C:\\Users\\demo\\Documents",
+     "mb": 9100,
+     "partial": false
+    },
+    {
+     "name": "Temp (user)",
+     "path": "C:\\Users\\demo\\AppData\\Local\\Temp",
+     "mb": 1200,
+     "partial": false
+    }
+   ],
+   "systemFiles": [
+    {
+     "name": "hiberfil.sys",
+     "mb": 12800
+    },
+    {
+     "name": "pagefile.sys",
+     "mb": 4096
+    }
+   ],
+   "bigFiles": [
+    {
+     "path": "C:\\Users\\demo\\Downloads\\Win11_Setup.iso",
+     "mb": 5400,
+     "modified": "2026-02-11T10:12:00"
+    },
+    {
+     "path": "C:\\Users\\demo\\Videos\\trip2025.mp4",
+     "mb": 3900,
+     "modified": "2025-08-20T21:40:00"
+    }
+   ],
+   "oldInstallers": {
+    "count": 23,
+    "mb": 7400
+   },
+   "recycleBinMB": 1850
+  },
+  "gaming": {
+   "gameDvr": true,
+   "gameMode": false,
+   "hags": false
   }
  }
 }

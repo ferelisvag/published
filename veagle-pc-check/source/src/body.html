@@ -13,7 +13,8 @@
       <div><b>VEAGLE</b> <span>// PC CHECK</span></div>
     </div>
     <nav role="tablist" aria-label="Report sections" id="nav">
-      <button role="tab" data-tab="dashboard" aria-selected="true">Dashboard</button>
+      <button role="tab" data-tab="summary" aria-selected="true">Summary</button>
+      <button role="tab" data-tab="dashboard" aria-selected="false">Dashboard</button>
       <button role="tab" data-tab="findings" aria-selected="false">Findings<span class="n" id="navcount"></span></button>
       <button role="tab" data-tab="hardware" aria-selected="false">Hardware</button>
       <button role="tab" data-tab="software" aria-selected="false">Software</button>
@@ -27,6 +28,7 @@
       <label class="chip" for="profileSel">PC type <select id="profileSel" aria-label="Type of PC"></select></label>
       <span class="chip" id="chipOs"></span>
       <span class="chip" id="chipDate"></span>
+      <button class="btn sm" id="btnLang" type="button" title="Language">EL</button>
       <button class="btn sm" id="btnShare" type="button" title="Download a copy of this report with your personal details removed">Share-safe copy</button>
       <button class="btn sm" id="btnPrint" type="button">Print / PDF</button>
     </div>
@@ -36,8 +38,11 @@
 <main>
   <div id="demo"></div>
 
-  <section class="tabpane on" id="tab-dashboard" role="tabpanel" aria-label="Dashboard">
+  <section class="tabpane on" id="tab-summary" role="tabpanel" aria-label="Summary"></section>
+
+  <section class="tabpane" id="tab-dashboard" role="tabpanel" aria-label="Dashboard">
     <div id="startBox"></div>
+    <div id="sinceBox"></div>
     <div class="grid">
       <div class="win s4" id="wHealth"></div>
       <div class="win s4" id="wRadar"></div>

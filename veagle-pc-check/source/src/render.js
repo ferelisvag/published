@@ -29,6 +29,7 @@ var UI = (function (V) {
   function wrapWin(name, status, inner) { return '<div class="win" style="margin-bottom:18px"><header><span>' + esc(name) + '</span><span class="st">' + esc(status || '') + '</span></header><div class="body">' + inner + '</div></div>'; }
   function mark(state, text) { return '<div><span class="mark ' + state + '">' + (state === 'ok' ? '&#10003;' : state === 'bad' ? '!' : '-') + '</span><span>' + text + '</span></div>'; }
   function cmdBox(cmd) { return '<div class="cmd"><code>' + esc(cmd) + '</code><button class="btn sm" type="button" data-copy="' + esc(cmd) + '">Copy</button></div>'; }
+  function fmtMB(mb) { return num(mb) >= 1024 ? fmtNum(num(mb) / 1024, 1) + ' GB' : fmtNum(num(mb)) + ' MB'; }
   function tf(v) { return v === true ? 'yes' : v === false ? 'no' : 'unknown'; }
   var GL = [
     ['BIOS', 'The first program that runs when the PC starts, before Windows.'], ['UEFI', 'The modern BIOS.'], ['SMART', 'A health report that every drive keeps about itself.'],
@@ -98,7 +99,8 @@ var UI = (function (V) {
     var top = V.findings.filter(function (f) { return f.sev !== 'info'; }).slice(0, 3);
     var h;
     if (!top.length) h = '<div class="sub">Nothing needs doing. Re-run the scan after big changes.</div>';
-    else h = top.map(function (f, i) {
+    else h = top.map(function (f0, i) {
+      var f = V.tf(f0);
       return '<div class="action"><div class="num">' + (i + 1) + '</div><div style="min-width:0"><div class="row" style="gap:8px">' + tag(f.sev) + '<span class="area">' + esc(f.area) + '</span></div>' +
         '<div style="font-family:var(--head);font-weight:700;font-size:16px;margin:4px 0">' + esc(f.title) + '</div>' +
         metaChips(f) + '<button class="btn sm" type="button" data-open="' + esc(f.id) + '">Show me how, step by step</button></div></div>';
@@ -107,9 +109,44 @@ var UI = (function (V) {
   }
   function rStart() {
     var el = $('#startBox'); if (!el) return;
-    var n = V.counts.high + V.counts.medium + V.counts.low;
-    var msg = n ? 'Your PC has <b>' + n + ' thing' + (n > 1 ? 's' : '') + '</b> worth looking at. You do not need to fix them all. Start with the "Do this first" box: it has the 3 that matter most.' : 'Nothing needs fixing right now. You can close this page.';
-    el.innerHTML = '<div class="startbox"><b>New to this?</b> ' + msg + ' Every problem is explained in plain words, with exact clicks. <button class="btn sm" type="button" data-tab-go="tools">Beginner guide</button></div>';
+    var I = V.I, n = V.counts.high + V.counts.medium + V.counts.low;
+    var msg = n ? I('Your PC has <b>' + n + ' thing' + (n > 1 ? 's' : '') + '</b> worth looking at. You do not need to fix them all. Start with the "Do this first" box: it has the 3 that matter most.', 'Ο υπολογιστής σου έχει <b>' + n + (n > 1 ? ' πράγματα' : ' πράγμα') + '</b> που αξίζει να δεις. Δεν χρειάζεται να τα διορθώσεις όλα. Ξεκίνα από το κουτί «Do this first»: έχει τα 3 σημαντικότερα.') : I('Nothing needs fixing right now. You can close this page.', 'Τίποτα δεν χρειάζεται διόρθωση τώρα. Μπορείς να κλείσεις τη σελίδα.');
+    el.innerHTML = '<div class="startbox"><b>' + I('New to this?', 'Πρώτη φορά;') + '</b> ' + msg + ' ' + I('Every problem is explained in plain words, with exact clicks.', 'Κάθε πρόβλημα εξηγείται με απλά λόγια, με ακριβή κλικ.') + ' <button class="btn sm" type="button" data-tab-go="tools">' + I('Beginner guide', 'Οδηγός για αρχάριους') + '</button></div>';
+  }
+  function rSince() {
+    var el = $('#sinceBox'); if (!el) return;
+    var P = V.RAW && V.RAW.previous; if (!P || !P.meta || !P.system) { el.innerHTML = ''; return; }
+    var O = V.Engine(P);
+    var oi = {}, ni = {}; O.findings.forEach(function (f) { oi[f.id] = 1; }); V.findings.forEach(function (f) { ni[f.id] = 1; });
+    var fixed = O.findings.filter(function (f) { return !ni[f.id] && f.sev !== 'info'; });
+    var fresh = V.findings.filter(function (f) { return !oi[f.id] && f.sev !== 'info'; });
+    var ds = V.score.score - O.score.score;
+    var days = Math.max(0, Math.round((new Date(g(D, 'meta.generated', 0)) - new Date(g(P, 'meta.generated', 0))) / 86400000));
+    var I = V.I;
+    var txt = ds > 0 ? I('better', 'καλύτερο') : (ds < 0 ? I('worse', 'χειρότερο') : I('the same', 'το ίδιο'));
+    var when = days === 0 ? I('earlier today', 'νωρίτερα σήμερα') : I(days + ' day' + (days > 1 ? 's' : '') + ' ago', 'πριν ' + days + (days > 1 ? ' ημέρες' : ' ημέρα'));
+    var h = '<div class="since"><b>' + I('Since your last scan', 'Από την τελευταία σάρωση') + ' (' + when + '):</b> ' + I('your score is', 'ο βαθμός σου είναι') + ' <b>' + txt + '</b> (' + O.score.score + ' → ' + V.score.score + ', ' + (ds > 0 ? '+' : '') + ds + '). ';
+    h += I(fixed.length + ' problem' + (fixed.length === 1 ? '' : 's') + ' fixed, ' + fresh.length + ' new. ', fixed.length + ' προβλήματα διορθώθηκαν, ' + fresh.length + ' νέα. ');
+    if (fixed.length) h += '<br><span class="sub">' + I('Fixed', 'Διορθώθηκαν') + ': ' + esc(fixed.slice(0, 5).map(function (f) { return V.tf(f).title; }).join('; ')) + '</span>';
+    if (fresh.length) h += '<br><span class="sub">' + I('New', 'Νέα') + ': ' + esc(fresh.slice(0, 5).map(function (f) { return V.tf(f).title; }).join('; ')) + '</span>';
+    el.innerHTML = h + '</div>';
+  }
+  function rSummary() {
+    var el = $('#tab-summary'); if (!el) return;
+    var s = V.score, c = V.counts, top = V.findings.filter(function (f) { return f.sev !== 'info'; }).slice(0, 3);
+    var I = V.I;
+    var light = c.high ? 'red' : (c.medium || s.score < 85 ? 'amber' : 'green');
+    var head = light === 'red' ? I('Your PC needs attention', 'Ο υπολογιστής σου χρειάζεται προσοχή') : (light === 'amber' ? I('Your PC is mostly fine', 'Ο υπολογιστής σου είναι ως επί το πλείστον καλά') : I('Your PC looks healthy', 'Ο υπολογιστής σου φαίνεται υγιής'));
+    var line = light === 'red' ? I('There ' + (c.high === 1 ? 'is 1 serious problem' : 'are ' + c.high + ' serious problems') + ' to look at first. Nothing is urgent if the PC works fine today, but do not ignore it.', (c.high === 1 ? 'Υπάρχει 1 σοβαρό πρόβλημα' : 'Υπάρχουν ' + c.high + ' σοβαρά προβλήματα') + ' να δεις πρώτα. Τίποτα δεν είναι επείγον αν ο υπολογιστής δουλεύει σήμερα, αλλά μην το αγνοήσεις.')
+      : (light === 'amber' ? I('Nothing serious, but a few things are worth fixing when you have time.', 'Τίποτα σοβαρό, αλλά μερικά πράγματα αξίζει να διορθωθούν όταν έχεις χρόνο.') : I('We found nothing that needs fixing. Run the check again after big changes.', 'Δεν βρήκαμε τίποτα που να χρειάζεται διόρθωση. Τρέξε ξανά τον έλεγχο μετά από μεγάλες αλλαγές.'));
+    var h = '<div class="summary ' + light + '"><div class="lamp"></div><div><h2>' + esc(head) + '</h2><p>' + esc(line) + '</p><p class="sub">' + I('Score ' + s.score + ' out of 100. Scanned ' + fmtDT(g(D, 'meta.generated', null)) + ' on ' + g(D, 'meta.computer', 'this PC') + '.', 'Βαθμός ' + s.score + ' στα 100. Σάρωση: ' + fmtDT(g(D, 'meta.generated', null)) + ' στο ' + g(D, 'meta.computer', 'αυτό το PC') + '.') + '</p></div></div>';
+    h += '<div id="sinceBox2"></div>';
+    h += '<div class="sect"><h2>What to do, in this order</h2><span>only the most important</span></div>';
+    h += top.length ? top.map(function (f0, i) { var f = V.tf(f0); return '<div class="action"><div class="num">' + (i + 1) + '</div><div style="min-width:0"><div style="font-family:var(--head);font-weight:700;font-size:17px;margin:2px 0">' + esc(f.title) + '</div>' + metaChips(f) + '<button class="btn sm" type="button" data-open="' + esc(f.id) + '">Show me how, step by step</button></div></div>'; }).join('') : '<div class="sub">Nothing to do.</div>';
+    h += '<div class="btns" style="margin-top:18px"><button class="btn sm" type="button" data-tab-go="dashboard">See all details</button><button class="btn sm" type="button" data-tab-go="tools">Beginner guide</button><button class="btn sm" type="button" id="btnPrint2">Print this page</button></div>';
+    el.innerHTML = h;
+    var sb = $('#sinceBox2'); if (sb) { var src = $('#sinceBox'); sb.innerHTML = src ? src.innerHTML : ''; }
+    var pb = $('#btnPrint2'); if (pb) pb.addEventListener('click', function () { window.print(); });
   }
   function rCpu() {
     var c = g(D, 'system.cpu', null);
@@ -270,9 +307,10 @@ var UI = (function (V) {
   function drawFindings(openId) {
     var q = state.q.toLowerCase();
     var list = V.findings.filter(function (f) { return (state.sev === 'all' || f.sev === state.sev) && (!q || (f.title + ' ' + f.why + ' ' + f.area + ' ' + f.evidence).toLowerCase().indexOf(q) >= 0); });
-    $('#findList').innerHTML = list.length ? list.map(function (f, i) {
+    $('#findList').innerHTML = list.length ? list.map(function (f0, i) {
+      var f = V.tf(f0);
       var steps = f.steps.length ? '<ol class="steps">' + f.steps.map(function (s) { return '<li><span>' + gloss(esc(s.t)) + '</span>' + (s.cmd ? cmdBox(s.cmd) : '') + '</li>'; }).join('') + '</ol>' : '';
-      return '<div class="finding' + (f.id === openId ? ' open' : '') + '" data-id="' + esc(f.id) + '"><button class="fh" type="button" aria-expanded="' + (f.id === openId) + '"><span class="fid">#' + String(V.findings.indexOf(f) + 1).padStart(2, '0') + '</span>' + tag(f.sev) + '<span class="t">' + esc(f.title) + '</span><span class="area">' + esc(f.area) + '</span></button>' +
+      return '<div class="finding' + (f.id === openId ? ' open' : '') + '" data-id="' + esc(f.id) + '"><button class="fh" type="button" aria-expanded="' + (f.id === openId) + '"><span class="fid">#' + String(V.findings.indexOf(f0) + 1).padStart(2, '0') + '</span>' + tag(f.sev) + '<span class="t">' + esc(f.title) + '</span><span class="area">' + esc(f.area) + '</span></button>' +
         '<div class="fb">' + metaChips(f) + '<div class="lbl">In plain words</div><p class="why">' + gloss(esc(f.why)) + '</p>' + (f.evidence ? '<div class="ev"><span class="lbl">What we found</span><br>' + esc(f.evidence).replace(/\n/g, '<br>') + '</div>' : '') + steps +
         '<div class="btns" style="margin-top:14px"><button class="btn sm" type="button" data-ask="' + esc(f.id) + '">Ask an AI about this</button></div></div></div>';
     }).join('') : '<div class="win"><div class="body sub">No findings match.</div></div>';
@@ -316,6 +354,13 @@ var UI = (function (V) {
     arr(g(D, 'drivers.problemDevices', [])).forEach(function (x) { var k = x['class'] + '|' + x.name + '|' + x.status + '|' + x.problem; if (pidx[k] == null) { pidx[k] = pdv.length; pdv.push({ cls: x['class'], name: x.name, status: x.status, problem: x.problem, n: 0 }); } pdv[pidx[k]].n++; });
     h += table([{ h: 'Class', k: 'cls' }, { h: 'Device', k: 'name' }, { h: 'Count', cls: 'num', k: 'n' }, { h: 'Status', k: 'status' }, { h: 'Problem', k: 'problem' }], pdv, 'No devices report a problem.');
     h += '<div style="height:14px"></div>' + table([{ h: 'Older non-Microsoft drivers', k: 'device' }, { h: 'Provider', k: 'provider' }, { h: 'Version', k: 'version' }, { h: 'Date', f: function (d) { return fmtDate(d.date); } }], arr(g(D, 'drivers.oldDrivers', [])), 'No old drivers found.');
+    var STO = g(D, 'extras.storage', null);
+    if (STO && arr(STO.folders).length) {
+      h += sect('Where the disk space went', 'folders, biggest first');
+      h += table([{ h: 'Place', k: 'name' }, { h: 'Size', cls: 'num', f: function (x) { return fmtMB(x.mb) + (x.partial ? ' +' : ''); } }, { h: 'Path', k: 'path' }], arr(STO.folders), 'Nothing measured.');
+      if (arr(STO.systemFiles).length) h += '<div style="height:14px"></div>' + table([{ h: 'System file', k: 'name' }, { h: 'Size', cls: 'num', f: function (x) { return fmtMB(x.mb); } }], arr(STO.systemFiles), '');
+      if (arr(STO.bigFiles).length) h += '<div style="height:14px"></div>' + table([{ h: 'Biggest files (over 300 MB)', k: 'path' }, { h: 'Size', cls: 'num', f: function (x) { return fmtMB(x.mb); } }, { h: 'Last changed', f: function (x) { return fmtDate(x.modified); } }], arr(STO.bigFiles), '');
+    }
     $('#tab-hardware').innerHTML = h;
   }
 
@@ -354,7 +399,7 @@ var UI = (function (V) {
 
   /* ---------------- events ---------------- */
   function evTable(list) {
-    return table([{ h: 'Count', cls: 'num', k: 'count' }, { h: 'Level', k: 'level' }, { h: 'Source', k: 'provider' }, { h: 'ID', cls: 'num', k: 'id' }, { h: 'Last seen', f: function (x) { return fmtDT(x.lastSeen); } }, { h: 'Example message', k: 'sample' }], list, 'No events.');
+    return table([{ h: 'Count', cls: 'num', k: 'count' }, { h: 'Level', k: 'level' }, { h: 'Source', k: 'provider' }, { h: 'ID', cls: 'num', k: 'id' }, { h: 'Last seen', f: function (x) { return fmtDT(x.lastSeen); } }, { h: 'In plain words', f: function (x) { var n = V.noiseFor(x.provider, x.id); return n || '-'; } }, { h: 'Example message', k: 'sample' }], list, 'No events.');
   }
   function rEvents() {
     var e = D.events || {}, h = '';
@@ -384,7 +429,7 @@ var UI = (function (V) {
     $('#chipDate').textContent = 'Scanned ' + fmtDT(g(D, 'meta.generated', null));
     var n = V.counts.high + V.counts.medium + V.counts.low;
     $('#navcount').textContent = n ? n : '';
-    rStart(); rHealth(); rRadar(); rActions(); rCpu(); rMem(); rGpu(); rBoard(); rOs(); rNet(); rExtras(); rStorage(); rSecurity(); rBoot(); rHeat(); rUplink();
+    rStart(); rSince(); rSummary(); rHealth(); rRadar(); rActions(); rCpu(); rMem(); rGpu(); rBoard(); rOs(); rNet(); rExtras(); rStorage(); rSecurity(); rBoot(); rHeat(); rUplink();
     rFindings(); rHardware(); rSoftware(); rEvents();
     countUp();
   }

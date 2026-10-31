@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.4.0'
+$script:Version = '0.4.1'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -733,7 +733,7 @@ try {
         if ($td.Count -gt 0) { $lastThreat = Iso ($td | Sort-Object InitialDetectionTime -Descending | Select-Object -First 1).InitialDetectionTime }
     } catch { }
     $defExtra = [pscustomobject]@{
-        signatureAgeDays = [int]$mp2.AntivirusSignatureAge
+        signatureAgeDays = $(if ($mp2.AntivirusSignatureAge -ge 0 -and $mp2.AntivirusSignatureAge -lt 9999) { [int]$mp2.AntivirusSignatureAge } else { $null })
         quickScanAgeDays = $(if ($mp2.QuickScanAge -ge 0 -and $mp2.QuickScanAge -lt 99999) { [int]$mp2.QuickScanAge } else { $null })
         fullScanAgeDays  = $(if ($mp2.FullScanAge -ge 0 -and $mp2.FullScanAge -lt 99999) { [int]$mp2.FullScanAge } else { $null })
         tamperProtected  = [bool]$mp2.IsTamperProtected

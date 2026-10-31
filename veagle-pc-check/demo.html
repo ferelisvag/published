@@ -1178,7 +1178,8 @@ function Engine(RAW) {
     });
 
     R(function () {
-      var d = SEC.defender; if (!d || d.signatureAgeDays == null || d.signatureAgeDays < 7) return null;
+      var d = SEC.defender; if (!d || !d.realTimeOn && g(D, 'security.defender.realTime', false) !== true) return null;
+      if (d.signatureAgeDays == null || d.signatureAgeDays >= 9999 || d.signatureAgeDays < 7) return null;
       var onlyWD = arr(g(D, 'security.antivirus', [])).filter(function (a) { return a.enabled && !/windows defender|microsoft defender/i.test(a.name || ''); }).length === 0;
       if (!onlyWD) return null;
       return F('sec-def-sigs', 'Security', d.signatureAgeDays >= 14 ? 'high' : 'medium', 'Your antivirus does not know the newest viruses (' + d.signatureAgeDays + ' days old)',
@@ -1198,13 +1199,13 @@ function Engine(RAW) {
         'Last detection: ' + (d.lastThreat ? fmtDT(d.lastThreat) : 'unknown'));
     });
     R(function () {
-      var d = SEC.defender; if (!d || d.tamperProtected !== false) return null;
+      var d = SEC.defender; if (!d || d.tamperProtected !== false || g(D, 'security.defender.realTime', false) !== true) return null;
       return F('sec-def-tamper', 'Security', 'low', 'Tamper protection is off',
         'Tamper protection stops viruses from switching your antivirus off. It should be on.',
         [S('Open Windows Security, "Virus & threat protection", then "Manage settings".'), S('Scroll down and turn "Tamper Protection" on.')], '');
     });
     R(function () {
-      var d = SEC.defender; if (!d) return null;
+      var d = SEC.defender; if (!d || g(D, 'security.defender.realTime', false) !== true) return null;
       var q = d.quickScanAgeDays, f = d.fullScanAgeDays;
       if (q == null && f == null) return null;
       var age = Math.min(q == null ? 9999 : q, f == null ? 9999 : f);
@@ -1426,15 +1427,18 @@ function Engine(RAW) {
     });
 
     R(function () {
-      var PUP = /driver\s*(booster|updater|easy|talent|genius|pack)|advanced\s*systemcare|iobit|pc\s*(cleaner|optimi[sz]er|speed|tune|accelerat)|reimage|mypc\s*backup|web\s*companion|ask\s*toolbar|conduit|babylon|wajam|opencandy|segurazo|slimware|registry\s*(cleaner|booster|fix)|system\s*mechanic|total\s*av|mackeeper|pc\s*app\s*store|coupon|search\s*protect|yac\b|delta\s*search/i;
-      var hits = appsMatching(PUP); if (!hits.length) return null;
+      var PUP = /driver\s*(booster|updater|easy|talent|genius)|driverpack|advanced\s*systemcare|iobit|pc\s*(cleaner|optimi[sz]er|speed|tune|accelerat)|reimage|mypc\s*backup|web\s*companion|ask\s*toolbar|conduit|babylon|wajam|opencandy|segurazo|slimware|registry\s*(cleaner|booster|fix)|system\s*mechanic|total\s*av|mackeeper|pc\s*app\s*store|coupon|search\s*protect|yac\b|delta\s*search/i;
+      var hits = appsMatching(PUP).filter(function (n) { return !/^windows driver package/i.test(n); }); if (!hits.length) return null;
       return F('soft-pup', 'Software', hits.length >= 3 ? 'medium' : 'low', hits.length + ' program' + (hits.length > 1 ? 's' : '') + ' of the kind that often come bundled or do little good',
         'Some programs promise to "speed up" or "clean" your PC, update your drivers or protect you, and mostly show ads or scare you into paying. Others come hidden inside free downloads. Not every name on the list is bad, so check each one.',
         [S('Read the names under "What we found". Do you remember installing each one on purpose?'), S('If not, open Settings, Apps, Installed apps, click the three dots next to the name and choose Uninstall.'), S('Never install "driver updater" or "PC cleaner" programs. Windows Update and your PC maker already update drivers safely.'), S('After removing, restart and run a Quick scan in Windows Security.')],
         hits.join(', '));
     });
     R(function () {
-      var t = appsMatching(/mcafee|norton|trend micro|kaspersky|avast|avg\b|bitdefender|eset|malwarebytes|f-secure|webroot/i);
+      var all = appsMatching(/mcafee|norton|trend micro|kaspersky|avast|avg\b|bitdefender|eset|f-secure|webroot|sophos|panda|comodo|360 total/i);
+      var fam = {}, famNames = {};
+      all.forEach(function (n) { var k = (/mcafee/i.test(n) ? 'mcafee' : /norton/i.test(n) ? 'norton' : /trend micro/i.test(n) ? 'trend' : /kaspersky/i.test(n) ? 'kaspersky' : /avast|avg\b/i.test(n) ? 'avast' : /bitdefender/i.test(n) ? 'bitdefender' : /eset/i.test(n) ? 'eset' : /f-secure/i.test(n) ? 'fsecure' : /webroot/i.test(n) ? 'webroot' : /sophos/i.test(n) ? 'sophos' : /panda/i.test(n) ? 'panda' : /comodo/i.test(n) ? 'comodo' : 'other'); fam[k] = 1; (famNames[k] = famNames[k] || []).push(n); });
+      var t = Object.keys(fam).map(function (k) { return famNames[k][0]; });
       var av = arr(g(D, 'security.antivirus', [])).filter(function (a) { return a.enabled; });
       var thirdActive = av.filter(function (a) { return !/windows defender|microsoft defender/i.test(a.name || ''); });
       if (t.length < 2 || ids2('sec-av2')) return null;

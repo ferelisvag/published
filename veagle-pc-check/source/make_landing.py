@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""Builds dist/index.html (landing page + manual, English and Greek) for GitHub Pages.
+Needs dist/VEAGLE-PC-Check-v<version>.zip (run package.py first) and the screenshots in shots/."""
+import datetime, hashlib, pathlib, re
+from zoneinfo import ZoneInfo
+from PIL import Image
+
+root = pathlib.Path(__file__).resolve().parent
+version = re.search(r"\$script:Version = '([\d.]+)'", (root / 'app' / 'collector.ps1').read_text(encoding='utf-8')).group(1)
+zip_name = f'VEAGLE-PC-Check-v{version}.zip'
+zip_path = root / 'dist' / zip_name
+sha = hashlib.sha256(zip_path.read_bytes()).hexdigest()
+size_kb = round(zip_path.stat().st_size / 1024)
+now = datetime.datetime.now(ZoneInfo('Europe/Athens'))
+stamp = f'{now.day}.{now.month} · {now:%H:%M}'
+rel_date = f'{now.day} {now:%b %Y}'
+shots_dir = root / 'shots' if (root / 'shots').exists() else root.parent / 'shots'
+shots = {n: Image.open(shots_dir / f'{n}.webp').size for n in ('dash', 'dash2', 'findings', 'ai', 'compare', 'win11')}
+DL = 'download/' + zip_name
+
+# --------------------------------------------------------------------------- texts: key -> (English, Greek)
+T = {
+ 'nav_how': ('How it works', 'Πώς δουλεύει'),
+ 'nav_feat': ('Features', 'Χαρακτηριστικά'),
+ 'nav_reads': ('What it reads', 'Τι διαβάζει'),
+ 'nav_manual': ('Manual', 'Manual'),
+ 'nav_faq': ('FAQ', 'Συχνές ερωτήσεις'),
+ 'nav_dl': ('Download', 'Κατέβασμα'),
+ 'eyebrow': ('FREE WINDOWS TOOL &middot; READ-ONLY &middot; OFFLINE', 'ΔΩΡΕΑΝ ΕΡΓΑΛΕΙΟ ΓΙΑ WINDOWS &middot; ΜΟΝΟ ΑΝΑΓΝΩΣΗ &middot; ΧΩΡΙΣ ΔΙΚΤΥΟ'),
+ 'h1': ('Find out what is wrong with your PC. Safely.', 'Βρες τι φταίει στον υπολογιστή σου. Με ασφάλεια.'),
+ 'lede': ('VEAGLE PC Check scans your Windows PC (it only reads, it never changes anything), builds a clear report, and can hand the findings to an AI for a second opinion. No account, nothing is uploaded.',
+          'Το VEAGLE PC Check σαρώνει τον υπολογιστή σου με Windows (μόνο διαβάζει, τίποτα δεν αλλάζει), φτιάχνει μια καθαρή αναφορά και, αν θέλεις, δίνει τα ευρήματα σε ένα AI για δεύτερη γνώμη. Χωρίς λογαριασμό, δεν ανεβαίνει τίποτα.'),
+ 'btn_dl': (f'Download v{version}', f'Κατέβασε v{version}'),
+ 'btn_demo': ('Open a demo report', 'Δες δείγμα αναφοράς'),
+ 'f1': ('Windows 10 and 11', 'Windows 10 και 11'),
+ 'f2': ('3 to 5 minutes (quick scan: 30 seconds)', '3 έως 5 λεπτά (quick scan: 30 δευτ.)'),
+ 'f3': ('Reads only, changes nothing', 'Μόνο ανάγνωση, δεν αλλάζει τίποτα'),
+ 'f4': ('No install, no account', 'Χωρίς εγκατάσταση, χωρίς λογαριασμό'),
+
+ 'how_h': ('How it works', 'Πώς δουλεύει'),
+ 's1_h': ('Download and unzip', 'Κατέβασε και αποσυμπίεσε'),
+ 's1_p': ('Download the ZIP. Right-click it, choose Properties and tick Unblock if you see it, then extract the whole folder.', 'Κατέβασε το ZIP. Δεξί κλικ, Ιδιότητες, και αν δεις το Unblock τσεκάρε το. Μετά αποσυμπίεσε όλον τον φάκελο.'),
+ 's2_h': ('Double-click the launcher', 'Διπλό κλικ στο αρχείο εκκίνησης'),
+ 's2_p': ('Run <b>VEAGLE-PC-Check.bat</b> and accept the Windows administrator prompt. Wait 3 to 5 minutes, or use the <b>Quick</b> launcher for about 30 seconds.', 'Τρέξε το <b>VEAGLE-PC-Check.bat</b> και απόδεξε το αίτημα διαχειριστή των Windows. Περίμενε 3 έως 5 λεπτά, ή χρησιμοποίησε το <b>Quick</b> για περίπου 30 δευτερόλεπτα.'),
+ 's3_h': ('Read the report', 'Διάβασε την αναφορά'),
+ 's3_p': ('It opens in your browser: a health score, findings with exact fixes, and every detail of your PC.', 'Ανοίγει στον browser: βαθμολογία υγείας, ευρήματα με ακριβείς διορθώσεις και κάθε λεπτομέρεια του υπολογιστή σου.'),
+
+ 'feat_h': ('What you get', 'Τι παίρνεις'),
+ 'ft1_h': ('Your PC at a glance', 'Ο υπολογιστής σου με μια ματιά'),
+ 'ft1_p': ('Processor, memory, graphics, motherboard, drives, Windows, network and security on one screen, with a health score, a score per area and the three things to do first.', 'Επεξεργαστής, μνήμη, κάρτα γραφικών, μητρική, δίσκοι, Windows, δίκτυο και ασφάλεια σε μία οθόνη, με βαθμολογία υγείας, βαθμό ανά τομέα και τα τρία πρώτα βήματα.'),
+ 'ft2_h': ('Problems explained, fixes included', 'Προβλήματα εξηγημένα, με διορθώσεις'),
+ 'ft2_p': ('Around 45 checks turn Windows logs and settings into plain-language findings, ranked by priority, with commands you can copy. Harmless noise is separated from real problems.', 'Περίπου 45 έλεγχοι μετατρέπουν τα logs και τις ρυθμίσεις των Windows σε κατανοητά ευρήματα με σειρά προτεραιότητας και εντολές που αντιγράφονται. Ο αβλαβής θόρυβος ξεχωρίζει από τα πραγματικά προβλήματα.'),
+ 'ft3_h': ('A second opinion from an AI', 'Δεύτερη γνώμη από AI'),
+ 'ft3_p': ('One click builds a package from your scan with your user name, PC name, IP and MAC addresses and e-mails removed. You see exactly what is copied. It opens <b>Claude</b> first; ChatGPT, Gemini and Copilot are there for another opinion.', 'Ένα κλικ φτιάχνει πακέτο από τη σάρωση, χωρίς όνομα χρήστη, όνομα PC, διευθύνσεις IP και MAC και email. Βλέπεις ακριβώς τι αντιγράφεται. Ανοίγει πρώτα το <b>Claude</b>· το ChatGPT, το Gemini και το Copilot υπάρχουν για μια επιπλέον γνώμη.'),
+ 'ft4_h': ('Before and after', 'Πριν και μετά'),
+ 'ft4_p': ('Drop an older scan into the Compare tab and see what got better or worse after your fixes: score, free space, startup programs, boot time, errors.', 'Σύρε μια παλιότερη σάρωση στην καρτέλα Compare και δες τι βελτιώθηκε ή χειροτέρεψε μετά τις διορθώσεις σου: βαθμολογία, ελεύθερος χώρος, προγράμματα εκκίνησης, χρόνος boot, σφάλματα.'),
+ 'ft5_h': ('Windows 11 readiness and battery health', 'Έτοιμος για Windows 11 και υγεία μπαταρίας'),
+ 'ft5_p': ('On Windows 10 it checks the Windows 11 requirements one by one. On a laptop it shows how much capacity the battery has lost.', 'Σε Windows 10 ελέγχει τις απαιτήσεις των Windows 11 μία-μία. Σε laptop δείχνει πόση χωρητικότητα έχει χάσει η μπαταρία.'),
+ 'extras': ('Also: a <b>share-safe copy</b> of the report with personal details removed, a <b>quick scan</b>, and print or save as PDF.', 'Επίσης: <b>share-safe αντίγραφο</b> της αναφοράς χωρίς προσωπικά στοιχεία, <b>quick scan</b>, και εκτύπωση ή αποθήκευση σε PDF.'),
+
+ 'reads_h': ('What it reads, and what it never touches', 'Τι διαβάζει και τι δεν αγγίζει ποτέ'),
+ 'reads_yes_h': ('It reads', 'Διαβάζει'),
+ 'reads_yes': ('<li>Hardware: processor, memory, graphics, motherboard, BIOS, drives (health, free space)</li><li>Windows version, updates, power and performance settings</li><li>Security state: Secure Boot, TPM, BitLocker status, antivirus, firewall</li><li>The list of installed programs and what starts with Windows</li><li>Errors and warnings from the Windows Event Viewer (last 30 days)</li><li>Devices and drivers with problems, laptop battery report</li>',
+               '<li>Υλικό: επεξεργαστής, μνήμη, κάρτα γραφικών, μητρική, BIOS, δίσκοι (υγεία, ελεύθερος χώρος)</li><li>Έκδοση Windows, ενημερώσεις, ρυθμίσεις ενέργειας και απόδοσης</li><li>Κατάσταση ασφάλειας: Secure Boot, TPM, BitLocker, antivirus, firewall</li><li>Τη λίστα των εγκατεστημένων προγραμμάτων και τι ξεκινά με τα Windows</li><li>Σφάλματα και προειδοποιήσεις από το Event Viewer (τελευταίες 30 ημέρες)</li><li>Συσκευές και drivers με προβλήματα, αναφορά μπαταρίας σε laptop</li>'),
+ 'reads_no_h': ('It never touches', 'Δεν αγγίζει ποτέ'),
+ 'reads_no': ('<li>Passwords, product keys, serial numbers</li><li>Your files, documents, photos, e-mails or browsing history</li><li>Your online accounts</li><li>It does not change settings, install, delete or upload anything. The only network use is winget, which is asked which of your programs have updates</li>',
+              '<li>Κωδικούς, κλειδιά προϊόντος, σειριακούς αριθμούς</li><li>Τα αρχεία, έγγραφα, φωτογραφίες, email ή ιστορικό περιήγησης σου</li><li>Τους online λογαριασμούς σου</li><li>Δεν αλλάζει ρυθμίσεις, δεν εγκαθιστά, δεν διαγράφει και δεν ανεβάζει τίποτα. Η μόνη χρήση δικτύου είναι το winget, που ρωτάται ποια προγράμματα έχουν ενημέρωση</li>'),
+
+ 'dl_h': ('Download', 'Κατέβασμα'),
+ 'dl_p': (f'Version {version}, {rel_date}, {size_kb} KB. Windows 10 or 11, PowerShell 5.1 (already included).', f'Έκδοση {version}, {rel_date}, {size_kb} KB. Windows 10 ή 11, PowerShell 5.1 (ήδη συμπεριλαμβάνεται).'),
+ 'dl_btn': (f'Download {zip_name}', f'Κατέβασε {zip_name}'),
+ 'sha_h': ('Check that the file is the original (SHA-256)', 'Έλεγξε ότι το αρχείο είναι το γνήσιο (SHA-256)'),
+ 'sha_p': ('After downloading, run this in PowerShell in the folder with the ZIP. The result must be the same as the line above.', 'Μετά τη λήψη, τρέξε αυτή την εντολή στο PowerShell, στον φάκελο με το ZIP. Το αποτέλεσμα πρέπει να είναι ίδιο με την παραπάνω γραμμή.'),
+ 'copy': ('Copy', 'Αντιγραφή'),
+ 'copied': ('Copied', 'Αντιγράφηκε'),
+ 'read_code_h': ('Read the code before you run it', 'Διάβασε τον κώδικα πριν τον τρέξεις'),
+ 'read_code_p': ('Both files that run on your PC are plain text. Open them here or in Notepad: the <a href="source/VEAGLE-PC-Check.bat">launcher (.bat)</a> and the <a href="source/app/collector.ps1">scan script (collector.ps1)</a>. The whole project, including the report builder, is in the <a href="source/">source folder</a>.', 'Τα δύο αρχεία που τρέχουν στον υπολογιστή σου είναι απλό κείμενο. Άνοιξέ τα εδώ ή στο Σημειωματάριο: το <a href="source/VEAGLE-PC-Check.bat">αρχείο εκκίνησης (.bat)</a> και το <a href="source/app/collector.ps1">script της σάρωσης (collector.ps1)</a>. Ολόκληρο το project, μαζί με τον δημιουργό της αναφοράς, είναι στον <a href="source/">φάκελο source</a>.'),
+
+ 'man_h': ('Manual', 'Manual'),
+ 'man_toc': ('On this page', 'Σε αυτή τη σελίδα'),
+ 'm1_h': ('1. What you need', '1. Τι χρειάζεσαι'),
+ 'm1': ('<li>Windows 10 or 11, 64-bit.</li><li>Windows PowerShell 5.1. It is part of Windows, nothing to install.</li><li>Administrator rights for the full scan (drive health, BitLocker and the Windows image check need them).</li><li>A browser: Edge, Chrome or Firefox.</li><li>About 30 MB of free space for the <span class="mono">Reports</span> folder (most of it is the optional msinfo32 export).</li><li>Internet only for the winget update lookup and for the AI help.</li>',
+        '<li>Windows 10 ή 11, 64-bit.</li><li>Windows PowerShell 5.1. Είναι μέρος των Windows, δεν χρειάζεται εγκατάσταση.</li><li>Δικαιώματα διαχειριστή για την πλήρη σάρωση (τα χρειάζονται η υγεία δίσκων, το BitLocker και ο έλεγχος του Windows image).</li><li>Έναν browser: Edge, Chrome ή Firefox.</li><li>Περίπου 30 MB ελεύθερου χώρου για τον φάκελο <span class="mono">Reports</span> (το μεγαλύτερο μέρος είναι το προαιρετικό export του msinfo32).</li><li>Δίκτυο μόνο για το winget και για το AI help.</li>'),
+ 'm2_h': ('2. Running a scan', '2. Πώς τρέχει μια σάρωση'),
+ 'm2': ('<p>Extract the whole ZIP first (do not run the files from inside the ZIP). Then:</p><ul><li><b>VEAGLE-PC-Check.bat</b>: the full scan, 3 to 5 minutes. It also exports msinfo32 and checks for app updates (winget) and for damage in the Windows image (DISM).</li><li><b>VEAGLE-PC-Check-Quick.bat</b>: about 30 seconds. It skips msinfo32, winget, DISM, optional features, old-driver and folder-size checks. The report says it was a quick scan.</li></ul><p>Windows asks for administrator rights. A black window shows progress; when it says Done, the report opens in your browser. Everything lands in a new folder <span class="mono">Reports\\&lt;date-time&gt;</span> next to the launcher.</p>',
+        '<p>Αποσυμπίεσε πρώτα όλο το ZIP (μην τρέχεις τα αρχεία από μέσα από το ZIP). Μετά:</p><ul><li><b>VEAGLE-PC-Check.bat</b>: η πλήρης σάρωση, 3 έως 5 λεπτά. Εξάγει και το msinfo32 και ελέγχει για ενημερώσεις προγραμμάτων (winget) και για βλάβη στο Windows image (DISM).</li><li><b>VEAGLE-PC-Check-Quick.bat</b>: περίπου 30 δευτερόλεπτα. Παραλείπει msinfo32, winget, DISM, optional features και τους ελέγχους παλιών drivers και μεγέθους φακέλων. Η αναφορά γράφει ότι ήταν quick scan.</li></ul><p>Τα Windows ζητούν δικαιώματα διαχειριστή. Ένα μαύρο παράθυρο δείχνει την πρόοδο. Όταν γράψει Done, η αναφορά ανοίγει στον browser. Όλα βρίσκονται σε νέο φάκελο <span class="mono">Reports\\&lt;ημερομηνία-ώρα&gt;</span> δίπλα στο αρχείο εκκίνησης.</p>'),
+ 'm3_h': ('3. Understanding the report', '3. Πώς διαβάζεις την αναφορά'),
+ 'm3': ('<ul><li><b>Dashboard</b>: the health score, a radar of six areas (Stability, Storage, Security, Performance, Updates, Software), the three things to do first, and your hardware and Windows at a glance.</li><li><b>Findings</b>: every problem with a reason, evidence and fix steps. Click one to open it. Commands have a Copy button. <b>Looking good</b> lists what passed.</li><li><b>Hardware, Software, Events</b>: all the details, tables you can search.</li><li><b>Compare</b>: drop an older <span class="mono">data.json</span> or <span class="mono">report.html</span> to see what changed.</li><li><b>AI help</b>: the package for an AI, see below.</li></ul>'
+        '<table class="tbl"><thead><tr><th>Level</th><th>Meaning</th><th>What to do</th></tr></thead><tbody><tr><td><span class="tag high">HIGH</span></td><td>Real risk or something broken.</td><td>Fix soon, start here.</td></tr><tr><td><span class="tag medium">MEDIUM</span></td><td>Hurts speed, stability or safety.</td><td>Fix when you can.</td></tr><tr><td><span class="tag low">LOW</span></td><td>Small issue or tidy-up.</td><td>Optional.</td></tr><tr><td><span class="tag info">TIP</span></td><td>Good to know, not counted in the score.</td><td>Read it.</td></tr></tbody></table>'
+        '<p>The score starts at 100 and loses 8 points per high finding, 3 per medium and 0.8 per low. 85 and above is <i>in good shape</i>, 60 to 84 <i>needs attention</i>, below 60 <i>needs work</i>. Old one-off events lose weight: a burst of errors that stopped two weeks ago counts less than a problem that is still happening.</p>',
+        '<ul><li><b>Dashboard</b>: η βαθμολογία υγείας, radar εξήντα τομέων (Stability, Storage, Security, Performance, Updates, Software), τα τρία πρώτα βήματα, και το υλικό και τα Windows σου με μια ματιά.</li><li><b>Findings</b>: κάθε πρόβλημα με αιτιολόγηση, τεκμήρια και βήματα διόρθωσης. Κάνε κλικ για να ανοίξει. Οι εντολές έχουν κουμπί Copy. Το <b>Looking good</b> δείχνει ό,τι έλεγχος έπερασε.</li><li><b>Hardware, Software, Events</b>: όλες οι λεπτομέρειες, πίνακες με αναζήτηση.</li><li><b>Compare</b>: σύρε ένα παλιό <span class="mono">data.json</span> ή <span class="mono">report.html</span> για να δεις τι άλλαξε.</li><li><b>AI help</b>: το πακέτο για AI, δες παρακάτω.</li></ul>'
+        '<table class="tbl"><thead><tr><th>Επίπεδο</th><th>Τι σημαίνει</th><th>Τι κάνεις</th></tr></thead><tbody><tr><td><span class="tag high">HIGH</span></td><td>Πραγματικός κίνδυνος ή κάτι σπασμένο.</td><td>Διόρθωσε γρήγορα, ξεκίνα από εδώ.</td></tr><tr><td><span class="tag medium">MEDIUM</span></td><td>Βλάπτει ταχύτητα, σταθερότητα ή ασφάλεια.</td><td>Διόρθωσε όταν μπορείς.</td></tr><tr><td><span class="tag low">LOW</span></td><td>Μικρό θέμα ή νοικοκυριά.</td><td>Προαιρετικό.</td></tr><tr><td><span class="tag info">TIP</span></td><td>Διάβασέ το, δεν μέτραει στη βαθμολογία.</td><td>Διάβασέ το.</td></tr></tbody></table>'
+        '<p>Η βαθμολογία ξεκινά από 100 και χάνει 8 πόντους ανά high εύρημα, 3 ανά medium και 0,8 ανά low. Από 85 και πάνω είναι <i>In good shape</i>, 60 έως 84 <i>Needs attention</i>, κάτω από 60 <i>Needs work</i>. Τα παλιά μοναδικά γεγονότα έχουν λιγότερο βάρος: μια έκρηξη σφαλμάτων που τελείωσε πριν δύο εβδομάδες μετράει λιγότερο από ένα πρόβλημα που συνεχίζεται.</p>'),
+ 'm4_h': ('4. Fixing things safely', '4. Πώς διορθώνεις πράγματα με ασφάλεια'),
+ 'm4': ('<ol><li>Start with the <b>high</b> findings. Change one thing at a time.</li><li>Before bigger changes, create a restore point. Run this in PowerShell as Administrator: <span class="cmdline">Checkpoint-Computer -Description "Before VEAGLE fixes" -RestorePointType MODIFY_SETTINGS</span></li><li>Commands run in <b>PowerShell as Administrator</b> (Start, type PowerShell, right-click, Run as administrator), unless the step says otherwise.</li><li>Restart when asked, then run the Quick scan again and use <b>Compare</b> to confirm the fix worked.</li></ol><p>The app never changes anything by itself. Every fix is a step you choose to take.</p>',
+        '<ol><li>Ξεκίνα από τα ευρήματα <b>high</b>. Αλλάξε ένα πράγμα τη φορά.</li><li>Πριν από μεγαλύτερες αλλαγές, κάνε restore point. Τρέξε στο PowerShell ως Administrator: <span class="cmdline">Checkpoint-Computer -Description "Before VEAGLE fixes" -RestorePointType MODIFY_SETTINGS</span></li><li>Οι εντολές τρέχουν στο <b>PowerShell ως Administrator</b> (Start, γράψε PowerShell, δεξί κλικ, Run as administrator), εκτός αν το βήμα λέει κάτι άλλο.</li><li>Κάνε επανεκκίνηση όταν το ζητάει, τρέξε ξανά το Quick scan και χρησιμοποίησε το <b>Compare</b> για να δεις ότι η διόρθωση έπιασε.</li></ol><p>Η εφαρμογή δεν αλλάζει ποτέ τίποτα μόνη της. Κάθε διόρθωση είναι βήμα που επιλέγεις εσύ.</p>'),
+ 'm5_h': ('5. Sharing safely and getting AI help', '5. Ασφαλής κοινοποίηση και βοήθεια από AI'),
+ 'm5': ('<ol><li>Open the <b>AI help</b> tab. Optionally write what you need help with, and the language you want the answer in.</li><li>Choose what to include and read the preview. It is exactly what will be copied.</li><li>Click <b>Copy and open Claude</b>, then press Ctrl+V in the new tab. For a second opinion use the ChatGPT, Gemini or Copilot buttons.</li><li>If pasting is not possible, use <b>Download .txt</b> and attach the file.</li></ol><p>Removed before anything is copied: your Windows user name, the PC and domain name, IP and MAC addresses, e-mail addresses, account IDs and your user-profile paths. Still read the preview: program names can say something about you.</p><p>The <b>Share-safe copy</b> button (top right) saves the whole report as a new HTML file with the same details removed, so you can send it to a friend or a technician.</p>',
+        '<ol><li>Άνοιξε την καρτέλα <b>AI help</b>. Γράψε, αν θέλεις, τι βοήθεια χρειάζεσαι και σε ποια γλώσσα θέλεις την απάντηση.</li><li>Διάλεξε τι θα συμπεριλάβει το πακέτο και διάβασε την προεπισκόπηση. Είναι ακριβώς ό,τι θα αντιγραφεί.</li><li>Πάτα <b>Copy and open Claude</b> και μετά Ctrl+V στη νέα καρτέλα. Για δεύτερη γνώμη χρησιμοποίησε τα κουμπιά ChatGPT, Gemini ή Copilot.</li><li>Αν δεν γίνεται επικόλληση, χρησιμοποίησε το <b>Download .txt</b> και συνένωσε το αρχείο.</li></ol><p>Πριν αντιγραφεί τίποτα αφαιρούνται: το όνομα χρήστη των Windows, το όνομα PC και domain, διευθύνσεις IP και MAC, email, account IDs και τα paths του προφίλ χρήστη. Διάβασε πάντα την προεπισκόπηση: τα ονόματα προγραμμάτων μπορεί να λένε κάτι για εσένα.</p><p>Το κουμπί <b>Share-safe copy</b> (πάνω δεξιά) αποθηκεύει όλη την αναφορά ως νέο HTML αρχείο χωρίς αυτά τα στοιχεία, ώστε να το στείλεις σε φίλο ή τεχνικό.</p>'),
+
+ 'faq_h': ('Frequently asked questions', 'Συχνές ερωτήσεις'),
+ 'q1': ('Is it safe?', 'Είναι ασφαλές;'),
+ 'a1': ('The scan only reads information. The launcher and the script are plain text files you can read first, nothing is installed, changed, deleted or uploaded. Compare the SHA-256 above with your download to be sure it is the original.', 'Η σάρωση μόνο διαβάζει πληροφορίες. Το αρχείο εκκίνησης και το script είναι απλά αρχεία κειμένου που μπορείς να διαβάσεις πρώτα, τίποτα δεν εγκαθίσταται, δεν αλλάζει, δεν διαγράφεται και δεν ανεβαίνει. Σύγκρινε το SHA-256 παραπάνω με το αρχείο που κατέβασες για να είσαι σίγουρος ότι είναι το γνήσιο.'),
+ 'q2': ('Why does it ask for administrator rights?', 'Γιατί ζητά δικαιώματα διαχειριστή;'),
+ 'a2': ('Some information can only be read as administrator: drive health (SMART), BitLocker status and the Windows image check. Without it the scan still runs, those parts are just skipped.', 'Μερικές πληροφορίες διαβάζονται μόνο ως διαχειριστής: υγεία δίσκων (SMART), κατάσταση BitLocker και ο έλεγχος του Windows image. Χωρίς αυτά η σάρωση τρέχει, απλά παραλείπονται αυτά τα μέρη.'),
+ 'q3': ('Windows or my antivirus warns me', 'Τα Windows ή το antivirus μου με προειδοποιούν'),
+ 'a3': ('SmartScreen: click <b>More info</b>, then <b>Run anyway</b>. Some antivirus products flag any launcher that asks for administrator rights and starts PowerShell. Check the SHA-256, read the script if you want, and allow it. If you are unsure, do not run it.', 'SmartScreen: πάτα <b>More info</b> και μετά <b>Run anyway</b>. Μερικά antivirus σημειώνουν κάθε αρχείο εκκίνησης που ζητά δικαιώματα διαχειριστή και ξεκινά PowerShell. Έλεγξε το SHA-256, διάβασε το script αν θέλεις και επέτρεψέ το. Αν δεν είσαι σίγουρος, μην το τρέξεις.'),
+ 'q4': ('The black window closes at once', 'Το μαύρο παράθυρο κλείνει αμέσως'),
+ 'a4': ('Make sure you extracted the whole ZIP and did not run it from inside the ZIP. Then right-click the .bat and choose <b>Run as administrator</b>.', 'Βεβαιώσου ότι αποσυμπίεσες όλο το ZIP και δεν το έτρεξες από μέσα από το ZIP. Μετά δεξί κλικ στο .bat και <b>Run as administrator</b>.'),
+ 'q5': ('It takes very long', 'Παίρνει πολύ ώρα'),
+ 'a5': ('The full scan takes 3 to 5 minutes; msinfo32 and winget are the slow parts. The Quick launcher skips them and takes about 30 seconds.', 'Η πλήρης σάρωση παίρνει 3 έως 5 λεπτά· το msinfo32 και το winget είναι τα αργά μέρη. Το Quick τα παραλείπει και παίρνει περίπου 30 δευτερόλεπτα.'),
+ 'q6': ('Some checks say "unknown"', 'Κάποιοι έλεγχοι δείχνουν "unknown"'),
+ 'a6': ('A few checks read English text (for example the DISM result). On Windows in another language they may not be recognised and show as unknown. Event messages stay in your language. This is a known limit of version 0.2.', 'Μερικοί έλεγχοι διαβάζουν αγγλικά κείμενα (π.χ. το αποτέλεσμα του DISM). Σε Windows με άλλη γλώσσα μπορεί να μην αναγνωρίζονται και να δείχνουν unknown. Τα μηνύματα του Event Viewer μένουν στη γλώσσα σου. Είναι γνωστός περιορισμός της έκδοσης 0.2.'),
+ 'q7': ('Where are my results, and how do I delete them?', 'Πού είναι τα αποτελέσματά μου και πώς τα σβήνω;'),
+ 'a7': ('In the <span class="mono">Reports</span> folder next to the launcher: <span class="mono">report.html</span>, <span class="mono">data.json</span> and a <span class="mono">raw</span> folder with the exports. Delete the folder whenever you like. Nothing is stored anywhere else.', 'Στον φάκελο <span class="mono">Reports</span> δίπλα στο αρχείο εκκίνησης: <span class="mono">report.html</span>, <span class="mono">data.json</span> και ον φάκελος <span class="mono">raw</span> με τα exports. Σβήσε τον όταν θέλεις. Τίποτα δεν αποθηκεύεται αλλού.'),
+ 'q8': ('How do I uninstall it?', 'Πώς το απεγκαθιστώ;'),
+ 'a8': ('Nothing is installed. Delete the folder.', 'Δεν εγκαθίσταται τίποτα. Σβήνεις τον φάκελο.'),
+ 'q9': ('Can I use it on a work PC?', 'Μπορώ να το χρησιμοποιήσω σε υπολογιστή δουλειάς;'),
+ 'a9': ('Ask your IT department first. Many companies block scripts, or want to know what runs on their machines.', 'Ρώτα πρώτα το IT της εταιρείας. Πολλές εταιρείες μπλοκάρουν scripts ή θέλουν να ξέρουν τι τρέχει στα μηχανήματά τους.'),
+
+ 'log_h': ('Version history', 'Ιστορικό εκδόσεων'),
+ 'log': (f'<li><b>{version}</b> ({rel_date}): compare two scans, Windows 11 readiness, laptop battery health, quick scan, share-safe copy of the report.</li><li><b>0.1.1</b>: references to ferelis.gr in the report and in the AI package.</li><li><b>0.1.0</b>: first version: dashboard, findings, hardware, software and Event Viewer tabs, AI help.</li>',
+         f'<li><b>{version}</b> ({rel_date}): σύγκριση δύο σαρώσεων, έλεγχος για Windows 11, υγεία μπαταρίας laptop, quick scan, share-safe αντίγραφο της αναφοράς.</li><li><b>0.1.1</b>: αναφορές στο ferelis.gr στην αναφορά και στο πακέτο για AI.</li><li><b>0.1.0</b>: πρώτη έκδοση: dashboard, findings, hardware, software και Event Viewer, AI help.</li>'),
+ 'credit': ('Idea and brand: VEAGLE &middot; <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a>. Built with the help of Claude (Anthropic).', 'Ιδέα και brand: VEAGLE &middot; <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a>. Φτιαγμένο με τη βοήθεια του Claude (Anthropic).'),
+ 'version_word': ('Version', 'Έκδοση'),
+}
+ALT = {
+ 'dash': ('VEAGLE PC Check dashboard: health score, area radar, hardware overview', 'Dashboard του VEAGLE PC Check: βαθμολογία υγείας, radar τομέων, υλικό'),
+ 'dash2': ('Hardware overview: processor, memory, graphics, board, Windows, network, storage, security, boot history and error heatmap', 'Παρουσίαση υλικού: επεξεργαστής, μνήμη, κάρτα γραφικών, μητρική, Windows, δίκτυο, δίσκοι, ασφάλεια, ιστορικό boot και heatmap σφαλμάτων'),
+ 'findings': ('A finding opened with its reason, evidence and fix commands', 'Ένα εύρημα ανοιγμένο με αιτιολόγηση, τεκμήρια και εντολές διόρθωσης'),
+ 'ai': ('AI help tab with the preview of what will be copied and the Claude button first', 'Καρτέλα AI help με προεπισκόπηση του πακέτου και πρώτο το κουμπί του Claude'),
+ 'compare': ('Compare tab showing what improved between two scans', 'Καρτέλα Compare με τι βελτιώθηκε μεταξύ δύο σαρώσεων'),
+ 'win11': ('Battery health and Windows 11 readiness check on a laptop with Windows 10', 'Υγεία μπαταρίας και έλεγχος για Windows 11 σε laptop με Windows 10'),
+}
+
+
+def L(key):
+    en, el = T[key]
+    return f'<span class="en">{en}</span><span class="el">{el}</span>'
+
+
+def img(name):
+    w, h = shots[name]
+    en, el = ALT[name]
+    return f'<a href="shots/{name}.webp" target="_blank" rel="noopener"><img src="shots/{name}.webp" width="{w}" height="{h}" loading="lazy" alt="{en}" data-alt-en="{en}" data-alt-el="{el}"></a>'
+
+
+template = (root / 'landing.template.html').read_text(encoding='utf-8')
+html = re.sub(r'\{\{L:(\w+)\}\}', lambda m: L(m.group(1)), template)
+html = re.sub(r'\{\{IMG:(\w+)\}\}', lambda m: img(m.group(1)), html)
+html = (html.replace('{{VERSION}}', version).replace('{{SHA}}', sha).replace('{{ZIPNAME}}', zip_name)
+            .replace('{{DL}}', DL).replace('{{STAMP}}', stamp))
+assert '{{' not in html, re.findall(r'\{\{[^}]*\}\}', html)[:5]
+(root / 'dist' / 'index.html').write_text(html, encoding='utf-8')
+print('landing built', round(len(html.encode('utf-8')) / 1024), 'KB | version', version, '| stamp', stamp, '| sha', sha[:12])

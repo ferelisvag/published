@@ -1,0 +1,23 @@
+{
+  "name": "VEAGLE PC Check",
+  "short_name": "PC Check",
+  "description": "Free read-only health check for Windows 10 and 11, with an HTML report and optional AI help.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0b0c",
+  "theme_color": "#0b0b0c",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

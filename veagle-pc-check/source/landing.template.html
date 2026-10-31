@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VEAGLE PC Check</title>
+<meta name="description" content="Free read-only health check for Windows 10 and 11: hardware, drives, security, startup and Event Viewer in one report, with optional AI help.">
+<meta name="theme-color" content="#0b0b0c">
+<link rel="icon" href="favicon.png" type="image/png" sizes="64x64">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="VEAGLE PC Check">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Play:wght@400;700&display=swap">
+<style>
+:root { --bg:#050506; --panel:#0b0b0d; --panel2:#121216; --line:#2a2a30; --line2:#1c1c21; --text:#ececf0; --muted:#a1a1aa; --dim:#8a8a94; --red:#E82C2D; --redbtn:#C81E1F; --redtext:#ff6b6c;
+  --mono:'Fira Code',Consolas,'Courier New',monospace; --head:'Play','Segoe UI',system-ui,sans-serif; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; scroll-padding-top:84px; }
+body { margin:0; background:var(--bg); color:var(--text); font:15px/1.65 var(--mono); background-image:radial-gradient(#17171b 1px,transparent 1px); background-size:22px 22px; }
+a { color:var(--redtext); } a:hover { color:#fff; }
+:focus-visible { outline:2px solid #fff; outline-offset:2px; }
+html[lang="en"] .el, html[lang="el"] .en { display:none !important; }
+.mono { font-family:var(--mono); }
+.wrap { max-width:1120px; margin:0 auto; padding:0 28px; }
+h1,h2,h3 { font-family:var(--head); margin:0; line-height:1.15; }
+h2 { font-size:30px; margin-bottom:20px; } h3 { font-size:19px; margin-bottom:8px; }
+section { padding:56px 0 8px; }
+p { margin:0 0 14px; } ul,ol { margin:0 0 14px; padding-left:22px; } li { margin:4px 0; }
+
+/* header */
+header.top { position:sticky; top:0; z-index:30; background:rgba(5,5,6,.95); border-bottom:1px solid var(--line); }
+header.top .wrap { display:flex; flex-wrap:wrap; align-items:center; gap:10px 24px; padding-top:10px; padding-bottom:10px; }
+.brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--text); }
+.brand img { width:32px; height:34px; object-fit:contain; }
+.brand b { font-family:var(--head); font-size:19px; letter-spacing:.24em; } .brand span { font-size:12px; color:var(--dim); }
+nav.main { display:flex; flex-wrap:wrap; gap:2px; margin-left:8px; }
+nav.main a { color:var(--muted); text-decoration:none; padding:8px 10px; font-size:13px; border:1px solid transparent; }
+nav.main a:hover { color:#fff; border-color:var(--line); }
+.right { margin-left:auto; display:flex; gap:8px; align-items:center; }
+.btn { min-height:44px; padding:0 18px; border:1px solid #3a3a42; background:var(--bg); color:var(--text); font:13px var(--mono); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; }
+.btn:hover { border-color:#8a8a94; color:#fff; }
+.btn.primary { background:var(--redbtn); border-color:var(--red); color:#fff; font-family:var(--head); font-weight:700; font-size:17px; min-height:54px; padding:0 26px; }
+.btn.primary:hover { background:#e02a2b; }
+.btn.sm { min-height:36px; padding:0 12px; font-size:12px; }
+#langBtn { min-width:56px; }
+
+/* hero */
+.hero { padding:64px 0 24px; }
+.hero .grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.1fr); gap:40px; align-items:center; }
+@media (max-width:900px) { .hero .grid { grid-template-columns:1fr; } }
+.eyebrow { font-size:12px; letter-spacing:.2em; color:#ff8d8e; margin-bottom:16px; }
+.hero h1 { font-size:clamp(34px,5vw,54px); }
+.lede { font-size:16px; color:#d4d4d8; margin:18px 0 26px; max-width:560px; }
+.cta { display:flex; flex-wrap:wrap; gap:12px; }
+.facts { display:flex; flex-wrap:wrap; gap:8px; margin-top:26px; padding:0; list-style:none; }
+.facts li { margin:0; padding:7px 12px; border:1px solid var(--line); font-size:12px; color:var(--muted); }
+.shot { border:1px solid var(--line); background:var(--panel); }
+.shot img { display:block; width:100%; height:auto; }
+
+/* steps and cards */
+.steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+@media (max-width:860px) { .steps { grid-template-columns:1fr; } }
+.card { background:var(--panel); border:1px solid var(--line); padding:22px; }
+.card .num { width:34px; height:34px; border:1px solid var(--red); display:flex; align-items:center; justify-content:center; font:700 17px var(--head); margin-bottom:12px; }
+.card p { color:#d4d4d8; font-size:14px; margin:0; }
+.feat { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.25fr); gap:32px; align-items:center; margin:0 0 44px; }
+.feat.flip { grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); } .feat.flip .txt { order:2; }
+@media (max-width:900px) { .feat, .feat.flip { grid-template-columns:1fr; } .feat.flip .txt { order:0; } }
+.feat .txt p { color:#d4d4d8; }
+.two { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+@media (max-width:760px) { .two { grid-template-columns:1fr; } }
+.two ul { padding-left:20px; margin:0; } .two .card.no { border-color:#5a2526; }
+.two h3 { font-size:17px; }
+
+/* download */
+.dl { border:1px solid #5a2526; background:var(--panel); padding:28px; display:grid; gap:18px; }
+.sha { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.sha code, .cmd code, .cmdline { background:#000; border:1px solid var(--line); padding:8px 10px; font:12.5px var(--mono); overflow-wrap:anywhere; flex:1 1 320px; }
+.cmdline { display:inline-block; flex:none; margin-top:6px; }
+.cmd { display:flex; flex-wrap:wrap; gap:8px; align-items:stretch; }
+
+/* manual */
+.toc { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 26px; padding:0; list-style:none; }
+.toc a { display:block; padding:7px 12px; border:1px solid var(--line); color:var(--muted); text-decoration:none; font-size:13px; }
+.toc a:hover { color:#fff; border-color:var(--red); }
+.man h3 { margin-top:30px; font-size:21px; }
+.tbl { width:100%; border-collapse:collapse; margin:14px 0; font-size:13.5px; }
+.tbl th, .tbl td { padding:9px 12px; border:1px solid var(--line); text-align:left; vertical-align:top; }
+.tbl th { background:var(--panel2); font-weight:500; color:var(--dim); font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+.tag { display:inline-block; padding:2px 9px; font-size:11px; font-weight:700; letter-spacing:.1em; border:1px solid; white-space:nowrap; }
+.tag.high { background:var(--redbtn); border-color:var(--red); color:#fff; } .tag.medium { border-color:#e4e4e7; } .tag.low { border-color:#5a5a64; color:#b4b4bc; } .tag.info { border-color:#2a2a30; color:var(--dim); }
+details { border:1px solid var(--line); background:var(--panel); margin-bottom:10px; }
+summary { cursor:pointer; padding:14px 18px; font:700 16px var(--head); list-style:none; }
+summary::-webkit-details-marker { display:none; }
+summary::after { content:"+"; float:right; color:var(--redtext); }
+details[open] summary::after { content:"\2212"; }
+details > div { padding:0 18px 16px; color:#d4d4d8; }
+
+footer.foot { margin-top:60px; border-top:1px solid var(--line); padding:26px 0 40px; font-size:12.5px; color:var(--dim); }
+footer.foot .wrap { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; }
+.app-foot a { color:inherit; }
+#toast { position:fixed; left:50%; bottom:26px; transform:translateX(-50%); background:#f4f4f5; color:#0b0b0c; padding:10px 16px; font-size:13px; display:none; z-index:60; }
+#toast.on { display:block; }
+
+@media (max-width:760px) { nav.main { display:none; } header.top .wrap { padding-top:8px; padding-bottom:8px; } .hero { padding-top:36px; } section { padding-top:40px; } }
+
+@media print {
+  :root { --bg:#fff; --panel:#fff; --panel2:#f1f1f3; --line:#c9c9d0; --text:#111; --muted:#3f3f46; --dim:#52525b; --redtext:#b31b1c; }
+  body { background:#fff; font-size:11.5px; } header.top, .cta, .btn, #toast, nav.main { display:none !important; }
+  .shot img { max-width:100%; } section { padding-top:20px; } details { break-inside:avoid; } details > div { display:block; }
+  .tag.high { background:#C81E1F; color:#fff; } code, .cmdline { background:#f1f1f3 !important; color:#111; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="eagle-white.png" alt="VEAGLE eagle shield logo"><div><b>VEAGLE</b> <span>// PC CHECK</span></div></a>
+    <nav class="main" aria-label="Page sections">
+      <a href="#how">{{L:nav_how}}</a><a href="#features">{{L:nav_feat}}</a><a href="#reads">{{L:nav_reads}}</a><a href="#manual">{{L:nav_manual}}</a><a href="#faq">{{L:nav_faq}}</a>
+    </nav>
+    <div class="right">
+      <button class="btn sm" id="langBtn" type="button" aria-label="Language"><span class="en">GR</span><span class="el">EN</span></button>
+      <a class="btn sm" href="#download" style="border-color:var(--red)">{{L:nav_dl}}</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+<div class="wrap">
+
+  <div class="hero">
+    <div class="grid">
+      <div>
+        <div class="eyebrow">{{L:eyebrow}}</div>
+        <h1>{{L:h1}}</h1>
+        <p class="lede">{{L:lede}}</p>
+        <div class="cta">
+          <a class="btn primary" href="{{DL}}" download>{{L:btn_dl}}</a>
+          <a class="btn" href="demo.html" target="_blank" rel="noopener">{{L:btn_demo}}</a>
+        </div>
+        <ul class="facts"><li>{{L:f1}}</li><li>{{L:f2}}</li><li>{{L:f3}}</li><li>{{L:f4}}</li></ul>
+      </div>
+      <div class="shot">{{IMG:dash}}</div>
+    </div>
+  </div>
+
+  <section id="how">
+    <h2>{{L:how_h}}</h2>
+    <div class="steps">
+      <div class="card"><div class="num">1</div><h3>{{L:s1_h}}</h3><p>{{L:s1_p}}</p></div>
+      <div class="card"><div class="num">2</div><h3>{{L:s2_h}}</h3><p>{{L:s2_p}}</p></div>
+      <div class="card"><div class="num">3</div><h3>{{L:s3_h}}</h3><p>{{L:s3_p}}</p></div>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>{{L:feat_h}}</h2>
+    <div class="feat"><div class="txt"><h3>{{L:ft1_h}}</h3><p>{{L:ft1_p}}</p></div><div class="shot">{{IMG:dash2}}</div></div>
+    <div class="feat flip"><div class="shot">{{IMG:findings}}</div><div class="txt"><h3>{{L:ft2_h}}</h3><p>{{L:ft2_p}}</p></div></div>
+    <div class="feat"><div class="txt"><h3>{{L:ft3_h}}</h3><p>{{L:ft3_p}}</p></div><div class="shot">{{IMG:ai}}</div></div>
+    <div class="feat flip"><div class="shot">{{IMG:compare}}</div><div class="txt"><h3>{{L:ft4_h}}</h3><p>{{L:ft4_p}}</p></div></div>
+    <div class="feat"><div class="txt"><h3>{{L:ft5_h}}</h3><p>{{L:ft5_p}}</p></div><div class="shot">{{IMG:win11}}</div></div>
+    <p>{{L:extras}}</p>
+  </section>
+
+  <section id="reads">
+    <h2>{{L:reads_h}}</h2>
+    <div class="two">
+      <div class="card"><h3>{{L:reads_yes_h}}</h3><ul>{{L:reads_yes}}</ul></div>
+      <div class="card no"><h3>{{L:reads_no_h}}</h3><ul>{{L:reads_no}}</ul></div>
+    </div>
+  </section>
+
+  <section id="download">
+    <h2>{{L:dl_h}}</h2>
+    <div class="dl">
+      <p style="margin:0">{{L:dl_p}}</p>
+      <div class="cta"><a class="btn primary" href="{{DL}}" download>{{L:dl_btn}}</a><a class="btn" href="demo.html" target="_blank" rel="noopener">{{L:btn_demo}}</a></div>
+      <div>
+        <h3>{{L:sha_h}}</h3>
+        <div class="sha"><code id="shaText">{{SHA}}</code><button class="btn sm" type="button" data-copy="shaText">{{L:copy}}</button></div>
+        <p style="margin:12px 0 8px;color:var(--muted)">{{L:sha_p}}</p>
+        <div class="cmd"><code id="shaCmd">Get-FileHash .\{{ZIPNAME}} -Algorithm SHA256</code><button class="btn sm" type="button" data-copy="shaCmd">{{L:copy}}</button></div>
+      </div>
+      <div><h3>{{L:read_code_h}}</h3><p style="margin:0;color:#d4d4d8">{{L:read_code_p}}</p></div>
+    </div>
+  </section>
+
+  <section id="manual" class="man">
+    <h2>{{L:man_h}}</h2>
+    <ul class="toc" aria-label="Manual sections"><li><a href="#m1">1</a></li><li><a href="#m2">2</a></li><li><a href="#m3">3</a></li><li><a href="#m4">4</a></li><li><a href="#m5">5</a></li><li><a href="#faq">FAQ</a></li></ul>
+    <h3 id="m1">{{L:m1_h}}</h3><ul>{{L:m1}}</ul>
+    <h3 id="m2">{{L:m2_h}}</h3>{{L:m2}}
+    <h3 id="m3">{{L:m3_h}}</h3>{{L:m3}}
+    <h3 id="m4">{{L:m4_h}}</h3>{{L:m4}}
+    <h3 id="m5">{{L:m5_h}}</h3>{{L:m5}}
+  </section>
+
+  <section id="faq">
+    <h2>{{L:faq_h}}</h2>
+    <details><summary>{{L:q1}}</summary><div>{{L:a1}}</div></details>
+    <details><summary>{{L:q2}}</summary><div>{{L:a2}}</div></details>
+    <details><summary>{{L:q3}}</summary><div>{{L:a3}}</div></details>
+    <details><summary>{{L:q4}}</summary><div>{{L:a4}}</div></details>
+    <details><summary>{{L:q5}}</summary><div>{{L:a5}}</div></details>
+    <details><summary>{{L:q6}}</summary><div>{{L:a6}}</div></details>
+    <details><summary>{{L:q7}}</summary><div>{{L:a7}}</div></details>
+    <details><summary>{{L:q8}}</summary><div>{{L:a8}}</div></details>
+    <details><summary>{{L:q9}}</summary><div>{{L:a9}}</div></details>
+  </section>
+
+  <section id="changelog">
+    <h2>{{L:log_h}}</h2>
+    <ul>{{L:log}}</ul>
+    <p style="color:var(--muted)">{{L:credit}}</p>
+  </section>
+
+</div>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span class="app-foot">VEAGLE PC Check &middot; <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a> &middot; {{L:version_word}} {{STAMP}}</span>
+    <span><a href="source/">source</a> &middot; <a href="https://github.com/ferelisvag/published/tree/main/veagle-pc-check" target="_blank" rel="noopener">GitHub</a></span>
+  </div>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var html = document.documentElement;
+  var TITLES = { en: 'VEAGLE PC Check - free Windows health check', el: 'VEAGLE PC Check - δωρεάν έλεγχος υγείας για Windows' };
+  function setLang(l) {
+    html.setAttribute('lang', l);
+    document.title = TITLES[l];
+    Array.prototype.forEach.call(document.querySelectorAll('img[data-alt-en]'), function (i) { i.alt = i.getAttribute('data-alt-' + l); });
+    try { localStorage.setItem('vpc.lang', l); } catch (e) { }
+  }
+  var q = null, saved = null;
+  try { q = new URLSearchParams(location.search).get('lang'); } catch (e) { }
+  try { saved = localStorage.getItem('vpc.lang'); } catch (e) { }
+  var nav = String(navigator.language || 'en').toLowerCase();
+  var lang = (q === 'el' || q === 'en') ? q : (saved === 'el' || saved === 'en') ? saved : (nav.indexOf('el') === 0 ? 'el' : 'en');
+  setLang(lang);
+  document.getElementById('langBtn').addEventListener('click', function () { setLang(html.getAttribute('lang') === 'el' ? 'en' : 'el'); });
+
+  var toast = document.getElementById('toast');
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copy]'); if (!b) return;
+    var el = document.getElementById(b.getAttribute('data-copy')); if (!el) return;
+    var text = el.textContent, ok = false;
+    try { var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); document.body.removeChild(ta); } catch (x) { }
+    if (!ok && navigator.clipboard) { try { navigator.clipboard.writeText(text); ok = true; } catch (y) { } }
+    toast.textContent = html.getAttribute('lang') === 'el' ? (ok ? 'Αντιγράφηκε' : 'Η αντιγραφή απέτυχε') : (ok ? 'Copied' : 'Copy failed');
+    toast.className = 'on'; clearTimeout(toast.t); toast.t = setTimeout(function () { toast.className = ''; }, 1800);
+  });
+})();
+</script>
+</body>
+</html>

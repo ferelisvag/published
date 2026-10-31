@@ -1,0 +1,1487 @@
+{
+ "meta": {
+  "mode": "quick",
+  "tool": "VEAGLE PC Check",
+  "version": "0.2.0",
+  "generated": "2026-10-31T16:35:00",
+  "isAdmin": true,
+  "psVersion": "5.1.26100.9549",
+  "user": "demo",
+  "computer": "DEMO-LAPTOP",
+  "domain": "DEMO-LAPTOP",
+  "durationSec": 41,
+  "warnings": [
+   "winget: first run may be slow"
+  ]
+ },
+ "system": {
+  "manufacturer": "Demo Corp",
+  "model": "ThinkBook demo",
+  "chassis": "Laptop",
+  "isLaptop": true,
+  "firmware": "BIOS",
+  "board": {
+   "manufacturer": "Gigabyte Technology Co., Ltd.",
+   "product": "Z590 AORUS PRO AX"
+  },
+  "bios": {
+   "vendor": "American Megatrends International, LLC.",
+   "version": "ALASKA - 1072009",
+   "date": "2025-06-10T00:00:00",
+   "smbios": "3.4"
+  },
+  "cpu": {
+   "name": "Intel(R) Core(TM) i5-7200U CPU @ 2.50GHz",
+   "manufacturer": "GenuineIntel",
+   "sockets": 1,
+   "cores": 2,
+   "threads": 4,
+   "baseMHz": 2500,
+   "currentMHz": 3600,
+   "l2KB": 512,
+   "l3KB": 3072,
+   "socket": "U3E1",
+   "virtualizationEnabled": true,
+   "loadPercent": 7
+  },
+  "ram": {
+   "totalGB": 7.9,
+   "freeGB": 2.1,
+   "slots": 2,
+   "maxGB": 128,
+   "modules": [
+    {
+     "slot": "SODIMM1",
+     "gb": 8,
+     "speedMHz": 2133,
+     "configuredMHz": 2133,
+     "manufacturer": "Samsung",
+     "partNumber": "",
+     "type": "DDR4",
+     "formFactor": "SODIMM"
+    }
+   ]
+  },
+  "os": {
+   "caption": "Microsoft Windows 10 Pro",
+   "productName": "Windows 10 Pro",
+   "edition": "Professional",
+   "displayVersion": "22H2",
+   "version": "10.0.19045",
+   "build": 19045,
+   "ubr": 6456,
+   "arch": "64-bit",
+   "installDate": "2026-06-22T16:44:15",
+   "lastBoot": "2026-10-31T16:01:34",
+   "uptimeHours": 0.6,
+   "language": "el-GR",
+   "timeZone": "GTB Standard Time"
+  }
+ },
+ "gpus": [
+  {
+   "name": "Intel(R) HD Graphics 620",
+   "vramGB": 1,
+   "driverVersion": "27.20.100.9466",
+   "driverFriendly": "27.20.100.9466",
+   "driverDate": "2021-03-01T00:00:00",
+   "width": 1920,
+   "height": 1080,
+   "refreshHz": 60,
+   "status": "OK"
+  }
+ ],
+ "disks": [
+  {
+   "name": "SAMSUNG MZNLN256",
+   "mediaType": "SSD",
+   "busType": "SATA",
+   "health": "Healthy",
+   "status": "OK",
+   "sizeGB": 238,
+   "firmware": "",
+   "reliability": null
+  }
+ ],
+ "volumes": [
+  {
+   "letter": "C:",
+   "label": "",
+   "fs": "NTFS",
+   "health": "Healthy",
+   "driveType": "Fixed",
+   "sizeGB": 238,
+   "freeGB": 31,
+   "bitlocker": null
+  }
+ ],
+ "network": {
+  "adapters": [
+   {
+    "name": "Ethernet",
+    "description": "Intel(R) Ethernet Controller (3) I225-V",
+    "status": "Up",
+    "linkSpeed": "1 Gbps",
+    "virtual": false
+   },
+   {
+    "name": "vEthernet (Default Switch)",
+    "description": "Hyper-V Virtual Ethernet Adapter",
+    "status": "Up",
+    "linkSpeed": "10 Gbps",
+    "virtual": true
+   },
+   {
+    "name": "NordLynx",
+    "description": "NordLynx Tunnel",
+    "status": "Disconnected",
+    "linkSpeed": "100 Gbps",
+    "virtual": true
+   },
+   {
+    "name": "Wi-Fi",
+    "description": "Intel(R) Wi-Fi 6 AX200 160MHz",
+    "status": "Not Present",
+    "linkSpeed": "0 bps",
+    "virtual": false
+   }
+  ],
+  "dns": [
+   "1.1.1.1",
+   "8.8.8.8"
+  ]
+ },
+ "security": {
+  "secureBoot": false,
+  "tpm": {
+   "present": true,
+   "ready": true,
+   "specVersion": "1.2"
+  },
+  "antivirus": [
+   {
+    "name": "Bitdefender Antivirus",
+    "enabled": true,
+    "upToDate": true
+   },
+   {
+    "name": "Windows Defender",
+    "enabled": false,
+    "upToDate": true
+   }
+  ],
+  "defender": {
+   "serviceEnabled": false,
+   "realTime": false,
+   "signaturesUpdated": null
+  },
+  "firewall": {
+   "domain": true,
+   "private": true,
+   "public": true
+  },
+  "uac": true,
+  "pendingReboot": false,
+  "rdpEnabled": false,
+  "localAdmins": 2,
+  "memoryIntegrity": null,
+  "vbsStatus": 2,
+  "hypervisorPresent": false,
+  "optionalFeatures": []
+ },
+ "settings": {
+  "powerPlan": "Balanced",
+  "fastStartup": true,
+  "hibernation": true,
+  "pagefileAuto": false,
+  "pagefiles": [
+   {
+    "name": "C:\\pagefile.sys",
+    "allocatedMB": 35000,
+    "usedMB": 32
+   }
+  ],
+  "trim": true,
+  "gpuScheduling": null,
+  "gameMode": null,
+  "storageSense": true,
+  "tempMB": {
+   "user": 797,
+   "windows": 381
+  },
+  "hasBattery": true
+ },
+ "updates": {
+  "hotfixes": [
+   {
+    "id": "KB5127648",
+    "description": "Security Update",
+    "installedOn": "2026-10-18T00:00:00"
+   },
+   {
+    "id": "KB5127647",
+    "description": "Security Update",
+    "installedOn": "2026-10-16T00:00:00"
+   }
+  ],
+  "lastPatchDaysAgo": 13
+ },
+ "crashDumps": {
+  "dumps": 0,
+  "liveKernelReports": 0
+ },
+ "events": {
+  "days": 30,
+  "system": {
+   "total": 1379,
+   "errors": 700,
+   "warnings": 679,
+   "groups": [
+    {
+     "provider": "nvlddmkm",
+     "id": 153,
+     "level": "Error",
+     "count": 466,
+     "sample": "",
+     "lastSeen": "2026-10-03T16:35:00"
+    },
+    {
+     "provider": "Microsoft-Windows-DistributedCOM",
+     "id": 10016,
+     "level": "Warning",
+     "count": 447,
+     "sample": "The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "Microsoft-Windows-DistributedCOM",
+     "id": 10010,
+     "level": "Error",
+     "count": 163,
+     "sample": "The server did not register with DCOM within the required timeout.",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "Microsoft-Windows-BitLocker-Driver",
+     "id": 24641,
+     "level": "Error",
+     "count": 95,
+     "sample": "An unexpected error was encountered attempting to retrieve the BitLocker volume master key during restart.",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "e2fexpress",
+     "id": 27,
+     "level": "Warning",
+     "count": 45,
+     "sample": "Intel(R) Ethernet Controller (3) I225-V",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "Service Control Manager",
+     "id": 7034,
+     "level": "Error",
+     "count": 39,
+     "sample": "The MEmuSVC service terminated unexpectedly.  It has done this 1 time(s).",
+     "lastSeen": "2026-10-09T16:35:00"
+    },
+    {
+     "provider": "Microsoft-Windows-Hyper-V-Hypervisor",
+     "id": 167,
+     "level": "Warning",
+     "count": 39,
+     "sample": "The hypervisor did not enable mitigations for side channel vulnerabilities because HyperThreading is enabled.",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "Tcpip",
+     "id": 4266,
+     "level": "Warning",
+     "count": 17,
+     "sample": "A request to allocate an ephemeral port number from the global UDP port space has failed due to all such ports being in use.",
+     "lastSeen": "2026-10-11T16:35:00"
+    },
+    {
+     "provider": "winsrvext",
+     "id": 100,
+     "level": "Warning",
+     "count": 16,
+     "sample": "Process nvcontainer.exe is delaying system shutdown after 5172 milliseconds.",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "Microsoft-Windows-DistributedCOM",
+     "id": 10005,
+     "level": "Error",
+     "count": 12,
+     "sample": "DCOM got error \"87\" attempting to start the service GamingServices",
+     "lastSeen": "2026-10-27T16:35:00"
+    },
+    {
+     "provider": "VMnetDHCP",
+     "id": 1,
+     "level": "Warning",
+     "count": 9,
+     "sample": "dispatch: Timeout waiting for input data",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "Microsoft-Windows-FilterManager",
+     "id": 3,
+     "level": "Error",
+     "count": 8,
+     "sample": "Filter Manager failed to attach to volume. This volume will be unavailable for filtering until a reboot.",
+     "lastSeen": "2026-10-29T16:35:00"
+    },
+    {
+     "provider": "Service Control Manager",
+     "id": 7024,
+     "level": "Error",
+     "count": 6,
+     "sample": "The XboxService service terminated with a service-specific error.",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "Tcpip",
+     "id": 4231,
+     "level": "Warning",
+     "count": 4,
+     "sample": "A request to allocate an ephemeral port number from the global TCP port space has failed due to all such ports being in use.",
+     "lastSeen": "2026-10-11T16:35:00"
+    },
+    {
+     "provider": "Microsoft-Windows-WindowsUpdateClient",
+     "id": 20,
+     "level": "Error",
+     "count": 2,
+     "sample": "Installation Failure: Windows failed to install the following update with error 0x8024200B: LG Electronics Inc. - Extension",
+     "lastSeen": "2026-10-27T16:35:00"
+    },
+    {
+     "provider": "Volsnap",
+     "id": 36,
+     "level": "Error",
+     "count": 1,
+     "sample": "The shadow copies of volume C: were aborted because the shadow copy storage could not grow due to a user imposed limit.",
+     "lastSeen": "2026-10-06T16:35:00"
+    },
+    {
+     "provider": "disk",
+     "id": 153,
+     "level": "Warning",
+     "count": 1,
+     "sample": "The IO operation at logical block address was retried.",
+     "lastSeen": "2026-10-06T16:35:00"
+    }
+   ],
+   "perDay": [
+    {
+     "date": "2026-10-02",
+     "errors": 4,
+     "warnings": 8
+    },
+    {
+     "date": "2026-10-03",
+     "errors": 14,
+     "warnings": 36
+    },
+    {
+     "date": "2026-10-04",
+     "errors": 471,
+     "warnings": 39
+    },
+    {
+     "date": "2026-10-05",
+     "errors": 3,
+     "warnings": 25
+    },
+    {
+     "date": "2026-10-06",
+     "errors": 3,
+     "warnings": 34
+    },
+    {
+     "date": "2026-10-07",
+     "errors": 2,
+     "warnings": 24
+    },
+    {
+     "date": "2026-10-08",
+     "errors": 1,
+     "warnings": 16
+    },
+    {
+     "date": "2026-10-09",
+     "errors": 5,
+     "warnings": 20
+    },
+    {
+     "date": "2026-10-10",
+     "errors": 10,
+     "warnings": 24
+    },
+    {
+     "date": "2026-10-11",
+     "errors": 4,
+     "warnings": 36
+    },
+    {
+     "date": "2026-10-12",
+     "errors": 2,
+     "warnings": 33
+    },
+    {
+     "date": "2026-10-13",
+     "errors": 2,
+     "warnings": 9
+    },
+    {
+     "date": "2026-10-14",
+     "errors": 0,
+     "warnings": 37
+    },
+    {
+     "date": "2026-10-15",
+     "errors": 3,
+     "warnings": 15
+    },
+    {
+     "date": "2026-10-16",
+     "errors": 6,
+     "warnings": 26
+    },
+    {
+     "date": "2026-10-17",
+     "errors": 12,
+     "warnings": 36
+    },
+    {
+     "date": "2026-10-18",
+     "errors": 3,
+     "warnings": 7
+    },
+    {
+     "date": "2026-10-19",
+     "errors": 5,
+     "warnings": 9
+    },
+    {
+     "date": "2026-10-20",
+     "errors": 6,
+     "warnings": 40
+    },
+    {
+     "date": "2026-10-21",
+     "errors": 4,
+     "warnings": 25
+    },
+    {
+     "date": "2026-10-22",
+     "errors": 2,
+     "warnings": 27
+    },
+    {
+     "date": "2026-10-23",
+     "errors": 4,
+     "warnings": 36
+    },
+    {
+     "date": "2026-10-24",
+     "errors": 22,
+     "warnings": 9
+    },
+    {
+     "date": "2026-10-25",
+     "errors": 6,
+     "warnings": 10
+    },
+    {
+     "date": "2026-10-26",
+     "errors": 2,
+     "warnings": 35
+    },
+    {
+     "date": "2026-10-27",
+     "errors": 5,
+     "warnings": 9
+    },
+    {
+     "date": "2026-10-28",
+     "errors": 0,
+     "warnings": 24
+    },
+    {
+     "date": "2026-10-29",
+     "errors": 5,
+     "warnings": 33
+    },
+    {
+     "date": "2026-10-30",
+     "errors": 2,
+     "warnings": 29
+    },
+    {
+     "date": "2026-10-31",
+     "errors": 19,
+     "warnings": 6
+    }
+   ]
+  },
+  "application": {
+   "total": 871,
+   "errors": 520,
+   "warnings": 351,
+   "groups": [
+    {
+     "provider": "Microsoft-Windows-CAPI2",
+     "id": 4176,
+     "level": "Error",
+     "count": 443,
+     "sample": "PFX operation failed as AuthSafes count doesn't lie in expected range. Maximum permissible value: 200. Erroneous value: 202.",
+     "lastSeen": "2026-10-07T16:35:00"
+    },
+    {
+     "provider": "Microsoft-Windows-WMI",
+     "id": 63,
+     "level": "Warning",
+     "count": 117,
+     "sample": "A provider, IntelMEProv, has been registered in the WMI namespace to use the LocalSystem account.",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "Telemetry 3.0 x64",
+     "id": 259,
+     "level": "Error",
+     "count": 60,
+     "sample": "Policy not available",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "Application Error",
+     "id": 1000,
+     "level": "Error",
+     "count": 54,
+     "sample": "Faulting application name: MemuService.exe",
+     "lastSeen": "2026-10-09T16:35:00"
+    },
+    {
+     "provider": "Microsoft-Windows-Perflib",
+     "id": 2003,
+     "level": "Warning",
+     "count": 42,
+     "sample": "The configuration information of the performance library perfts.dll does not match the trusted information.",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": "Microsoft-Windows-Search",
+     "id": 10024,
+     "level": "Warning",
+     "count": 40,
+     "sample": "The filter host process did not respond and is being forcibly terminated.",
+     "lastSeen": "2026-10-28T16:35:00"
+    },
+    {
+     "provider": ".NET Runtime",
+     "id": 1022,
+     "level": "Error",
+     "count": 36,
+     "sample": "There was a failure initializing profiling API attach infrastructure.",
+     "lastSeen": "2026-10-09T16:35:00"
+    },
+    {
+     "provider": "VSS",
+     "id": 13,
+     "level": "Error",
+     "count": 7,
+     "sample": "The COM Server CEventSystem cannot be started. A system shutdown is in progress.",
+     "lastSeen": "2026-10-22T16:35:00"
+    },
+    {
+     "provider": "Application Hang",
+     "id": 1002,
+     "level": "Error",
+     "count": 2,
+     "sample": "The program dllhost.exe stopped interacting with Windows and was closed.",
+     "lastSeen": "2026-10-09T16:35:00"
+    }
+   ],
+   "perDay": [
+    {
+     "date": "2026-10-02",
+     "errors": 3,
+     "warnings": 27
+    },
+    {
+     "date": "2026-10-03",
+     "errors": 13,
+     "warnings": 12
+    },
+    {
+     "date": "2026-10-04",
+     "errors": 3,
+     "warnings": 8
+    },
+    {
+     "date": "2026-10-05",
+     "errors": 1,
+     "warnings": 23
+    },
+    {
+     "date": "2026-10-06",
+     "errors": 444,
+     "warnings": 20
+    },
+    {
+     "date": "2026-10-07",
+     "errors": 3,
+     "warnings": 30
+    },
+    {
+     "date": "2026-10-08",
+     "errors": 6,
+     "warnings": 36
+    },
+    {
+     "date": "2026-10-09",
+     "errors": 0,
+     "warnings": 15
+    },
+    {
+     "date": "2026-10-10",
+     "errors": 22,
+     "warnings": 30
+    },
+    {
+     "date": "2026-10-11",
+     "errors": 4,
+     "warnings": 22
+    },
+    {
+     "date": "2026-10-12",
+     "errors": 1,
+     "warnings": 32
+    },
+    {
+     "date": "2026-10-13",
+     "errors": 6,
+     "warnings": 40
+    },
+    {
+     "date": "2026-10-14",
+     "errors": 2,
+     "warnings": 31
+    },
+    {
+     "date": "2026-10-15",
+     "errors": 2,
+     "warnings": 29
+    },
+    {
+     "date": "2026-10-16",
+     "errors": 1,
+     "warnings": 14
+    },
+    {
+     "date": "2026-10-17",
+     "errors": 10,
+     "warnings": 16
+    },
+    {
+     "date": "2026-10-18",
+     "errors": 1,
+     "warnings": 19
+    },
+    {
+     "date": "2026-10-19",
+     "errors": 5,
+     "warnings": 19
+    },
+    {
+     "date": "2026-10-20",
+     "errors": 0,
+     "warnings": 36
+    },
+    {
+     "date": "2026-10-21",
+     "errors": 6,
+     "warnings": 16
+    },
+    {
+     "date": "2026-10-22",
+     "errors": 2,
+     "warnings": 23
+    },
+    {
+     "date": "2026-10-23",
+     "errors": 0,
+     "warnings": 14
+    },
+    {
+     "date": "2026-10-24",
+     "errors": 21,
+     "warnings": 39
+    },
+    {
+     "date": "2026-10-25",
+     "errors": 2,
+     "warnings": 25
+    },
+    {
+     "date": "2026-10-26",
+     "errors": 1,
+     "warnings": 37
+    },
+    {
+     "date": "2026-10-27",
+     "errors": 4,
+     "warnings": 8
+    },
+    {
+     "date": "2026-10-28",
+     "errors": 3,
+     "warnings": 40
+    },
+    {
+     "date": "2026-10-29",
+     "errors": 3,
+     "warnings": 30
+    },
+    {
+     "date": "2026-10-30",
+     "errors": 3,
+     "warnings": 30
+    },
+    {
+     "date": "2026-10-31",
+     "errors": 11,
+     "warnings": 35
+    }
+   ]
+  },
+  "appCrashes": [
+   {
+    "app": "MemuService.exe",
+    "count": 39
+   },
+   {
+    "app": "OnScreen Control.exe",
+    "count": 3
+   },
+   {
+    "app": "nordvpn-service.exe",
+    "count": 2
+   },
+   {
+    "app": "vmware-vmx.exe",
+    "count": 2
+   },
+   {
+    "app": "GalaxyClient.exe",
+    "count": 2
+   }
+  ],
+  "appHangs": 2
+ },
+ "boot": {
+  "history": [
+   {
+    "time": "2026-10-31T16:35:00",
+    "seconds": 64.6
+   },
+   {
+    "time": "2026-10-30T16:35:00",
+    "seconds": 65.0
+   },
+   {
+    "time": "2026-10-29T16:35:00",
+    "seconds": 78.8
+   },
+   {
+    "time": "2026-10-28T16:35:00",
+    "seconds": 103.7
+   },
+   {
+    "time": "2026-10-27T16:35:00",
+    "seconds": 79.6
+   },
+   {
+    "time": "2026-10-26T16:35:00",
+    "seconds": 88.2
+   },
+   {
+    "time": "2026-10-25T16:35:00",
+    "seconds": 71.4
+   },
+   {
+    "time": "2026-10-24T16:35:00",
+    "seconds": 69.9
+   }
+  ],
+  "slowStarters": [
+   {
+    "name": "Discord.exe",
+    "times": 4
+   },
+   {
+    "name": "Microsoft.CmdPal.UI.exe",
+    "times": 4
+   },
+   {
+    "name": "nvcontainer.exe",
+    "times": 3
+   },
+   {
+    "name": "bdservicehost.exe",
+    "times": 3
+   },
+   {
+    "name": "Agent.exe",
+    "times": 3
+   },
+   {
+    "name": "nordvpn-service.exe",
+    "times": 2
+   }
+  ]
+ },
+ "apps": {
+  "count": 212,
+  "storeCount": 60,
+  "list": [
+   {
+    "name": "@BIOS",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 120
+   },
+   {
+    "name": "ACDSee Free",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 20
+   },
+   {
+    "name": "Adobe Acrobat (64-bit)",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 540
+   },
+   {
+    "name": "AnyDesk",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "Bitdefender Total Security",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "Brave",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "Discord",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 120
+   },
+   {
+    "name": "EA app",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "Epic Games Launcher",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 20
+   },
+   {
+    "name": "FileZilla",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "GitHub Desktop",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "GOG GALAXY",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 540
+   },
+   {
+    "name": "Google Chrome",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 540
+   },
+   {
+    "name": "HandBrake 1.9.2",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "HWiNFO 64",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 20
+   },
+   {
+    "name": "Intel(R) Extreme Tuning Utility",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "MEmu",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 540
+   },
+   {
+    "name": "Microsoft Edge",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "Microsoft Office Professional Plus 2021",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "Microsoft OneDrive",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 20
+   },
+   {
+    "name": "NordVPN",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "Notepad++ (64-bit x64)",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 540
+   },
+   {
+    "name": "NVIDIA App",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "NVIDIA Graphics Driver",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 20
+   },
+   {
+    "name": "OpenVPN",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "PowerShell 7-x64",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 20
+   },
+   {
+    "name": "PowerToys (Preview)",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 120
+   },
+   {
+    "name": "RustDesk",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 540
+   },
+   {
+    "name": "Steam",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 20
+   },
+   {
+    "name": "SteelSeries GG",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "Ubisoft Connect",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 120
+   },
+   {
+    "name": "VLC media player",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 20
+   },
+   {
+    "name": "VMware Workstation",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "Viber",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 20
+   },
+   {
+    "name": "WinDirStat",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 120
+   },
+   {
+    "name": "WinRAR 7.10 (64-bit)",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   },
+   {
+    "name": "Wondershare Filmora 16",
+    "version": "1.0",
+    "publisher": "",
+    "sizeMB": 0
+   }
+  ],
+  "wingetAvailable": true,
+  "outdated": [],
+  "wingetSkipped": true
+ },
+ "startup": {
+  "items": [
+   {
+    "name": "GoogleDriveFS",
+    "command": "C:\\Users\\demo\\AppData\\Local\\GoogleDriveFS\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "OneDrive",
+    "command": "C:\\Users\\demo\\AppData\\Local\\OneDrive\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Discord",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Discord\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "EpicGamesLauncher",
+    "command": "C:\\Users\\demo\\AppData\\Local\\EpicGamesLauncher\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "CCXProcess",
+    "command": "C:\\Users\\demo\\AppData\\Local\\CCXProcess\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "BraveSoftware Update",
+    "command": "C:\\Users\\demo\\AppData\\Local\\BraveSoftware Update\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Adobe Acrobat Synchronizer",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Adobe Acrobat Synchronizer\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Agent Tray",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Agent Tray\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "ACDSeeCommanderFree",
+    "command": "C:\\Users\\demo\\AppData\\Local\\ACDSeeCommanderFree\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Wargaming.net Game Center",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Wargaming.net Game Center\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Studio.QuickLook",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Studio.QuickLook\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "EADM",
+    "command": "C:\\Users\\demo\\AppData\\Local\\EADM\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "FilmoraTray",
+    "command": "C:\\Users\\demo\\AppData\\Local\\FilmoraTray\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "NVIDIA Broadcast",
+    "command": "C:\\Users\\demo\\AppData\\Local\\NVIDIA Broadcast\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "GogGalaxy",
+    "command": "C:\\Users\\demo\\AppData\\Local\\GogGalaxy\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "MicrosoftEdgeAutoLaunch",
+    "command": "C:\\Users\\demo\\AppData\\Local\\MicrosoftEdgeAutoLaunch\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "AnyDesk",
+    "command": "C:\\Users\\demo\\AppData\\Local\\AnyDesk\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "SecurityHealth",
+    "command": "C:\\Users\\demo\\AppData\\Local\\SecurityHealth\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "RtkAudUService",
+    "command": "C:\\Users\\demo\\AppData\\Local\\RtkAudUService\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "SteelSeriesGG",
+    "command": "C:\\Users\\demo\\AppData\\Local\\SteelSeriesGG\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Bdagent",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Bdagent\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "ACFW02EN",
+    "command": "C:\\Users\\demo\\AppData\\Local\\ACFW02EN\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "BdVpnApp",
+    "command": "C:\\Users\\demo\\AppData\\Local\\BdVpnApp\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Steam",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Steam\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Viber",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Viber\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Spotify",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Spotify\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Zoom",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Zoom\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   },
+   {
+    "name": "Dropbox",
+    "command": "C:\\Users\\demo\\AppData\\Local\\Dropbox\\run.exe --background",
+    "location": "HKU\\S-1-5-21-1-2-3-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"
+   }
+  ],
+  "thirdPartyServices": [
+   {
+    "name": "AnyDesk",
+    "display": "AnyDesk Service",
+    "state": "Running"
+   },
+   {
+    "name": "Agent",
+    "display": "Agent Service",
+    "state": "Running"
+   },
+   {
+    "name": "BDAppSrv",
+    "display": "BDAppSrv Service",
+    "state": "Running"
+   },
+   {
+    "name": "BDAuxSrv",
+    "display": "BDAuxSrv Service",
+    "state": "Running"
+   },
+   {
+    "name": "BDProtSrv",
+    "display": "BDProtSrv Service",
+    "state": "Running"
+   },
+   {
+    "name": "bdredline",
+    "display": "bdredline Service",
+    "state": "Running"
+   },
+   {
+    "name": "bdvpnservice",
+    "display": "bdvpnservice Service",
+    "state": "Running"
+   },
+   {
+    "name": "nordvpn-service",
+    "display": "nordvpn-service Service",
+    "state": "Running"
+   },
+   {
+    "name": "OpenVPNService",
+    "display": "OpenVPNService Service",
+    "state": "Running"
+   },
+   {
+    "name": "VMAuthdService",
+    "display": "VMAuthdService Service",
+    "state": "Running"
+   },
+   {
+    "name": "NvContainerLocalSystem",
+    "display": "NvContainerLocalSystem Service",
+    "state": "Running"
+   },
+   {
+    "name": "WSLService",
+    "display": "WSLService Service",
+    "state": "Running"
+   }
+  ],
+  "failedAutoServices": [
+   {
+    "name": "MEmuSVC",
+    "display": "MEmuSVC",
+    "exitCode": 1067
+   },
+   {
+    "name": "XboxService",
+    "display": "Xbox Service",
+    "exitCode": 1066
+   }
+  ],
+  "scheduledTasks": [
+   {
+    "name": "Adobe Acrobat Update Task",
+    "state": "Ready"
+   },
+   {
+    "name": "GCC",
+    "state": "Ready"
+   }
+  ],
+  "topRam": [
+   {
+    "name": "NVIDIA Broadcast",
+    "instances": 2,
+    "ramMB": 950,
+    "cpuSeconds": 226
+   },
+   {
+    "name": "Discord",
+    "instances": 3,
+    "ramMB": 923,
+    "cpuSeconds": 1087
+   },
+   {
+    "name": "Agent",
+    "instances": 1,
+    "ramMB": 737,
+    "cpuSeconds": 972
+   },
+   {
+    "name": "bdservicehost",
+    "instances": 4,
+    "ramMB": 737,
+    "cpuSeconds": 84
+   },
+   {
+    "name": "claude",
+    "instances": 3,
+    "ramMB": 1100,
+    "cpuSeconds": 274
+   },
+   {
+    "name": "steamwebhelper",
+    "instances": 2,
+    "ramMB": 717,
+    "cpuSeconds": 40
+   },
+   {
+    "name": "chrome",
+    "instances": 14,
+    "ramMB": 1260,
+    "cpuSeconds": 65
+   }
+  ],
+  "topCpu": []
+ },
+ "drivers": {
+  "problemDevices": [
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "SoftwareComponent",
+    "name": "Intel(R) XTU Component Device",
+    "status": "Degraded",
+    "problem": "CM_PROB_NONE",
+    "disabled": false
+   },
+   {
+    "class": "Net",
+    "name": "VMware Virtual Ethernet Adapter for VMnet1",
+    "status": "Error",
+    "problem": "CM_PROB_DISABLED",
+    "disabled": true
+   },
+   {
+    "class": "Net",
+    "name": "Intel(R) Wi-Fi 6 AX200 160MHz",
+    "status": "Error",
+    "problem": "CM_PROB_DISABLED",
+    "disabled": true
+   }
+  ],
+  "oldDrivers": []
+ },
+ "dism": {
+  "state": "skipped",
+  "text": ""
+ },
+ "battery": {
+  "present": true,
+  "designMWh": 48000,
+  "fullChargeMWh": 27800,
+  "cycleCount": 612,
+  "chemistry": "LION",
+  "wearPercent": 42
+ }
+}

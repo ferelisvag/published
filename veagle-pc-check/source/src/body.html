@@ -1,0 +1,143 @@
+<div id="boot" aria-hidden="true">
+  <div class="box">
+    <img src="%%LOGO%%" alt="">
+    <pre id="bootlog"></pre>
+    <span class="skip">click or press any key to skip</span>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="in">
+    <div class="brand">
+      <img src="%%LOGO%%" alt="VEAGLE eagle shield logo">
+      <div><b>VEAGLE</b> <span>// PC CHECK</span></div>
+    </div>
+    <nav role="tablist" aria-label="Report sections" id="nav">
+      <button role="tab" data-tab="dashboard" aria-selected="true">Dashboard</button>
+      <button role="tab" data-tab="findings" aria-selected="false">Findings<span class="n" id="navcount"></span></button>
+      <button role="tab" data-tab="hardware" aria-selected="false">Hardware</button>
+      <button role="tab" data-tab="software" aria-selected="false">Software</button>
+      <button role="tab" data-tab="events" aria-selected="false">Events</button>
+      <button role="tab" data-tab="compare" aria-selected="false">Compare</button>
+      <button role="tab" data-tab="ai" aria-selected="false">AI help</button>
+    </nav>
+    <div class="topright">
+      <a class="chip" href="https://ferelis.gr" target="_blank" rel="noopener" title="VEAGLE - ferelis.gr">ferelis.gr</a>
+      <span class="chip" id="chipOs"></span>
+      <span class="chip" id="chipDate"></span>
+      <button class="btn sm" id="btnShare" type="button" title="Download a copy of this report with your personal details removed">Share-safe copy</button>
+      <button class="btn sm" id="btnPrint" type="button">Print / PDF</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="demo"></div>
+
+  <section class="tabpane on" id="tab-dashboard" role="tabpanel" aria-label="Dashboard">
+    <div class="grid">
+      <div class="win s4" id="wHealth"></div>
+      <div class="win s4" id="wRadar"></div>
+      <div class="win s4" id="wActions"></div>
+
+      <div class="win s4" id="wCpu"></div>
+      <div class="win s4" id="wMem"></div>
+      <div class="win s4" id="wGpu"></div>
+
+      <div class="win s4" id="wBoard"></div>
+      <div class="win s4" id="wOs"></div>
+      <div class="win s4" id="wNet"></div>
+
+      <div class="win s4" id="wBattery"></div>
+      <div class="win s4" id="wReady"></div>
+
+      <div class="win s8" id="wStorage"></div>
+      <div class="win s4" id="wSecurity"></div>
+
+      <div class="win s4" id="wBoot"></div>
+      <div class="win s8" id="wHeat"></div>
+
+      <div class="win s12 alert" id="wUplink"></div>
+    </div>
+  </section>
+
+  <section class="tabpane" id="tab-findings" role="tabpanel" aria-label="Findings">
+    <div class="sect"><h2>Findings</h2><span id="findSummary"></span></div>
+    <div class="toolbar">
+      <div class="filters" id="filters"></div>
+      <label class="sr" for="findQ">Filter findings</label>
+      <input type="text" id="findQ" placeholder="/ filter findings" autocomplete="off">
+    </div>
+    <div id="findList"></div>
+    <div class="sect"><h2>Looking good</h2><span>checks that passed</span></div>
+    <div class="win"><div class="body"><div class="list" id="goodList"></div></div></div>
+  </section>
+
+  <section class="tabpane" id="tab-hardware" role="tabpanel" aria-label="Hardware"></section>
+  <section class="tabpane" id="tab-software" role="tabpanel" aria-label="Software"></section>
+  <section class="tabpane" id="tab-events" role="tabpanel" aria-label="Events"></section>
+
+  <section class="tabpane" id="tab-compare" role="tabpanel" aria-label="Compare scans"></section>
+
+  <section class="tabpane" id="tab-ai" role="tabpanel" aria-label="AI help">
+    <div class="sect"><h2>Get expert help from an AI</h2><span>you stay in control of what is shared</span></div>
+    <div class="two">
+      <div class="win"><header><span>package.txt</span><span class="st" id="pkgSize"></span></header>
+        <div class="body">
+          <div class="removed" id="removedList"></div>
+          <div class="field">
+            <label class="lbl" for="aiFocus">What do you want help with? (optional)</label>
+            <textarea id="aiFocus" placeholder="e.g. my PC is slow after startup, or: why does it restart randomly?"></textarea>
+          </div>
+          <div class="field">
+            <label class="lbl" for="aiLang">Reply language</label>
+            <input type="text" id="aiLang" value="English">
+          </div>
+          <div class="lbl">Include in the package</div>
+          <div class="checks" id="aiChecks"></div>
+          <div class="lbl">Exactly what will be copied</div>
+          <label class="sr" for="aiPreview">Package preview</label>
+          <textarea class="preview" id="aiPreview" readonly></textarea>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="win alert"><header><span>uplink</span></header>
+          <div class="body">
+            <div class="steps3">
+              <div><b>1</b><span>Review the package on the left.</span></div>
+              <div><b>2</b><span>Copy it and open the assistant.</span></div>
+              <div><b>3</b><span>Paste with <b style="display:inline;border:0;font-family:var(--mono)">Ctrl+V</b> and send.</span></div>
+            </div>
+            <button class="btn primary" type="button" id="btnClaude">Copy and open Claude</button>
+            <div class="btns">
+              <button class="btn" type="button" id="btnCopy">Copy only</button>
+              <button class="btn" type="button" id="btnDownload">Download .txt</button>
+            </div>
+            <hr class="hr">
+            <div class="lbl">Want a second opinion?</div>
+            <div class="alt">
+              <button class="btn" type="button" data-ai="https://chatgpt.com">ChatGPT</button>
+              <button class="btn" type="button" data-ai="https://gemini.google.com/app">Gemini</button>
+              <button class="btn" type="button" data-ai="https://copilot.microsoft.com">Copilot</button>
+            </div>
+            <p class="sub" style="margin:0">Nothing is sent from this report. The copy button only puts text on your clipboard, and you paste it yourself.</p>
+          </div>
+        </div>
+        <div class="win"><header><span>what is not included</span></header>
+          <div class="body sub">
+            <div>Your Windows user name, the PC name and domain, IP and MAC addresses, e-mail addresses, Windows account IDs and user-profile paths are replaced with placeholders such as &lt;USER&gt; and &lt;PC&gt;.</div>
+            <div>Serial numbers, product keys and passwords are never collected. The raw exports in the <span class="mono">raw</span> folder stay on this PC and are not part of the package.</div>
+            <div>Still, read the preview. Program names and file paths can reveal things about you.</div>
+            <div>The package tells the assistant that the data was collected by the VEAGLE PC Check app (<a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a>), built with the help of Claude.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span id="footL">VEAGLE PC Check - read-only scan, nothing is changed on this PC</span>
+  <span><a href="https://ferelis.gr" target="_blank" rel="noopener">VEAGLE - ferelis.gr</a> &middot; built with Claude</span>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>

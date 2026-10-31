@@ -720,7 +720,7 @@ function Engine(RAW) {
       if (g(D, 'meta.mode', 'full') !== 'quick') return null;
       return F('scan-quick', 'Software', 'info', 'This was a quick scan: some checks were skipped',
         'The quick scan leaves out the slow checks: the Windows image check (DISM), app update list (winget), full msinfo32 export, optional features, old drivers and temp-folder sizes.',
-        [S('Run VEAGLE-PC-Check.bat (the full scan) when you have 3 to 5 minutes.')], '');
+        [S('Run VEAGLE-PC-Check.bat (the full scan) when you have 3 to 8 minutes.')], '');
     });
 
     /* ================= v0.3: reliability, security details, network, backups ================= */

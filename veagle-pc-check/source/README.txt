@@ -28,7 +28,7 @@ HOW TO USE IT (5 steps, about 5 minutes)
    (Short on time? Double-click VEAGLE-PC-Check-Quick.bat instead. It takes about 30 seconds.)
 4. Windows asks: "Do you want to allow this app to make changes?" Click YES.
    (It needs this only to READ things like drive health. It still changes nothing.)
-5. A black window shows the progress. Do not close it. After about 3 to 5 minutes your
+5. A black window shows the progress. Do not close it. After about 3 to 8 minutes your
    browser opens with the report. That is all.
 
 If a blue window says "Windows protected your PC": click "More info", then "Run anyway".

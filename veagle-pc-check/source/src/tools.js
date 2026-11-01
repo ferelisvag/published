@@ -171,7 +171,7 @@ var TOOLS = (function (V, AI, CMP) {
     var h = '';
     h += sect(I('New here? Start with this', 'Πρώτη φορά εδώ; Ξεκίνα από αυτό'), I('no computer knowledge needed', 'δεν χρειάζονται γνώσεις υπολογιστών'));
     h += box('how_to.txt', I('3 minutes', '3 λεπτά'),
-      '<ol class="steps3"><li>' + I('<b>Look at the "Do this first" box</b> on the Dashboard. It shows the 3 most important things.', '<b>Κοίταξε το κουτί «Do this first»</b> στον Πίνακα. Δείχνει τα 3 σημαντικότερα πράγματα.') + '</li>' +
+      '<ol class="steps3"><li>' + I('<b>Look at the "Do this first" box</b> on the Dashboard. It shows the 3 most important things.', '<b>Κοίταξε το κουτί «Τι να κάνεις πρώτα»</b> στον Πίνακα. Δείχνει τα 3 σημαντικότερα πράγματα.') + '</li>' +
       '<li>' + I('<b>Open the Findings tab</b> and click one problem. Read "In plain words", then follow the numbered steps one by one. Each step says exactly what to click.', '<b>Άνοιξε την καρτέλα Ευρήματα</b> και πάτα ένα πρόβλημα. Διάβασε το «Με απλά λόγια» και μετά ακολούθησε τα αριθμημένα βήματα ένα ένα. Κάθε βήμα λέει ακριβώς τι να πατήσεις.') + '</li>' +
       '<li>' + I('<b>Do one thing at a time.</b> Restart the PC, then run the scan again. The Compare tab shows what got better.', '<b>Κάνε ένα πράγμα τη φορά.</b> Επανεκκίνησε τον υπολογιστή και τρέξε ξανά τη σάρωση. Η Σύνοψη δείχνει τι βελτιώθηκε.') + '</li></ol>' +
       '<p class="sub" style="margin-top:12px">' + I('Words next to a dotted underline have a hint: hold the mouse over them. The list at the bottom of this page explains every technical word.', 'Οι λέξεις με διακεκομμένη υπογράμμιση έχουν υπόδειξη: κράτα το ποντίκι πάνω τους. Η λίστα στο τέλος της σελίδας εξηγεί κάθε τεχνικό όρο.') + '</p>');

@@ -2416,7 +2416,7 @@ var VIZ = (function (V) {
     var r = 70, c = 2 * Math.PI * r, off = c * (1 - Math.max(0, Math.min(100, score)) / 100);
     return '<svg class="ring" viewBox="0 0 180 180" role="img" aria-label="' + esc(I('Health score ', 'Βαθμός υγείας ') + score + '/100') + '"><circle cx="90" cy="90" r="' + r + '" fill="none" stroke="var(--line)" stroke-width="14"/>' +
       '<circle class="rg" cx="90" cy="90" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="14" stroke-linecap="round" transform="rotate(-90 90 90)" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + c.toFixed(1) + '" data-off="' + off.toFixed(1) + '"/>' +
-      '<text x="90" y="92" text-anchor="middle" class="rnum">' + score + '</text><text x="90" y="116" text-anchor="middle" class="rsub">' + esc(label) + '</text></svg>';
+      '<text x="90" y="92" text-anchor="middle" class="rnum">' + score + '</text><text x="90" y="116" text-anchor="middle" class="rsub" style="font-size:' + (String(label).length > 13 ? 9 : 12) + 'px">' + esc(label) + '</text></svg>';
   }
   function animateRings(root) {
     Array.prototype.forEach.call((root || document).querySelectorAll('circle.rg'), function (c) { requestAnimationFrame(function () { requestAnimationFrame(function () { c.style.strokeDashoffset = c.getAttribute('data-off'); }); }); });
@@ -2626,7 +2626,7 @@ var UI = (function (V) {
   function rStart() {
     var el = $('#startBox'); if (!el) return;
     var I = V.I, n = V.counts.high + V.counts.medium + V.counts.low;
-    var msg = n ? I('Your PC has <b>' + n + ' thing' + (n > 1 ? 's' : '') + '</b> worth looking at. You do not need to fix them all. Start with the "Do this first" box: it has the 3 that matter most.', 'Ο υπολογιστής σου έχει <b>' + n + (n > 1 ? ' πράγματα' : ' πράγμα') + '</b> που αξίζει να δεις. Δεν χρειάζεται να τα διορθώσεις όλα. Ξεκίνα από το κουτί «Do this first»: έχει τα 3 σημαντικότερα.') : I('Nothing needs fixing right now. You can close this page.', 'Τίποτα δεν χρειάζεται διόρθωση τώρα. Μπορείς να κλείσεις τη σελίδα.');
+    var msg = n ? I('Your PC has <b>' + n + ' thing' + (n > 1 ? 's' : '') + '</b> worth looking at. You do not need to fix them all. Start with the "Do this first" box: it has the 3 that matter most.', 'Ο υπολογιστής σου έχει <b>' + n + (n > 1 ? ' πράγματα' : ' πράγμα') + '</b> που αξίζει να δεις. Δεν χρειάζεται να τα διορθώσεις όλα. Ξεκίνα από το κουτί «Τι να κάνεις πρώτα»: έχει τα 3 σημαντικότερα.') : I('Nothing needs fixing right now. You can close this page.', 'Τίποτα δεν χρειάζεται διόρθωση τώρα. Μπορείς να κλείσεις τη σελίδα.');
     el.innerHTML = '<div class="startbox"><b>' + I('New to this?', 'Πρώτη φορά;') + '</b> ' + msg + ' ' + I('Every problem is explained in plain words, with exact clicks.', 'Κάθε πρόβλημα εξηγείται με απλά λόγια, με ακριβή κλικ.') + ' <button class="btn sm" type="button" data-tab-go="tools">' + I('Beginner guide', 'Οδηγός για αρχάριους') + '</button></div>';
   }
   function rSince() {
@@ -3458,7 +3458,7 @@ var TOOLS = (function (V, AI, CMP) {
     var h = '';
     h += sect(I('New here? Start with this', 'Πρώτη φορά εδώ; Ξεκίνα από αυτό'), I('no computer knowledge needed', 'δεν χρειάζονται γνώσεις υπολογιστών'));
     h += box('how_to.txt', I('3 minutes', '3 λεπτά'),
-      '<ol class="steps3"><li>' + I('<b>Look at the "Do this first" box</b> on the Dashboard. It shows the 3 most important things.', '<b>Κοίταξε το κουτί «Do this first»</b> στον Πίνακα. Δείχνει τα 3 σημαντικότερα πράγματα.') + '</li>' +
+      '<ol class="steps3"><li>' + I('<b>Look at the "Do this first" box</b> on the Dashboard. It shows the 3 most important things.', '<b>Κοίταξε το κουτί «Τι να κάνεις πρώτα»</b> στον Πίνακα. Δείχνει τα 3 σημαντικότερα πράγματα.') + '</li>' +
       '<li>' + I('<b>Open the Findings tab</b> and click one problem. Read "In plain words", then follow the numbered steps one by one. Each step says exactly what to click.', '<b>Άνοιξε την καρτέλα Ευρήματα</b> και πάτα ένα πρόβλημα. Διάβασε το «Με απλά λόγια» και μετά ακολούθησε τα αριθμημένα βήματα ένα ένα. Κάθε βήμα λέει ακριβώς τι να πατήσεις.') + '</li>' +
       '<li>' + I('<b>Do one thing at a time.</b> Restart the PC, then run the scan again. The Compare tab shows what got better.', '<b>Κάνε ένα πράγμα τη φορά.</b> Επανεκκίνησε τον υπολογιστή και τρέξε ξανά τη σάρωση. Η Σύνοψη δείχνει τι βελτιώθηκε.') + '</li></ol>' +
       '<p class="sub" style="margin-top:12px">' + I('Words next to a dotted underline have a hint: hold the mouse over them. The list at the bottom of this page explains every technical word.', 'Οι λέξεις με διακεκομμένη υπογράμμιση έχουν υπόδειξη: κράτα το ποντίκι πάνω τους. Η λίστα στο τέλος της σελίδας εξηγεί κάθε τεχνικό όρο.') + '</p>');
@@ -4009,7 +4009,7 @@ var VIZ2 = (function (V, UI) {
       var p = pos[i], w = worst(a), sc = areaScore(a), x = p[0], y = p[1];
       svg += '<g class="pmn" data-area="' + a + '" tabindex="0" role="button" aria-label="' + esc(areaName(a) + ' ' + sc) + '"><rect x="' + (x - 104) + '" y="' + (y - 40) + '" width="208" height="80" rx="6" fill="var(--panel)" stroke="' + w.col + '" stroke-width="2"/>' +
         '<rect x="' + (x - 104) + '" y="' + (y - 40) + '" width="6" height="80" fill="' + w.col + '"/>' +
-        '<text x="' + (x - 88) + '" y="' + (y - 14) + '" class="pmt" fill="var(--text)">' + esc(areaName(a)) + '</text><text x="' + (x - 88) + '" y="' + (y + 4) + '" class="pms">' + esc(I(AREA_HINT[a][0], AREA_HINT[a][1])).slice(0, 30) + '</text>' +
+        '<text x="' + (x - 88) + '" y="' + (y - 14) + '" class="pmt" fill="var(--text)">' + esc(areaName(a)) + '</text><text x="' + (x - 88) + '" y="' + (y + 4) + '" class="pms">' + esc((function (s) { return s.length > 27 ? s.slice(0, 26) + '…' : s; })(I(AREA_HINT[a][0], AREA_HINT[a][1]))) + '</text>' +
         '<text x="' + (x + 94) + '" y="' + (y - 12) + '" text-anchor="end" class="pmv" fill="' + w.col + '">' + sc + '</text>' +
         '<text x="' + (x - 88) + '" y="' + (y + 28) + '" class="pms" fill="' + w.col + '">' + (w.n ? (w.h ? w.h + ' ' + I('serious', 'σοβαρά') + ' ' : '') + (w.m ? w.m + ' ' + I('medium', 'μέτρια') + ' ' : '') + (w.l ? w.l + ' ' + I('small', 'μικρά') : '') : '&#10003; ' + I('all good', 'όλα καλά')) + '</text></g>';
     });

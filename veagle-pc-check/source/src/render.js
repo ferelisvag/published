@@ -110,7 +110,7 @@ var UI = (function (V) {
   function rStart() {
     var el = $('#startBox'); if (!el) return;
     var I = V.I, n = V.counts.high + V.counts.medium + V.counts.low;
-    var msg = n ? I('Your PC has <b>' + n + ' thing' + (n > 1 ? 's' : '') + '</b> worth looking at. You do not need to fix them all. Start with the "Do this first" box: it has the 3 that matter most.', 'Ο υπολογιστής σου έχει <b>' + n + (n > 1 ? ' πράγματα' : ' πράγμα') + '</b> που αξίζει να δεις. Δεν χρειάζεται να τα διορθώσεις όλα. Ξεκίνα από το κουτί «Do this first»: έχει τα 3 σημαντικότερα.') : I('Nothing needs fixing right now. You can close this page.', 'Τίποτα δεν χρειάζεται διόρθωση τώρα. Μπορείς να κλείσεις τη σελίδα.');
+    var msg = n ? I('Your PC has <b>' + n + ' thing' + (n > 1 ? 's' : '') + '</b> worth looking at. You do not need to fix them all. Start with the "Do this first" box: it has the 3 that matter most.', 'Ο υπολογιστής σου έχει <b>' + n + (n > 1 ? ' πράγματα' : ' πράγμα') + '</b> που αξίζει να δεις. Δεν χρειάζεται να τα διορθώσεις όλα. Ξεκίνα από το κουτί «Τι να κάνεις πρώτα»: έχει τα 3 σημαντικότερα.') : I('Nothing needs fixing right now. You can close this page.', 'Τίποτα δεν χρειάζεται διόρθωση τώρα. Μπορείς να κλείσεις τη σελίδα.');
     el.innerHTML = '<div class="startbox"><b>' + I('New to this?', 'Πρώτη φορά;') + '</b> ' + msg + ' ' + I('Every problem is explained in plain words, with exact clicks.', 'Κάθε πρόβλημα εξηγείται με απλά λόγια, με ακριβή κλικ.') + ' <button class="btn sm" type="button" data-tab-go="tools">' + I('Beginner guide', 'Οδηγός για αρχάριους') + '</button></div>';
   }
   function rSince() {

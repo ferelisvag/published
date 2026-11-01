@@ -34,7 +34,7 @@ var VIZ = (function (V) {
     var r = 70, c = 2 * Math.PI * r, off = c * (1 - Math.max(0, Math.min(100, score)) / 100);
     return '<svg class="ring" viewBox="0 0 180 180" role="img" aria-label="' + esc(I('Health score ', 'Βαθμός υγείας ') + score + '/100') + '"><circle cx="90" cy="90" r="' + r + '" fill="none" stroke="var(--line)" stroke-width="14"/>' +
       '<circle class="rg" cx="90" cy="90" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="14" stroke-linecap="round" transform="rotate(-90 90 90)" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + c.toFixed(1) + '" data-off="' + off.toFixed(1) + '"/>' +
-      '<text x="90" y="92" text-anchor="middle" class="rnum">' + score + '</text><text x="90" y="116" text-anchor="middle" class="rsub">' + esc(label) + '</text></svg>';
+      '<text x="90" y="92" text-anchor="middle" class="rnum">' + score + '</text><text x="90" y="116" text-anchor="middle" class="rsub" style="font-size:' + (String(label).length > 13 ? 9 : 12) + 'px">' + esc(label) + '</text></svg>';
   }
   function animateRings(root) {
     Array.prototype.forEach.call((root || document).querySelectorAll('circle.rg'), function (c) { requestAnimationFrame(function () { requestAnimationFrame(function () { c.style.strokeDashoffset = c.getAttribute('data-off'); }); }); });

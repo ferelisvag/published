@@ -92,7 +92,7 @@ var VIZ2 = (function (V, UI) {
       var p = pos[i], w = worst(a), sc = areaScore(a), x = p[0], y = p[1];
       svg += '<g class="pmn" data-area="' + a + '" tabindex="0" role="button" aria-label="' + esc(areaName(a) + ' ' + sc) + '"><rect x="' + (x - 104) + '" y="' + (y - 40) + '" width="208" height="80" rx="6" fill="var(--panel)" stroke="' + w.col + '" stroke-width="2"/>' +
         '<rect x="' + (x - 104) + '" y="' + (y - 40) + '" width="6" height="80" fill="' + w.col + '"/>' +
-        '<text x="' + (x - 88) + '" y="' + (y - 14) + '" class="pmt" fill="var(--text)">' + esc(areaName(a)) + '</text><text x="' + (x - 88) + '" y="' + (y + 4) + '" class="pms">' + esc(I(AREA_HINT[a][0], AREA_HINT[a][1])).slice(0, 30) + '</text>' +
+        '<text x="' + (x - 88) + '" y="' + (y - 14) + '" class="pmt" fill="var(--text)">' + esc(areaName(a)) + '</text><text x="' + (x - 88) + '" y="' + (y + 4) + '" class="pms">' + esc((function (s) { return s.length > 27 ? s.slice(0, 26) + '…' : s; })(I(AREA_HINT[a][0], AREA_HINT[a][1]))) + '</text>' +
         '<text x="' + (x + 94) + '" y="' + (y - 12) + '" text-anchor="end" class="pmv" fill="' + w.col + '">' + sc + '</text>' +
         '<text x="' + (x - 88) + '" y="' + (y + 28) + '" class="pms" fill="' + w.col + '">' + (w.n ? (w.h ? w.h + ' ' + I('serious', 'σοβαρά') + ' ' : '') + (w.m ? w.m + ' ' + I('medium', 'μέτρια') + ' ' : '') + (w.l ? w.l + ' ' + I('small', 'μικρά') : '') : '&#10003; ' + I('all good', 'όλα καλά')) + '</text></g>';
     });

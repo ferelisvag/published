@@ -240,6 +240,7 @@ var PRO = (function (V, AI) {
     if (ba) h += '<h2>' + esc(I('What improved since the last visit', 'Τι βελτιώθηκε από την προηγούμενη επίσκεψη')) + '</h2>' + beforeAfterHtml(true);
     h += '<h2>' + esc(I('Your PC at a glance', 'Ο υπολογιστής σου με μια ματιά')) + '</h2><table class="cd-tb">' + [[I('Processor', 'Επεξεργαστής'), g(D, 'system.cpu.name', '')], [I('Memory', 'Μνήμη'), V.fmtGB(g(D, 'system.ram.totalGB', 0))], [I('Windows', 'Windows'), g(D, 'system.os.productName', '') + ' ' + g(D, 'system.os.displayVersion', '')], [I('Drives', 'Δίσκοι'), arr(D.volumes).map(function (v) { return v.letter + ' ' + V.fmtGB(v.freeGB) + ' ' + I('free of', 'ελεύθερα από') + ' ' + V.fmtGB(v.sizeGB); }).join(', ')]].map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>';
     if (P.note) h += '<h2>' + esc(I('Notes', 'Σημειώσεις')) + '</h2><p class="cd-note">' + esc(P.note).replace(/\n/g, '<br>') + '</p>';
+    h += '<div class="cd-disc"><b>' + esc(I('Important note', 'Σημαντική ενημέρωση')) + '</b> ' + esc(I(NOTE_B[0], NOTE_B[1])) + ' ' + esc(I(DISC[0], DISC[1])) + '</div>';
     h += '<div class="cd-foot">VEAGLE PC Check ' + esc(g(D, 'meta.version', '')) + ' &middot; ferelis.gr &middot; ' + esc(I('read-only scan: nothing on this PC was changed', 'σάρωση μόνο ανάγνωσης: τίποτα δεν άλλαξε σε αυτόν τον υπολογιστή')) + '</div></div>';
     return h;
   }
@@ -307,7 +308,7 @@ var PRO = (function (V, AI) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'hq'; b.textContent = '?'; b.setAttribute('aria-label', I('What is this?', 'Τι είναι αυτό;')); b.title = I('What is this?', 'Τι είναι αυτό;');
       b.setAttribute('data-help', id); hd.insertBefore(b, hd.querySelector('.st'));
     });
-    insights();
+    insights(); notices();
   }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.hq'); if (!b) return;
@@ -317,6 +318,24 @@ var PRO = (function (V, AI) {
     var d = document.createElement('div'); d.className = 'hqpop'; d.textContent = I(h[0], h[1]);
     w.querySelector('header').insertAdjacentElement('afterend', d);
   });
+
+
+  /* ---------- notices: a short note on top of the report and a general disclaimer at the end ---------- */
+  var NOTE_A = ['If your PC works well, you do not have to change anything. This report helps you get to know it: what is hidden and running inside, how to make it faster and more stable, and how to raise its level of security.', 'Αν ο υπολογιστής σου δουλεύει καλά, δεν είναι απαραίτητο να αλλάξεις τίποτα. Η αναφορά όμως σε βοηθά να τον γνωρίσεις: τι κρύβεται και τι τρέχει μέσα του, πώς να τον κάνεις πιο γρήγορο και πιο σταθερό και πώς να ανεβάσεις το επίπεδο ασφάλειάς του.'];
+  var NOTE_B = ['The findings are hints and estimates, not diagnoses and not a guarantee. A hint does not always mean a problem. This app changed nothing on your PC and sent nothing anywhere. Whatever you decide to do, you do yourself, at your own responsibility. Before important changes, keep a backup of your files and, if you are not sure, ask an expert.', 'Τα ευρήματα είναι ενδείξεις και εκτιμήσεις, όχι διαγνώσεις και όχι εγγύηση. Μια ένδειξη δεν σημαίνει πάντα πρόβλημα. Η εφαρμογή δεν άλλαξε τίποτα στον υπολογιστή σου και δεν έστειλε τίποτα πουθενά. Όσα αποφασίσεις να κάνεις, τα κάνεις εσύ, με δική σου ευθύνη. Πριν από σημαντικές αλλαγές κράτα αντίγραφο ασφαλείας των αρχείων σου και, αν δεν είσαι σίγουρος, ρώτα έναν ειδικό.'];
+  var DISC = ['VEAGLE PC Check is a free tool provided "as is", without any warranty of any kind. It reads information from your PC and shows it with explanations and estimates that can be incomplete or wrong, because every PC and every version of Windows is different. It is not a replacement for professional advice, repair or security services. The authors are not responsible for any loss of data, damage, downtime or any other consequence of using the app or of following its suggestions. Instructions with commands change your system: use them only if you understand them and, for important changes, after you have made a backup. Names of programs, products and companies belong to their owners and are used only to describe what was found. Everything stays on your PC: nothing is collected or uploaded by the app. If you share the report or the AI package, you decide what to share, so read it first.',
+    'Το VEAGLE PC Check είναι δωρεάν εργαλείο που παρέχεται «ως έχει», χωρίς καμία εγγύηση οποιουδήποτε είδους. Διαβάζει πληροφορίες από τον υπολογιστή σου και τις δείχνει με εξηγήσεις και εκτιμήσεις που μπορεί να είναι ελλιπείς ή λανθασμένες, γιατί κάθε υπολογιστής και κάθε έκδοση των Windows είναι διαφορετική. Δεν αντικαθιστά επαγγελματική συμβουλή, επισκευή ή υπηρεσίες ασφάλειας. Οι δημιουργοί δεν ευθύνονται για απώλεια δεδομένων, ζημιά, διακοπή λειτουργίας ή οποιαδήποτε άλλη συνέπεια από τη χρήση της εφαρμογής ή την εφαρμογή των προτάσεών της. Οι οδηγίες με εντολές αλλάζουν το σύστημά σου: χρησιμοποίησέ τες μόνο αν τις καταλαβαίνεις και, για σημαντικές αλλαγές, αφού κάνεις αντίγραφο ασφαλείας. Τα ονόματα προγραμμάτων, προϊόντων και εταιρειών ανήκουν στους κατόχους τους και χρησιμοποιούνται μόνο για να περιγράψουν τι βρέθηκε. Όλα μένουν στον υπολογιστή σου: η εφαρμογή δεν συλλέγει και δεν ανεβάζει τίποτα. Αν μοιραστείς την αναφορά ή το πακέτο για AI, εσύ αποφασίζεις τι θα μοιραστείς, γι’ αυτό διάβασέ το πρώτα.'];
+  function notices() {
+    var top = $('#noticeTop'), foot = $('#noticeFoot');
+    if (top) {
+      var closed = !!P.noteClosed;
+      top.className = 'notice' + (closed ? ' small' : '');
+      top.innerHTML = '<div class="nt"><b>' + esc(I('Before you read the results', 'Πριν διαβάσεις τα αποτελέσματα')) + '</b><button type="button" class="btn sm" id="noteTog" aria-expanded="' + (!closed) + '">' + esc(closed ? I('Show the full note', 'Δες ολόκληρη την ενημέρωση') : I('Understood', 'Κατάλαβα')) + '</button></div>' +
+        '<p>' + esc(I(NOTE_A[0], NOTE_A[1])) + '</p>' + (closed ? '' : '<p class="nb">' + esc(I(NOTE_B[0], NOTE_B[1])) + '</p>');
+    }
+    if (foot) foot.innerHTML = '<b>' + esc(I('General disclaimer', 'Γενική αποποίηση ευθύνης')) + '</b><p>' + esc(I(DISC[0], DISC[1])) + '</p>';
+  }
+  document.addEventListener('click', function (e) { if (e.target && e.target.id === 'noteTog') { P.noteClosed = !P.noteClosed; save(); notices(); } });
 
   /* ---------- easter egg: click the eagle 7 times, type "veagle", or the old cheat code ---------- */
   var ART = '   __     _______    _    ____ _     _____\n   \\ \\   / | ____|  / \\  / ___| |   | ____|\n    \\ \\ / /|  _|   / _ \\| |  _| |   |  _|\n     \\ V / | |___ / ___ | |_| | |___| |___\n      \\_/  |_____/_/   \\_\\____|_____|_____|';

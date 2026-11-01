@@ -109,6 +109,14 @@ IF SOMETHING GOES WRONG
   administrator question.
 - The scan seems stuck: some checks take a few minutes. Wait up to 10 minutes. Do not switch the PC off.
 
+GENERAL DISCLAIMER
+------------------
+VEAGLE PC Check is a free tool provided "as is", without any warranty. It only reads information and
+shows explanations and estimates that can be incomplete or wrong. It is not a replacement for
+professional advice, repair or security services. The authors are not responsible for any loss of
+data, damage or other consequence of using the app or following its suggestions. Use any command
+only if you understand it, and make a backup first. Product and company names belong to their owners.
+
 Brand, idea and design: VEAGLE - https://ferelis.gr
 Built with the help of Claude (Anthropic).
 When you share the scan with an AI, the package says that the data comes from the VEAGLE PC Check app (ferelis.gr), built with the help of Claude.

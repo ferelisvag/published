@@ -15,6 +15,7 @@ var VIZ = (function (V) {
   }
   function savePrefs() { try { localStorage.setItem(PK, JSON.stringify(pref)); } catch (e) { } }
   function toggle(which) { pref[which] = !pref[which]; savePrefs(); applyPrefs(); }
+  function set(which, v) { pref[which] = !!v; savePrefs(); applyPrefs(); }
 
   /* ---------- checklist of steps (stored only in this browser, nothing is executed) ---------- */
   var CK = 'veagle.pccheck.chk.' + String(g(D, 'meta.computer', 'pc')) + '.' + String(g(D, 'meta.generated', ''));
@@ -129,7 +130,7 @@ var VIZ = (function (V) {
     return h;
   }
 
-  return { applyPrefs: applyPrefs, toggle: toggle, chkOn: chkOn, chkSet: chkSet, chkStats: chkStats, findingDone: findingDone, ring: ring, animateRings: animateRings, timelineHtml: timelineHtml, trendHtml: trendHtml, win11Html: win11Html };
+  return { applyPrefs: applyPrefs, toggle: toggle, set: set, chkOn: chkOn, chkSet: chkSet, chkStats: chkStats, findingDone: findingDone, ring: ring, animateRings: animateRings, timelineHtml: timelineHtml, trendHtml: trendHtml, win11Html: win11Html };
 })(V);
 
 /* ---------- what the user has done or accepted changes the score (an estimate until the next scan) ---------- */

@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v0.9.1
+VEAGLE PC CHECK  v1.0.1
 =======================
 VEAGLE - ferelis.gr
 
@@ -51,11 +51,19 @@ READING THE REPORT
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
 
-COMFORT
--------
-Top right of the report: the sun button switches to a light theme, "Aa" makes everything bigger. Both are
-remembered on your PC. In every problem you can tick each step when you have done it, and the Summary
-page counts your progress (this only marks your progress, nothing is run).
+COMFORT AND LOOK
+----------------
+Top right of the report there is a box called "Theme". It changes only how the report looks, nothing on your
+PC is touched, and the report remembers your choice in your browser. You can switch any time:
+  Classic (Veagle OS) - the dark look from before. This one opens first.
+  Clean               - light and simple, easy to read.
+  Step by step        - big text, one finding at a time with Back and Next buttons. Good if you are new to this.
+  Cockpit             - black and red, with a big radar of the 8 areas.
+  Bento               - dark, with soft round cards.
+  Cyber               - a turning sphere with one dot for every finding. Drag it, point at a dot, press it to open.
+In the Classic theme the sun button switches to a light theme. "Aa" makes everything bigger in every theme. Both are remembered on your PC.
+In every problem you can tick each step when you have done it, and the Summary page counts your progress
+(this only marks your progress, nothing is run).
 
 LANGUAGE
 --------

@@ -1102,7 +1102,7 @@ function Engine(RAW) {
     function ofKind() { var ks = Array.prototype.slice.call(arguments); return TL.filter(function (e) { return ks.indexOf(e.k) >= 0; }); }
     function when(ms) { return fmtDT(new Date(ms).toISOString()); }
     function within(ms, list, before, after) { return list.filter(function (e) { return e.t >= ms - before && e.t <= ms + after; }); }
-    function trigName(e) { return (e.k === 'update' ? 'a Windows update' : e.k === 'install' ? 'the installation of ' : e.k === 'svcinst' ? 'a new background service' : 'the removal of ') + (e.k === 'update' ? ' (' + e.x + ')' : e.x ? e.x : ''); }
+    function trigName(e) { return (e.k === 'update' ? 'a Windows update' : e.k === 'install' ? 'the installation of ' : e.k === 'svcinst' ? 'a new background service ' : 'the removal of ') + (e.k === 'update' ? ' (' + e.x + ')' : e.x ? e.x : ''); }
     var NICE = { crash: 'program crashes', unclean: 'unexpected shutdowns', bsod: 'blue screens', hang: 'programs that froze', gpu: 'graphics driver errors', disk: 'drive errors', svc: 'service crashes', whea: 'hardware errors' };
 
     R(function () {

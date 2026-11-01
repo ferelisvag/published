@@ -74,6 +74,7 @@
     var dm = g(D, 'meta.isAdmin', true) === false; if (dm) { var chip = document.createElement('span'); chip.className = 'chip warn'; chip.textContent = 'not run as admin: partial'; $('.topright').insertBefore(chip, $('#btnPrint')); }
     if (g(D, 'meta.mode', 'full') === 'quick') { var qc = document.createElement('span'); qc.className = 'chip warn'; qc.textContent = 'quick scan'; $('.topright').insertBefore(qc, $('#btnShare')); }
     if (g(D, 'meta.shareSafe', false)) { var sc = document.createElement('span'); sc.className = 'chip'; sc.textContent = 'share-safe copy: personal details removed'; $('.topright').insertBefore(sc, $('#btnShare')); var sb = $('#btnShare'); if (sb) sb.style.display = 'none'; }
+    var bv = $('#brandVer'); if (bv) bv.textContent = 'v' + g(D, 'meta.version', '?');
     $('#footL').textContent = 'VEAGLE PC Check v' + g(D, 'meta.version', '?') + ' - read-only scan in ' + g(D, 'meta.durationSec', '?') + ' s, nothing was changed on this PC';
     VIZ.applyPrefs(); I18N.apply();
     if (window.MutationObserver) { var pend = false; new MutationObserver(function () { if (pend || V.lang !== 'el') return; pend = true; requestAnimationFrame(function () { pend = false; I18N.apply(); }); }).observe(document.body, { childList: true, subtree: true }); }

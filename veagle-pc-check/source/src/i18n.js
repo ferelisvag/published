@@ -168,6 +168,7 @@ var I18N = (function (V) {
     if (d.e && f.evidence) c.evidence = d.e(f.evidence);
     var ss = typeof d.s === 'function' ? d.s(f) : d.s;
     if (ss && ss.length) c.steps = f.steps.map(function (s, i) { return ss[i] ? { t: ss[i], cmd: s.cmd } : s; });
+    c.title = String(c.title).replace(/\b1 ημέρες\b/g, '1 ημέρα'); if (c.why) c.why = String(c.why).replace(/\b1 ημέρες\b/g, '1 ημέρα');
     return c;
   };
 
@@ -236,7 +237,7 @@ var I18N = (function (V) {
 
   /* ---- static UI text: exact English -> Greek ---- */
   var UI = {
-    'Summary': 'Σύνοψη', 'Insights': 'Ανάλυση', 'Equipment': 'Εξοπλισμός', 'Dashboard': 'Πίνακας', 'Findings': 'Ευρήματα', 'Hardware': 'Υλικό', 'Software': 'Λογισμικό', 'Events': 'Συμβάντα', 'Compare': 'Σύγκριση', 'Tools': 'Εργαλεία', 'AI help': 'Βοήθεια AI',
+    'Summary': 'Σύνοψη', 'Period': 'Περίοδος', 'Insights': 'Ανάλυση', 'Equipment': 'Εξοπλισμός', 'Dashboard': 'Πίνακας', 'Findings': 'Ευρήματα', 'Hardware': 'Υλικό', 'Software': 'Λογισμικό', 'Events': 'Συμβάντα', 'Compare': 'Σύγκριση', 'Tools': 'Εργαλεία', 'AI help': 'Βοήθεια AI',
     'Share-safe copy': 'Αντίγραφο για κοινοποίηση', 'Print / PDF': 'Εκτύπωση / PDF', 'PC type': 'Τύπος PC', 'Home PC': 'Σπίτι', 'Work or clinic PC': 'Δουλειά ή ιατρείο', 'Gaming PC': 'Gaming',
     'HIGH': 'ΥΨΗΛΟ', 'MEDIUM': 'ΜΕΤΡΙΟ', 'LOW': 'ΧΑΜΗΛΟ', 'INFO': 'ΣΥΜΒΟΥΛΗ', 'In plain words': 'Με απλά λόγια', 'What we found': 'Τι βρήκαμε', 'Ask an AI about this': 'Ρώτα ένα AI γι’ αυτό',
     'Easy': 'Εύκολο', 'Medium': 'Μέτριο', 'Ask a pro': 'Ρώτα ειδικό', 'Safe': 'Ασφαλές', 'Back up first': 'Πρώτα αντίγραφο ασφαλείας', 'Careful': 'Προσοχή', 'raised for your PC type': 'ανεβασμένο για τον τύπο PC σου',

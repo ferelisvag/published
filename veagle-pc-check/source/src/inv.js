@@ -169,7 +169,7 @@ var INV = (function (V, AI) {
     var s = D.system || {}, inv = X1.inventory || {}, c = V.counts, RT = V.RT, hl = RT.hardList(), L = function (en, el) { return V.I(en, el); };
     var sheets = [];
     sheets.push({ name: L('Summary', 'Σύνοψη'), rows: [[L('Item', 'Στοιχείο'), L('Value', 'Τιμή')],
-      [L('Computer', 'Υπολογιστής'), g(D, 'meta.computer', '')], [L('Scan date', 'Ημερομηνία σάρωσης'), g(D, 'meta.generated', '')], [L('Health score', 'Βαθμός υγείας'), V.score.score], [L('Serious findings', 'Σοβαρά ευρήματα'), c.high], [L('Medium findings', 'Μέτρια ευρήματα'), c.medium], [L('Small findings', 'Μικρά ευρήματα'), c.low],
+      [L('Computer', 'Υπολογιστής'), g(D, 'meta.computer', '')], [L('Scan date', 'Ημερομηνία σάρωσης'), g(D, 'meta.generated', '')], [L('Health score (with your ticks and accepted items)', 'Βαθμός υγείας (με τα τικ και τα αποδεκτά σου)'), V.score.score], [L('Health score of the scan itself', 'Βαθμός υγείας της ίδιας της σάρωσης'), V.scoreRaw ? V.scoreRaw.score : V.score.score], [L('Serious findings', 'Σοβαρά ευρήματα'), c.high], [L('Medium findings', 'Μέτρια ευρήματα'), c.medium], [L('Small findings', 'Μικρά ευρήματα'), c.low],
       [L('Hardening score', 'Βαθμός σκληροποίησης'), RT.hardScore() ? RT.hardScore().score : ''], ['VEAGLE PC Check', g(D, 'meta.version', '')], ['', 'Created with VEAGLE PC Check - ferelis.gr']] });
     var cv = arr(D.volumes).filter(function (v) { return /^C:/i.test(v.letter); })[0] || {};
     var disks = arr(D.disks).map(function (d) { return d.name + ' ' + V.fmtGB(d.sizeGB); }).join(' | ');

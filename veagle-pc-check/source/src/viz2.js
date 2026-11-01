@@ -11,7 +11,7 @@ var VIZ2 = (function (V, UI) {
   };
   function areaName(a) { return I(a, AREA_EL[a] || a); }
   function worst(area) {
-    var f = V.findings.filter(function (x) { return x.area === area && x.sev !== 'info'; });
+    var f = V.active().filter(function (x) { return x.area === area && x.sev !== 'info'; });
     var h = f.filter(function (x) { return x.sev === 'high'; }).length, m = f.filter(function (x) { return x.sev === 'medium'; }).length, l = f.filter(function (x) { return x.sev === 'low'; }).length;
     return { n: f.length, h: h, m: m, l: l, col: h ? COL.red : (m ? COL.amber : (l ? COL.white : COL.green)) };
   }
@@ -52,8 +52,8 @@ var VIZ2 = (function (V, UI) {
     var pd = g(D, 'updates.lastPatchDaysAgo', null);
     if (pd != null) { var c4 = pd > 90 ? COL.red : (pd > 45 ? COL.amber : COL.green); tiles.push({ go: 'findings', t: I('Last Windows update', 'Τελευταία ενημέρωση Windows'), v: '<div class="kbig" style="color:' + c4 + '">' + pd + '<small> ' + I('days', 'ημ.') + '</small></div>', s: pd > 90 ? I('far too long', 'πάρα πολύ καιρό') : (pd > 45 ? I('getting old', 'παλιώνει') : I('recent', 'πρόσφατη')), sp: spark(tr.map(function (x) { return x.patchDays; }), c4) }); }
     var er = num(g(D, 'events.system.errors', 0)) + num(g(D, 'events.application.errors', 0));
-    var c5 = er > 800 ? COL.red : (er > 200 ? COL.amber : COL.green);
-    tiles.push({ go: 'events', t: I('Errors in 30 days', 'Σφάλματα σε 30 ημέρες'), v: '<div class="kbig" style="color:' + c5 + '">' + V.fmtNum(er) + '</div>', s: er > 800 ? I('a lot, see the timeline', 'πολλά, δες το χρονολόγιο') : (er > 200 ? I('some noise', 'λίγος θόρυβος') : I('quiet', 'ήσυχο')), sp: spark(tr.map(function (x) { return x.sysErr; }), c5) });
+    var c5 = er > 800 * V.days / 30 ? COL.red : (er > 200 * V.days / 30 ? COL.amber : COL.green);
+    tiles.push({ go: 'events', t: I('Errors in ' + V.days + ' days', 'Σφάλματα σε ' + V.days + ' ημέρες'), v: '<div class="kbig" style="color:' + c5 + '">' + V.fmtNum(er) + '</div>', s: er > 800 * V.days / 30 ? I('a lot, see the timeline', 'πολλά, δες το χρονολόγιο') : (er > 200 * V.days / 30 ? I('some noise', 'λίγος θόρυβος') : I('quiet', 'ήσυχο')), sp: spark(tr.map(function (x) { return x.sysErr; }), c5) });
     var sn = (V.uniq ? V.uniq(arr(g(D, 'startup.items', [])).map(function (s) { return s.name; })) : arr(g(D, 'startup.items', []))).length;
     var c6 = sn > 25 ? COL.red : (sn > 14 ? COL.amber : COL.green);
     tiles.push({ go: 'software', t: I('Programs at start-up', 'Προγράμματα στην εκκίνηση'), v: '<div class="kbig" style="color:' + c6 + '">' + sn + '</div>', s: sn > 25 ? I('too many', 'πάρα πολλά') : (sn > 14 ? I('quite a few', 'αρκετά') : I('fine', 'εντάξει')), sp: spark(tr.map(function (x) { return x.startup; }), c6) });

@@ -114,8 +114,9 @@ function Engine(RAW) {
   var SEV_ORDER = { high: 0, medium: 1, low: 2, info: 3 };
   var PEN = { high: 8, medium: 3, low: 0.8, info: 0 };
   var AREAS = ['Stability', 'Storage', 'Security', 'Network', 'Backup', 'Performance', 'Updates', 'Software'];
+  function sing(s) { return typeof s === 'string' ? s.replace(/\b1 days\b/g, '1 day') : s; }
   function F(id, area, sev, title, why, steps, evidence) {
-    return { id: id, area: area, sev: sev, title: title, why: why, steps: arr(steps), evidence: evidence || '' };
+    return { id: id, area: area, sev: sev, title: sing(title), why: sing(why), steps: arr(steps), evidence: sing(evidence) || '' };
   }
   function S(t, cmd) { return { t: t, cmd: cmd || '' }; }
 
@@ -1096,7 +1097,7 @@ function Engine(RAW) {
     /* ================= v0.5: connecting the dots between events and problems ================= */
     var TL = arr(EX.timeline).map(function (e) { return { t: new Date(e.t).getTime(), k: e.k, x: String(e.x || '') }; }).filter(function (e) { return isFinite(e.t); }).sort(function (a, b) { return a.t - b.t; });
     var H = 3600000, MIN = 60000;
-    var end30 = new Date(g(D, 'meta.generated', Date.now())).getTime() - 30 * 86400000;
+    var end30 = new Date(g(D, 'meta.generated', Date.now())).getTime() - days * 86400000;
     var BAD = { crash: 1, unclean: 1, bsod: 1, hang: 1, gpu: 1, disk: 1, svc: 1, whea: 1 };
     function ofKind() { var ks = Array.prototype.slice.call(arguments); return TL.filter(function (e) { return ks.indexOf(e.k) >= 0; }); }
     function when(ms) { return fmtDT(new Date(ms).toISOString()); }
@@ -1332,8 +1333,8 @@ function Engine(RAW) {
       var left = Math.round((endDate.getTime() - NOW6) / 86400000);
       if (left > 365) return null;
       var dstr = endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-      if (left <= 0) return F('soft-office-eol', 'Software', 'medium', yr + ' no longer gets security updates (ended ' + dstr + ')',
-        'Microsoft stopped fixing security holes in ' + yr + '. Office files from e-mail are a very common way to deliver viruses, so an unpatched Office is a real risk.',
+      if (left <= 0) return F('soft-office-eol', 'Software', 'low', yr + ' no longer gets security updates (ended ' + dstr + ')',
+        'Microsoft stopped fixing security holes in ' + yr + '. It keeps working, and many people keep using the version they bought. The risk is Office files from e-mail or downloads, a common way to deliver viruses. If you keep it, open attachments only from people you trust and keep Windows and your antivirus up to date. You can press "I accept this" so it stops counting against your score.',
         [S('Option 1: switch to Microsoft 365 (subscription, always updated) or to Office 2024 (one-time purchase).'), S('Option 2: use the free web versions at office.com in the meantime and open attachments only from people you trust.')], 'Found: ' + ids.replace(/,/g, ', '));
       return F('soft-office-eol', 'Software', 'low', yr + ' stops getting security updates in ' + left + ' days (' + dstr + ')',
         'After that date Microsoft will not fix security holes in this Office. Plan the change now.',
@@ -1657,7 +1658,7 @@ function Engine(RAW) {
     });
     /* basic security checklist in five groups (used by Insights and the client report) */
     function basicList() {
-      function has(ids) { return V_findingsNow().filter(function (f) { return ids.indexOf(f.id) >= 0; }); }
+      function has(ids) { return V_findingsNow().filter(function (f) { return ids.indexOf(f.id) >= 0 && !(typeof V !== 'undefined' && V.isResolved && V.isResolved(f)); }); }
       function grp(en, el, hdEn, hdEl, ids, minusInfo) {
         var f = has(ids), bad = f.filter(function (x) { return x.sev === 'high' || x.sev === 'medium'; });
         return { en: en, el: el, hen: hdEn, hel: hdEl, st: bad.length ? 'bad' : (f.length ? 'warn' : 'ok'), items: f };
@@ -1793,9 +1794,30 @@ function Engine(RAW) {
     fmtNum: fmtNum, fmtGB: fmtGB, fmtDate: fmtDate, fmtDT: fmtDT, fmtUptime: fmtUptime, ageDays: ageDays,
     evGroups: evGroups, evCount: evCount, RE: RE, findings: findings, good: good, score: sc, counts: counts,
     SEV_ORDER: SEV_ORDER, AREAS: AREAS, readiness: readiness(), battery: g(D, 'battery', null),
+    days: num(g(D, 'events.days', 30), 30), periodChoice: !!(D.events && D.events.availableDays),
     RT: RT, withProfile: withProfile, scoreOf: score, META: META, noiseFor: noiseFor, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
   };
 }
+/* ---------- period of the Event Viewer data: 7, 30 or 60 days (the scan collects 60 and the report narrows it down) ---------- */
+(function () {
+  var R = window.__PCDATA__; if (!R || !R.events || !R.events.system || !R.events.system.win) return;
+  var N = 30; try { N = parseInt(localStorage.getItem('veagle.pccheck.period') || '30', 10); } catch (e) { }
+  if ([1, 7, 30, 60].indexOf(N) < 0) N = 30;
+  R.events.availableDays = true; R.events.fullDays = R.events.days;
+  if (N === 60) { R.events.days = 60; R.meta.periodDays = 60; return; }
+  var key = N === 1 ? 'count1' : (N === 7 ? 'count7' : 'count30'), wk = N === 1 ? 'd1' : (N === 7 ? 'd7' : 'd30'), gen = new Date(R.meta.generated).getTime(), cut = gen - N * 86400000;
+  ['system', 'application'].forEach(function (k) {
+    var S = R.events[k]; if (!S) return;
+    S.groups = (S.groups || []).map(function (gp) { var c = {}; Object.keys(gp).forEach(function (x) { c[x] = gp[x]; }); c.count = gp[key] != null ? gp[key] : gp.count; return c; }).filter(function (gp) { return gp.count > 0; });
+    if (S.win && S.win[wk]) { S.total = S.win[wk].total; S.errors = S.win[wk].errors; S.warnings = S.win[wk].warnings; }
+    S.perDay = (S.perDay || []).slice(-N);
+  });
+  R.events.appCrashes = (R.events.appCrashes || []).map(function (a) { var c = {}; Object.keys(a).forEach(function (x) { c[x] = a[x]; }); c.count = a[key] != null ? a[key] : a.count; return c; }).filter(function (a) { return a.count > 0; });
+  var hk = N === 1 ? 'appHangs1' : (N === 7 ? 'appHangs7' : 'appHangs30'); if (R.events[hk] != null) R.events.appHangs = R.events[hk];
+  R.events.days = N; R.meta.periodDays = N;
+  if (R.extras && R.extras.timeline) R.extras.timeline = R.extras.timeline.filter(function (e) { return new Date(e.t).getTime() >= cut; });
+  if (R.extras && R.extras.reliability && R.extras.reliability.bugchecks) R.extras.reliability.bugchecks = R.extras.reliability.bugchecks.filter(function (b) { return new Date(b.time).getTime() >= cut; });
+})();
 var V = Engine(window.__PCDATA__ || null);
 V.Engine = Engine;
 V.setProfile = function (key) {
@@ -1804,4 +1826,5 @@ V.setProfile = function (key) {
   V.counts = { high: 0, medium: 0, low: 0, info: 0 };
   V.findings.forEach(function (x) { V.counts[x.sev]++; });
   V.score = V.scoreOf(V.findings);
+  if (V.userAdjust) V.userAdjust();
 };

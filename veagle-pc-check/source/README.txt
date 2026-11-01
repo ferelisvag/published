@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v0.7.1
+VEAGLE PC CHECK  v0.8.0
 =======================
 VEAGLE - ferelis.gr
 

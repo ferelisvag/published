@@ -420,3 +420,12 @@ body.light .notice { background: linear-gradient(90deg, #fdeaea, #fff); } body.l
 .bci { position: absolute; top: 8px; right: 10px; font: 700 18px var(--head); } .bc.ok .bci { color: #3ddc84; } .bc.warn .bci { color: #f5b44a; } .bc.bad .bci { color: #e82c2d; }
 .hardtop { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; } .hardtop .ring { width: 130px; height: 130px; }
 body.light .bc { background: #fff; }
+
+.finding.facc .t { opacity: .7; } .accn { font: 700 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: #7ddc9a; border: 1px solid #2e7d52; padding: 0 6px; margin-left: 8px; vertical-align: 2px; }
+.sub.est { border-left: 3px solid var(--amber); padding-left: 10px; margin-top: 8px; }
+
+.howto { max-width: 100%; border: 1px solid var(--line); background: var(--panel); margin: 0 0 14px; font-size: 13px; }
+.howto > summary { cursor: pointer; padding: 10px 14px; font: 700 13.5px var(--head); list-style: none; } .howto > summary::-webkit-details-marker { display: none; } .howto > summary::before { content: '\25B8'; color: var(--redtext); margin-right: 8px; } .howto[open] > summary::before { content: '\25BE'; }
+.howto > div { padding: 2px 16px 12px; line-height: 1.6; color: #d4d4d8; } .howto ol, .howto ul { margin: 6px 0; padding-left: 20px; } .howto li { margin: 5px 0; }
+.howto.on { border-color: var(--amber); } body.light .howto > div { color: #1f2430; } body.light .howto { background: #fff; }
+@media print { .howto { display: none; } }

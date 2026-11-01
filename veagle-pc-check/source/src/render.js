@@ -97,7 +97,7 @@ var UI = (function (V) {
     win('wRadar', 'areas.map', 'score per area', svg);
   }
   function rActions() {
-    var top = V.findings.filter(function (f) { return f.sev !== 'info'; }).slice(0, 3);
+    var top = V.openList().slice(0, 3);
     var h;
     if (!top.length) h = '<div class="sub">Nothing needs doing. Re-run the scan after big changes.</div>';
     else h = top.map(function (f0, i) {
@@ -134,7 +134,7 @@ var UI = (function (V) {
   }
   function rSummary() {
     var el = $('#tab-summary'); if (!el) return;
-    var s = V.score, c = V.counts, top = V.findings.filter(function (f) { return f.sev !== 'info'; }).slice(0, 3);
+    var s = V.score, c = V.counts, top = V.openList().slice(0, 3);
     var I = V.I;
     var light = c.high ? 'red' : (c.medium || s.score < 85 ? 'amber' : 'green');
     var head = light === 'red' ? I('Your PC needs attention', 'Ο υπολογιστής σου χρειάζεται προσοχή') : (light === 'amber' ? I('Your PC is mostly fine', 'Ο υπολογιστής σου είναι ως επί το πλείστον καλά') : I('Your PC looks healthy', 'Ο υπολογιστής σου φαίνεται υγιής'));
@@ -147,7 +147,7 @@ var UI = (function (V) {
     h += '<div id="sinceBox2"></div>';
     h += '<div class="sect"><h2>What to do, in this order</h2><span>only the most important</span></div>';
     h += top.length ? top.map(function (f0, i) { var f = V.tf(f0); return '<div class="action"><div class="num">' + (i + 1) + '</div><div style="min-width:0"><div style="font-family:var(--head);font-weight:700;font-size:17px;margin:2px 0">' + esc(f.title) + '</div>' + metaChips(f) + '<button class="btn sm" type="button" data-open="' + esc(f.id) + '">Show me how, step by step</button></div></div>'; }).join('') : '<div class="sub">Nothing to do.</div>';
-    h += '<div class="sect"><h2>' + I('What happened in the last 30 days', 'Τι έγινε τις τελευταίες 30 ημέρες') + '</h2><span>' + I('problems and changes on one line', 'προβλήματα και αλλαγές σε μία γραμμή') + '</span></div><div class="win"><div class="body">' + VIZ.timelineHtml(true) + '</div></div>';
+    h += '<div class="sect"><h2>' + I('What happened in the last ' + V.days + ' days', 'Τι έγινε τις τελευταίες ' + V.days + ' ημέρες') + '</h2><span>' + I('problems and changes on one line', 'προβλήματα και αλλαγές σε μία γραμμή') + '</span></div><div class="win"><div class="body">' + VIZ.timelineHtml(true) + '</div></div>';
     h += '<div class="sect"><h2>' + I('Your progress over time', 'Η πρόοδός σου στον χρόνο') + '</h2><span>' + I('from your earlier scans', 'από τις προηγούμενες σαρώσεις σου') + '</span></div>' + VIZ.trendHtml();
     h += '<div class="btns" style="margin-top:18px"><button class="btn sm" type="button" data-tab-go="dashboard">See all details</button><button class="btn sm" type="button" data-tab-go="tools">Beginner guide</button><button class="btn sm" type="button" id="btnPrint2">Print this page</button></div>';
     el.innerHTML = h;
@@ -318,9 +318,9 @@ var UI = (function (V) {
     $('#findList').innerHTML = list.length ? list.map(function (f0, i) {
       var f = V.tf(f0);
       var steps = f.steps.length ? '<ol class="steps">' + f.steps.map(function (s, si) { var on = VIZ.chkOn(f.id, si); return '<li' + (on ? ' class="done"' : '') + '><label class="chk"><input type="checkbox" data-chk="' + esc(f.id) + '|' + si + '"' + (on ? ' checked' : '') + '><span>' + gloss(esc(s.t)) + '</span></label>' + (s.cmd ? cmdBox(s.cmd) : '') + '</li>'; }).join('') + '</ol><p class="sub chkhint">' + esc(V.I('Tick each step when you have done it. This only marks your progress, nothing is run.', 'Τσέκαρε κάθε βήμα όταν το κάνεις. Αυτό μόνο σημειώνει την πρόοδό σου, δεν τρέχει τίποτα.')) + '</p>' : '';
-      return '<div class="finding' + (f.id === openId ? ' open' : '') + (VIZ.findingDone(f) ? ' fdone' : '') + '" data-id="' + esc(f.id) + '"><button class="fh" type="button" aria-expanded="' + (f.id === openId) + '"><span class="fid">#' + String(V.findings.indexOf(f0) + 1).padStart(2, '0') + '</span>' + tag(f.sev) + '<span class="t">' + esc(f.title) + '</span><span class="area">' + esc(f.area) + '</span></button>' +
+      return '<div class="finding' + (f.id === openId ? ' open' : '') + (VIZ.findingDone(f) ? ' fdone' : '') + (V.isAccepted(f.id) ? ' facc' : '') + '" data-id="' + esc(f.id) + '"><button class="fh" type="button" aria-expanded="' + (f.id === openId) + '"><span class="fid">#' + String(V.findings.indexOf(f0) + 1).padStart(2, '0') + '</span>' + tag(f.sev) + '<span class="t">' + esc(f.title) + (V.isAccepted(f.id) ? ' <small class="accn">' + esc(V.I('accepted', 'αποδεκτό')) + '</small>' : '') + '</span><span class="area">' + esc(f.area) + '</span></button>' +
         '<div class="fb">' + metaChips(f) + '<div class="lbl">In plain words</div><p class="why">' + gloss(esc(f.why)) + '</p>' + (f.evidence ? '<div class="ev"><span class="lbl">What we found</span><br>' + esc(f.evidence).replace(/\n/g, '<br>') + '</div>' : '') + steps +
-        '<div class="btns" style="margin-top:14px"><button class="btn sm" type="button" data-ask="' + esc(f.id) + '">Ask an AI about this</button></div></div></div>';
+        '<div class="btns" style="margin-top:14px"><button class="btn sm" type="button" data-ask="' + esc(f.id) + '">Ask an AI about this</button>' + (f.sev === 'info' ? '' : '<button class="btn sm" type="button" data-accept="' + esc(f.id) + '" title="' + esc(V.I('You know about it and decided to keep things as they are. It stops counting against the score. You can undo this any time.', 'Το ξέρεις και αποφάσισες να μείνουν όπως είναι. Δεν μετράει πια στον βαθμό. Μπορείς να το αναιρέσεις οποτεδήποτε.')) + '">' + esc(V.isAccepted(f.id) ? V.I('Undo: count it again', 'Αναίρεση: να μετράει ξανά') : V.I('I accept this (do not count it)', 'Το αποδέχομαι (να μην μετράει)')) + '</button>') + '</div></div></div>';
     }).join('') : '<div class="win"><div class="body sub">No findings match.</div></div>';
     if (openId) { var el = $('.finding[data-id="' + openId + '"]'); if (el) el.scrollIntoView({ block: 'center' }); }
   }
@@ -411,8 +411,8 @@ var UI = (function (V) {
   }
   function rEvents() {
     var e = D.events || {}, h = '';
-    h += sect(V.I('Timeline of problems and changes', 'Χρονολόγιο προβλημάτων και αλλαγών'), V.I('last 30 days', 'τελευταίες 30 ημέρες')) + '<div class="win" style="margin-bottom:18px"><div class="body">' + VIZ.timelineHtml(false) + '</div></div>';
-    h += sect('Event Viewer, last ' + (e.days || 30) + ' days', 'errors and warnings only');
+    h += sect(V.I('Timeline of problems and changes', 'Χρονολόγιο προβλημάτων και αλλαγών'), V.I('last ' + V.days + ' days', 'τελευταίες ' + V.days + ' ημέρες')) + '<div class="win" style="margin-bottom:18px"><div class="body">' + VIZ.timelineHtml(false) + '</div></div>';
+    h += sect(V.I('Event Viewer, last ' + (e.days || 30) + ' days', 'Event Viewer, τελευταίες ' + (e.days || 30) + ' ημέρες'), V.I('errors and warnings only', 'μόνο σφάλματα και προειδοποιήσεις'));
     h += '<div class="grid"><div class="win s6"><header><span>System log</span></header><div class="body">' + kv([['Total', fmtNum(g(e, 'system.total', 0))], ['Errors / critical', fmtNum(g(e, 'system.errors', 0))], ['Warnings', fmtNum(g(e, 'system.warnings', 0))]]) + '</div></div>' +
       '<div class="win s6"><header><span>Application log</span></header><div class="body">' + kv([['Total', fmtNum(g(e, 'application.total', 0))], ['Errors / critical', fmtNum(g(e, 'application.errors', 0))], ['Warnings', fmtNum(g(e, 'application.warnings', 0))]]) + '</div></div></div>';
     h += sect('Programs that crashed', arr(e.appCrashes).length + ' programs, ' + (e.appHangs || 0) + ' hangs');

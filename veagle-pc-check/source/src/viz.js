@@ -55,12 +55,12 @@ var VIZ = (function (V) {
     var EX = g(D, 'extras.timeline', null);
     var evs = arr(EX).map(function (e) { return { t: new Date(e.t).getTime(), k: e.k, x: e.x }; }).filter(function (e) { return isFinite(e.t) && KN[e.k]; });
     if (!evs.length) return '<div class="sub">' + esc(I('No timeline data in this scan. Run the full scan again.', 'Δεν υπάρχουν δεδομένα χρονολογίου σε αυτή τη σάρωση. Τρέξε ξανά την πλήρη σάρωση.')) + '</div>';
-    var end = new Date(g(D, 'meta.generated', Date.now())).getTime(), days = 30, start = end - days * 86400000;
+    var end = new Date(g(D, 'meta.generated', Date.now())).getTime(), days = V.days || 30, start = end - days * 86400000;
     var W = 1000, L = compact ? 26 : 215, R = 30, laneH = compact ? 16 : 30, top = 20, H = top + LANES.length * laneH + 22, usable = W - L - R;
     var lanes = compact ? LANES.filter(function (l) { return !l.bars; }) : LANES;
     H = top + lanes.length * laneH + 22;
     function X(t) { return L + Math.max(0, Math.min(1, (t - start) / (end - start))) * usable; }
-    var svg = '<svg class="tl" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(I('Timeline of problems and changes in the last 30 days', 'Χρονολόγιο προβλημάτων και αλλαγών τις τελευταίες 30 ημέρες')) + '">';
+    var svg = '<svg class="tl" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(I('Timeline of problems and changes in the last ' + days + ' days', 'Χρονολόγιο προβλημάτων και αλλαγών τις τελευταίες 30 ημέρες')) + '">';
     for (var d = 0; d <= days; d += 5) { var x = L + usable * d / days, dt = new Date(start + d * 86400000); svg += '<line x1="' + x + '" y1="' + top + '" x2="' + x + '" y2="' + (H - 18) + '" stroke="var(--line2)"/><text x="' + x + '" y="' + (H - 4) + '" text-anchor="middle" class="tlx">' + dt.getDate() + '/' + (dt.getMonth() + 1) + '</text>'; }
     var n = 0;
     lanes.forEach(function (ln, li) {
@@ -130,4 +130,25 @@ var VIZ = (function (V) {
   }
 
   return { applyPrefs: applyPrefs, toggle: toggle, chkOn: chkOn, chkSet: chkSet, chkStats: chkStats, findingDone: findingDone, ring: ring, animateRings: animateRings, timelineHtml: timelineHtml, trendHtml: trendHtml, win11Html: win11Html };
+})(V);
+
+/* ---------- what the user has done or accepted changes the score (an estimate until the next scan) ---------- */
+(function (V) {
+  'use strict';
+  var AK = 'veagle.pccheck.acc.' + String((V.D && V.D.meta && V.D.meta.computer) || 'pc'), acc = {};
+  try { acc = JSON.parse(localStorage.getItem(AK) || '{}') || {}; } catch (e) { acc = {}; }
+  V.isAccepted = function (id) { return !!acc[id]; };
+  V.setAccepted = function (id, on) { if (on) acc[id] = 1; else delete acc[id]; try { localStorage.setItem(AK, JSON.stringify(acc)); } catch (e) { } V.userAdjust(); };
+  V.isResolved = function (f) { return !!(f && (acc[f.id] || VIZ.findingDone(f))); };
+  V.active = function () { return V.findings.filter(function (f) { return !V.isResolved(f); }); };
+  V.openList = function () { return V.active().filter(function (f) { return f.sev !== 'info'; }); };
+  V.userAdjust = function () {
+    V.scoreRaw = V.scoreOf(V.findings);
+    V.countsRaw = { high: 0, medium: 0, low: 0, info: 0 }; V.findings.forEach(function (x) { V.countsRaw[x.sev]++; });
+    var act = V.active();
+    V.score = V.scoreOf(act);
+    V.counts = { high: 0, medium: 0, low: 0, info: 0 }; act.forEach(function (x) { V.counts[x.sev]++; });
+    V.resolvedCount = V.findings.length - act.length;
+  };
+  V.userAdjust();
 })(V);

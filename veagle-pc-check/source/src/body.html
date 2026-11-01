@@ -27,6 +27,7 @@
     </nav>
     <div class="topright">
       <a class="chip" href="https://ferelis.gr" target="_blank" rel="noopener" title="VEAGLE - ferelis.gr">ferelis.gr</a>
+      <label class="chip" for="periodSel" id="periodChip" hidden title="How far back to look at the Event Viewer problems. Read the explanation on the Summary page.">Period <select id="periodSel" aria-label="Period of the Event Viewer data"></select></label>
       <label class="chip" for="profileSel">PC type <select id="profileSel" aria-label="Type of PC"></select></label>
       <span class="chip" id="chipOs"></span>
       <span class="chip" id="chipDate"></span>
@@ -77,6 +78,7 @@
 
   <section class="tabpane" id="tab-findings" role="tabpanel" aria-label="Findings">
     <div class="sect"><h2>Findings</h2><span id="findSummary"></span></div>
+    <div id="howFind"></div>
     <div id="findViz"></div>
     <div class="toolbar">
       <div class="filters" id="filters"></div>

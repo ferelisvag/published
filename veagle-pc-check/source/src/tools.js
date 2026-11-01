@@ -37,7 +37,7 @@ var TOOLS = (function (V, AI, CMP) {
 
   /* ---------- text builders ---------- */
   function ticket() {
-    var f = V.findings.filter(function (x) { return x.sev !== 'info'; });
+    var f = V.openList();
     var L = [];
     L.push('PC HEALTH SUMMARY (VEAGLE PC Check v' + g(D, 'meta.version', '?') + ')');
     L.push('PC: ' + g(D, 'meta.computer', '?') + ' | ' + g(D, 'system.os.productName', 'Windows') + ' ' + g(D, 'system.os.displayVersion', '') + ' | ' + g(D, 'system.cpu.name', '?') + ' | ' + V.fmtGB(num(g(D, 'system.ram.totalGB', 0))) + ' RAM');

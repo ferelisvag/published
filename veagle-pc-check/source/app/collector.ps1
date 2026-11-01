@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.7.1'
+$script:Version = '0.8.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -123,6 +123,7 @@ function Get-EvData($ev, [string]$name) {
 # Turns the event list into: totals, top groups, per-day counts.
 function Summarize-Events($events, [int]$Days, [int]$Top = 60) {
     $events = @($events)
+    $cut1 = (Get-Date).AddDays(-1); $cut7 = (Get-Date).AddDays(-7); $cut30 = (Get-Date).AddDays(-30)
     $groups = @()
     if ($events.Count -gt 0) {
         $grouped = $events | Group-Object -Property { '{0}|{1}|{2}' -f $_.ProviderName, $_.Id, $_.Level }
@@ -134,6 +135,9 @@ function Summarize-Events($events, [int]$Days, [int]$Top = 60) {
                 id       = [int]$first.Id
                 level    = LevelName $first.Level
                 count    = [int]$_.Count
+                count1   = @($_.Group | Where-Object { $_.TimeCreated -ge $cut1 }).Count
+                count7   = @($_.Group | Where-Object { $_.TimeCreated -ge $cut7 }).Count
+                count30  = @($_.Group | Where-Object { $_.TimeCreated -ge $cut30 }).Count
                 sample   = FirstLine $first.Message 220
                 lastSeen = Iso $last
             }
@@ -152,10 +156,16 @@ function Summarize-Events($events, [int]$Days, [int]$Top = 60) {
         if ($null -eq $v) { $v = @(0, 0) }
         $perDay += [pscustomobject]@{ date = $d; errors = [int]$v[0]; warnings = [int]$v[1] }
     }
+    $win = [ordered]@{}
+    foreach ($wd in @(@('d1', $cut1), @('d7', $cut7), @('d30', $cut30))) {
+        $we = @($events | Where-Object { $_.TimeCreated -ge $wd[1] })
+        $win[$wd[0]] = [pscustomobject]@{ total = $we.Count; errors = @($we | Where-Object { $_.Level -le 2 }).Count; warnings = @($we | Where-Object { $_.Level -eq 3 }).Count }
+    }
     return [pscustomobject]@{
         total    = $events.Count
         errors   = @($events | Where-Object { $_.Level -le 2 }).Count
         warnings = @($events | Where-Object { $_.Level -eq 3 }).Count
+        win      = [pscustomobject]$win
         groups   = $groups
         perDay   = $perDay
     }
@@ -565,7 +575,7 @@ $crashDumps = [pscustomobject]@{ dumps = [int]$dumpCount; liveKernelReports = [i
 
 # ---------------------------------------------------------------- 7. events
 Step 7 $TOTAL 'Event Viewer, last 30 days (System and Application)'
-$days = 30
+$days = 60
 $since = (Get-Date).AddDays(-$days)
 $sysEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'System'; Level = 1, 2, 3; StartTime = $since } -ErrorAction SilentlyContinue)
 $appEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Level = 1, 2, 3; StartTime = $since } -ErrorAction SilentlyContinue)
@@ -573,11 +583,15 @@ $appEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Level = 1, 
 foreach ($pair in @(@('System', $sysEv), @('Application', $appEv))) {
     try {
         $pair[1] | Select-Object @{ n = 'Time'; e = { $_.TimeCreated.ToString('s') } }, Id, @{ n = 'Level'; e = { LevelName $_.Level } }, ProviderName, @{ n = 'Message'; e = { FirstLine $_.Message 300 } } |
-            Export-Csv -NoTypeInformation -Encoding UTF8 -Path (Join-Path $raw ('events-' + $pair[0] + '-30d.csv'))
+            Export-Csv -NoTypeInformation -Encoding UTF8 -Path (Join-Path $raw ('events-' + $pair[0] + '-60d.csv'))
     } catch { Warn ('csv ' + $pair[0] + ': ' + $_.Exception.Message) }
 }
 
 $crashApps = @{}
+$crashApps1 = @{}
+$crashApps7 = @{}
+$crashApps30 = @{}
+$cut1c = (Get-Date).AddDays(-1); $cut7c = (Get-Date).AddDays(-7); $cut30c = (Get-Date).AddDays(-30)
 $crashPaths = @{}
 foreach ($e in $appEv) {
     if ($e.ProviderName -eq 'Application Error' -and $e.Id -eq 1000) {
@@ -586,14 +600,20 @@ foreach ($e in $appEv) {
         if (-not $n -and $e.Message -match 'Faulting application name:\s*([^,\r\n]+)') { $n = $Matches[1].Trim() }
         if ($n) {
             $crashApps[$n] = 1 + [int]$crashApps[$n]
+            if ($e.TimeCreated -ge $cut1c) { $crashApps1[$n] = 1 + [int]$crashApps1[$n] }
+            if ($e.TimeCreated -ge $cut7c) { $crashApps7[$n] = 1 + [int]$crashApps7[$n] }
+            if ($e.TimeCreated -ge $cut30c) { $crashApps30[$n] = 1 + [int]$crashApps30[$n] }
             if (-not $crashPaths.ContainsKey($n)) { $pp = ''; try { $pp = [string]$e.Properties[10].Value } catch { }; $crashPaths[$n] = $pp }
         }
     }
 }
 $crashList = @($crashApps.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 12 | ForEach-Object { $k = [string]$_.Key; $pth = [string]$crashPaths[$k]; $ex = $null
     if ($pth -and $pth -match '^[A-Za-z]:\\') { $ex = [bool](Test-Path -LiteralPath $pth -ErrorAction SilentlyContinue) }
-    [pscustomobject]@{ app = $k; count = [int]$_.Value; path = $pth; exists = $ex } })
+    [pscustomobject]@{ app = $k; count = [int]$_.Value; count1 = [int]$crashApps1[$k]; count7 = [int]$crashApps7[$k]; count30 = [int]$crashApps30[$k]; path = $pth; exists = $ex } })
 $hangCount = @($appEv | Where-Object { $_.ProviderName -eq 'Application Hang' }).Count
+$hang1 = @($appEv | Where-Object { $_.ProviderName -eq 'Application Hang' -and $_.TimeCreated -ge $cut1c }).Count
+$hang7 = @($appEv | Where-Object { $_.ProviderName -eq 'Application Hang' -and $_.TimeCreated -ge $cut7c }).Count
+$hang30 = @($appEv | Where-Object { $_.ProviderName -eq 'Application Hang' -and $_.TimeCreated -ge $cut30c }).Count
 
 $events = [ordered]@{
     days        = $days
@@ -601,6 +621,9 @@ $events = [ordered]@{
     application = Summarize-Events $appEv $days
     appCrashes  = $crashList
     appHangs    = $hangCount
+    appHangs1   = $hang1
+    appHangs7   = $hang7
+    appHangs30  = $hang30
 }
 
 # ---------------------------------------------------------------- 8. boot
@@ -1032,7 +1055,7 @@ try {
     }
     foreach ($b in $boots) { [void]$tl.Add([pscustomobject]@{ t = [string]$b.time; k = 'boot'; x = [string]$b.seconds }) }
 } catch { Warn ('timeline: ' + $_.Exception.Message) }
-$timeline = @($tl | Sort-Object t -Descending | Select-Object -First 900 | Sort-Object t)
+$timeline = @($tl | Sort-Object t -Descending | Select-Object -First 1500 | Sort-Object t)
 $extras | Add-Member -NotePropertyName dumps -NotePropertyValue $dumps -Force
 $extras | Add-Member -NotePropertyName timeline -NotePropertyValue $timeline -Force
 

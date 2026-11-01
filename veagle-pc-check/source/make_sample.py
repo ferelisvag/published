@@ -179,8 +179,28 @@ def _more2(heavy):
       caches=[dict(name='Chrome cache', mb=1840, partial=False), dict(name='Windows shader cache', mb=720, partial=False), dict(name='NVIDIA shader cache', mb=380, partial=False), dict(name='Delivery Optimization', mb=1260, partial=False), dict(name='Windows error reports', mb=240, partial=False)],
       recentRuns=[dict(exe=e, days=d) for e, d in [('chrome.exe', 0), ('discord.exe', 0), ('steam.exe', 1), ('code.exe', 2), ('explorer.exe', 0), ('winword.exe', 6), ('excel.exe', 9)] + [('app%d.exe' % i, i) for i in range(30)]])
 
+
+def _addwin(d):
+    """Pretend the scan collected 60 days (v0.8): per-window counts for the 7 / 30 / 60 day choice."""
+    ev = d['events']
+    for k in ('system', 'application'):
+        S = ev[k]
+        for g in S['groups']:
+            g['count'] = int(g['count'] * 1.7) + 1
+            g['count30'] = g['count'] * 6 // 10
+            g['count7'] = g['count'] // 5
+            g['count1'] = g['count'] // 20
+        S['total'] = sum(g['count'] for g in S['groups'])
+        S['win'] = dict(d1=dict(total=S['total'] // 24, errors=S['errors'] // 24, warnings=S['warnings'] // 24), d7=dict(total=S['total'] // 6, errors=S['errors'] // 6, warnings=S['warnings'] // 6), d30=dict(total=S['total'] * 6 // 10, errors=S['errors'] * 6 // 10, warnings=S['warnings'] * 6 // 10))
+        S['errors'] = int(S['errors'] * 1.7); S['warnings'] = int(S['warnings'] * 1.7)
+        pre = [dict(date=(now - datetime.timedelta(days=59 - i)).strftime('%Y-%m-%d'), errors=0, warnings=0) for i in range(30)]
+        S['perDay'] = pre + S['perDay'][-30:]
+    for a in ev.get('appCrashes', []):
+        a['count'] = int(a['count'] * 1.7) + 1; a['count30'] = a['count'] * 6 // 10; a['count7'] = a['count'] // 5; a['count1'] = a['count'] // 20
+    ev['days'] = 60; ev['appHangs1'] = ev.get('appHangs', 0) // 20; ev['appHangs7'] = ev.get('appHangs', 0) // 5; ev['appHangs30'] = ev.get('appHangs', 0) * 6 // 10
+
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '0.7.1'
+data['meta']['version'] = '0.8.0'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -202,6 +222,7 @@ for _i, _t in enumerate(SAMPLE_TREND):
 data['extras']['more'] = _more(False)
 data['extras']['more2'] = _more2(False)
 data['trend'] = SAMPLE_TREND
+_addwin(data)
 for v in data['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
 (out / 'sample-data.json').write_text(json.dumps(data, indent=1), encoding='utf-8')
@@ -223,7 +244,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '0.7.1'
+w['meta']['version'] = '0.8.0'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),
@@ -237,6 +258,7 @@ for v in w['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
 w['extras']['more'] = _more(True)
 w['extras']['more2'] = _more2(True)
+_addwin(w)
 (out / 'sample-win10-laptop.json').write_text(json.dumps(w, indent=1), encoding='utf-8')
 
 # --- variant: an older, worse scan of the desktop (for Compare)

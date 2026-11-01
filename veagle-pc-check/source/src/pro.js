@@ -10,7 +10,7 @@ var PRO = (function (V, AI) {
   function save() { try { localStorage.setItem(PK, JSON.stringify(P)); } catch (e) { } }
   function dt(iso) { try { return new Date(iso).toLocaleDateString(V.lang === 'el' ? 'el-GR' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } }
   function minsOf(f) { var m = V.META[f.id]; return m ? m[0] : 10; }
-  function nonInfo() { return V.findings.filter(function (f) { return f.sev !== 'info'; }); }
+  function nonInfo() { return V.openList(); }
   function mins(n) { return n >= 60 ? Math.floor(n / 60) + ' h ' + (n % 60 ? (n % 60) + ' min' : '') : n + ' min'; }
   function cFree() { var v = arr(D.volumes).filter(function (x) { return /^C:/i.test(x.letter); })[0]; return v || null; }
   function bar(pct, cls) { return '<div class="bar ' + (cls || '') + '"><i style="width:' + Math.max(0, Math.min(100, pct)) + '%"></i></div>'; }
@@ -26,7 +26,7 @@ var PRO = (function (V, AI) {
   function planHtml() {
     var top = nonInfo().slice(0, 3); if (!top.length) return '';
     var ids = {}; top.forEach(function (f) { ids[f.id] = 1; });
-    var after = V.scoreOf(V.findings.filter(function (f) { return !ids[f.id]; }));
+    var after = V.scoreOf(V.active().filter(function (f) { return !ids[f.id]; }));
     var total = top.reduce(function (a, f) { return a + minsOf(f); }, 0);
     var col = function (s) { return s >= 85 ? '#3ddc84' : (s >= 65 ? '#f5b44a' : '#e82c2d'); };
     return '<div class="plan"><div class="plan-sc"><div class="pn" style="color:' + col(V.score.score) + '">' + V.score.score + '</div><div class="pl">' + esc(I('now', 'τώρα')) + '</div></div><div class="plan-ar">&rarr;</div>' +
@@ -57,7 +57,7 @@ var PRO = (function (V, AI) {
 
   /* ---------- badges ---------- */
   function badges() {
-    var c = cFree(), tr = arr(D.trend).length, f = V.findings, has = function (id) { return f.some(function (x) { return x.id === id; }); };
+    var c = cFree(), tr = arr(D.trend).length, f = V.active(), has = function (id) { return f.some(function (x) { return x.id === id; }); };
     var boots = arr(g(D, 'boot.history', [])).slice(0, 5), bootAvg = boots.length ? boots.reduce(function (a, b) { return a + num(b.seconds); }, 0) / boots.length : null;
     var errs = num(g(D, 'events.system.errors', 0)) + num(g(D, 'events.application.errors', 0));
     var startN = V.uniq ? V.uniq(arr(g(D, 'startup.items', [])).map(function (s) { return s.name; })).length : arr(g(D, 'startup.items', [])).length;
@@ -65,7 +65,7 @@ var PRO = (function (V, AI) {
     return [
       { n: I('Roomy drive', 'Άνετος δίσκος'), h: I('At least 20 % free on C:', 'Τουλάχιστον 20 % ελεύθερο στο C:'), ok: !!(c && num(c.sizeGB) && num(c.freeGB) / num(c.sizeGB) >= 0.2), i: '&#9632;' },
       { n: I('Fresh Windows', 'Φρέσκα Windows'), h: I('A Windows update in the last 30 days', 'Ενημέρωση Windows τις τελευταίες 30 ημέρες'), ok: g(D, 'updates.lastPatchDaysAgo', 999) <= 30, i: '&#8635;' },
-      { n: I('Quiet logs', 'Ήσυχα logs'), h: I('Under 20 errors in 30 days', 'Κάτω από 20 σφάλματα σε 30 ημέρες'), ok: errs < 20, i: '&#9835;' },
+      { n: I('Quiet logs', 'Ήσυχα logs'), h: I('Under ' + Math.round(20 * V.days / 30) + ' errors in ' + V.days + ' days', 'Κάτω από ' + Math.round(20 * V.days / 30) + ' σφάλματα σε ' + V.days + ' ημέρες'), ok: errs < 20 * V.days / 30, i: '&#9835;' },
       { n: I('Fast start', 'Γρήγορη εκκίνηση'), h: I('Start-up under 40 seconds', 'Εκκίνηση κάτω από 40 δευτερόλεπτα'), ok: bootAvg != null && bootAvg < 40, i: '&#9889;' },
       { n: I('Armored', 'Θωρακισμένο'), h: I('No serious security finding', 'Κανένα σοβαρό εύρημα ασφάλειας'), ok: !f.some(function (x) { return x.area === 'Security' && (x.sev === 'high' || x.sev === 'medium'); }), i: '&#9632;' },
       { n: I('Backed up', 'Με αντίγραφα'), h: I('A backup of your files exists', 'Υπάρχει αντίγραφο των αρχείων σου'), ok: !has('bak-none') && !!(bk.fileHistory || od.documents || od.desktop || od.pictures), i: '&#9729;' },
@@ -86,11 +86,16 @@ var PRO = (function (V, AI) {
   function summary() {
     var el = $('#tab-summary'); if (!el) return;
     var pl = planHtml();
+    periodNote(el);
     var host = el.querySelector('.action') ? el.querySelector('.action').parentNode : null;
     var firstAct = el.querySelector('.action');
     if (pl && firstAct) {
       var last = el.querySelectorAll('.action'); last = last[last.length - 1];
       var d = document.createElement('div'); d.innerHTML = pl; last.parentNode.insertBefore(d.firstChild, last.nextSibling);
+    }
+    if (V.scoreRaw && V.scoreRaw.score !== V.score.score) {
+      var sp = el.querySelector('.summary .sub'); 
+      if (sp) { var nt = document.createElement('p'); nt.className = 'sub est'; nt.innerHTML = '<b>' + esc(I('Scan result: ' + V.scoreRaw.score + '. With the steps you ticked and what you accepted: ' + V.score.score + '.', 'Αποτέλεσμα σάρωσης: ' + V.scoreRaw.score + '. Με τα βήματα που τικάρισες και όσα αποδέχτηκες: ' + V.score.score + '.')) + '</b> ' + esc(I('This is an estimate. Run the scan again to confirm what you fixed.', 'Είναι εκτίμηση. Τρέξε ξανά τη σάρωση για να επιβεβαιωθεί ό,τι διόρθωσες.')); sp.parentNode.insertBefore(nt, sp.nextSibling); }
     }
     var tail = document.createElement('div');
     tail.innerHTML = sect(I('What improved', 'Τι βελτιώθηκε'), I('your last scan against this one', 'η προηγούμενη σάρωση απέναντι σε αυτή')) + '<div class="win"><div class="body">' + beforeAfterHtml() + '</div></div>' +
@@ -312,7 +317,7 @@ var PRO = (function (V, AI) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'hq'; b.textContent = '?'; b.setAttribute('aria-label', I('What is this?', 'Τι είναι αυτό;')); b.title = I('What is this?', 'Τι είναι αυτό;');
       b.setAttribute('data-help', id); hd.insertBefore(b, hd.querySelector('.st'));
     });
-    insights(); if (typeof INV !== 'undefined') INV.render(); notices();
+    insights(); if (typeof INV !== 'undefined') INV.render(); notices(); howFind();
   }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.hq'); if (!b) return;
@@ -340,6 +345,32 @@ var PRO = (function (V, AI) {
     if (foot) foot.innerHTML = '<b>' + esc(I('General disclaimer', 'Γενική αποποίηση ευθύνης')) + '</b><p>' + esc(I(DISC[0], DISC[1])) + '</p>';
   }
   document.addEventListener('click', function (e) { if (e.target && e.target.id === 'noteTog') { P.noteClosed = !P.noteClosed; save(); notices(); } });
+
+
+  /* ---------- plain-words explanations for ticks, "accept" and the period choice ---------- */
+  function howFind() {
+    var el = $('#howFind'); if (!el) return;
+    el.innerHTML = '<details class="howto"><summary>' + esc(I('How to use this page (read once)', 'Πώς χρησιμοποιείς αυτή τη σελίδα (διάβασέ το μία φορά)')) + '</summary><div>' +
+      '<ol>' +
+      '<li>' + esc(I('Click a finding to open it. Inside you see, in plain words, what it means and the exact clicks to fix it.', 'Πάτα ένα εύρημα για να ανοίξει. Μέσα βλέπεις με απλά λόγια τι σημαίνει και τα ακριβή κλικ για να το διορθώσεις.')) + '</li>' +
+      '<li><b>' + esc(I('Tick each step', 'Τσέκαρε κάθε βήμα')) + '</b> ' + esc(I('after you do it. When every step of a finding is ticked, it stops counting and your score goes up. Ticking changes nothing on your PC: it is only your own checklist.', 'αφού το κάνεις. Όταν είναι τσεκαρισμένα όλα τα βήματα ενός ευρήματος, το εύρημα δεν μετράει πια και ο βαθμός σου ανεβαίνει. Το τσεκάρισμα δεν αλλάζει τίποτα στον υπολογιστή: είναι μόνο η δική σου λίστα.')) + '</li>' +
+      '<li><b>' + esc(I('"I accept this"', '«Το αποδέχομαι»')) + '</b> ' + esc(I('is for things you know about and want to keep as they are (for example an Office you bought and will not replace). It stops counting against the score. You can undo it any time with the same button.', 'είναι για πράγματα που τα ξέρεις και θες να μείνουν όπως είναι (π.χ. ένα Office που αγόρασες και δεν θα αλλάξεις). Δεν μετράει πια στον βαθμό. Μπορείς να το αναιρέσεις οποτεδήποτε με το ίδιο κουμπί.')) + '</li>' +
+      '<li>' + esc(I('The new score is only an estimate. To really confirm your fixes, close this report, run the scan again and open the new report.', 'Ο νέος βαθμός είναι μόνο εκτίμηση. Για να επιβεβαιώσεις πραγματικά τις διορθώσεις σου, κλείσε αυτό το report, τρέξε ξανά τη σάρωση και άνοιξε το καινούργιο.')) + '</li>' +
+      '<li>' + esc(I('Your ticks are remembered in this browser for this scan. Accepted items are remembered for this PC, also in the next scans.', 'Τα τσεκαρίσματά σου θυμούνται σε αυτόν τον browser για αυτή τη σάρωση. Τα αποδεκτά θυμούνται για αυτόν τον υπολογιστή, και στις επόμενες σαρώσεις.')) + '</li>' +
+      '</ol></div></details>';
+  }
+  function periodNote(el) {
+    if (!V.periodChoice || !el) return;
+    var d = V.days, lab = d === 1 ? I('the last 24 hours', 'τις τελευταίες 24 ώρες') : I('the last ' + d + ' days', 'τις τελευταίες ' + d + ' ημέρες');
+    var h = document.createElement('details'); h.className = 'howto' + (d !== 30 ? ' on' : '');
+    h.innerHTML = '<summary>' + esc(I('Period of the problems: you are looking at ' + lab, 'Περίοδος των προβλημάτων: βλέπεις ' + lab)) + '</summary><div><p>' + esc(I('Windows keeps the record of old errors for weeks, even after you have fixed the cause. So a fixed problem can still show up in the report for a while. Use the "Period" box at the top to choose how far back to look:', 'Τα Windows κρατούν το αρχείο των παλιών σφαλμάτων για εβδομάδες, ακόμα κι αφού έχεις διορθώσει την αιτία. Έτσι ένα πρόβλημα που διορθώθηκε μπορεί να φαίνεται ακόμα στο report για λίγο. Διάλεξε από το κουτί «Περίοδος» πάνω πάνω πόσο πίσω θες να κοιτάς:')) + '</p><ul>' +
+      '<li><b>' + esc(I('1 day', '1 ημέρα')) + '</b>: ' + esc(I('right after you fixed something. Shows only what happened in the last 24 hours, so you can see if the problem is gone.', 'αμέσως μετά από μια διόρθωση. Δείχνει μόνο τι έγινε τις τελευταίες 24 ώρες, ώστε να δεις αν το πρόβλημα έφυγε.')) + '</li>' +
+      '<li><b>' + esc(I('7 days', '7 ημέρες')) + '</b>: ' + esc(I('a few days after the fix, or to see what has been happening this week.', 'λίγες μέρες μετά τη διόρθωση, ή για να δεις τι γίνεται αυτή την εβδομάδα.')) + '</li>' +
+      '<li><b>' + esc(I('30 days', '30 ημέρες')) + '</b>: ' + esc(I('the normal view.', 'η κανονική προβολή.')) + '</li>' +
+      '<li><b>' + esc(I('60 days', '60 ημέρες')) + '</b>: ' + esc(I('for problems that build up slowly or happen only now and then.', 'για προβλήματα που χτίζονται αργά ή εμφανίζονται μόνο πότε πότε.')) + '</li></ul><p class="sub">' + esc(I('Changing the period reloads this report (nothing is lost). Things like Windows Update history or the antivirus status always look at their own time frame.', 'Όταν αλλάζεις περίοδο, το report ξαναφορτώνει (δεν χάνεται τίποτα). Πράγματα όπως το ιστορικό του Windows Update ή η κατάσταση του antivirus κοιτάζουν πάντα το δικό τους χρονικό διάστημα.')) + '</p></div>';
+    var anchor = el.querySelector('.vz2') || el.querySelector('.summary');
+    if (anchor) anchor.insertAdjacentElement('beforebegin', h);
+  }
 
   /* ---------- easter egg: click the eagle 7 times, type "veagle", or the old cheat code ---------- */
   var ART = '   __     _______    _    ____ _     _____\n   \\ \\   / | ____|  / \\  / ___| |   | ____|\n    \\ \\ / /|  _|   / _ \\| |  _| |   |  _|\n     \\ V / | |___ / ___ | |_| | |___| |___\n      \\_/  |_____/_/   \\_\\____|_____|_____|';

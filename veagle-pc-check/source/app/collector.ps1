@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.5.1'
+$script:Version = '0.5.2'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -20,7 +20,17 @@ $root = Split-Path -Parent $appDir
 function Warn([string]$m) { [void]$script:Warnings.Add($m) }
 
 function Step([int]$n, [int]$total, [string]$label) {
-    Write-Host ("  [{0,2}/{1}] {2} ..." -f $n, $total, $label) -ForegroundColor White
+    $w = 20
+    $f = [int][math]::Floor($w * ($n - 1) / $total)
+    $bar = ('#' * $f) + ('-' * ($w - $f))
+    $pct = [int][math]::Floor(100 * ($n - 1) / $total)
+    $sec = [int]$swTotal.Elapsed.TotalSeconds
+    try { $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check {0} - {1}% - {2} s' -f $script:Version, $pct, $sec) } catch { }
+    Write-Host '  ' -NoNewline
+    Write-Host ('[{0,2}/{1}] ' -f $n, $total) -NoNewline -ForegroundColor Cyan
+    Write-Host $bar.Substring(0, $f) -NoNewline -ForegroundColor Red
+    Write-Host $bar.Substring($f) -NoNewline -ForegroundColor DarkGray
+    Write-Host ('  {0}' -f $label) -ForegroundColor White
 }
 
 function Iso($d) {
@@ -154,11 +164,28 @@ function Summarize-Events($events, [int]$Days, [int]$Top = 60) {
 # ---------------------------------------------------------------- start
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
+try {
+    $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check ' + $script:Version)
+    $sz = $Host.UI.RawUI.WindowSize
+    if ($sz.Width -lt 92) {
+        $bs = $Host.UI.RawUI.BufferSize; $bs.Width = 92; $Host.UI.RawUI.BufferSize = $bs
+        $sz.Width = 92; $Host.UI.RawUI.WindowSize = $sz
+    }
+} catch { }
 Write-Host ''
-Write-Host '  =====================================' -ForegroundColor DarkRed
-Write-Host '    V E A G L E   P C   C H E C K' -ForegroundColor Red
-if ($Quick) { Write-Host '    QUICK scan, read-only, nothing is changed' -ForegroundColor Gray } else { Write-Host '    read-only scan, nothing is changed' -ForegroundColor Gray }
-Write-Host '  =====================================' -ForegroundColor DarkRed
+Write-Host '   __     _______    _    ____ _     _____' -ForegroundColor Red
+Write-Host '   \ \   / | ____|  / \  / ___| |   | ____|' -ForegroundColor Red
+Write-Host '    \ \ / /|  _|   / _ \| |  _| |   |  _|' -ForegroundColor Red
+Write-Host '     \ V / | |___ / ___ | |_| | |___| |___' -ForegroundColor DarkRed
+Write-Host '      \_/  |_____/_/   \_\____|_____|_____|' -ForegroundColor DarkRed
+Write-Host ''
+Write-Host '   P C   C H E C K' -NoNewline -ForegroundColor White
+Write-Host ('   version ' + $script:Version) -NoNewline -ForegroundColor Yellow
+Write-Host '   |   ferelis.gr' -ForegroundColor DarkGray
+Write-Host '   ------------------------------------------------' -ForegroundColor DarkGray
+if ($Quick) { Write-Host '   QUICK scan. Read-only: nothing is changed or sent.' -ForegroundColor Green } else { Write-Host '   Read-only scan: nothing is changed or sent.' -ForegroundColor Green }
+Write-Host '   Please wait. It takes 2-3 minutes. You can keep working.' -ForegroundColor Gray
+Write-Host '   ------------------------------------------------' -ForegroundColor DarkGray
 Write-Host ''
 if (-not $isAdmin) {
     Write-Host '  Not running as Administrator: some checks (BitLocker, SMART, DISM) will be skipped.' -ForegroundColor Yellow
@@ -1108,9 +1135,17 @@ if (Test-Path $templatePath) {
 }
 
 Write-Host ''
-Write-Host ('  Done in {0} s.' -f [int]$swTotal.Elapsed.TotalSeconds) -ForegroundColor Green
-Write-Host ('  Report: ' + (Join-Path $out 'report.html')) -ForegroundColor White
-if ($script:Warnings.Count -gt 0) { Write-Host ('  {0} non-critical warning(s) are listed inside the report.' -f $script:Warnings.Count) -ForegroundColor Yellow }
-Write-Host '  Nothing was changed on this PC and nothing was uploaded.' -ForegroundColor Gray
+Write-Host ('  [{0}/{0}] ' -f $TOTAL) -NoNewline -ForegroundColor Cyan
+Write-Host ('#' * 20) -NoNewline -ForegroundColor Green
+Write-Host '  Finished' -ForegroundColor White
+try { $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check ' + $script:Version + ' - done') } catch { }
+Write-Host ''
+Write-Host '   ================================================' -ForegroundColor Green
+Write-Host ('    DONE in {0} s   |   VEAGLE PC Check {1}' -f [int]$swTotal.Elapsed.TotalSeconds, $script:Version) -ForegroundColor Green
+Write-Host '   ================================================' -ForegroundColor Green
+Write-Host ('   Report: ' + (Join-Path $out 'report.html')) -ForegroundColor White
+if ($script:Warnings.Count -gt 0) { Write-Host ('   {0} small warning(s) are listed inside the report.' -f $script:Warnings.Count) -ForegroundColor Yellow }
+Write-Host '   Nothing was changed on this PC and nothing was uploaded.' -ForegroundColor Gray
+Write-Host '   The report opens in your browser now.' -ForegroundColor Gray
 
 if (-not $NoOpen -and (Test-Path (Join-Path $out 'report.html'))) { try { Start-Process (Join-Path $out 'report.html') } catch { } }

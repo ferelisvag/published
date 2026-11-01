@@ -2,6 +2,8 @@
 setlocal
 title VEAGLE PC Check (quick scan)
 cd /d "%~dp0"
+mode con cols=92 lines=40
+color 0F
 
 net session >nul 2>&1
 if %errorlevel% neq 0 (

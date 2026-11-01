@@ -365,6 +365,49 @@ body.light .hbt, body.light .bar { background: #e4e7ee; } body.light .hqpop { ba
   #clientDoc .plan, #clientDoc .ba { background: #fff; border-color: #ccc; } #clientDoc .pl, #clientDoc .sub { color: #52525b; }
 }
 
+/* ---------- 0.6.1: visual layer ---------- */
+.topbar { border-bottom: 1px solid var(--line); box-shadow: 0 1px 0 rgba(232,44,45,.35), 0 8px 24px rgba(0,0,0,.5); }
+.tabpane.on { animation: tabin .28s ease-out; }
+@keyframes tabin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.win { position: relative; transition: border-color .2s, box-shadow .2s; }
+.win:hover { border-color: #3a3a42; box-shadow: 0 0 0 1px rgba(232,44,45,.12), 0 10px 30px rgba(0,0,0,.35); }
+.win::before, .win::after { content: ''; position: absolute; width: 9px; height: 9px; border: 0 solid var(--red); pointer-events: none; opacity: .7; }
+.win::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; } .win::after { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+.win:empty::before, .win:empty::after { display: none; }
+.summary { background-image: radial-gradient(900px 260px at 0% 0%, rgba(232,44,45,.12), transparent 60%); }
+.summary .ring .rg { filter: drop-shadow(0 0 7px currentColor); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 12px; }
+.kpi { display: flex; flex-direction: column; gap: 6px; text-align: left; background: var(--panel); border: 1px solid var(--line); color: var(--text); padding: 12px 14px 8px; cursor: pointer; font: inherit; transition: transform .18s, border-color .18s; position: relative; overflow: hidden; }
+.kpi:hover { transform: translateY(-3px); border-color: var(--red); }
+.kpi .kt { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+.kpi .kv { display: flex; align-items: center; min-height: 64px; }
+.kpi .ks { font-size: 12px; color: var(--muted); }
+.kpi .spk { width: 100%; height: 34px; margin-top: 2px; display: block; }
+.kbig { font: 700 40px/1 var(--head); } .kbig small { font-size: 15px; color: var(--muted); font-weight: 400; }
+.kg { width: 120px; } .kgn { font: 700 20px var(--head); fill: var(--text); } .kgf { transition: stroke-dashoffset 1s ease-out; }
+.atiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.atile { display: flex; align-items: center; gap: 12px; text-align: left; background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--ac); color: var(--text); padding: 10px 12px; cursor: pointer; font: inherit; transition: transform .18s, background .18s; }
+.atile:hover { transform: translateX(3px); background: var(--panel2); }
+.atile .ar { width: 54px; height: 54px; flex: none; } .arn { font: 700 15px var(--head); fill: var(--text); } .arf { transition: stroke-dashoffset 1s ease-out; }
+.atile .at { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .atile b { font-family: var(--head); font-size: 15px; } .atile small { color: var(--dim); font-size: 11.5px; }
+.dots { display: flex; gap: 5px; margin-top: 3px; } .d { font-style: normal; font-size: 11px; font-weight: 700; padding: 0 7px; border-radius: 9px; line-height: 17px; }
+.d.h { background: var(--redbtn); color: #fff; } .d.m { background: #5a4310; color: #ffd98a; } .d.l { background: #2b2b31; color: #d4d4d8; } .d.ok { background: #0f3a22; color: #7ddc9a; }
+.pcmap { width: 100%; height: auto; display: block; }
+.pmt { font: 700 15px var(--head); } .pms { font: 11.5px var(--mono); fill: var(--muted); } .pmv { font: 700 30px var(--head); }
+.pmn { cursor: pointer; } .pmn rect:first-child { transition: fill .2s; } .pmn:hover rect:first-child, .pmn:focus rect:first-child { fill: var(--panel2); } .pmn:focus { outline: none; } .pmn:focus rect:first-child { stroke-width: 3; }
+.pml { animation: dash 1.6s linear infinite; } @keyframes dash { to { stroke-dashoffset: -22; } }
+.pmc { filter: drop-shadow(0 0 8px rgba(232,44,45,.55)); }
+.fbar { display: flex; height: 26px; margin: 0 0 12px; border: 1px solid var(--line); overflow: hidden; }
+.fbar i { display: flex; align-items: center; justify-content: center; color: #0b0b0d; font-style: normal; min-width: 22px; animation: grow .8s ease-out both; transform-origin: left; } .fbar b { font-size: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; } .chsp { flex: 1; }
+.ch { display: inline-flex; align-items: center; gap: 7px; background: transparent; border: 1px solid var(--line); color: var(--muted); padding: 5px 11px; cursor: pointer; font: inherit; font-size: 12.5px; }
+.ch:hover { color: #fff; border-color: #55555e; } .ch.on { color: #fff; border-color: var(--ac, var(--red)); background: #160a0a; } .ch small { color: var(--dim); } .cd { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.sel.sm { padding: 5px 8px; font-size: 12.5px; }
+body.light .kpi, body.light .atile { background: #fff; } body.light .atile:hover { background: #f3f5f9; } body.light .ch.on { background: #fdeaea; color: #14171c; } body.light .ch:hover { color: #000; } body.light .win::before, body.light .win::after { opacity: .5; }
+body.light .summary { background-image: radial-gradient(900px 260px at 0% 0%, rgba(232,44,45,.08), transparent 60%); }
+@media (prefers-reduced-motion: reduce) { .tabpane.on, .pml, .hbt > i, .fbar i, #egg img { animation: none; } .kgf, .arf { transition: none; } }
+@media print { .vz2, #pcMap, #findViz { display: none !important; } .win::before, .win::after { display: none; } }
+
 </style>
 </head>
 <body>
@@ -414,6 +457,7 @@ body.light .hbt, body.light .bar { background: #e4e7ee; } body.light .hqpop { ba
   <section class="tabpane on" id="tab-summary" role="tabpanel" aria-label="Summary"></section>
 
   <section class="tabpane" id="tab-dashboard" role="tabpanel" aria-label="Dashboard">
+    <div id="pcMap" style="margin-bottom:18px"></div>
     <div id="startBox"></div>
     <div id="sinceBox"></div>
     <div class="grid">
@@ -444,6 +488,7 @@ body.light .hbt, body.light .bar { background: #e4e7ee; } body.light .hqpop { ba
 
   <section class="tabpane" id="tab-findings" role="tabpanel" aria-label="Findings">
     <div class="sect"><h2>Findings</h2><span id="findSummary"></span></div>
+    <div id="findViz"></div>
     <div class="toolbar">
       <div class="filters" id="filters"></div>
       <label class="sr" for="findQ">Filter findings</label>
@@ -2768,7 +2813,7 @@ var UI = (function (V) {
   }
 
   /* ---------------- findings ---------------- */
-  var state = { sev: 'all', q: '' };
+  var state = { sev: 'all', q: '', area: '', sort: 'prio' };
   function rFindings() {
     var c = V.counts;
     $('#findSummary').textContent = (c.high + c.medium + c.low) + ' findings, ' + c.info + (c.info === 1 ? ' tip' : ' tips');
@@ -2779,7 +2824,9 @@ var UI = (function (V) {
   }
   function drawFindings(openId) {
     var q = state.q.toLowerCase();
-    var list = V.findings.filter(function (f) { return (state.sev === 'all' || f.sev === state.sev) && (!q || (f.title + ' ' + f.why + ' ' + f.area + ' ' + f.evidence).toLowerCase().indexOf(q) >= 0); });
+    var list = V.findings.filter(function (f) { return (state.sev === 'all' || f.sev === state.sev) && (!state.area || f.area === state.area) && (!q || (f.title + ' ' + f.why + ' ' + f.area + ' ' + f.evidence).toLowerCase().indexOf(q) >= 0); });
+    if (state.sort === 'quick') list = list.slice().sort(function (a, b) { return (V.META[a.id] ? V.META[a.id][0] : 10) - (V.META[b.id] ? V.META[b.id][0] : 10); });
+    else if (state.sort === 'area') list = list.slice().sort(function (a, b) { return a.area < b.area ? -1 : (a.area > b.area ? 1 : 0); });
     $('#findList').innerHTML = list.length ? list.map(function (f0, i) {
       var f = V.tf(f0);
       var steps = f.steps.length ? '<ol class="steps">' + f.steps.map(function (s, si) { var on = VIZ.chkOn(f.id, si); return '<li' + (on ? ' class="done"' : '') + '><label class="chk"><input type="checkbox" data-chk="' + esc(f.id) + '|' + si + '"' + (on ? ' checked' : '') + '><span>' + gloss(esc(s.t)) + '</span></label>' + (s.cmd ? cmdBox(s.cmd) : '') + '</li>'; }).join('') + '</ol><p class="sub chkhint">' + esc(V.I('Tick each step when you have done it. This only marks your progress, nothing is run.', 'Τσέκαρε κάθε βήμα όταν το κάνεις. Αυτό μόνο σημειώνει την πρόοδό σου, δεν τρέχει τίποτα.')) + '</p>' : '';
@@ -2906,6 +2953,7 @@ var UI = (function (V) {
     rStart(); rSince(); rSummary(); rHealth(); rRadar(); rActions(); rCpu(); rMem(); rGpu(); rBoard(); rOs(); rNet(); rExtras(); rStorage(); rSecurity(); rBoot(); rHeat(); rUplink();
     rFindings(); rHardware(); rSoftware(); rEvents();
     if (typeof PRO !== 'undefined') { PRO.summary(); PRO.decorate(); }
+    if (typeof VIZ2 !== 'undefined') VIZ2.render();
     countUp();
     VIZ.animateRings(document);
   }
@@ -3864,6 +3912,135 @@ var PRO = (function (V, AI) {
   return { summary: summary, insights: insights, decorate: decorate, toolsHtml: toolsHtml, wireTools: wireTools, inventoryCsv: inventoryCsv, badges: badges, beforeAfterHtml: beforeAfterHtml };
 })(V, AI);
 
+/* VEAGLE PC Check 0.6.1 - visual layer: PC map, KPI tiles with gauges and sparklines, area tiles, findings overview */
+var VIZ2 = (function (V, UI) {
+  'use strict';
+  var $ = V.$, $$ = V.$$, esc = V.esc, arr = V.arr, num = V.num, g = V.g, D = V.D;
+  function I(en, el) { return V.I(en, el); }
+  var COL = { red: '#e82c2d', amber: '#f5b44a', green: '#3ddc84', grey: '#8a8a94', white: '#ececf0' };
+  var AREA_EL = { Stability: 'Σταθερότητα', Storage: 'Αποθήκευση', Security: 'Ασφάλεια', Network: 'Δίκτυο', Backup: 'Αντίγραφα', Performance: 'Απόδοση', Updates: 'Ενημερώσεις', Software: 'Λογισμικό' };
+  var AREA_HINT = {
+    Stability: ['crashes and blue screens', 'κρασαρίσματα και μπλε οθόνες'], Storage: ['drives and free space', 'δίσκοι και ελεύθερος χώρος'], Security: ['antivirus, accounts, doors', 'antivirus, λογαριασμοί, πόρτες'],
+    Network: ['internet and Wi-Fi', 'internet και Wi-Fi'], Backup: ['copies of your files', 'αντίγραφα των αρχείων σου'], Performance: ['speed, heat, start-up', 'ταχύτητα, θερμοκρασία, εκκίνηση'], Updates: ['Windows and programs', 'Windows και προγράμματα'], Software: ['installed programs', 'εγκατεστημένα προγράμματα']
+  };
+  function areaName(a) { return I(a, AREA_EL[a] || a); }
+  function worst(area) {
+    var f = V.findings.filter(function (x) { return x.area === area && x.sev !== 'info'; });
+    var h = f.filter(function (x) { return x.sev === 'high'; }).length, m = f.filter(function (x) { return x.sev === 'medium'; }).length, l = f.filter(function (x) { return x.sev === 'low'; }).length;
+    return { n: f.length, h: h, m: m, l: l, col: h ? COL.red : (m ? COL.amber : (l ? COL.white : COL.green)) };
+  }
+  function areaScore(a) { var x = V.score.areas.filter(function (z) { return z.name === a; })[0]; return x ? x.score : 100; }
+  function goArea(area) {
+    UI.state.area = area; UI.state.sev = 'all'; UI.state.q = '';
+    var fq = $('#findQ'); if (fq) fq.value = '';
+    $$('#nav button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === 'findings' ? 'true' : 'false'); });
+    $$('.tabpane').forEach(function (p) { p.classList.toggle('on', p.id === 'tab-findings'); });
+    try { history.replaceState(null, '', '#findings'); } catch (e) { } window.scrollTo(0, 0);
+    UI.renderAll();
+  }
+  function spark(vals, col, w, h) {
+    vals = vals.filter(function (v) { return v != null && isFinite(v); }); w = w || 120; h = h || 34;
+    if (vals.length < 2) return '<svg viewBox="0 0 ' + w + ' ' + h + '" class="spk"></svg>';
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals), sp = (mx - mn) || 1;
+    var xy = vals.map(function (v, i) { return [3 + i * (w - 6) / (vals.length - 1), h - 4 - (v - mn) / sp * (h - 10)]; });
+    var line = xy.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+    return '<svg viewBox="0 0 ' + w + ' ' + h + '" class="spk" preserveAspectRatio="none"><path d="' + line + ' L' + xy[xy.length - 1][0] + ' ' + h + ' L' + xy[0][0] + ' ' + h + ' Z" fill="' + col + '" fill-opacity=".14"/><path d="' + line + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round"/><circle cx="' + xy[xy.length - 1][0].toFixed(1) + '" cy="' + xy[xy.length - 1][1].toFixed(1) + '" r="3" fill="' + col + '"/></svg>';
+  }
+  function gauge(pct, col, big, small) {
+    pct = Math.max(0, Math.min(100, pct)); var r = 44, c = Math.PI * r, off = c * (1 - pct / 100);
+    return '<svg viewBox="0 0 120 74" class="kg" role="img" aria-label="' + esc(big) + '"><path d="M16 64 A44 44 0 0 1 104 64" fill="none" stroke="var(--line)" stroke-width="10" stroke-linecap="round"/><path class="kgf" d="M16 64 A44 44 0 0 1 104 64" fill="none" stroke="' + col + '" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '"/><text x="60" y="58" text-anchor="middle" class="kgn">' + esc(big) + '</text></svg>';
+  }
+
+  /* ---------- Summary: KPI tiles and area tiles ---------- */
+  function kpis() {
+    var tr = arr(D.trend), cv = arr(D.volumes).filter(function (x) { return /^C:/i.test(x.letter); })[0] || arr(D.volumes)[0];
+    var tiles = [];
+    if (cv && num(cv.sizeGB)) {
+      var fp = num(cv.freeGB) / num(cv.sizeGB) * 100, c1 = fp < 10 ? COL.red : (fp < 20 ? COL.amber : COL.green);
+      tiles.push({ go: 'dashboard', t: I('Free space on ', 'Ελεύθερος χώρος στο ') + cv.letter, v: gauge(100 - fp, c1, Math.round(fp) + '%'), s: V.fmtGB(cv.freeGB) + I(' free of ', ' ελεύθερα από ') + V.fmtGB(cv.sizeGB), sp: spark(tr.map(function (x) { return x.freeC; }), c1) });
+    }
+    var r = g(D, 'system.ram', null);
+    if (r && num(r.totalGB)) { var up = (r.totalGB - r.freeGB) / r.totalGB * 100, c2 = up > 90 ? COL.red : (up > 75 ? COL.amber : COL.green); tiles.push({ go: 'dashboard', t: I('Memory in use', 'Μνήμη σε χρήση'), v: gauge(up, c2, Math.round(up) + '%'), s: V.fmtGB(r.totalGB - r.freeGB) + I(' of ', ' από ') + V.fmtGB(r.totalGB), sp: '' }); }
+    var bh = arr(g(D, 'boot.history', [])).slice(0, 6).reverse().map(function (x) { return num(x.seconds); }), bavg = bh.length ? bh.reduce(function (a, b) { return a + b; }, 0) / bh.length : null;
+    if (bavg != null) { var c3 = bavg > 90 ? COL.red : (bavg > 50 ? COL.amber : COL.green); tiles.push({ go: 'events', t: I('Start-up time', 'Χρόνος εκκίνησης'), v: '<div class="kbig" style="color:' + c3 + '">' + Math.round(bavg) + '<small> s</small></div>', s: bavg > 90 ? I('slow', 'αργή') : (bavg > 50 ? I('a bit slow', 'λίγο αργή') : I('fast', 'γρήγορη')), sp: spark(bh, c3) }); }
+    var pd = g(D, 'updates.lastPatchDaysAgo', null);
+    if (pd != null) { var c4 = pd > 90 ? COL.red : (pd > 45 ? COL.amber : COL.green); tiles.push({ go: 'findings', t: I('Last Windows update', 'Τελευταία ενημέρωση Windows'), v: '<div class="kbig" style="color:' + c4 + '">' + pd + '<small> ' + I('days', 'ημ.') + '</small></div>', s: pd > 90 ? I('far too long', 'πάρα πολύ καιρό') : (pd > 45 ? I('getting old', 'παλιώνει') : I('recent', 'πρόσφατη')), sp: spark(tr.map(function (x) { return x.patchDays; }), c4) }); }
+    var er = num(g(D, 'events.system.errors', 0)) + num(g(D, 'events.application.errors', 0));
+    var c5 = er > 800 ? COL.red : (er > 200 ? COL.amber : COL.green);
+    tiles.push({ go: 'events', t: I('Errors in 30 days', 'Σφάλματα σε 30 ημέρες'), v: '<div class="kbig" style="color:' + c5 + '">' + V.fmtNum(er) + '</div>', s: er > 800 ? I('a lot, see the timeline', 'πολλά, δες το χρονολόγιο') : (er > 200 ? I('some noise', 'λίγος θόρυβος') : I('quiet', 'ήσυχο')), sp: spark(tr.map(function (x) { return x.sysErr; }), c5) });
+    var sn = (V.uniq ? V.uniq(arr(g(D, 'startup.items', [])).map(function (s) { return s.name; })) : arr(g(D, 'startup.items', []))).length;
+    var c6 = sn > 25 ? COL.red : (sn > 14 ? COL.amber : COL.green);
+    tiles.push({ go: 'software', t: I('Programs at start-up', 'Προγράμματα στην εκκίνηση'), v: '<div class="kbig" style="color:' + c6 + '">' + sn + '</div>', s: sn > 25 ? I('too many', 'πάρα πολλά') : (sn > 14 ? I('quite a few', 'αρκετά') : I('fine', 'εντάξει')), sp: spark(tr.map(function (x) { return x.startup; }), c6) });
+    return '<div class="kpis">' + tiles.map(function (t) { return '<button type="button" class="kpi" data-tab-go="' + t.go + '"><span class="kt">' + esc(t.t) + '</span><span class="kv">' + t.v + '</span><span class="ks">' + esc(t.s) + '</span>' + (t.sp || '') + '</button>'; }).join('') + '</div>';
+  }
+  function areaTiles() {
+    return '<div class="atiles">' + V.score.areas.map(function (a) {
+      var w = worst(a.name), sc = a.score, col = sc >= 90 ? COL.green : (sc >= 70 ? COL.amber : COL.red), r = 22, c = 2 * Math.PI * r;
+      return '<button type="button" class="atile" data-area="' + esc(a.name) + '" style="--ac:' + col + '"><svg viewBox="0 0 56 56" class="ar"><circle cx="28" cy="28" r="' + r + '" fill="none" stroke="var(--line)" stroke-width="5"/><circle class="arf" cx="28" cy="28" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="5" stroke-linecap="round" transform="rotate(-90 28 28)" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + (c * (1 - sc / 100)).toFixed(1) + '"/><text x="28" y="32" text-anchor="middle" class="arn">' + sc + '</text></svg>' +
+        '<span class="at"><b>' + esc(areaName(a.name)) + '</b><small>' + esc(I(AREA_HINT[a.name][0], AREA_HINT[a.name][1])) + '</small><span class="dots">' + (w.h ? '<i class="d h">' + w.h + '</i>' : '') + (w.m ? '<i class="d m">' + w.m + '</i>' : '') + (w.l ? '<i class="d l">' + w.l + '</i>' : '') + (!w.n ? '<i class="d ok">&#10003;</i>' : '') + '</span></span></button>';
+    }).join('') + '</div>';
+  }
+  function summary() {
+    var el = $('#tab-summary'); if (!el) return;
+    var old = el.querySelector('.vz2'); if (old) old.remove();
+    var hero = el.querySelector('.summary'); if (!hero) return;
+    var d = document.createElement('div'); d.className = 'vz2';
+    d.innerHTML = '<div class="sect"><h2>' + esc(I('Your PC in numbers', 'Ο υπολογιστής σου σε αριθμούς')) + '</h2><span>' + esc(I('click a tile for details', 'πάτα ένα πλακίδιο για λεπτομέρειες')) + '</span></div>' + kpis() +
+      '<div class="sect"><h2>' + esc(I('How each area is doing', 'Πώς πάει κάθε περιοχή')) + '</h2><span>' + esc(I('click an area to see only its findings', 'πάτα μια περιοχή για να δεις μόνο τα ευρήματά της')) + '</span></div>' + areaTiles();
+    hero.insertAdjacentElement('afterend', d);
+  }
+
+  /* ---------- Dashboard: the map of the PC ---------- */
+  function pcMap() {
+    var el = $('#pcMap'); if (!el) return;
+    var A = ['Stability', 'Storage', 'Security', 'Network', 'Backup', 'Performance', 'Updates', 'Software'];
+    var pos = [[110, 52], [370, 52], [630, 52], [890, 52], [110, 258], [370, 258], [630, 258], [890, 258]];
+    var cx = 500, cy = 155, svg = '<svg viewBox="0 0 1000 310" class="pcmap" role="img" aria-label="' + esc(I('Map of your PC: each box is an area, the colour shows how it is doing', 'Χάρτης του υπολογιστή σου: κάθε κουτί είναι μια περιοχή, το χρώμα δείχνει πώς πάει')) + '">';
+    svg += '<defs><linearGradient id="pmg" x1="0" x2="1"><stop offset="0" stop-color="#e82c2d" stop-opacity=".0"/><stop offset=".5" stop-color="#e82c2d" stop-opacity=".9"/><stop offset="1" stop-color="#e82c2d" stop-opacity=".0"/></linearGradient></defs>';
+    A.forEach(function (a, i) {
+      var p = pos[i], w = worst(a), x = p[0], y = p[1], top = y < cy, y2 = top ? y + 40 : y - 40;
+      svg += '<path class="pml" d="M' + x + ' ' + y2 + ' C ' + x + ' ' + cy + ', ' + cx + ' ' + (top ? cy - 40 : cy + 40) + ', ' + cx + ' ' + (top ? cy - 26 : cy + 26) + '" fill="none" stroke="' + w.col + '" stroke-opacity=".55" stroke-width="2" stroke-dasharray="5 6"/>';
+    });
+    svg += '<g><rect x="' + (cx - 92) + '" y="' + (cy - 28) + '" width="184" height="56" rx="6" fill="#120a0a" stroke="#e82c2d" stroke-width="2" class="pmc"/><text x="' + cx + '" y="' + (cy - 3) + '" text-anchor="middle" class="pmt" fill="#fff">' + esc(g(D, 'meta.computer', 'PC')) + '</text><text x="' + cx + '" y="' + (cy + 16) + '" text-anchor="middle" class="pms">' + esc(I('score ', 'βαθμός ') + V.score.score + '/100') + '</text></g>';
+    A.forEach(function (a, i) {
+      var p = pos[i], w = worst(a), sc = areaScore(a), x = p[0], y = p[1];
+      svg += '<g class="pmn" data-area="' + a + '" tabindex="0" role="button" aria-label="' + esc(areaName(a) + ' ' + sc) + '"><rect x="' + (x - 104) + '" y="' + (y - 40) + '" width="208" height="80" rx="6" fill="var(--panel)" stroke="' + w.col + '" stroke-width="2"/>' +
+        '<rect x="' + (x - 104) + '" y="' + (y - 40) + '" width="6" height="80" fill="' + w.col + '"/>' +
+        '<text x="' + (x - 88) + '" y="' + (y - 14) + '" class="pmt" fill="var(--text)">' + esc(areaName(a)) + '</text><text x="' + (x - 88) + '" y="' + (y + 4) + '" class="pms">' + esc(I(AREA_HINT[a][0], AREA_HINT[a][1])).slice(0, 30) + '</text>' +
+        '<text x="' + (x + 94) + '" y="' + (y - 12) + '" text-anchor="end" class="pmv" fill="' + w.col + '">' + sc + '</text>' +
+        '<text x="' + (x - 88) + '" y="' + (y + 28) + '" class="pms" fill="' + w.col + '">' + (w.n ? (w.h ? w.h + ' ' + I('serious', 'σοβαρά') + ' ' : '') + (w.m ? w.m + ' ' + I('medium', 'μέτρια') + ' ' : '') + (w.l ? w.l + ' ' + I('small', 'μικρά') : '') : '&#10003; ' + I('all good', 'όλα καλά')) + '</text></g>';
+    });
+    svg += '</svg>';
+    el.innerHTML = '<div class="win"><header><span>pc.map</span><span class="st">' + esc(I('click a box to see its findings', 'πάτα ένα κουτί για τα ευρήματά του')) + '</span></header><div class="body">' + svg + '</div></div>';
+  }
+
+  /* ---------- Findings: overview, area chips, sort ---------- */
+  function findingsBar() {
+    var el = $('#findViz'); if (!el) return;
+    var c = V.counts, tot = Math.max(1, c.high + c.medium + c.low + c.info);
+    var seg = [['high', c.high, COL.red, I('serious', 'σοβαρά')], ['medium', c.medium, COL.amber, I('medium', 'μέτρια')], ['low', c.low, '#c9c9d0', I('small', 'μικρά')], ['info', c.info, '#5b6475', I('tips', 'συμβουλές')]];
+    var h = '<div class="fbar" role="img" aria-label="' + esc(seg.map(function (s) { return s[1] + ' ' + s[3]; }).join(', ')) + '">' + seg.filter(function (s) { return s[1]; }).map(function (s) { return '<i style="flex:' + s[1] + ';background:' + s[2] + '" title="' + esc(s[1] + ' ' + s[3]) + '"><b>' + s[1] + '</b></i>'; }).join('') + '</div>';
+    h += '<div class="chips"><button type="button" class="ch' + (!UI.state.area ? ' on' : '') + '" data-area="">' + esc(I('All areas', 'Όλες οι περιοχές')) + '</button>' + V.score.areas.map(function (a) {
+      var n = V.findings.filter(function (f) { return f.area === a.name; }).length, w = worst(a.name);
+      return '<button type="button" class="ch' + (UI.state.area === a.name ? ' on' : '') + '" data-area="' + esc(a.name) + '" style="--ac:' + w.col + '"><i class="cd" style="background:' + w.col + '"></i>' + esc(areaName(a.name)) + ' <small>' + n + '</small></button>';
+    }).join('') + '<span class="chsp"></span><label class="sr" for="findSort">' + esc(I('Sort', 'Ταξινόμηση')) + '</label><select id="findSort" class="sel sm"><option value="prio">' + esc(I('Most important first', 'Πρώτα τα πιο σημαντικά')) + '</option><option value="quick">' + esc(I('Quick wins first', 'Πρώτα τα γρήγορα')) + '</option><option value="area">' + esc(I('By area', 'Ανά περιοχή')) + '</option></select>' +
+      '<button type="button" class="btn sm" id="fExpand">' + esc(I('Open all', 'Άνοιγμα όλων')) + '</button><button type="button" class="btn sm" id="fCollapse">' + esc(I('Close all', 'Κλείσιμο όλων')) + '</button></div>';
+    el.innerHTML = h;
+    var s = $('#findSort'); if (s) { s.value = UI.state.sort || 'prio'; }
+  }
+  document.addEventListener('click', function (e) {
+    var t;
+    if ((t = e.target.closest && e.target.closest('.atile, .pmn'))) { goArea(t.getAttribute('data-area')); return; }
+    if ((t = e.target.closest && e.target.closest('.chips .ch'))) { UI.state.area = t.getAttribute('data-area') || ''; findingsBar(); UI.drawFindings(); return; }
+    if (e.target && e.target.id === 'fExpand') { $$('#findList .finding').forEach(function (f) { f.classList.add('open'); var h = f.querySelector('.fh'); if (h) h.setAttribute('aria-expanded', 'true'); }); }
+    if (e.target && e.target.id === 'fCollapse') { $$('#findList .finding').forEach(function (f) { f.classList.remove('open'); var h = f.querySelector('.fh'); if (h) h.setAttribute('aria-expanded', 'false'); }); }
+  });
+  document.addEventListener('change', function (e) { if (e.target && e.target.id === 'findSort') { UI.state.sort = e.target.value; UI.drawFindings(); } });
+  document.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('pmn')) { e.preventDefault(); goArea(e.target.getAttribute('data-area')); } });
+  function render() { summary(); pcMap(); findingsBar(); }
+  return { render: render };
+})(V, UI);
+
 /* VEAGLE PC Check - "share-safe copy": the same report with personal details removed from the data */
 var SHARE = (function (V, AI) {
   'use strict';
@@ -3928,7 +4105,7 @@ var SHARE = (function (V, AI) {
     document.addEventListener('click', function (e) {
       var t;
       if ((t = e.target.closest('[data-tab-go]'))) { go(t.getAttribute('data-tab-go')); return; }
-      if ((t = e.target.closest('[data-open]'))) { var id = t.getAttribute('data-open'); UI.state.sev = 'all'; UI.state.q = ''; go('findings'); UI.drawFindings(id); return; }
+      if ((t = e.target.closest('[data-open]'))) { var id = t.getAttribute('data-open'); UI.state.sev = 'all'; UI.state.q = ''; UI.state.area = ''; go('findings'); UI.drawFindings(id); return; }
       if ((t = e.target.closest('[data-copy]'))) { var ok = AI.copyText(t.getAttribute('data-copy')); AI.toast(ok ? 'Command copied. Paste it into PowerShell (as Administrator where noted).' : 'Copy failed. Select the text and press Ctrl+C.'); return; }
       if ((t = e.target.closest('[data-ask]'))) { var f = findFinding(t.getAttribute('data-ask')); AI.setFocus(f ? f.title : ''); var fo = $('#aiFocus'); if (fo && f) { fo.value = 'Please explain finding "' + f.title + '" and how to fix it safely.'; } AI.refresh(); go('ai'); return; }
       if ((t = e.target.closest('#filters button'))) { UI.state.sev = t.getAttribute('data-sev'); $$('#filters button').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); }); UI.drawFindings(); return; }

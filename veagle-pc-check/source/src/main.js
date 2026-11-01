@@ -18,7 +18,7 @@
     document.addEventListener('click', function (e) {
       var t;
       if ((t = e.target.closest('[data-tab-go]'))) { go(t.getAttribute('data-tab-go')); return; }
-      if ((t = e.target.closest('[data-open]'))) { var id = t.getAttribute('data-open'); UI.state.sev = 'all'; UI.state.q = ''; go('findings'); UI.drawFindings(id); return; }
+      if ((t = e.target.closest('[data-open]'))) { var id = t.getAttribute('data-open'); UI.state.sev = 'all'; UI.state.q = ''; UI.state.area = ''; go('findings'); UI.drawFindings(id); return; }
       if ((t = e.target.closest('[data-copy]'))) { var ok = AI.copyText(t.getAttribute('data-copy')); AI.toast(ok ? 'Command copied. Paste it into PowerShell (as Administrator where noted).' : 'Copy failed. Select the text and press Ctrl+C.'); return; }
       if ((t = e.target.closest('[data-ask]'))) { var f = findFinding(t.getAttribute('data-ask')); AI.setFocus(f ? f.title : ''); var fo = $('#aiFocus'); if (fo && f) { fo.value = 'Please explain finding "' + f.title + '" and how to fix it safely.'; } AI.refresh(); go('ai'); return; }
       if ((t = e.target.closest('#filters button'))) { UI.state.sev = t.getAttribute('data-sev'); $$('#filters button').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); }); UI.drawFindings(); return; }

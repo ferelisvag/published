@@ -300,7 +300,7 @@ var UI = (function (V) {
   }
 
   /* ---------------- findings ---------------- */
-  var state = { sev: 'all', q: '' };
+  var state = { sev: 'all', q: '', area: '', sort: 'prio' };
   function rFindings() {
     var c = V.counts;
     $('#findSummary').textContent = (c.high + c.medium + c.low) + ' findings, ' + c.info + (c.info === 1 ? ' tip' : ' tips');
@@ -311,7 +311,9 @@ var UI = (function (V) {
   }
   function drawFindings(openId) {
     var q = state.q.toLowerCase();
-    var list = V.findings.filter(function (f) { return (state.sev === 'all' || f.sev === state.sev) && (!q || (f.title + ' ' + f.why + ' ' + f.area + ' ' + f.evidence).toLowerCase().indexOf(q) >= 0); });
+    var list = V.findings.filter(function (f) { return (state.sev === 'all' || f.sev === state.sev) && (!state.area || f.area === state.area) && (!q || (f.title + ' ' + f.why + ' ' + f.area + ' ' + f.evidence).toLowerCase().indexOf(q) >= 0); });
+    if (state.sort === 'quick') list = list.slice().sort(function (a, b) { return (V.META[a.id] ? V.META[a.id][0] : 10) - (V.META[b.id] ? V.META[b.id][0] : 10); });
+    else if (state.sort === 'area') list = list.slice().sort(function (a, b) { return a.area < b.area ? -1 : (a.area > b.area ? 1 : 0); });
     $('#findList').innerHTML = list.length ? list.map(function (f0, i) {
       var f = V.tf(f0);
       var steps = f.steps.length ? '<ol class="steps">' + f.steps.map(function (s, si) { var on = VIZ.chkOn(f.id, si); return '<li' + (on ? ' class="done"' : '') + '><label class="chk"><input type="checkbox" data-chk="' + esc(f.id) + '|' + si + '"' + (on ? ' checked' : '') + '><span>' + gloss(esc(s.t)) + '</span></label>' + (s.cmd ? cmdBox(s.cmd) : '') + '</li>'; }).join('') + '</ol><p class="sub chkhint">' + esc(V.I('Tick each step when you have done it. This only marks your progress, nothing is run.', 'Τσέκαρε κάθε βήμα όταν το κάνεις. Αυτό μόνο σημειώνει την πρόοδό σου, δεν τρέχει τίποτα.')) + '</p>' : '';
@@ -438,6 +440,7 @@ var UI = (function (V) {
     rStart(); rSince(); rSummary(); rHealth(); rRadar(); rActions(); rCpu(); rMem(); rGpu(); rBoard(); rOs(); rNet(); rExtras(); rStorage(); rSecurity(); rBoot(); rHeat(); rUplink();
     rFindings(); rHardware(); rSoftware(); rEvents();
     if (typeof PRO !== 'undefined') { PRO.summary(); PRO.decorate(); }
+    if (typeof VIZ2 !== 'undefined') VIZ2.render();
     countUp();
     VIZ.animateRings(document);
   }

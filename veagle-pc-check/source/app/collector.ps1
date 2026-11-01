@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.6.5'
+$script:Version = '0.7.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -203,7 +203,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 17
+$TOTAL = 18
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -637,6 +637,7 @@ $apps = @(Get-ItemProperty $uninstallPaths -ErrorAction SilentlyContinue | Where
         version   = [string]$_.DisplayVersion
         publisher = [string]$_.Publisher
         sizeMB    = [int]([double]$_.EstimatedSize / 1024)
+        installDate = [string]$_.InstallDate
     }
 } | Sort-Object name, version -Unique)
 try { $apps | Export-Csv -NoTypeInformation -Encoding UTF8 -Path (Join-Path $raw 'installed-apps.csv') } catch { }
@@ -1322,6 +1323,247 @@ $extras | Add-Member -NotePropertyName more -NotePropertyValue ([pscustomobject]
     accounts = $accounts; signatures = [pscustomobject]@{ checked = $sigChecked; flagged = $sigFlags }; wifiSaved = $wifiSaved; browserExt = $browserExt
     lock = $lockInfo; bitlockerKeys = $blKeys; thermal = $thermal; inventory = $inventory; office = $office; certs = $certs; wu = $wuInfo
     oneDrive = $oneDriveInfo; slowStart = $slowStart; dnsSpeed = $dnsSpeed; connections = $conns
+}) -Force
+
+# ---------------------------------------------------------------- 18. inventory details, performance sample, hardening, privacy (all read-only)
+Step 18 $TOTAL 'Equipment, hardening, privacy, performance sample'
+
+# --- monitors (what each screen reports about itself)
+$monitors = @()
+try {
+    $ids = @(Get-CimInstance -Namespace root/wmi -ClassName WmiMonitorID -ErrorAction Stop)
+    $bps = @(Get-CimInstance -Namespace root/wmi -ClassName WmiMonitorBasicDisplayParams -ErrorAction SilentlyContinue)
+    foreach ($m in $ids) {
+        $mk = (-join @($m.ManufacturerName | Where-Object { $_ -gt 0 } | ForEach-Object { [char]$_ })).Trim()
+        $md = (-join @($m.UserFriendlyName | Where-Object { $_ -gt 0 } | ForEach-Object { [char]$_ })).Trim()
+        $sn = (-join @($m.SerialNumberID | Where-Object { $_ -gt 0 } | ForEach-Object { [char]$_ })).Trim()
+        $bp = $bps | Where-Object { $_.InstanceName -eq $m.InstanceName } | Select-Object -First 1
+        $inch = $null; if ($bp -and $bp.MaxHorizontalImageSize -gt 0 -and $bp.MaxVerticalImageSize -gt 0) { $inch = [math]::Round([math]::Sqrt([math]::Pow($bp.MaxHorizontalImageSize, 2) + [math]::Pow($bp.MaxVerticalImageSize, 2)) / 2.54, 0) }
+        $monitors += [pscustomobject]@{ maker = $mk; model = $md; serial = $sn; year = [int]$m.YearOfManufacture; inches = $inch }
+    }
+} catch { }
+
+# --- printers (virtual ones are left out)
+$printers = @()
+try {
+    $printers = @(Get-CimInstance Win32_Printer -ErrorAction Stop | Where-Object { $_.Name -notmatch '(?i)PDF|XPS|OneNote|Fax|Snagit|Send To|Print to' } | Select-Object -First 20 | ForEach-Object {
+        [pscustomobject]@{ name = [string]$_.Name; driver = [string]$_.DriverName; port = [string]$_.PortName; isDefault = [bool]$_.Default; network = [bool]$_.Network; shared = [bool]$_.Shared; offline = [bool]$_.WorkOffline }
+    })
+} catch { }
+
+# --- peripherals connected now
+$periph = @()
+try {
+    $periph = @(Get-PnpDevice -PresentOnly -ErrorAction Stop | Where-Object { $_.Class -match '^(Keyboard|Mouse|Camera|Image|Bluetooth|WPD|Printer|Biometric|SmartCardReader)$' -and $_.FriendlyName -and $_.FriendlyName -notmatch '(?i)HID-compliant|Root|Virtual|Composite|Generic|Enumerator|Radio|Transport|Protocol|Microsoft Bluetooth|Intel\(R\) Wireless Bluetooth$' } | Select-Object -First 40 | ForEach-Object {
+        [pscustomobject]@{ class = [string]$_.Class; name = [string]$_.FriendlyName; status = [string]$_.Status }
+    })
+    $audio = @(Get-PnpDevice -PresentOnly -Class AudioEndpoint -ErrorAction SilentlyContinue | Where-Object { $_.FriendlyName } | Select-Object -First 12 | ForEach-Object { [pscustomobject]@{ class = 'Audio'; name = [string]$_.FriendlyName; status = [string]$_.Status } })
+    $periph = @($periph + $audio)
+    $usbd = @(Get-CimInstance Win32_DiskDrive -ErrorAction SilentlyContinue | Where-Object { $_.InterfaceType -eq 'USB' } | ForEach-Object { [pscustomobject]@{ class = 'USB drive'; name = [string]$_.Model; status = 'OK' } })
+    $periph = @($periph + $usbd)
+} catch { }
+
+# --- who manages this PC (domain, Entra ID / Azure AD, Intune)
+$mgmt = $null
+try {
+    $csx = Get-CimInstance Win32_ComputerSystem
+    $ds = (& dsregcmd.exe /status 2>&1 | Out-String)
+    $aad = ($ds -match '(?im)AzureAdJoined\s*:\s*YES'); $wp = ($ds -match '(?im)WorkplaceJoined\s*:\s*YES')
+    $tn = ''; $tm = [regex]::Match($ds, '(?im)TenantName\s*:\s*(.+)'); if ($tm.Success) { $tn = $tm.Groups[1].Value.Trim() }
+    $mdm = $false
+    try { foreach ($en in @(Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Enrollments' -ErrorAction Stop)) { if ([string](Get-ItemProperty $en.PSPath).ProviderID -match 'MS DM Server') { $mdm = $true } } } catch { }
+    $mgmt = [pscustomobject]@{ domainJoined = [bool]$csx.PartOfDomain; domain = $(if ($csx.PartOfDomain) { [string]$csx.Domain } else { '' }); workgroup = $(if (-not $csx.PartOfDomain) { [string]$csx.Domain } else { '' }); entraJoined = $aad; workplaceJoined = $wp; tenant = $tn; intune = $mdm }
+} catch { }
+
+# --- licences (only the last 5 characters of a key, never the whole key)
+$winLic = $null
+try {
+    $wl = @(Get-CimInstance -ClassName SoftwareLicensingProduct -Filter "PartialProductKey IS NOT NULL AND ApplicationId='55c92734-d682-4d71-983e-d6ec3f16059f'" -ErrorAction Stop | Select-Object -First 1)
+    $biosKey = $false; try { $biosKey = -not [string]::IsNullOrEmpty([string](Get-CimInstance SoftwareLicensingService).OA3xOriginalProductKey) } catch { }
+    if ($wl.Count -gt 0) { $winLic = [pscustomobject]@{ name = [string]$wl[0].Name; channel = [string]$wl[0].ProductKeyChannel; partialKey = [string]$wl[0].PartialProductKey; status = [int]$wl[0].LicenseStatus; keyInBios = $biosKey } }
+} catch { }
+
+# --- mapped network drives and VPN connections (names only, never passwords)
+$mapped = @(); $vpns = @()
+try { $mapped = @(Get-SmbMapping -ErrorAction Stop | Select-Object -First 20 | ForEach-Object { [pscustomobject]@{ local = [string]$_.LocalPath; remote = [string]$_.RemotePath; status = [string]$_.Status } }) } catch { }
+try { $vpns = @(@(Get-VpnConnection -ErrorAction Stop) + @(Get-VpnConnection -AllUserConnection -ErrorAction SilentlyContinue) | Select-Object -First 10 | ForEach-Object { [pscustomobject]@{ name = [string]$_.Name; server = [string]$_.ServerAddress; type = [string]$_.TunnelType } }) } catch { }
+
+# --- neighbours the PC already knows about (only reads the PC's own ARP memory, nothing is scanned)
+$neighbours = @()
+try {
+    $neighbours = @(Get-NetNeighbor -AddressFamily IPv4 -ErrorAction Stop | Where-Object { [string]$_.State -match 'Reachable|Stale|Delay|Probe' -and [string]$_.LinkLayerAddress -match '^[0-9A-Fa-f]{2}(-[0-9A-Fa-f]{2}){5}$' -and [string]$_.IPAddress -notmatch '^(224\.|239\.|255\.|169\.254\.)' -and [string]$_.LinkLayerAddress -ne 'FF-FF-FF-FF-FF-FF' } | Select-Object -First 40 | ForEach-Object {
+        [pscustomobject]@{ ip = [string]$_.IPAddress; mac = ([string]$_.LinkLayerAddress).ToUpper(); state = [string]$_.State }
+    })
+} catch { }
+
+# --- board, enclosure, last user, browsers
+$board = $null
+try { $enc = Get-CimInstance Win32_SystemEnclosure | Select-Object -First 1; $board = [pscustomobject]@{ assetTag = $(if ($enc) { ([string]$enc.SMBIOSAssetTag).Trim() } else { '' }); chassisSerial = $(if ($enc) { ([string]$enc.SerialNumber).Trim() } else { '' }) } } catch { }
+$lastUser = $null
+try { $lastUser = [pscustomobject]@{ user = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI' 'LastLoggedOnUser'); display = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI' 'LastLoggedOnDisplayName') } } catch { }
+$browsers = @()
+try {
+    foreach ($bw in @(@('Chrome', 'chrome.exe'), @('Edge', 'msedge.exe'), @('Firefox', 'firefox.exe'), @('Brave', 'brave.exe'), @('Opera', 'opera.exe'))) {
+        $ap = [string](Read-Reg ('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\' + $bw[1]) '(default)')
+        if (-not $ap) { $ap = [string](Read-Reg ('HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\' + $bw[1]) '(default)') }
+        $ap = $ap.Trim('"')
+        if ($ap -and (Test-Path -LiteralPath $ap)) { $fi = Get-Item -LiteralPath $ap; $browsers += [pscustomobject]@{ name = $bw[0]; version = [string]$fi.VersionInfo.ProductVersion; fileDays = [int]((Get-Date) - $fi.LastWriteTime).TotalDays } }
+    }
+} catch { }
+$defBrowser = ''
+try { $defBrowser = [string](Read-Reg 'HKCU:\Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice' 'ProgId') } catch { }
+
+# --- 10-second performance sample (CIM counters, so it works on every Windows language)
+$perf = $null
+if (-not $Quick) {
+    try {
+        $cpuS = @(); $dskS = @(); $qS = @(); $netS = @(); $memS = @()
+        for ($i = 0; $i -lt 10; $i++) {
+            $c1 = Get-CimInstance Win32_PerfFormattedData_PerfOS_Processor -Filter "Name='_Total'" -ErrorAction Stop; $cpuS += [int]$c1.PercentProcessorTime
+            $d1 = Get-CimInstance Win32_PerfFormattedData_PerfDisk_PhysicalDisk -Filter "Name='_Total'" -ErrorAction Stop; $dskS += [int]$d1.PercentDiskTime; $qS += [double]$d1.CurrentDiskQueueLength
+            $n1 = @(Get-CimInstance Win32_PerfFormattedData_Tcpip_NetworkInterface -ErrorAction SilentlyContinue); $netS += [int](($n1 | Measure-Object -Property BytesTotalPersec -Sum).Sum / 1024)
+            $o1 = Get-CimInstance Win32_OperatingSystem; $memS += [int](100 * ($o1.TotalVisibleMemorySize - $o1.FreePhysicalMemory) / $o1.TotalVisibleMemorySize)
+            Start-Sleep -Milliseconds 900
+        }
+        $perf = [pscustomobject]@{ cpu = $cpuS; disk = $dskS; queue = $qS; netKBs = $netS; mem = $memS }
+    } catch { }
+}
+
+# --- NVIDIA graphics card details (only if the driver already installed nvidia-smi)
+$gpuSmi = @()
+try {
+    $smi = $null
+    foreach ($sp in @((Join-Path $env:windir 'System32\nvidia-smi.exe'), (Join-Path $env:ProgramFiles 'NVIDIA Corporation\NVSMI\nvidia-smi.exe'))) { if (Test-Path -LiteralPath $sp) { $smi = $sp; break } }
+    if ($smi) {
+        $o = (& $smi --query-gpu=name,temperature.gpu,memory.used,memory.total,power.draw,fan.speed,utilization.gpu --format=csv,noheader,nounits 2>&1 | Out-String)
+        foreach ($ln in @($o -split "`r?`n" | Where-Object { $_ -match ',' })) {
+            $p = @($ln -split ',' | ForEach-Object { $_.Trim() })
+            if ($p.Count -ge 7) { $gpuSmi += [pscustomobject]@{ name = $p[0]; tempC = $(if ($p[1] -match '^\d+$') { [int]$p[1] } else { $null }); memUsedMB = $(if ($p[2] -match '^\d+$') { [int]$p[2] } else { $null }); memTotalMB = $(if ($p[3] -match '^\d+$') { [int]$p[3] } else { $null }); powerW = $(if ($p[4] -match '^[\d.]+$') { [double]$p[4] } else { $null }); fanPct = $(if ($p[5] -match '^\d+$') { [int]$p[5] } else { $null }); loadPct = $(if ($p[6] -match '^\d+$') { [int]$p[6] } else { $null }) } }
+        }
+    }
+} catch { }
+
+# --- all the places where something can start by itself (and what is unusual)
+$persist = [pscustomobject]@{ items = @(); unusual = @() }
+try {
+    $pi = @(); $un = @()
+    foreach ($rk in @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run', 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run', 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run', 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce')) {
+        try { $ip = Get-ItemProperty -LiteralPath $rk -ErrorAction Stop; foreach ($pr in $ip.PSObject.Properties) { if ($pr.Name -notmatch '^PS') { $pi += [pscustomobject]@{ where = $rk.Replace('HKLM:\SOFTWARE\', 'HKLM\').Replace('HKCU:\SOFTWARE\', 'HKCU\'); name = [string]$pr.Name; command = [string]$pr.Value } } } } catch { }
+    }
+    foreach ($sf in @((Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Startup'), (Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\StartUp'))) {
+        try { foreach ($f in @(Get-ChildItem -LiteralPath $sf -File -ErrorAction Stop | Where-Object { $_.Name -ne 'desktop.ini' })) { $pi += [pscustomobject]@{ where = 'Startup folder'; name = [string]$f.Name; command = [string]$f.FullName } } } catch { }
+    }
+    $wl2 = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+    $sh = [string](Read-Reg $wl2 'Shell'); if ($sh -and $sh -ne 'explorer.exe') { $un += [pscustomobject]@{ kind = 'winlogon-shell'; detail = $sh } }
+    $ui = [string](Read-Reg $wl2 'Userinit'); if ($ui -and $ui.TrimEnd(',').ToLower() -ne 'c:\windows\system32\userinit.exe') { $un += [pscustomobject]@{ kind = 'winlogon-userinit'; detail = $ui } }
+    try { foreach ($ik in @(Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options' -ErrorAction Stop)) { $dbg = [string](Get-ItemProperty -LiteralPath $ik.PSPath -ErrorAction SilentlyContinue).Debugger; if ($dbg) { $un += [pscustomobject]@{ kind = 'ifeo-debugger'; detail = ($ik.PSChildName + ' -> ' + $dbg) } } } } catch { }
+    $aid = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows' 'AppInit_DLLs'); if ($aid.Trim()) { $un += [pscustomobject]@{ kind = 'appinit-dlls'; detail = $aid } }
+    $be = @(Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager' 'BootExecute'); if ($be.Count -gt 0 -and (($be -join ' ').Trim() -ne 'autocheck autochk *')) { $un += [pscustomobject]@{ kind = 'bootexecute'; detail = ($be -join ' ') } }
+    try { foreach ($cs in @(Get-CimInstance -Namespace root/subscription -ClassName __EventConsumer -ErrorAction Stop | Where-Object { $_.Name -ne 'SCM Event Log Consumer' })) { $un += [pscustomobject]@{ kind = 'wmi-consumer'; detail = [string]$cs.Name } } } catch { }
+    # digital signatures of the run entries (full scan only)
+    if (-not $Quick) {
+        $seenP = @{}
+        foreach ($it in @($pi | Select-Object -First 50)) {
+            $px = Get-ExePath $it.command
+            $st = ''; $sg2 = ''
+            if ($px -and (Test-Path -LiteralPath $px) -and -not $seenP.ContainsKey($px.ToLower())) {
+                $seenP[$px.ToLower()] = 1
+                try { $sx = Get-AuthenticodeSignature -LiteralPath $px -ErrorAction Stop; $st = [string]$sx.Status; if ($sx.SignerCertificate) { $sg2 = CnOf $sx.SignerCertificate.Subject } } catch { }
+                $it | Add-Member -NotePropertyName signature -NotePropertyValue $st -Force; $it | Add-Member -NotePropertyName signer -NotePropertyValue $sg2 -Force
+            }
+        }
+    }
+    $persist = [pscustomobject]@{ items = @($pi | Select-Object -First 60); unusual = @($un | Select-Object -First 20) }
+} catch { }
+
+# --- hardening checks (only reading settings; the report explains each one)
+$hard = [ordered]@{}
+try {
+    $sec = @{}
+    if ($isAdmin) {
+        try {
+            $sf2 = Join-Path $raw 'secpol.cfg'
+            & secedit.exe /export /cfg $sf2 /quiet 2>&1 | Out-Null
+            foreach ($ln in @(Get-Content -LiteralPath $sf2 -ErrorAction Stop)) { $mm = [regex]::Match($ln, '^\s*(MinimumPasswordLength|PasswordComplexity|MaximumPasswordAge|LockoutBadCount)\s*=\s*(-?\d+)'); if ($mm.Success) { $sec[$mm.Groups[1].Value] = [int]$mm.Groups[2].Value } }
+            Remove-Item -LiteralPath $sf2 -Force -ErrorAction SilentlyContinue
+        } catch { }
+    }
+    $hard['pwLen'] = $(if ($sec.ContainsKey('MinimumPasswordLength')) { $sec['MinimumPasswordLength'] } else { $null })
+    $hard['pwComplex'] = $(if ($sec.ContainsKey('PasswordComplexity')) { $sec['PasswordComplexity'] } else { $null })
+    $hard['lockout'] = $(if ($sec.ContainsKey('LockoutBadCount')) { $sec['LockoutBadCount'] } else { $null })
+    $ss1 = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' 'SmartScreenEnabled'); $ss2 = Read-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' 'EnableSmartScreen'
+    $hard['smartscreen'] = $(if ($ss2 -ne $null) { ([int]$ss2 -ne 0) } elseif ($ss1) { ($ss1 -ne 'Off') } else { $null })
+    $ppl = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' 'RunAsPPL'; $hard['lsaPpl'] = $(if ($null -ne $ppl) { ([int]$ppl -ge 1) } else { $false })
+    $wd = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest' 'UseLogonCredential'; $hard['wdigestOff'] = $(if ($null -ne $wd) { ([int]$wd -eq 0) } else { $true })
+    $llm = Read-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient' 'EnableMulticast'; $hard['llmnrOff'] = $(if ($null -ne $llm) { ([int]$llm -eq 0) } else { $false })
+    try { $nb = @(Get-CimInstance Win32_NetworkAdapterConfiguration -Filter "IPEnabled=True" -ErrorAction Stop); $hard['netbiosOff'] = $(if ($nb.Count -gt 0) { (@($nb | Where-Object { $_.TcpipNetbiosOptions -ne 2 }).Count -eq 0) } else { $null }) } catch { $hard['netbiosOff'] = $null }
+    try { $hard['smbSign'] = [bool](Get-SmbServerConfiguration -ErrorAction Stop).RequireSecuritySignature } catch { $hard['smbSign'] = $null }
+    $sbl = Read-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging' 'EnableScriptBlockLogging'; $hard['psLogging'] = $(if ($null -ne $sbl) { ([int]$sbl -eq 1) } else { $false })
+    try { $dg = Get-CimInstance -Namespace root/Microsoft/Windows/DeviceGuard -ClassName Win32_DeviceGuard -ErrorAction Stop; $hard['vbs'] = ([int]$dg.VirtualizationBasedSecurityStatus -eq 2); $hard['credGuard'] = (@($dg.SecurityServicesRunning) -contains 1) } catch { $hard['vbs'] = $null; $hard['credGuard'] = $null }
+    try { $mp = Get-MpPreference -ErrorAction Stop; $hard['asrRules'] = @($mp.AttackSurfaceReductionRules_Ids).Count; $hard['cfa'] = ([int]$mp.EnableControlledFolderAccess -ge 1); $hard['cloudProt'] = ([int]$mp.MAPSReporting -ge 1); $hard['puaProt'] = ([int]$mp.PUAProtection -ge 1); $hard['netProt'] = ([int]$mp.EnableNetworkProtection -ge 1) } catch { $hard['asrRules'] = $null; $hard['cfa'] = $null; $hard['cloudProt'] = $null; $hard['puaProt'] = $null; $hard['netProt'] = $null }
+    $ar = Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer' 'NoDriveTypeAutoRun'; $hard['autorunOff'] = $(if ($null -ne $ar) { ([int]$ar -ge 255) } else { $false })
+    $ra = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' 'fAllowToGetHelp'; $hard['remoteAssistOff'] = $(if ($null -ne $ra) { ([int]$ra -eq 0) } else { $false })
+    $lm = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' 'LmCompatibilityLevel'; $hard['ntlmV2'] = $(if ($null -ne $lm) { ([int]$lm -ge 3) } else { $true })
+    $rsa = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' 'RestrictAnonymous'; $hard['anonRestricted'] = $(if ($null -ne $rsa) { ([int]$rsa -ge 1) } else { $false })
+    try { $spl = Get-Service -Name Spooler -ErrorAction Stop; $hard['spoolerOff'] = ([string]$spl.Status -ne 'Running'); $hard['spoolerHasPrinters'] = (@($printers).Count -gt 0) } catch { $hard['spoolerOff'] = $null }
+    try { $rr = Get-Service -Name RemoteRegistry -ErrorAction Stop; $hard['remoteRegOff'] = ([string]$rr.Status -ne 'Running') } catch { $hard['remoteRegOff'] = $null }
+} catch { }
+
+# --- privacy settings (status only, nothing is changed)
+$priv = [ordered]@{}
+try {
+    $tl = Read-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection' 'AllowTelemetry'; if ($null -eq $tl) { $tl = Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection' 'AllowTelemetry' }
+    $priv['telemetry'] = $tl
+    $priv['adId'] = Read-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo' 'Enabled'
+    $priv['location'] = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location' 'Value')
+    $priv['microphone'] = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone' 'Value')
+    $priv['camera'] = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam' 'Value')
+    $priv['activityHistory'] = Read-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' 'PublishUserActivities'
+    $priv['copilotOff'] = Read-Reg 'HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot' 'TurnOffWindowsCopilot'
+    $priv['tailored'] = Read-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Privacy' 'TailoredExperiencesWithDiagnosticDataEnabled'
+    $priv['clipboardHistory'] = Read-Reg 'HKCU:\Software\Microsoft\Clipboard' 'EnableClipboardHistory'
+    $priv['bingSearch'] = Read-Reg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search' 'BingSearchEnabled'
+    $rc2 = $null; try { $rf = Get-WindowsOptionalFeature -Online -FeatureName Recall -ErrorAction Stop; $rc2 = [string]$rf.State } catch { }
+    $priv['recall'] = $rc2
+} catch { }
+
+# --- temporary files and caches (sizes only; the report points to Windows' own cleaner)
+$caches = @()
+if (-not $Quick -and (Get-Command Measure-Dir -ErrorAction SilentlyContinue)) {
+    try {
+        $la = $env:LOCALAPPDATA
+        $cl = @(
+            @('Chrome cache', (Join-Path $la 'Google\Chrome\User Data\Default\Cache')), @('Edge cache', (Join-Path $la 'Microsoft\Edge\User Data\Default\Cache')),
+            @('Windows shader cache', (Join-Path $la 'D3DSCache')), @('NVIDIA shader cache', (Join-Path $la 'NVIDIA\DXCache')),
+            @('Delivery Optimization', (Join-Path $env:windir 'ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache')),
+            @('Windows error reports', (Join-Path $env:ProgramData 'Microsoft\Windows\WER')), @('Crash dumps (Minidump)', (Join-Path $env:windir 'Minidump')),
+            @('Thumbnail cache', (Join-Path $la 'Microsoft\Windows\Explorer'))
+        )
+        foreach ($c in $cl) { if (Test-Path -LiteralPath $c[1]) { $r = Measure-Dir $c[1] 8 $false; if ($r.mb -gt 0) { $caches += [pscustomobject]@{ name = $c[0]; mb = $r.mb; partial = [bool]$r.partial } } } }
+    } catch { }
+}
+
+# --- USB storage devices that were connected in the past (names only)
+$usbHist = @()
+try {
+    foreach ($k1 in @(Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Enum\USBSTOR' -ErrorAction Stop)) {
+        foreach ($k2 in @(Get-ChildItem -LiteralPath $k1.PSPath -ErrorAction SilentlyContinue)) {
+            $fn = [string](Get-ItemProperty -LiteralPath $k2.PSPath -ErrorAction SilentlyContinue).FriendlyName
+            if (-not $fn) { $fn = ($k1.PSChildName -replace '^(Disk|CdRom)&Ven_', '' -replace '&Prod_', ' ' -replace '&Rev_.*$', '' -replace '_', ' ') }
+            $usbHist += [pscustomobject]@{ name = $fn }
+        }
+    }
+    $usbHist = @($usbHist | Sort-Object name -Unique | Select-Object -First 40)
+} catch { }
+
+# --- Prefetch: programs that ran recently (used only for a hint about unused programs)
+$ran = @()
+try { $ran = @(Get-ChildItem -LiteralPath (Join-Path $env:windir 'Prefetch') -Filter *.pf -ErrorAction Stop | ForEach-Object { [pscustomobject]@{ exe = ($_.Name -replace '-[0-9A-F]{8}\.pf$', '').ToLower(); days = [int]((Get-Date) - $_.LastWriteTime).TotalDays } } | Sort-Object days | Select-Object -First 500) } catch { }
+
+$extras | Add-Member -NotePropertyName more2 -NotePropertyValue ([pscustomobject]@{
+    monitors = $monitors; printers = $printers; peripherals = $periph; management = $mgmt; windowsLicence = $winLic; mappedDrives = $mapped; vpn = $vpns
+    neighbours = $neighbours; board = $board; lastUser = $lastUser; browsers = $browsers; defaultBrowser = $defBrowser; perf = $perf; gpuSmi = $gpuSmi
+    usbHistory = $usbHist; persistence = $persist; hardening = [pscustomobject]$hard; privacy = [pscustomobject]$priv; caches = $caches; recentRuns = $ran
 }) -Force
 
 # ---------------------------------------------------------------- finish

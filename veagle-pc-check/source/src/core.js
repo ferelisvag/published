@@ -152,6 +152,23 @@ function Engine(RAW) {
     '0x154': ['UNEXPECTED_STORE_EXCEPTION', 'The drive (often an SSD) stopped answering.']
   };
   var NOISE = {
+    'Microsoft-Windows-Kernel-Processor-Power|37': 'The processor ran slower than normal (heat or a power limit). A few are normal on laptops, many mean heat or a weak charger.',
+    'Microsoft-Windows-Kernel-Power|37': 'The processor ran slower than normal (heat or a power limit).',
+    'EventLog|6008': 'The previous shutdown was unexpected (power cut, crash or holding the power button).',
+    'User32|1074': 'The PC was shut down or restarted by you or by a program. Normal.',
+    'Microsoft-Windows-WER-SystemErrorReporting|1001': 'A blue screen was recorded. See the stability findings.',
+    'BugCheck|1001': 'A blue screen was recorded. See the stability findings.',
+    'Microsoft-Windows-DNS-Client|1016': 'A website name could not be looked up. A few are normal.',
+    'Microsoft-Windows-WindowsUpdateClient|31': 'An update failed to download or install. Try again later and see the update findings.',
+    'Microsoft-Windows-TPM-WMI|1801': 'Windows says the Secure Boot certificates need to be updated (the old ones expire in 2026). Install the Windows updates and, if offered, a BIOS update.',
+    'Service Control Manager|7026': 'A driver could not start at boot. Usually an old or unused device.',
+    'Service Control Manager|7022': 'A service hung while starting. Harmless if rare.',
+    'Service Control Manager|7011': 'A service did not answer in time. Harmless if rare.',
+    'storahci|129': 'A drive did not answer in time and was reset. Check the drive health and the cable.',
+    'Microsoft-Windows-Windows Defender|1116': 'Windows Security found something suspicious. See the antivirus findings.',
+    '.NET Runtime|1026': 'A .NET program crashed. See the crash list for which one.',
+    'Windows Error Reporting|1001': 'A crash report was created. See the crash list.',
+    'MsiInstaller|11707': 'A program was installed. Information only.',
     'Microsoft-Windows-DistributedCOM|10016': 'A harmless permission message. Windows prints it very often. Safe to ignore.',
     'Microsoft-Windows-DistributedCOM|10010': 'A background program was slow to start. Usually harmless, ignore unless something really does not work.',
     'Microsoft-Windows-DistributedCOM|10005': 'A Windows service could not start. Harmless if the related app (for example Xbox or Gaming Services) is not needed.',
@@ -215,6 +232,7 @@ function Engine(RAW) {
     'sec-guest': [2, 'Easy', 'Safe'], 'sec-nopass': [5, 'Easy', 'Safe'], 'sec-builtinadmin': [3, 'Easy', 'Safe'], 'sec-pwexp': [2, 'Easy', 'Safe'], 'sec-signed': [15, 'Medium', 'Safe'], 'sec-wifi-open': [5, 'Easy', 'Safe'], 'sec-ext': [10, 'Easy', 'Safe'], 'sec-lock': [3, 'Easy', 'Safe'], 'sec-blkey': [10, 'Easy', 'Safe'], 'sec-certs': [10, 'Ask a pro', 'Safe'],
     'perf-heat': [20, 'Medium', 'Safe'], 'perf-throttle': [15, 'Medium', 'Safe'], 'perf-slowstart': [10, 'Easy', 'Safe'], 'soft-office-eol': [30, 'Medium', 'Safe'], 'soft-office-act': [5, 'Easy', 'Safe'], 'win-eol-11': [45, 'Medium', 'Back up first'], 'upd-fail': [15, 'Medium', 'Safe'], 'upd-off': [3, 'Easy', 'Safe'],
     'bak-size': [2, 'Easy', 'Safe'], 'bak-onedrive': [5, 'Easy', 'Safe'], 'net-dnsfast': [10, 'Medium', 'Safe'], 'net-conn': [5, 'Easy', 'Safe'], 'pred-disk': [15, 'Easy', 'Safe'], 'pred-ssd': [10, 'Ask a pro', 'Back up first'], 'pred-bat': [5, 'Easy', 'Safe'],
+    'sto-diskhealth': [20, 'Ask a pro', 'Back up first'], 'perf-gpuheat': [20, 'Medium', 'Safe'], 'hw-age': [2, 'Easy', 'Safe'], 'perf-bottleneck': [10, 'Easy', 'Safe'], 'sec-persist': [20, 'Ask a pro', 'Safe'], 'sec-hardening': [30, 'Medium', 'Safe'], 'sec-privacy': [15, 'Easy', 'Safe'], 'sto-caches': [5, 'Easy', 'Safe'], 'soft-unused': [15, 'Easy', 'Back up first'], 'sec-browser-old': [3, 'Easy', 'Safe'],
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe']
   };
   var PROFILES = {
@@ -235,6 +253,7 @@ function Engine(RAW) {
   }
 
   /* ---------------- rules ---------------- */
+  var RT = {};
   function runRules() {
     var out = [];
     var days = num(g(D, 'events.days', 30), 30);
@@ -1443,6 +1462,217 @@ function Engine(RAW) {
         [S('Plan a battery replacement around that time. Many laptops let a repair shop change it in minutes.')], p.length + ' scans, battery wear from ' + p[0][1] + ' % to ' + cur + ' %');
     });
 
+
+    /* ===== 0.7.0: drive health, hardware age, bottleneck, persistence, hardening, privacy, caches, unused programs, browsers ===== */
+    var X2 = EX.more2 || {};
+    R(function () {
+      var bad = [], notes = [];
+      arr(D.disks).forEach(function (d) {
+        var r = d.reliability; if (!r) return;
+        var hdd = /HDD|Unspecified/i.test(String(d.mediaType)) && !/SSD|NVMe/i.test(String(d.name));
+        var errs = num(r.readErrors) + num(r.writeErrors);
+        var hot = r.temperatureC != null && r.temperatureC >= (hdd ? 50 : 60);
+        var old = r.powerOnHours != null && r.powerOnHours >= 35000;
+        if (errs > 0 || hot || old) bad.push({ d: d, errs: errs, hot: hot, old: old, hdd: hdd });
+      });
+      if (!bad.length) return null;
+      var sev = bad.some(function (b) { return b.errs > 0; }) ? 'medium' : 'low';
+      return F('sto-diskhealth', 'Storage', sev, bad.length + ' drive' + (bad.length > 1 ? 's show' : ' shows') + ' warning signs (' + (sev === 'medium' ? 'read or write errors' : 'heat or age') + ')',
+        'Every drive keeps notes about its own health. Errors mean the drive had trouble reading or writing. Heat shortens its life. Many years of running means it is closer to the end, even if it works today.',
+        [S('Make a backup of the files you cannot lose, today.'), S('If there are errors: plan to replace the drive soon. A technician can copy Windows and your files to a new one without losing anything.'), S('If it is hot: clean the dust and make sure air can flow around the drive.')],
+        bad.map(function (b) { var r = b.d.reliability; return b.d.name + ': ' + (r.temperatureC != null ? r.temperatureC + ' C, ' : '') + (r.powerOnHours != null ? Math.round(r.powerOnHours / 24 / 365 * 10) / 10 + ' years powered on, ' : '') + b.errs + ' errors' + (r.wearPercent != null ? ', wear ' + r.wearPercent + ' %' : ''); }).join('\n'));
+    });
+    R(function () {
+      var gs = arr(X2.gpuSmi).filter(function (x) { return x.tempC != null && x.tempC >= 85; });
+      if (!gs.length) return null;
+      return F('perf-gpuheat', 'Performance', gs[0].tempC >= 92 ? 'medium' : 'low', 'The graphics card was very hot (' + gs[0].tempC + ' degrees C)',
+        'A hot graphics card slows down by itself and wears out faster. The reading was taken during the scan, so it was not under a game load unless something heavy was running.',
+        [S('Check that the case fans work and the vents are free of dust.'), S('Close heavy programs (games, video editors) and see if the temperature drops.')], gs.map(function (x) { return x.name + ': ' + x.tempC + ' C' + (x.fanPct != null ? ', fan ' + x.fanPct + ' %' : '') + (x.loadPct != null ? ', load ' + x.loadPct + ' %' : ''); }).join('\n'));
+    });
+    /* hardware age from the model name (approximate) */
+    function cpuYear(n) {
+      n = String(n || ''); var m;
+      if (/Core\(TM\) Ultra|Core Ultra/i.test(n)) return 2024;
+      if ((m = n.match(/i[3579]-(\d{4,5})/i)) || (m = n.match(/Core\(TM\)\s+(?:i[3579]\s+)?(\d{4,5})[A-Z]*/i))) {
+        var s = m[1], gen = s.length === 5 ? parseInt(s.slice(0, 2), 10) : parseInt(s.slice(0, 1), 10), Y = { 2: 2011, 3: 2012, 4: 2013, 5: 2015, 6: 2015, 7: 2017, 8: 2017, 9: 2018, 10: 2019, 11: 2021, 12: 2021, 13: 2022, 14: 2023 };
+        return Y[gen] ? { year: Y[gen], label: gen + (gen === 1 ? 'st' : gen === 2 ? 'nd' : gen === 3 ? 'rd' : 'th') + ' generation Intel' } : null;
+      }
+      if (/Ryzen\s+AI/i.test(n)) return { year: 2024, label: 'AMD Ryzen AI' };
+      if ((m = n.match(/Ryzen\s+[3579]\s+(?:PRO\s+)?(\d)(\d{3})/i))) { var Z = { 1: 2017, 2: 2018, 3: 2019, 4: 2020, 5: 2021, 6: 2022, 7: 2023, 8: 2024, 9: 2024 }; return Z[m[1]] ? { year: Z[m[1]], label: 'AMD Ryzen ' + m[1] + '000 series' } : null; }
+      return null;
+    }
+    function gpuYear(n) {
+      n = String(n || ''); var m;
+      if ((m = n.match(/RTX\s*(\d)0\d{2}/i))) { var A = { 2: 2018, 3: 2020, 4: 2022, 5: 2025 }; return A[m[1]] ? { year: A[m[1]], label: 'NVIDIA RTX ' + m[1] + '000 series' } : null; }
+      if ((m = n.match(/GTX\s*(\d{3,4})/i))) { var v = parseInt(m[1], 10); return { year: v >= 1600 ? 2019 : (v >= 1000 ? 2016 : (v >= 900 ? 2014 : 2013)), label: 'NVIDIA GTX ' + m[1] }; }
+      if ((m = n.match(/RX\s*(\d)\d{3}/i))) { var B = { 5: 2019, 6: 2020, 7: 2022, 9: 2025 }; return B[m[1]] ? { year: B[m[1]], label: 'AMD Radeon RX ' + m[1] + '000 series' } : null; }
+      if (/RX\s*[45]\d{2}\b/i.test(n)) return { year: 2017, label: 'AMD Radeon RX 400/500 series' };
+      if (/\bArc\b/i.test(n)) return { year: 2022, label: 'Intel Arc' };
+      return null;
+    }
+    function hwAge() {
+      var nowY = new Date(g(D, 'meta.generated', Date.now())).getFullYear(), out2 = [];
+      var c = cpuYear(g(D, 'system.cpu.name', '')); if (c) out2.push({ what: 'processor', year: c.year, age: nowY - c.year, label: c.label });
+      var seen = {}; arr(D.gpus).forEach(function (x) { var y = gpuYear(x.name); if (y && !seen[y.label]) { seen[y.label] = 1; out2.push({ what: 'graphics', year: y.year, age: nowY - y.year, label: y.label }); } });
+      var bi = g(D, 'system.bios.date', null); if (bi) { var by = new Date(bi).getFullYear(); if (by > 1990) out2.push({ what: 'bios', year: by, age: nowY - by, label: 'BIOS' }); }
+      return out2;
+    }
+    R(function () {
+      var a = hwAge().filter(function (x) { return x.what !== 'bios' && x.age >= 7; });
+      if (!a.length) return null;
+      var old = a.reduce(function (m, x) { return Math.max(m, x.age); }, 0);
+      return F('hw-age', 'Performance', old >= 9 ? 'low' : 'info', 'The ' + a[0].what + ' is about ' + a[0].age + ' years old (' + a[0].label + ')',
+        'Parts of this age still work, but they miss newer features (Windows 11 support, faster memory, modern security chips), use more power and are more likely to fail. It is an estimate from the model name.',
+        [S('Nothing to do if the PC does what you need. If you plan an upgrade, a new processor usually means a new motherboard and memory too.'), S('Keep a backup: older parts fail more often.')], a.map(function (x) { return x.what + ': ' + x.label + ', released about ' + x.year; }).join('\n'));
+    });
+    R(function () {
+      var p = X2.perf; if (!p || !arr(p.cpu).length) return null;
+      function avg(a) { a = arr(a); return a.length ? a.reduce(function (x, y) { return x + num(y); }, 0) / a.length : 0; }
+      var c = avg(p.cpu), d = avg(p.disk), q = avg(p.queue), m = arr(p.mem).length ? arr(p.mem)[arr(p.mem).length - 1] : 0, lim = null;
+      if (c >= 80) lim = ['processor', c]; else if (d >= 85 || q >= 2) lim = ['drive', d]; else if (m >= 92) lim = ['memory', m];
+      if (!lim) return null;
+      var why = { processor: 'The processor was busy most of the time. Something is using it heavily. See "Who used the processor" in the Insights tab.', drive: 'The drive was almost always busy. A slow disk (especially an old hard disk) makes everything wait.', memory: 'Memory was almost full. When it is full Windows uses the drive as extra memory, which is much slower.' };
+      return F('perf-bottleneck', 'Performance', 'low', 'During a 10-second check the ' + lim[0] + ' was the limit (' + Math.round(lim[1]) + ' % busy)',
+        why[lim[0]] + ' This is one 10-second snapshot, so repeat the scan when the PC feels slow to see if it is always the same part.',
+        [S('Open Task Manager (Ctrl+Shift+Esc) and sort by the ' + (lim[0] === 'processor' ? 'CPU' : (lim[0] === 'drive' ? 'Disk' : 'Memory')) + ' column to see which program is responsible.'), S('Close it or ask an AI in the AI help tab what that program is.')], 'Average processor ' + Math.round(c) + ' %, drive ' + Math.round(d) + ' %, memory ' + Math.round(m) + ' %');
+    });
+    R(function () {
+      var P = X2.persistence; if (!P) return null;
+      var un = arr(P.unusual), us = arr(P.items).filter(function (x) { return x.signature && x.signature !== 'Valid'; });
+      if (!un.length && !us.length) return null;
+      var KN = { 'winlogon-shell': 'Windows start-up shell was changed', 'winlogon-userinit': 'Windows sign-in program was changed', 'ifeo-debugger': 'A program is replaced by a "debugger"', 'appinit-dlls': 'Extra DLL files load into every program', 'bootexecute': 'Extra program runs before Windows loads', 'wmi-consumer': 'A hidden WMI start-up trigger exists' };
+      return F('sec-persist', 'Security', un.length ? 'medium' : 'low', (un.length ? un.length + ' unusual start-up setting' + (un.length > 1 ? 's' : '') : '') + (un.length && us.length ? ' and ' : '') + (us.length ? us.length + ' unsigned program' + (us.length > 1 ? 's' : '') + ' that starts with Windows' : ''),
+        'Besides the normal Startup list, Windows has many hidden places where a program can make itself start. Some are used by real tools (debuggers, antivirus), but they are also favourite hiding places for unwanted software, so each one deserves a look.',
+        [S('Read the lines under "Evidence". Do you recognise each one?'), S('If you do not, search the name on the internet or ask an AI in the AI help tab before you do anything. Do not delete things you do not understand.')],
+        un.map(function (x) { return (KN[x.kind] || x.kind) + ': ' + x.detail; }).concat(us.map(function (x) { return 'Not signed: ' + x.name + ' (' + x.where + ')'; })).slice(0, 14).join('\n'));
+    });
+    /* hardening checks */
+    var HC = X2.hardening || null;
+    var HCHK = [
+      { id: 'pwLen', w: 2, t: function (h) { return h.pwLen == null ? null : h.pwLen >= 8; }, en: 'Passwords must have at least 8 characters', el: 'Οι κωδικοί πρέπει να έχουν τουλάχιστον 8 χαρακτήρες', fen: 'Windows Pro: press the Windows key, type "Local Security Policy", open Account Policies, Password Policy, and set "Minimum password length" to 12. Windows Home does not have this tool.', fel: 'Windows Pro: πάτα το πλήκτρο Windows, πληκτρολόγησε «Τοπική πολιτική ασφαλείας», άνοιξε Πολιτικές λογαριασμού, Πολιτική κωδικών και βάλε «Ελάχιστο μήκος κωδικού» 12. Τα Windows Home δεν έχουν αυτό το εργαλείο.' },
+      { id: 'pwComplex', w: 1, t: function (h) { return h.pwComplex == null ? null : h.pwComplex === 1; }, en: 'Passwords must be complex (mixed characters)', el: 'Οι κωδικοί πρέπει να είναι σύνθετοι (μείγμα χαρακτήρων)', fen: 'Same place as above: turn on "Password must meet complexity requirements".', fel: 'Στο ίδιο σημείο: άναψε το «Ο κωδικός πρέπει να πληροί απαιτήσεις πολυπλοκότητας».' },
+      { id: 'lockout', w: 2, t: function (h) { return h.lockout == null ? null : h.lockout > 0; }, en: 'The account locks after too many wrong passwords', el: 'Ο λογαριασμός κλειδώνει μετά από πολλούς λάθος κωδικούς', fen: 'Local Security Policy, Account Policies, Account Lockout Policy: set "Account lockout threshold" to 10.', fel: 'Τοπική πολιτική ασφαλείας, Πολιτικές λογαριασμού, Πολιτική κλειδώματος: βάλε «Όριο κλειδώματος λογαριασμού» 10.' },
+      { id: 'smartscreen', w: 2, t: function (h) { return h.smartscreen; }, en: 'SmartScreen checks downloaded programs', el: 'Το SmartScreen ελέγχει τα προγράμματα που κατεβάζεις', fen: 'Settings, Privacy & security, Windows Security, App & browser control, Reputation-based protection: turn the switches on.', fel: 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Ασφάλεια των Windows, Έλεγχος εφαρμογών και προγράμματος περιήγησης, Προστασία βάσει φήμης: άναψε τους διακόπτες.' },
+      { id: 'lsaPpl', w: 2, t: function (h) { return h.lsaPpl; }, en: 'Windows login secrets are protected (LSA protection)', el: 'Τα μυστικά σύνδεσης των Windows προστατεύονται (προστασία LSA)', fen: 'Settings, Privacy & security, Windows Security, Device security, Core isolation: turn on "Local Security Authority protection", then restart.', fel: 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Ασφάλεια των Windows, Ασφάλεια συσκευής, Απομόνωση πυρήνα: άναψε την «Προστασία τοπικής αρχής ασφαλείας» και κάνε επανεκκίνηση.' },
+      { id: 'wdigestOff', w: 3, t: function (h) { return h.wdigestOff; }, en: 'Old password storage (WDigest) is off', el: 'Η παλιά αποθήκευση κωδικών (WDigest) είναι κλειστή', fen: 'Ask an expert: this old setting keeps passwords readable in memory. It should be 0.', fel: 'Ρώτα έναν ειδικό: αυτή η παλιά ρύθμιση κρατά τους κωδικούς αναγνώσιμους στη μνήμη. Πρέπει να είναι 0.' },
+      { id: 'llmnrOff', w: 1, t: function (h) { return h.llmnrOff; }, en: 'Old name lookup (LLMNR) is off', el: 'Η παλιά αναζήτηση ονομάτων (LLMNR) είναι κλειστή', fen: 'Mostly for offices: ask your IT person to turn it off with a policy.', fel: 'Κυρίως για γραφεία: ζήτα από τον υπεύθυνο IT να το κλείσει με πολιτική.' },
+      { id: 'netbiosOff', w: 1, t: function (h) { return h.netbiosOff; }, en: 'Old network naming (NetBIOS) is off', el: 'Η παλιά ονοματοδοσία δικτύου (NetBIOS) είναι κλειστή', fen: 'Mostly for offices: ask your IT person.', fel: 'Κυρίως για γραφεία: ρώτα τον υπεύθυνο IT.' },
+      { id: 'smbSign', w: 1, t: function (h) { return h.smbSign; }, en: 'File sharing requires a digital signature', el: 'Η κοινή χρήση αρχείων απαιτεί ψηφιακή υπογραφή', fen: 'Mostly for offices: ask your IT person.', fel: 'Κυρίως για γραφεία: ρώτα τον υπεύθυνο IT.' },
+      { id: 'psLogging', w: 1, t: function (h) { return h.psLogging; }, en: 'PowerShell activity is logged', el: 'Η δραστηριότητα του PowerShell καταγράφεται', fen: 'Mostly for offices: ask your IT person.', fel: 'Κυρίως για γραφεία: ρώτα τον υπεύθυνο IT.' },
+      { id: 'vbs', w: 2, t: function (h) { return h.vbs; }, en: 'Memory integrity (virtualization security) is running', el: 'Η ακεραιότητα μνήμης (ασφάλεια εικονικοποίησης) λειτουργεί', fen: 'Settings, Privacy & security, Windows Security, Device security, Core isolation: turn on "Memory integrity". If it will not turn on, an old driver is blocking it.', fel: 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Ασφάλεια των Windows, Ασφάλεια συσκευής, Απομόνωση πυρήνα: άναψε την «Ακεραιότητα μνήμης». Αν δεν ανάβει, την εμποδίζει κάποιος παλιός driver.' },
+      { id: 'credGuard', w: 1, t: function (h) { return h.credGuard; }, en: 'Credential Guard is running', el: 'Το Credential Guard λειτουργεί', fen: 'Mostly for company PCs (Windows Pro, Enterprise): ask your IT person.', fel: 'Κυρίως για εταιρικά PC (Windows Pro, Enterprise): ρώτα τον υπεύθυνο IT.' },
+      { id: 'asrRules', w: 2, t: function (h) { return h.asrRules == null ? null : h.asrRules > 0; }, en: 'Defender attack-surface rules are set', el: 'Οι κανόνες μείωσης επιφάνειας επίθεσης του Defender είναι ρυθμισμένοι', fen: 'Mostly for offices: ask your IT person. (Windows Security, App & browser control, Exploit protection.)', fel: 'Κυρίως για γραφεία: ρώτα τον υπεύθυνο IT. (Ασφάλεια των Windows, Έλεγχος εφαρμογών, Προστασία από εκμετάλλευση.)' },
+      { id: 'cfa', w: 1, t: function (h) { return h.cfa; }, en: 'Controlled folder access protects your documents', el: 'Η ελεγχόμενη πρόσβαση φακέλων προστατεύει τα έγγραφά σου', fen: 'Settings, Privacy & security, Windows Security, Virus & threat protection, Ransomware protection: turn on "Controlled folder access". It can block some programs, so test it.', fel: 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Ασφάλεια των Windows, Προστασία από ιούς και απειλές, Προστασία από ransomware: άναψε την «Ελεγχόμενη πρόσβαση φακέλων». Μπορεί να μπλοκάρει κάποια προγράμματα, γι’ αυτό δοκίμασέ το.' },
+      { id: 'cloudProt', w: 2, t: function (h) { return h.cloudProt; }, en: 'Defender cloud protection is on', el: 'Η προστασία cloud του Defender είναι ανοιχτή', fen: 'Settings, Privacy & security, Windows Security, Virus & threat protection, Manage settings: turn on "Cloud-delivered protection".', fel: 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Ασφάλεια των Windows, Προστασία από ιούς και απειλές, Διαχείριση ρυθμίσεων: άναψε την «Προστασία που παρέχεται από το cloud».' },
+      { id: 'puaProt', w: 2, t: function (h) { return h.puaProt; }, en: 'Blocking of unwanted programs is on', el: 'Ο αποκλεισμός ανεπιθύμητων προγραμμάτων είναι ανοιχτός', fen: 'Settings, Privacy & security, Windows Security, App & browser control, Reputation-based protection: turn on "Potentially unwanted app blocking".', fel: 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Ασφάλεια των Windows, Έλεγχος εφαρμογών, Προστασία βάσει φήμης: άναψε τον «Αποκλεισμό δυνητικά ανεπιθύμητων εφαρμογών».' },
+      { id: 'netProt', w: 1, t: function (h) { return h.netProt; }, en: 'Network protection is on', el: 'Η προστασία δικτύου είναι ανοιχτή', fen: 'Mostly for offices: ask your IT person.', fel: 'Κυρίως για γραφεία: ρώτα τον υπεύθυνο IT.' },
+      { id: 'autorunOff', w: 1, t: function (h) { return h.autorunOff; }, en: 'AutoPlay of USB sticks and discs is off', el: 'Η αυτόματη εκτέλεση USB και δίσκων είναι κλειστή', fen: 'Settings, Bluetooth & devices, AutoPlay: turn "Use AutoPlay for all media and devices" off.', fel: 'Ρυθμίσεις, Bluetooth και συσκευές, Αυτόματη αναπαραγωγή: κλείσε το «Χρήση αυτόματης αναπαραγωγής για όλα τα μέσα και τις συσκευές».' },
+      { id: 'remoteAssistOff', w: 1, t: function (h) { return h.remoteAssistOff; }, en: 'Remote Assistance is off', el: 'Η Απομακρυσμένη βοήθεια είναι κλειστή', fen: 'Press the Windows key, type "Allow Remote Assistance", open it and untick "Allow Remote Assistance connections to this computer".', fel: 'Πάτα το πλήκτρο Windows, πληκτρολόγησε «Να επιτρέπονται συνδέσεις Απομακρυσμένης βοήθειας», άνοιξέ το και ξετσέκαρε την επιλογή για αυτόν τον υπολογιστή.' },
+      { id: 'ntlmV2', w: 2, t: function (h) { return h.ntlmV2; }, en: 'Only the newer login check (NTLMv2) is used', el: 'Χρησιμοποιείται μόνο ο νεότερος έλεγχος σύνδεσης (NTLMv2)', fen: 'Mostly for offices: ask your IT person.', fel: 'Κυρίως για γραφεία: ρώτα τον υπεύθυνο IT.' },
+      { id: 'anonRestricted', w: 1, t: function (h) { return h.anonRestricted; }, en: 'Anonymous access to account lists is blocked', el: 'Η ανώνυμη πρόσβαση σε λίστες λογαριασμών είναι μπλοκαρισμένη', fen: 'Mostly for offices: ask your IT person.', fel: 'Κυρίως για γραφεία: ρώτα τον υπεύθυνο IT.' },
+      { id: 'spoolerOff', w: 2, t: function (h) { return h.spoolerHasPrinters ? null : h.spoolerOff; }, en: 'The print service is off when no printer is used', el: 'Η υπηρεσία εκτύπωσης είναι κλειστή όταν δεν υπάρχει εκτυπωτής', fen: 'No printer is installed, but the print service runs. It has been used by attackers in the past. Press the Windows key, type Services, open it, double-click "Print Spooler", set Startup type to Disabled and press Stop.', fel: 'Δεν υπάρχει εκτυπωτής, αλλά η υπηρεσία εκτύπωσης τρέχει. Έχει χρησιμοποιηθεί από επιτιθέμενους. Πάτα το πλήκτρο Windows, πληκτρολόγησε Υπηρεσίες, άνοιξέ το, διπλό κλικ στο «Print Spooler», βάλε Τύπος εκκίνησης Απενεργοποιημένη και πάτα Διακοπή.' },
+      { id: 'remoteRegOff', w: 2, t: function (h) { return h.remoteRegOff; }, en: 'Remote registry service is off', el: 'Η υπηρεσία απομακρυσμένου μητρώου είναι κλειστή', fen: 'Press the Windows key, type Services, open it, double-click "Remote Registry" and set Startup type to Disabled.', fel: 'Πάτα το πλήκτρο Windows, πληκτρολόγησε Υπηρεσίες, άνοιξέ το, διπλό κλικ στο «Remote Registry» και βάλε Τύπος εκκίνησης Απενεργοποιημένη.' }
+    ];
+    function hardList() {
+      if (!HC) return [];
+      return HCHK.map(function (c) { var r = null; try { r = c.t(HC); } catch (e) { } return { id: c.id, w: c.w, pass: r, en: c.en, el: c.el, fen: c.fen, fel: c.fel }; });
+    }
+    function hardScore() {
+      var l = hardList().filter(function (x) { return x.pass !== null && x.pass !== undefined; }); if (l.length < 6) return null;
+      var tot = 0, ok = 0; l.forEach(function (x) { tot += x.w; if (x.pass) ok += x.w; });
+      return { score: Math.round(ok / tot * 100), passed: l.filter(function (x) { return x.pass; }).length, total: l.length, unknown: HCHK.length - l.length };
+    }
+    R(function () {
+      var hs = hardScore(); if (!hs) return null;
+      var fails = hardList().filter(function (x) { return x.pass === false; }), wsum = fails.reduce(function (a, x) { return a + x.w; }, 0);
+      if (wsum < 3) return null;
+      return F('sec-hardening', 'Security', hs.score < 50 ? 'medium' : 'low', fails.length + ' of ' + hs.total + ' extra security settings are not switched on (hardening score ' + hs.score + '/100)',
+        'Windows has many protection switches that are off by default because they can get in the way. Each one that is on makes an attack harder. The Insights tab lists all of them with a plain explanation and how to switch them on. Some are only worth it in an office. Do not switch things on that you do not understand.',
+        [S('Open the Insights tab and read the "Extra security settings" box.'), S('Start with the ones marked "Easy". For the rest, ask your IT person or an AI in the AI help tab.')],
+        fails.slice(0, 12).map(function (x) { return x.en; }).join('\n'));
+    });
+    /* privacy */
+    var PR = X2.privacy || null;
+    function privList() {
+      if (!PR) return [];
+      var r = [];
+      function add(id, open, en, el, fen, fel) { r.push({ id: id, open: open, en: en, el: el, fen: fen, fel: fel }); }
+      if (PR.telemetry != null) add('telemetry', num(PR.telemetry) >= 2, 'Diagnostic data sent to Microsoft: ' + ({ 0: 'minimal', 1: 'required only', 2: 'enhanced', 3: 'full' }[num(PR.telemetry)] || 'set by policy'), 'Διαγνωστικά δεδομένα προς τη Microsoft: ' + ({ 0: 'ελάχιστα', 1: 'μόνο τα απαραίτητα', 2: 'εκτεταμένα', 3: 'πλήρη' }[num(PR.telemetry)] || 'ορισμένα από πολιτική'), 'Settings, Privacy & security, Diagnostics & feedback: choose "Required diagnostic data only" and turn off the optional ones.', 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Διαγνωστικά και σχόλια: διάλεξε «Μόνο τα απαιτούμενα διαγνωστικά δεδομένα» και κλείσε τα προαιρετικά.');
+      if (PR.adId != null) add('adId', num(PR.adId) === 1, 'Advertising ID is ' + (num(PR.adId) === 1 ? 'on' : 'off'), 'Το διαφημιστικό ID είναι ' + (num(PR.adId) === 1 ? 'ανοιχτό' : 'κλειστό'), 'Settings, Privacy & security, General: turn off "Let apps show me personalized ads by using my advertising ID".', 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Γενικά: κλείσε το «Να επιτρέπεται στις εφαρμογές να μου δείχνουν εξατομικευμένες διαφημίσεις».');
+      if (PR.location) add('location', PR.location === 'Allow', 'Location access is ' + PR.location, 'Η πρόσβαση στην τοποθεσία είναι ' + (PR.location === 'Allow' ? 'επιτρεπτή' : 'απαγορευμένη'), 'Settings, Privacy & security, Location: switch off "Location services" or choose which apps may use it.', 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Τοποθεσία: κλείσε τις «Υπηρεσίες τοποθεσίας» ή διάλεξε ποιες εφαρμογές μπορούν να τη χρησιμοποιούν.');
+      if (PR.activityHistory != null) add('activityHistory', num(PR.activityHistory) === 1, 'Activity history is ' + (num(PR.activityHistory) === 1 ? 'on' : 'off'), 'Το ιστορικό δραστηριότητας είναι ' + (num(PR.activityHistory) === 1 ? 'ανοιχτό' : 'κλειστό'), 'Settings, Privacy & security, Activity history (older Windows 10 versions): turn it off.', 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Ιστορικό δραστηριότητας (παλαιότερα Windows 10): κλείσε το.');
+      if (PR.recall) add('recall', /Enabled/i.test(PR.recall), 'Windows Recall (screenshots of your screen) is ' + (/Enabled/i.test(PR.recall) ? 'on' : 'off'), 'Το Windows Recall (στιγμιότυπα της οθόνης σου) είναι ' + (/Enabled/i.test(PR.recall) ? 'ανοιχτό' : 'κλειστό'), 'Settings, System, Optional features, find "Recall" and remove it, or turn it off in Settings, Privacy & security, Recall & snapshots.', 'Ρυθμίσεις, Σύστημα, Προαιρετικές λειτουργίες, βρες το «Recall» και αφαίρεσέ το, ή κλείσ’ το στο Απόρρητο και ασφάλεια, Recall και στιγμιότυπα.');
+      if (PR.copilotOff != null || PR.recall !== undefined) add('copilot', PR.copilotOff == null || num(PR.copilotOff) !== 1, 'The Copilot AI assistant is ' + (num(PR.copilotOff) === 1 ? 'turned off by a policy' : 'available'), 'Ο βοηθός AI Copilot είναι ' + (num(PR.copilotOff) === 1 ? 'κλειστός από πολιτική' : 'διαθέσιμος'), 'It only reads what you give it. If you do not want it: right-click the taskbar, Taskbar settings, switch Copilot off.', 'Διαβάζει μόνο ό,τι του δίνεις. Αν δεν τον θες: δεξί κλικ στη γραμμή εργασιών, Ρυθμίσεις γραμμής εργασιών, κλείσε το Copilot.');
+      if (PR.tailored != null) add('tailored', num(PR.tailored) === 1, 'Tips and ads tailored to your usage data are ' + (num(PR.tailored) === 1 ? 'on' : 'off'), 'Οι εξατομικευμένες συμβουλές και διαφημίσεις με βάση τη χρήση σου είναι ' + (num(PR.tailored) === 1 ? 'ανοιχτές' : 'κλειστές'), 'Settings, Privacy & security, Diagnostics & feedback, Tailored experiences: switch off.', 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Διαγνωστικά και σχόλια, Εξατομικευμένες εμπειρίες: κλείσ’ το.');
+      if (PR.clipboardHistory != null) add('clipboardHistory', num(PR.clipboardHistory) === 1, 'Clipboard history is ' + (num(PR.clipboardHistory) === 1 ? 'on' : 'off'), 'Το ιστορικό προχείρου είναι ' + (num(PR.clipboardHistory) === 1 ? 'ανοιχτό' : 'κλειστό'), 'It remembers things you copy, including passwords. Settings, System, Clipboard: switch off "Clipboard history".', 'Θυμάται ό,τι αντιγράφεις, ακόμα και κωδικούς. Ρυθμίσεις, Σύστημα, Πρόχειρο: κλείσε το «Ιστορικό προχείρου».');
+      if (PR.bingSearch != null) add('bingSearch', num(PR.bingSearch) === 1, 'Web results in the Start menu search are ' + (num(PR.bingSearch) === 1 ? 'on' : 'off'), 'Τα αποτελέσματα web στην αναζήτηση του μενού Έναρξη είναι ' + (num(PR.bingSearch) === 1 ? 'ανοιχτά' : 'κλειστά'), 'What you type in Start is sent to Bing. Settings, Privacy & security, Search permissions: ask your IT person or search the internet for "disable Bing in Start".', 'Ό,τι πληκτρολογείς στην Έναρξη στέλνεται στο Bing. Ρώτα τον υπεύθυνο IT ή ψάξε στο internet «απενεργοποίηση Bing στην Έναρξη».');
+      if (PR.microphone) add('microphone', PR.microphone === 'Allow', 'Microphone access for apps is ' + PR.microphone, 'Η πρόσβαση των εφαρμογών στο μικρόφωνο είναι ' + (PR.microphone === 'Allow' ? 'επιτρεπτή' : 'απαγορευμένη'), 'Settings, Privacy & security, Microphone: check which apps are allowed.', 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Μικρόφωνο: δες ποιες εφαρμογές επιτρέπονται.');
+      if (PR.camera) add('camera', PR.camera === 'Allow', 'Camera access for apps is ' + PR.camera, 'Η πρόσβαση των εφαρμογών στην κάμερα είναι ' + (PR.camera === 'Allow' ? 'επιτρεπτή' : 'απαγορευμένη'), 'Settings, Privacy & security, Camera: check which apps are allowed.', 'Ρυθμίσεις, Απόρρητο και ασφάλεια, Κάμερα: δες ποιες εφαρμογές επιτρέπονται.');
+      return r;
+    }
+    R(function () {
+      var o = privList().filter(function (x) { return x.open && x.id !== 'microphone' && x.id !== 'camera' && x.id !== 'copilot'; });
+      if (o.length < 2) return null;
+      return F('sec-privacy', 'Security', 'info', o.length + ' Windows privacy settings share more than they need to',
+        'Windows can send diagnostic data, show ads based on you, remember what you copy and more. None of it is dangerous, but it is your choice. The Insights tab lists every setting with how to change it.',
+        [S('Open the Insights tab and read the "Privacy of Windows" box.'), S('Change only what you want. Nothing here is required for the PC to work.')], o.map(function (x) { return x.en; }).join('\n'));
+    });
+    /* caches */
+    R(function () {
+      var c = arr(X2.caches), t = 0; c.forEach(function (x) { t += num(x.mb); });
+      var w = arr(g(D, 'extras.storage.folders', [])).filter(function (f) { return /Temp|Windows Update/i.test(f.name); }); w.forEach(function (x) { t += num(x.mb); });
+      if (t < 1500) return null;
+      return F('sto-caches', 'Storage', 'info', 'About ' + fmtGB(t / 1024) + ' of temporary files and caches can be cleaned',
+        'These are leftovers that programs keep to be faster or that Windows no longer needs. Removing them is safe, they are rebuilt when needed. Use the cleaner that comes with Windows, not a third-party "cleaner".',
+        [S('Press the Windows key, type "Storage settings" and open it. Click "Temporary files".'), S('Tick the boxes you want (Windows Update Cleanup, Temporary files, Thumbnails, Delivery Optimization) and click Remove files. Leave "Downloads" unticked.')],
+        c.concat(w).sort(function (a, b) { return b.mb - a.mb; }).slice(0, 10).map(function (x) { return x.name + ': ' + fmtGB(num(x.mb) / 1024) + (x.partial ? ' (partly measured)' : ''); }).join('\n'));
+    });
+    /* programs that seem unused */
+    function unusedApps() {
+      var runs = arr(X2.recentRuns); if (runs.length < 20) return [];
+      var nowT = NOW6;
+      return arr(D.apps && D.apps.list).filter(function (a) {
+        if (num(a.sizeMB) < 400) return false;
+        var id = String(a.installDate || ''); if (!/^\d{8}$/.test(id)) return false;
+        var dd = new Date(id.slice(0, 4) + '-' + id.slice(4, 6) + '-' + id.slice(6, 8)).getTime(); if (!isFinite(dd) || (nowT - dd) < 365 * 86400000) return false;
+        var toks = String(a.name).toLowerCase().replace(/\(.*?\)|\d+(\.\d+)*|x64|x86|64-bit|32-bit/g, ' ').split(/[^a-z0-9]+/).filter(function (w) { return w.length >= 4; });
+        if (!toks.length) return false;
+        return !runs.some(function (r) { return toks.some(function (w) { return r.exe.indexOf(w) >= 0; }); });
+      }).sort(function (a, b) { return b.sizeMB - a.sizeMB; });
+    }
+    R(function () {
+      var u = unusedApps(); if (u.length < 2) return null;
+      var t = u.reduce(function (a, x) { return a + num(x.sizeMB); }, 0);
+      return F('soft-unused', 'Software', 'info', u.length + ' big programs show no sign of being used recently (' + fmtGB(t / 1024) + ')',
+        'We compared installed programs with what Windows remembers having started recently (the "Prefetch" list). A program that is big, over a year old and missing from that list may be unused. This is only a hint: Prefetch is short, and some programs run under another name.',
+        [S('Look at the list under "Evidence". Do you still use each one?'), S('To remove one: Settings, Apps, Installed apps, click the three dots next to it and choose Uninstall. Make a backup first if it holds your data (for example games or video projects).')],
+        u.slice(0, 12).map(function (x) { return x.name + ' - ' + fmtGB(num(x.sizeMB) / 1024); }).join('\n'));
+    });
+    R(function () {
+      var b = arr(X2.browsers).filter(function (x) { return num(x.fileDays) > 90; }); if (!b.length) return null;
+      return F('sec-browser-old', 'Security', 'low', b.length + ' browser' + (b.length > 1 ? 's have' : ' has') + ' not been updated for over 3 months',
+        'Browsers normally update themselves every few weeks. One that has not changed for months is one of the most common ways to catch an infection, because it reads everything from the internet.',
+        [S('Open the browser, click the three dots (or the menu), then Help, About. It checks and updates by itself. Restart it when it asks.'), S('If you no longer use it, uninstall it (Settings, Apps, Installed apps).')], b.map(function (x) { return x.name + ' ' + x.version + ', last changed ' + x.fileDays + ' days ago'; }).join('\n'));
+    });
+    /* basic security checklist in five groups (used by Insights and the client report) */
+    function basicList() {
+      function has(ids) { return V_findingsNow().filter(function (f) { return ids.indexOf(f.id) >= 0; }); }
+      function grp(en, el, hdEn, hdEl, ids, minusInfo) {
+        var f = has(ids), bad = f.filter(function (x) { return x.sev === 'high' || x.sev === 'medium'; });
+        return { en: en, el: el, hen: hdEn, hel: hdEl, st: bad.length ? 'bad' : (f.length ? 'warn' : 'ok'), items: f };
+      }
+      return [
+        grp('Firewall', 'Τείχος προστασίας', 'The wall between your PC and the network', 'Ο τοίχος ανάμεσα στον υπολογιστή και το δίκτυο', ['sec-fw', 'sec-ports', 'sec-rdp', 'sec-rdp-nla']),
+        grp('Malware protection', 'Προστασία από κακόβουλο λογισμικό', 'Antivirus on, up to date and scanning', 'Antivirus ανοιχτό, ενημερωμένο και σαρώνει', ['sec-av', 'sec-av2', 'sec-avold', 'sec-def-sigs', 'sec-def-threats', 'sec-def-tamper', 'sec-def-scan', 'soft-pup']),
+        grp('Secure settings', 'Ασφαλείς ρυθμίσεις', 'Protections switched on, risky things off', 'Προστασίες ανοιχτές, επικίνδυνα πράγματα κλειστά', ['sec-uac', 'sec-uac-level', 'sec-autologon', 'sec-smb1', 'sec-legacy', 'sec-sb', 'sec-tpm', 'sec-hardening', 'sec-persist', 'sec-lock', 'sec-ext', 'sec-wifi-open']),
+        grp('User access', 'Πρόσβαση χρηστών', 'Only the right people, with passwords', 'Μόνο οι σωστοί άνθρωποι, με κωδικούς', ['sec-nopass', 'sec-guest', 'sec-builtinadmin', 'sec-admins', 'sec-pwexp']),
+        grp('Updates', 'Ενημερώσεις', 'Windows, Office and programs kept up to date', 'Windows, Office και προγράμματα ενημερωμένα', ['upd-patch', 'upd-fail', 'upd-off', 'upd-apps', 'win-eol', 'win-eol-11', 'soft-office-eol', 'sec-browser-old'])
+      ];
+    }
+    function V_findingsNow() { return out; }
+
+    // expose helpers that need the data and the findings of this scan
+    RT = { hardList: hardList, hardScore: hardScore, privList: privList, basicList: basicList, hwAge: hwAge, unusedApps: unusedApps, HCHK: HCHK };
     out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });
     return out;
   }
@@ -1562,7 +1792,7 @@ function Engine(RAW) {
     fmtNum: fmtNum, fmtGB: fmtGB, fmtDate: fmtDate, fmtDT: fmtDT, fmtUptime: fmtUptime, ageDays: ageDays,
     evGroups: evGroups, evCount: evCount, RE: RE, findings: findings, good: good, score: sc, counts: counts,
     SEV_ORDER: SEV_ORDER, AREAS: AREAS, readiness: readiness(), battery: g(D, 'battery', null),
-    withProfile: withProfile, scoreOf: score, META: META, noiseFor: noiseFor, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
+    RT: RT, withProfile: withProfile, scoreOf: score, META: META, noiseFor: noiseFor, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
   };
 }
 var V = Engine(window.__PCDATA__ || null);

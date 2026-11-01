@@ -11,6 +11,7 @@ var SHARE = (function (V, AI) {
       return x;
     }
     var clean = walk(V.RAW);
+    delete clean.previous; // the earlier scan is not part of a share-safe copy
     clean.meta = clean.meta || {};
     try {
       var mo = clean.extras && clean.extras.more;
@@ -20,6 +21,19 @@ var SHARE = (function (V, AI) {
         (mo.wifiSaved || []).forEach(function (w, i) { w.name = '<NETWORK ' + (i + 1) + '>'; });
         (mo.certs || []).forEach(function (c, i) { c.name = '<CERTIFICATE ' + (i + 1) + '>'; });
         (mo.signatures && mo.signatures.flagged || []).forEach(function (s) { s.folder = '<PATH>'; });
+      }
+      var m2 = clean.extras && clean.extras.more2;
+      if (m2) {
+        m2.neighbours = []; m2.usbHistory = []; m2.recentRuns = [];
+        (m2.mappedDrives || []).forEach(function (x, i) { x.remote = '<PATH ' + (i + 1) + '>'; });
+        (m2.vpn || []).forEach(function (x, i) { x.name = '<VPN ' + (i + 1) + '>'; x.server = '<SERVER>'; });
+        (m2.monitors || []).forEach(function (x) { x.serial = '<SERIAL>'; });
+        (m2.printers || []).forEach(function (x, i) { x.name = '<PRINTER ' + (i + 1) + '>'; });
+        if (m2.board) { m2.board.assetTag = '<TAG>'; m2.board.chassisSerial = '<SERIAL>'; }
+        if (m2.lastUser) { m2.lastUser.user = '<USER>'; m2.lastUser.display = '<USER>'; }
+        if (m2.management) { m2.management.tenant = '<ORG>'; m2.management.domain = m2.management.domain ? '<DOMAIN>' : ''; m2.management.workgroup = m2.management.workgroup ? '<WORKGROUP>' : ''; }
+        if (m2.windowsLicence) m2.windowsLicence.partialKey = '<KEY>';
+        ((m2.persistence && m2.persistence.items) || []).forEach(function (x) { x.command = '<PATH>'; });
       }
     } catch (e) { }
     clean.meta.user = '<USER>'; clean.meta.computer = '<PC>'; clean.meta.domain = '<DOMAIN>'; clean.meta.shareSafe = true;

@@ -85,6 +85,7 @@ var UI = (function (V) {
     var svg = '<svg viewBox="0 0 380 290" width="100%" role="img" aria-label="Score per area: ' + A.map(function (a) { return a.name + ' ' + a.score; }).join(', ') + '">';
     [0.25, 0.5, 0.75, 1].forEach(function (k) { svg += '<polygon points="' + A.map(function (_, i) { return pt(i, R * k).join(','); }).join(' ') + '" fill="none" stroke="#2a2a30" stroke-width="1"/>'; });
     A.forEach(function (_, i) { var p = pt(i, R); svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p[0] + '" y2="' + p[1] + '" stroke="#2a2a30"/>'; });
+    svg += '<polygon points="' + A.map(function (_, i) { return pt(i, R * 0.9).join(','); }).join(' ') + '" fill="none" stroke="#3ddc84" stroke-width="1.5" stroke-dasharray="5 4"><title>' + esc(V.I('Goal: 90 in every area', 'Στόχος: 90 σε κάθε περιοχή')) + '</title></polygon>';
     svg += '<polygon points="' + A.map(function (a, i) { return pt(i, R * Math.max(0.04, a.score / 100)).join(','); }).join(' ') + '" fill="rgba(232,44,45,.28)" stroke="#E82C2D" stroke-width="2"/>';
     A.forEach(function (a, i) {
       var p = pt(i, R * Math.max(0.04, a.score / 100)); svg += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.5" fill="#fff"/>';
@@ -92,7 +93,7 @@ var UI = (function (V) {
       svg += '<text x="' + l[0] + '" y="' + (l[1] + 4) + '" text-anchor="' + anchor + '" font-size="11" fill="#d4d4d8">' + esc(a.name) + '</text>';
       svg += '<text x="' + l[0] + '" y="' + (l[1] + 17) + '" text-anchor="' + anchor + '" font-size="11" fill="' + (a.score < 80 ? '#ff6b6c' : '#a1a1aa') + '">' + a.score + '</text>';
     });
-    svg += '</svg>';
+    svg += '<text x="10" y="282" font-size="11" fill="#3ddc84">' + esc(V.I('- - goal (90)', '- - στόχος (90)')) + '</text><text x="120" y="282" font-size="11" fill="#E82C2D">' + esc(V.I('your PC', 'ο υπολογιστής σου')) + '</text></svg>';
     win('wRadar', 'areas.map', 'score per area', svg);
   }
   function rActions() {

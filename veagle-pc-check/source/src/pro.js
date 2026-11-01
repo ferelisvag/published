@@ -220,7 +220,7 @@ var PRO = (function (V, AI) {
       '<div class="win"><header><span>inventory.csv</span><span class="st">' + esc(I('one row for this PC', 'μία γραμμή για αυτόν τον υπολογιστή')) + '</span></header><div class="body">' +
       '<p class="sub" style="margin:0">' + esc(I('A row for your inventory sheet: maker, model, serial number, processor, memory, drives, Windows, BIOS age and health score. The serial number is only in this file, never in the AI package or the share-safe copy.', 'Μία γραμμή για τη λίστα εξοπλισμού σου: κατασκευαστής, μοντέλο, σειριακός αριθμός, επεξεργαστής, μνήμη, δίσκοι, Windows, ηλικία BIOS και βαθμός υγείας. Ο σειριακός αριθμός υπάρχει μόνο σε αυτό το αρχείο, ποτέ στο πακέτο για AI ή στο αντίγραφο για κοινοποίηση.')) + '</p>' +
       '<dl class="kv">' + [[I('Maker and model', 'Κατασκευαστής και μοντέλο'), ((X.inventory || {}).maker || g(D, 'system.manufacturer', '')) + ' ' + ((X.inventory || {}).model || g(D, 'system.model', ''))], [I('Serial number', 'Σειριακός αριθμός'), (X.inventory || {}).serial || '-'], [I('BIOS age', 'Ηλικία BIOS'), ageYears() == null ? '-' : ageYears() + I(' years', ' έτη')]].map(function (p) { return '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>'; }).join('') + '</dl>' +
-      '<div class="btns"><button class="btn" type="button" id="invSave">' + esc(I('Save inventory row (CSV)', 'Σώσε γραμμή απογραφής (CSV)')) + '</button></div></div></div></div>';
+      '<div class="btns"><button class="btn" type="button" id="xlsBtn2">' + esc(I('Export everything to Excel', 'Εξαγωγή όλων σε Excel')) + '</button><button class="btn" type="button" id="invSave">' + esc(I('Save inventory row (CSV)', 'Σώσε γραμμή απογραφής (CSV)')) + '</button></div></div></div></div>';
     return h;
   }
   function clientDoc() {
@@ -238,6 +238,10 @@ var PRO = (function (V, AI) {
     h += '<h2>' + esc(I('What to do first', 'Τι να γίνει πρώτα')) + '</h2>' + (top.length ? '<ol class="cd-ol">' + top.map(function (f0) { var f = V.tf(f0); return '<li><b>' + esc(f.title) + '</b> <small>(' + esc(f.sev.toUpperCase()) + ', ~' + mins(minsOf(f0)) + ')</small><br><span>' + esc(f.why) + '</span></li>'; }).join('') + '</ol>' : '<p>' + esc(I('Nothing needs fixing.', 'Δεν χρειάζεται διόρθωση τίποτα.')) + '</p>');
     if (pl) h += '<div class="cd-plan">' + pl + '</div>';
     if (ba) h += '<h2>' + esc(I('What improved since the last visit', 'Τι βελτιώθηκε από την προηγούμενη επίσκεψη')) + '</h2>' + beforeAfterHtml(true);
+    try {
+      var bl = V.RT.basicList(), hs = V.RT.hardScore();
+      h += '<h2>' + esc(I('Basic security checklist', 'Λίστα βασικής ασφάλειας')) + '</h2><table class="cd-tb">' + bl.map(function (b) { return '<tr><td>' + esc(I(b.en, b.el)) + '</td><td>' + (b.st === 'ok' ? '&#10003; ' + esc(I('OK', 'Εντάξει')) : (b.st === 'warn' ? '! ' + esc(I('needs a look', 'θέλει μια ματιά')) : '&#10005; ' + esc(I('needs fixing', 'θέλει διόρθωση')))) + (b.items.length ? ' - ' + esc(b.items.slice(0, 2).map(function (f) { return V.tf(f).title; }).join('; ')) : '') + '</td></tr>'; }).join('') + (hs ? '<tr><td>' + esc(I('Hardening score', 'Βαθμός σκληροποίησης')) + '</td><td>' + hs.score + '/100 (' + hs.passed + '/' + hs.total + ')</td></tr>' : '') + '</table>';
+    } catch (e) { }
     h += '<h2>' + esc(I('Your PC at a glance', 'Ο υπολογιστής σου με μια ματιά')) + '</h2><table class="cd-tb">' + [[I('Processor', 'Επεξεργαστής'), g(D, 'system.cpu.name', '')], [I('Memory', 'Μνήμη'), V.fmtGB(g(D, 'system.ram.totalGB', 0))], [I('Windows', 'Windows'), g(D, 'system.os.productName', '') + ' ' + g(D, 'system.os.displayVersion', '')], [I('Drives', 'Δίσκοι'), arr(D.volumes).map(function (v) { return v.letter + ' ' + V.fmtGB(v.freeGB) + ' ' + I('free of', 'ελεύθερα από') + ' ' + V.fmtGB(v.sizeGB); }).join(', ')]].map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + esc(r[1]) + '</td></tr>'; }).join('') + '</table>';
     if (P.note) h += '<h2>' + esc(I('Notes', 'Σημειώσεις')) + '</h2><p class="cd-note">' + esc(P.note).replace(/\n/g, '<br>') + '</p>';
     h += '<div class="cd-disc"><b>' + esc(I('Important note', 'Σημαντική ενημέρωση')) + '</b> ' + esc(I(NOTE_B[0], NOTE_B[1])) + ' ' + esc(I(DISC[0], DISC[1])) + '</div>';
@@ -267,7 +271,7 @@ var PRO = (function (V, AI) {
     function on(id, fn) { var e = $(id); if (e) e.addEventListener('click', fn); }
     function bind(id, key) { var e = $(id); if (e) e.addEventListener('input', function () { P[key] = e.value; save(); }); }
     bind('#crCust', 'cust'); bind('#crTech', 'tech'); bind('#crStamp', 'stamp'); bind('#crNote', 'note');
-    on('#crPrint', printClient); on('#mlGo', mailGo);
+    on('#crPrint', printClient); on('#mlGo', mailGo); on('#xlsBtn2', function () { if (typeof INV !== 'undefined') INV.exportXlsx(); });
     on('#invSave', function () { dl('veagle-inventory-' + String(g(D, 'meta.computer', 'pc')).replace(/[^\w-]/g, '') + '.csv', inventoryCsv()); AI.toast(I('Saved the inventory row.', 'Η γραμμή απογραφής σώθηκε.')); });
     on('#crImgDel', function () { delete P.img; save(); var i = $('#crImgInfo'); if (i) i.textContent = ''; });
     var fi = $('#crImg');
@@ -308,7 +312,7 @@ var PRO = (function (V, AI) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'hq'; b.textContent = '?'; b.setAttribute('aria-label', I('What is this?', 'Τι είναι αυτό;')); b.title = I('What is this?', 'Τι είναι αυτό;');
       b.setAttribute('data-help', id); hd.insertBefore(b, hd.querySelector('.st'));
     });
-    insights(); notices();
+    insights(); if (typeof INV !== 'undefined') INV.render(); notices();
   }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.hq'); if (!b) return;

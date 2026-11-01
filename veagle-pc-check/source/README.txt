@@ -15,6 +15,8 @@ IT IS SAFE
 - The only things it asks the internet: which of your programs have updates (winget), one
   "ping" to your own router, and a few lookups of website names (www.microsoft.com, and in the
   full scan a speed comparison of DNS servers: yours, Cloudflare, Google and Quad9).
+- The 10-second performance snapshot and the list of network neighbours only read what the PC already knows.
+  Nothing on your network is scanned. If the NVIDIA driver installed nvidia-smi, it is asked for temperature and load.
 - The serial number of the PC is read only for your own inventory file. It is never in the AI
   package or in the share-safe copy.
 - NOTHING IS EVER CHANGED OR TURNED ON FOR YOU. Every fix is something you do yourself, step by step.

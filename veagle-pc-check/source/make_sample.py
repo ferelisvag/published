@@ -46,7 +46,7 @@ def perday(total_err, spike_idx, spike):
     return out
 
 apps_all = ['@BIOS','ACDSee Free','Adobe Acrobat (64-bit)','AnyDesk','Bitdefender Total Security','Brave','Discord','EA app','Epic Games Launcher','FileZilla','GitHub Desktop','GOG GALAXY','Google Chrome','HandBrake 1.9.2','HWiNFO 64','Intel(R) Extreme Tuning Utility','MEmu','Microsoft Edge','Microsoft Office Professional Plus 2021','Microsoft OneDrive','NordVPN','Notepad++ (64-bit x64)','NVIDIA App','NVIDIA Graphics Driver','OpenVPN','PowerShell 7-x64','PowerToys (Preview)','RustDesk','Steam','SteelSeries GG','Ubisoft Connect','VLC media player','VMware Workstation','Viber','WinDirStat','WinRAR 7.10 (64-bit)','Wondershare Filmora 16']
-apps_list = [dict(name=n, version='1.0', publisher='', sizeMB=random.choice([0, 20, 120, 540])) for n in apps_all]
+apps_list = [dict(name=n, version='1.0', publisher=random.choice(['', 'Microsoft Corporation', 'Valve', 'Adobe Inc.', 'Google LLC']), sizeMB=random.choice([0, 20, 120, 540, 1800, 5200]), installDate=random.choice(['20230214', '20240305', '20250111', '20260301', '20221120'])) for n in apps_all]
 outdated = [
  ('@BIOS','GIGABYTE.BIOS','4.24.0130.1','4.26.0930.1','winget'),('AnyDesk','AnyDesk.AnyDesk','ad 9.0.4','9.8.3','winget'),
  ('CapCut','XP9KN75RRB9NHS','9.1.0.3879','9.7.0.4153','msstore'),('EA app','ElectronicArts.EADesktop','13.700.0.6213','13.813.1.6327','winget'),
@@ -155,8 +155,32 @@ def _more(heavy):
       dnsSpeed=[dict(label='This PC', ip='192.168.1.1', ms=74), dict(label='Cloudflare', ip='1.1.1.1', ms=14), dict(label='Google', ip='8.8.8.8', ms=19), dict(label='Quad9', ip='9.9.9.9', ms=22)],
       connections=[dict(process='chrome', n=34, remotes=['142.250.1.1:443']), dict(process='Teams', n=9, remotes=['52.1.1.1:443']), dict(process='OneDrive', n=4, remotes=['13.1.1.1:443']), dict(process='svchost', n=6, remotes=['20.1.1.1:443']), dict(process='unknown_tool', n=2, remotes=['185.1.1.1:8080'])])
 
+
+# --- v0.7 extras ("more2")
+def _more2(heavy):
+    rnd2 = random.Random(5 if heavy else 6)
+    return dict(
+      monitors=[dict(maker='DEL', model='DELL U2723QE', serial='DEMO-MON-1', year=2023, inches=27), dict(maker='GSM', model='LG ULTRAGEAR', serial='DEMO-MON-2', year=2021, inches=32)],
+      printers=[dict(name='HP LaserJet Pro M404', driver='HP Universal Printing PCL 6', port='IP_192.168.1.40', isDefault=True, network=True, shared=False, offline=False), dict(name='Brother DCP-L2510D', driver='Brother DCP-L2510D', port='USB001', isDefault=False, network=False, shared=False, offline=False)],
+      peripherals=[dict(**{'class': 'Keyboard', 'name': 'Logitech K380', 'status': 'OK'}), dict(**{'class': 'Mouse', 'name': 'Logitech MX Master 3', 'status': 'OK'}), dict(**{'class': 'Camera', 'name': 'Logitech C920', 'status': 'OK'}), dict(**{'class': 'Audio', 'name': 'Speakers (Realtek Audio)', 'status': 'OK'}), dict(**{'class': 'USB drive', 'name': 'SanDisk Ultra USB 3.0', 'status': 'OK'})],
+      management=dict(domainJoined=False, domain='', workgroup='WORKGROUP', entraJoined=heavy, workplaceJoined=False, tenant='Demo Company' if heavy else '', intune=heavy),
+      windowsLicence=dict(name='Windows(R), Professional edition', channel='OEM_DM' if not heavy else 'Retail', partialKey='ABCDE', status=1, keyInBios=not heavy),
+      mappedDrives=[dict(local='Z:', remote='\\\\NAS\\Shared', status='OK')] if heavy else [],
+      vpn=[dict(name='Office VPN', server='vpn.example.com', type='Ikev2')] if heavy else [],
+      neighbours=[dict(ip='192.168.1.1', mac='AA-BB-CC-00-11-22', state='Reachable'), dict(ip='192.168.1.40', mac='3C-2A-F4-12-34-56', state='Stale'), dict(ip='192.168.1.52', mac='B8-27-EB-98-76-54', state='Stale')],
+      board=dict(assetTag='ASSET-0042', chassisSerial='DEMO-CH-1'), lastUser=dict(user='DEMO-PC\\demo', display='Demo User'),
+      browsers=[dict(name='Chrome', version='141.0.7390.54', fileDays=9), dict(name='Edge', version='141.0.3537.57', fileDays=12), dict(name='Firefox', version='128.0', fileDays=210 if heavy else 14)], defaultBrowser='ChromeHTML',
+      perf=dict(cpu=[8 + rnd2.randint(0, 20) + (60 if heavy else 0) for _ in range(10)], disk=[3 + rnd2.randint(0, 25) + (60 if heavy else 0) for _ in range(10)], queue=[0.1] * 10, netKBs=[rnd2.randint(5, 400) for _ in range(10)], mem=[(88 if heavy else 52) + rnd2.randint(0, 6) for _ in range(10)]),
+      gpuSmi=[dict(name='NVIDIA GeForce RTX 3070', tempC=87 if heavy else 46, memUsedMB=1530, memTotalMB=8192, powerW=64.5, fanPct=55, loadPct=12)],
+      usbHistory=[dict(name='SanDisk Ultra USB Device'), dict(name='Kingston DataTraveler 3.0'), dict(name='Samsung Portable SSD T7')],
+      persistence=dict(items=[dict(where='HKCU\\Microsoft\\Windows\\CurrentVersion\\Run', name='Discord', command='C:\\Users\\demo\\AppData\\Local\\Discord\\Update.exe', signature='Valid', signer='Discord Inc.'), dict(where='HKLM\\Microsoft\\Windows\\CurrentVersion\\Run', name='QuickTool', command='C:\\Users\\demo\\AppData\\Local\\Temp\\quicktool.exe', signature='NotSigned', signer='')], unusual=[dict(kind='ifeo-debugger', detail='notepad.exe -> C:\\Tools\\dbg.exe')] if heavy else []),
+      hardening=dict(pwLen=0 if heavy else 12, pwComplex=0 if heavy else 1, lockout=0, smartscreen=True, lsaPpl=False, wdigestOff=True, llmnrOff=False, netbiosOff=False, smbSign=False, psLogging=False, vbs=not heavy, credGuard=False, asrRules=0, cfa=False, cloudProt=True, puaProt=not heavy, netProt=False, autorunOff=False, remoteAssistOff=not heavy, ntlmV2=True, anonRestricted=False, spoolerOff=False, spoolerHasPrinters=True, remoteRegOff=True),
+      privacy=dict(telemetry=3 if heavy else 1, adId=1, location='Allow', microphone='Allow', camera='Deny', activityHistory=1 if heavy else None, copilotOff=None, tailored=1, clipboardHistory=1, bingSearch=1, recall='Enabled' if heavy else 'DisabledWithPayloadRemoved'),
+      caches=[dict(name='Chrome cache', mb=1840, partial=False), dict(name='Windows shader cache', mb=720, partial=False), dict(name='NVIDIA shader cache', mb=380, partial=False), dict(name='Delivery Optimization', mb=1260, partial=False), dict(name='Windows error reports', mb=240, partial=False)],
+      recentRuns=[dict(exe=e, days=d) for e, d in [('chrome.exe', 0), ('discord.exe', 0), ('steam.exe', 1), ('code.exe', 2), ('explorer.exe', 0), ('winword.exe', 6), ('excel.exe', 9)] + [('app%d.exe' % i, i) for i in range(30)]])
+
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '0.6.5'
+data['meta']['version'] = '0.7.0'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -176,6 +200,7 @@ data['extras'] = dict(
 for _i, _t in enumerate(SAMPLE_TREND):
     _t['ssdWear'] = 22 + _i * 1.6; _t['batWear'] = 12 + _i * 2.2; _t['freeC'] = round(150 - _i * 9.5, 1)
 data['extras']['more'] = _more(False)
+data['extras']['more2'] = _more2(False)
 data['trend'] = SAMPLE_TREND
 for v in data['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
@@ -198,7 +223,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '0.6.5'
+w['meta']['version'] = '0.7.0'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),
@@ -211,6 +236,7 @@ w['extras'] = dict(
 for v in w['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
 w['extras']['more'] = _more(True)
+w['extras']['more2'] = _more2(True)
 (out / 'sample-win10-laptop.json').write_text(json.dumps(w, indent=1), encoding='utf-8')
 
 # --- variant: an older, worse scan of the desktop (for Compare)

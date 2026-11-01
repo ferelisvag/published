@@ -224,9 +224,11 @@ var TOOLS = (function (V, AI, CMP) {
 
     h += sect(I('Words explained', 'Εξηγήσεις λέξεων'), I('in plain language', 'με απλή γλώσσα'));
     h += box('glossary.txt', GLOSSARY.length + I(' words', ' λέξεις'), '<dl class="kv" style="grid-template-columns:180px 1fr">' + GLOSSARY.map(function (x, i) { return V.lang === 'el' ? '<dt>' + esc(GLOSSARY_EL_NAMES[i]) + '</dt><dd>' + esc(GLOSSARY_EL[i]) + '</dd>' : '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>');
+    if (typeof PRO !== 'undefined') h += PRO.toolsHtml();
     root.innerHTML = h;
     refreshTexts();
     wire();
+    if (typeof PRO !== 'undefined') PRO.wireTools();
   }
 
   function refreshTexts() {

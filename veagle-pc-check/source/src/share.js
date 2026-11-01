@@ -12,6 +12,16 @@ var SHARE = (function (V, AI) {
     }
     var clean = walk(V.RAW);
     clean.meta = clean.meta || {};
+    try {
+      var mo = clean.extras && clean.extras.more;
+      if (mo) {
+        if (mo.inventory) mo.inventory.serial = '<SERIAL>';
+        (mo.accounts || []).forEach(function (a, i) { a.name = '<ACCOUNT ' + (i + 1) + '>'; });
+        (mo.wifiSaved || []).forEach(function (w, i) { w.name = '<NETWORK ' + (i + 1) + '>'; });
+        (mo.certs || []).forEach(function (c, i) { c.name = '<CERTIFICATE ' + (i + 1) + '>'; });
+        (mo.signatures && mo.signatures.flagged || []).forEach(function (s) { s.folder = '<PATH>'; });
+      }
+    } catch (e) { }
     clean.meta.user = '<USER>'; clean.meta.computer = '<PC>'; clean.meta.domain = '<DOMAIN>'; clean.meta.shareSafe = true;
     var json = JSON.stringify(clean).replace(/<\//g, '<\\/');
     var html = '<!doctype html>\n<html lang="en">\n<head>' + PAGE.head + '</head>\n<body>' + PAGE.body +

@@ -437,6 +437,7 @@ var UI = (function (V) {
     $('#navcount').textContent = n ? n : '';
     rStart(); rSince(); rSummary(); rHealth(); rRadar(); rActions(); rCpu(); rMem(); rGpu(); rBoard(); rOs(); rNet(); rExtras(); rStorage(); rSecurity(); rBoot(); rHeat(); rUplink();
     rFindings(); rHardware(); rSoftware(); rEvents();
+    if (typeof PRO !== 'undefined') { PRO.summary(); PRO.decorate(); }
     countUp();
     VIZ.animateRings(document);
   }

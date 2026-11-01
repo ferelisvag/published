@@ -16,6 +16,7 @@
       <button role="tab" data-tab="summary" aria-selected="true">Summary</button>
       <button role="tab" data-tab="dashboard" aria-selected="false">Dashboard</button>
       <button role="tab" data-tab="findings" aria-selected="false">Findings<span class="n" id="navcount"></span></button>
+      <button role="tab" data-tab="insights" aria-selected="false">Insights</button>
       <button role="tab" data-tab="hardware" aria-selected="false">Hardware</button>
       <button role="tab" data-tab="software" aria-selected="false">Software</button>
       <button role="tab" data-tab="events" aria-selected="false">Events</button>
@@ -83,6 +84,7 @@
     <div class="win"><div class="body"><div class="list" id="goodList"></div></div></div>
   </section>
 
+  <section class="tabpane" id="tab-insights" role="tabpanel" aria-label="Insights"></section>
   <section class="tabpane" id="tab-hardware" role="tabpanel" aria-label="Hardware"></section>
   <section class="tabpane" id="tab-software" role="tabpanel" aria-label="Software"></section>
   <section class="tabpane" id="tab-events" role="tabpanel" aria-label="Events"></section>
@@ -138,7 +140,7 @@
         <div class="win"><header><span>what is not included</span></header>
           <div class="body sub">
             <div>Your Windows user name, the PC name and domain, IP and MAC addresses, e-mail addresses, Windows account IDs and user-profile paths are replaced with placeholders such as &lt;USER&gt; and &lt;PC&gt;.</div>
-            <div>Serial numbers, product keys and passwords are never collected. The raw exports in the <span class="mono">raw</span> folder stay on this PC and are not part of the package.</div>
+            <div>Product keys, Wi-Fi passwords, BitLocker keys and passwords are never collected. The serial number of the PC is read only for your inventory file and is removed from this package and from the share-safe copy. The raw exports in the <span class="mono">raw</span> folder stay on this PC and are not part of the package.</div>
             <div>Still, read the preview. Program names and file paths can reveal things about you.</div>
             <div>The package tells the assistant that the data was collected by the VEAGLE PC Check app (<a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a>), built with the help of Claude.</div>
           </div>

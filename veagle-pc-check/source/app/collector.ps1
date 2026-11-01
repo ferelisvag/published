@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.5.2'
+$script:Version = '0.6.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -203,7 +203,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 16
+$TOTAL = 17
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -1035,6 +1035,293 @@ $timeline = @($tl | Sort-Object t -Descending | Select-Object -First 900 | Sort-
 $extras | Add-Member -NotePropertyName dumps -NotePropertyValue $dumps -Force
 $extras | Add-Member -NotePropertyName timeline -NotePropertyValue $timeline -Force
 
+# ---------------------------------------------------------------- 17. accounts, signatures, browser add-ons, licences, certificates, updates, network, temperature
+Step 17 $TOTAL 'Accounts, signatures, add-ons, licences, updates, network, temperature'
+
+function Get-ExePath([string]$cmd) {
+    if (-not $cmd) { return $null }
+    $c = [Environment]::ExpandEnvironmentVariables($cmd.Trim())
+    if ($c.StartsWith('"')) { $e = $c.IndexOf('"', 1); if ($e -gt 1) { return $c.Substring(1, $e - 1) } }
+    $m = [regex]::Match($c, '(?i)^(.+?\.(exe|bat|cmd|com|scr|ps1|vbs|js|dll))(\s|$)')
+    if ($m.Success) { return $m.Groups[1].Value }
+    return $null
+}
+function CnOf([string]$subject) {
+    $m = [regex]::Match([string]$subject, 'CN=([^,]+)')
+    if ($m.Success) { return $m.Groups[1].Value.Trim('"') }
+    return [string]$subject
+}
+
+# --- local accounts
+$accounts = @()
+try {
+    $accounts = @(Get-LocalUser -ErrorAction Stop | Select-Object -First 20 | ForEach-Object {
+        $ll = $null; if ($_.LastLogon) { $ll = [int]((Get-Date) - $_.LastLogon).TotalDays }
+        [pscustomobject]@{
+            name = [string]$_.Name; enabled = [bool]$_.Enabled
+            noPassword = (-not [bool]$_.PasswordRequired); neverExpires = ($null -eq $_.PasswordExpires)
+            lastLogonDays = $ll; isGuest = ([string]$_.SID.Value -like '*-501'); isBuiltinAdmin = ([string]$_.SID.Value -like '*-500')
+            isAdmin = $false
+        }
+    })
+} catch { }
+try {
+    foreach ($a in $accounts) { $a.isAdmin = (@($adminNames | Where-Object { $_ -eq $a.name -or $_ -like ('*\' + $a.name) }).Count -gt 0) }
+} catch { }
+
+# --- digital signatures of start-up programs and non-Microsoft scheduled tasks (read-only)
+$sigChecked = 0; $sigFlags = @()
+if (-not $Quick) {
+    try {
+        $paths = @{}
+        foreach ($si in @($startup.items)) { $p = Get-ExePath $si.command; if ($p) { $paths[$p.ToLower()] = @{ path = $p; name = [string]$si.name } } }
+        try {
+            foreach ($t in @(Get-ScheduledTask -ErrorAction Stop | Where-Object { $_.TaskPath -notlike '\Microsoft\*' -and $_.State -ne 'Disabled' } | Select-Object -First 60)) {
+                foreach ($ac in @($t.Actions)) { $p = Get-ExePath ([string]$ac.Execute); if ($p) { $paths[$p.ToLower()] = @{ path = $p; name = [string]$t.TaskName } } }
+            }
+        } catch { }
+        foreach ($k in @($paths.Keys | Select-Object -First 45)) {
+            $it = $paths[$k]
+            if (-not (Test-Path -LiteralPath $it.path)) { continue }
+            if ($it.path -match '(?i)\.(dll|js|vbs)$') { continue }
+            $sigChecked++
+            $st = 'Unknown'; $sn = ''
+            try { $sg = Get-AuthenticodeSignature -LiteralPath $it.path -ErrorAction Stop; $st = [string]$sg.Status; if ($sg.SignerCertificate) { $sn = CnOf $sg.SignerCertificate.Subject } } catch { }
+            $odd = ($it.path -match '(?i)\\Temp\\|\\Downloads\\|\\Users\\Public\\|\\AppData\\Local\\Temp')
+            if ($st -ne 'Valid' -or $odd) { $sigFlags += [pscustomobject]@{ name = $it.name; file = (Split-Path -Leaf $it.path); folder = (Split-Path -Parent $it.path); status = $st; signer = $sn; oddFolder = $odd } }
+        }
+    } catch { Warn ('signatures: ' + $_.Exception.Message) }
+}
+
+# --- Wi-Fi networks saved on this PC (only name and security type, never the passwords)
+$wifiSaved = @()
+try {
+    foreach ($f in @(Get-ChildItem -Path (Join-Path $env:ProgramData 'Microsoft\Wlansvc\Profiles\Interfaces') -Recurse -Filter *.xml -ErrorAction Stop)) {
+        $tx = [IO.File]::ReadAllText($f.FullName)
+        $nm = [regex]::Match($tx, '<name>([^<]*)</name>'); $au = [regex]::Match($tx, '<authentication>([^<]*)</authentication>'); $en = [regex]::Match($tx, '<encryption>([^<]*)</encryption>')
+        if ($nm.Success) { $wifiSaved += [pscustomobject]@{ name = $nm.Groups[1].Value; auth = $au.Groups[1].Value; enc = $en.Groups[1].Value } }
+    }
+    $wifiSaved = @($wifiSaved | Select-Object -First 60)
+} catch { }
+
+# --- browser add-ons (name and the permissions they ask for)
+$riskyPerms = @('webRequest', 'webRequestBlocking', 'cookies', 'history', 'tabs', 'nativeMessaging', 'proxy', 'debugger', 'clipboardRead', 'management', 'browsingData', 'privacy', 'downloads')
+$browserExt = @()
+function Get-ChromiumExt([string]$label, [string]$base) {
+    $res = @()
+    if (-not (Test-Path -LiteralPath $base)) { return $res }
+    $seenIds = @{}
+    foreach ($prof in @(Get-ChildItem -LiteralPath $base -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -eq 'Default' -or $_.Name -like 'Profile *' })) {
+        $ed = Join-Path $prof.FullName 'Extensions'
+        if (-not (Test-Path -LiteralPath $ed)) { continue }
+        foreach ($ext in @(Get-ChildItem -LiteralPath $ed -Directory -ErrorAction SilentlyContinue)) {
+            if ($seenIds.ContainsKey($ext.Name)) { continue }
+            $vd = @(Get-ChildItem -LiteralPath $ext.FullName -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending | Select-Object -First 1)
+            if ($vd.Count -eq 0) { continue }
+            $mf = Join-Path $vd[0].FullName 'manifest.json'
+            if (-not (Test-Path -LiteralPath $mf)) { continue }
+            try {
+                $j = [IO.File]::ReadAllText($mf) | ConvertFrom-Json -ErrorAction Stop
+                $nm = [string]$j.name
+                if ($nm -like '__MSG_*') {
+                    $key = $nm.Substring(6).TrimEnd('_'); $found = $null
+                    $dl = [string]$j.default_locale; if (-not $dl) { $dl = 'en' }
+                    foreach ($loc in @($dl, 'en', 'en_US')) {
+                        $mp = Join-Path $vd[0].FullName ('_locales\' + $loc + '\messages.json')
+                        if (Test-Path -LiteralPath $mp) {
+                            try { $mj = [IO.File]::ReadAllText($mp) | ConvertFrom-Json; $pr = $mj.PSObject.Properties | Where-Object { $_.Name -ieq $key } | Select-Object -First 1; if ($pr) { $found = [string]$pr.Value.message; break } } catch { }
+                        }
+                    }
+                    if ($found) { $nm = $found } else { $nm = $ext.Name }
+                }
+                $perms = @(); foreach ($pm in @($j.permissions)) { if ($pm -is [string]) { $perms += $pm } }
+                $hosts = @(); foreach ($hm in @($j.host_permissions)) { $hosts += [string]$hm }
+                foreach ($pm in @($j.permissions)) { if ($pm -is [string] -and ($pm -match '://' -or $pm -eq '<all_urls>')) { $hosts += $pm } }
+                $allUrls = (@($hosts | Where-Object { $_ -eq '<all_urls>' -or $_ -match '^\*://\*/\*$|^https?://\*/\*$' }).Count -gt 0)
+                $risk = @($perms | Where-Object { $riskyPerms -contains $_ } | Select-Object -Unique)
+                $seenIds[$ext.Name] = 1
+                $res += [pscustomobject]@{ browser = $label; id = [string]$ext.Name; name = $nm; version = [string]$j.version; risky = $risk; allUrls = $allUrls }
+            } catch { }
+        }
+    }
+    return @($res | Select-Object -First 60)
+}
+try {
+    $browserExt += Get-ChromiumExt 'Chrome' (Join-Path $env:LOCALAPPDATA 'Google\Chrome\User Data')
+    $browserExt += Get-ChromiumExt 'Edge' (Join-Path $env:LOCALAPPDATA 'Microsoft\Edge\User Data')
+    $browserExt += Get-ChromiumExt 'Brave' (Join-Path $env:LOCALAPPDATA 'BraveSoftware\Brave-Browser\User Data')
+    $ffRoot = Join-Path $env:APPDATA 'Mozilla\Firefox\Profiles'
+    if (Test-Path -LiteralPath $ffRoot) {
+        foreach ($pf in @(Get-ChildItem -LiteralPath $ffRoot -Directory -ErrorAction SilentlyContinue)) {
+            $ej = Join-Path $pf.FullName 'extensions.json'
+            if (-not (Test-Path -LiteralPath $ej)) { continue }
+            try {
+                $fj = [IO.File]::ReadAllText($ej) | ConvertFrom-Json
+                foreach ($ad in @($fj.addons | Where-Object { $_.type -eq 'extension' -and $_.location -eq 'app-profile' -and $_.active })) {
+                    $perms = @(@($ad.userPermissions.permissions) | Where-Object { $_ })
+                    $orig = @(@($ad.userPermissions.origins) | Where-Object { $_ })
+                    $browserExt += [pscustomobject]@{ browser = 'Firefox'; id = [string]$ad.id; name = [string]$ad.defaultLocale.name; version = [string]$ad.version
+                        risky = @($perms | Where-Object { $riskyPerms -contains $_ } | Select-Object -Unique); allUrls = (@($orig | Where-Object { $_ -eq '<all_urls>' -or $_ -match '^\*://\*/\*$' }).Count -gt 0) }
+                }
+            } catch { }
+        }
+    }
+} catch { Warn ('browser add-ons: ' + $_.Exception.Message) }
+
+# --- screen lock
+$lockInfo = $null
+try {
+    $ssA = Read-Reg 'HKCU:\Control Panel\Desktop' 'ScreenSaveActive'; $ssS = Read-Reg 'HKCU:\Control Panel\Desktop' 'ScreenSaverIsSecure'; $ssT = Read-Reg 'HKCU:\Control Panel\Desktop' 'ScreenSaveTimeOut'
+    $inact = Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' 'InactivityTimeoutSecs'
+    $lw = $null
+    try {
+        $pq = (& powercfg /query SCHEME_CURRENT SUB_NONE CONSOLELOCK 2>&1 | Out-String)
+        $hx = @([regex]::Matches($pq, '0x[0-9a-fA-F]{8}') | ForEach-Object { [Convert]::ToInt32($_.Value.Substring(2), 16) })
+        if ($hx.Count -ge 2) { $lw = [pscustomobject]@{ ac = ($hx[$hx.Count - 2] -eq 1); dc = ($hx[$hx.Count - 1] -eq 1) } }
+    } catch { }
+    $lockInfo = [pscustomobject]@{
+        screensaverOn = $(if ($null -ne $ssA) { ([string]$ssA -eq '1') } else { $false })
+        screensaverSecure = $(if ($null -ne $ssS) { ([string]$ssS -eq '1') } else { $false })
+        screensaverSec = $(if ($null -ne $ssT) { [int]$ssT } else { $null })
+        inactivityLimitSec = $(if ($null -ne $inact) { [int]$inact } else { $null })
+        lockOnWake = $lw
+    }
+} catch { }
+
+# --- BitLocker: only whether a recovery key exists (we never read the key itself)
+$blKeys = @()
+if ($isAdmin) {
+    try { $blKeys = @(Get-BitLockerVolume -ErrorAction Stop | Where-Object { [string]$_.ProtectionStatus -match 'On|1' } | ForEach-Object { [pscustomobject]@{ letter = [string]$_.MountPoint; hasRecoveryKey = (@($_.KeyProtector | Where-Object { [string]$_.KeyProtectorType -eq 'RecoveryPassword' }).Count -gt 0) } }) } catch { }
+}
+
+# --- temperature and slow-down events
+$thermal = [pscustomobject]@{ tempC = $null; throttleEvents30d = 0; clockMHz = $null; maxClockMHz = $null }
+try {
+    $tc = $null
+    try { $tz = @(Get-CimInstance -ClassName Win32_PerfFormattedData_Counters_ThermalZoneInformation -ErrorAction Stop); if ($tz.Count -gt 0) { $tc = [math]::Round((($tz | ForEach-Object { [double]$_.Temperature } | Measure-Object -Maximum).Maximum) - 273.15, 0) } } catch { }
+    if ($null -eq $tc -and $isAdmin) { try { $tz2 = @(Get-CimInstance -Namespace root/wmi -ClassName MSAcpi_ThermalZoneTemperature -ErrorAction Stop); if ($tz2.Count -gt 0) { $tc = [math]::Round((($tz2 | ForEach-Object { [double]$_.CurrentTemperature } | Measure-Object -Maximum).Maximum) / 10 - 273.15, 0) } } catch { } }
+    if ($null -ne $tc -and ($tc -lt 10 -or $tc -gt 130)) { $tc = $null }
+    $thr = @($sysEv | Where-Object { $_.Id -eq 37 -and $_.ProviderName -match 'Kernel-Processor-Power' }).Count
+    $pc0 = Get-CimInstance Win32_Processor | Select-Object -First 1
+    $thermal = [pscustomobject]@{ tempC = $tc; throttleEvents30d = $thr; clockMHz = $(if ($pc0) { [int]$pc0.CurrentClockSpeed } else { $null }); maxClockMHz = $(if ($pc0) { [int]$pc0.MaxClockSpeed } else { $null }) }
+} catch { }
+
+# --- inventory (the serial number stays on this PC: it is removed from the AI package and from the share-safe copy)
+$inventory = $null
+try {
+    $inventory = [pscustomobject]@{ serial = [string]$bios.SerialNumber; maker = [string]$cs.Manufacturer; model = [string]$cs.Model; biosDate = Iso $bios.ReleaseDate; osInstall = Iso $os.InstallDate }
+} catch { }
+
+# --- Office and licences
+$office = [pscustomobject]@{ installed = $false; subscription = $false; releaseIds = ''; version = ''; channel = ''; licences = @() }
+try {
+    $c2r = 'HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration'
+    $rid = [string](Read-Reg $c2r 'ProductReleaseIds'); $ver = [string](Read-Reg $c2r 'VersionToReport')
+    $inst = ($rid -ne '')
+    if (-not $inst) { foreach ($ov in '16.0', '15.0', '14.0') { foreach ($hk in 'HKLM:\SOFTWARE\Microsoft\Office\', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Office\') { if (Read-Reg ($hk + $ov + '\Common\InstallRoot') 'Path') { $inst = $true; if (-not $ver) { $ver = $ov } } } } }
+    $lics = @()
+    try { $lics = @(Get-CimInstance -ClassName SoftwareLicensingProduct -Filter "ApplicationId='0ff1ce15-a989-479d-af46-f275c6370663' AND PartialProductKey IS NOT NULL" -ErrorAction Stop | Select-Object -First 8 | ForEach-Object { [pscustomobject]@{ name = [string]$_.Name; status = [int]$_.LicenseStatus } }) } catch { }
+    $office = [pscustomobject]@{ installed = $inst; subscription = ($rid -match '(?i)O365|Microsoft365'); releaseIds = $rid; version = $ver; channel = [string](Read-Reg $c2r 'UpdateChannel'); licences = $lics }
+} catch { }
+
+# --- certificates that expire (personal and machine stores)
+$certs = @()
+try {
+    foreach ($store in 'Cert:\LocalMachine\My', 'Cert:\CurrentUser\My') {
+        foreach ($ct in @(Get-ChildItem -Path $store -ErrorAction SilentlyContinue)) {
+            $dl = [int]($ct.NotAfter - (Get-Date)).TotalDays
+            if ($dl -le 45 -and $dl -ge -365) { $certs += [pscustomobject]@{ store = $(if ($store -like '*Machine*') { 'computer' } else { 'user' }); name = (CnOf $ct.Subject); days = $dl; hasKey = [bool]$ct.HasPrivateKey } }
+        }
+    }
+    $certs = @($certs | Sort-Object days | Select-Object -First 15)
+} catch { }
+
+# --- Windows Update history (read from the local history, nothing is downloaded)
+$wuInfo = $null
+try {
+    $us = New-Object -ComObject Microsoft.Update.Session
+    $se = $us.CreateUpdateSearcher()
+    $cnt = [int]$se.GetTotalHistoryCount()
+    $hist = @(); if ($cnt -gt 0) { $hist = @($se.QueryHistory(0, [math]::Min($cnt, 100))) }
+    $lastOk = $null; $failed = @()
+    foreach ($h in $hist) {
+        if ([int]$h.ResultCode -eq 2 -and -not $lastOk) { $lastOk = [int]((Get-Date) - $h.Date).TotalDays }
+        if ([int]$h.ResultCode -eq 4 -and (((Get-Date) - $h.Date).TotalDays -le 30)) { $failed += [string]$h.Title }
+    }
+    $svcWu = $null; try { $svcWu = [string](Get-Service -Name wuauserv -ErrorAction Stop).StartType } catch { }
+    $pause = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' 'PauseUpdatesExpiryTime')
+    $paused = $false; if ($pause) { try { $paused = ([datetime]$pause -gt (Get-Date)) } catch { } }
+    $noAuto = Read-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' 'NoAutoUpdate'
+    $rbp = ((Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired') -or (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending'))
+    $wuInfo = [pscustomobject]@{ lastSuccessDays = $lastOk; failed30 = @($failed | Select-Object -Unique | Select-Object -First 6); serviceDisabled = ($svcWu -eq 'Disabled'); paused = $paused; policyOff = ($null -ne $noAuto -and [int]$noAuto -eq 1); restartPending = $rbp }
+} catch { }
+
+# --- OneDrive
+$oneDriveInfo = $null
+try {
+    $odp = 'HKCU:\Software\Microsoft\OneDrive\Accounts'
+    $accs = @(); if (Test-Path $odp) { $accs = @(Get-ChildItem $odp -ErrorAction SilentlyContinue) }
+    $oneDriveInfo = [pscustomobject]@{ installed = ((Test-Path (Join-Path $env:LOCALAPPDATA 'Microsoft\OneDrive')) -or $accs.Count -gt 0); signedIn = ($accs.Count -gt 0); running = [bool](Get-Process OneDrive -ErrorAction SilentlyContinue) }
+} catch { }
+
+# --- what slows down the start-up (Windows' own measurements, last 60 days)
+$slowStart = @()
+try {
+    $se2 = @(Get-WinEvent -FilterHashtable @{ LogName = 'Microsoft-Windows-Diagnostics-Performance/Operational'; Id = 101, 102, 103; StartTime = (Get-Date).AddDays(-60) } -MaxEvents 300 -ErrorAction Stop)
+    $grp = @{}
+    foreach ($e in $se2) {
+        try {
+            $xm = [xml]$e.ToXml(); $d = @{}
+            foreach ($n in @($xm.Event.EventData.Data)) { $d[[string]$n.Name] = [string]$n.'#text' }
+            $nm = $d['FriendlyName']; if (-not $nm) { $nm = $d['Name'] }; if (-not $nm) { $nm = $d['FileName'] }; if (-not $nm) { continue }
+            $kind = 'app'; if ($e.Id -eq 102) { $kind = 'driver' } elseif ($e.Id -eq 103) { $kind = 'service' }
+            $tm = 0; try { $tm = [int]$d['TotalTime'] } catch { }
+            $k = $kind + '|' + $nm
+            if (-not $grp.ContainsKey($k)) { $grp[$k] = [pscustomobject]@{ kind = $kind; name = $nm; n = 0; totalMs = 0 } }
+            $grp[$k].n++; $grp[$k].totalMs += $tm
+        } catch { }
+    }
+    $slowStart = @($grp.Values | ForEach-Object { [pscustomobject]@{ kind = $_.kind; name = $_.name; n = $_.n; avgSec = [math]::Round(($_.totalMs / [math]::Max(1, $_.n)) / 1000, 1) } } | Sort-Object avgSec -Descending | Select-Object -First 12)
+} catch { }
+
+# --- DNS speed: the DNS of this PC against three well-known public ones (12 small lookups, full scan only)
+$dnsSpeed = @()
+if (-not $Quick) {
+    try {
+        $cur = [string](@(Get-DnsClientServerAddress -AddressFamily IPv4 | Where-Object { $_.ServerAddresses } | ForEach-Object { $_.ServerAddresses } | Select-Object -First 1))
+        $cands = @(); if ($cur) { $cands += , @('This PC', $cur) }
+        $cands += , @('Cloudflare', '1.1.1.1'); $cands += , @('Google', '8.8.8.8'); $cands += , @('Quad9', '9.9.9.9')
+        foreach ($c in $cands) {
+            $tot = 0; $ok = 0
+            foreach ($nmx in 'www.microsoft.com', 'www.wikipedia.org', 'www.bbc.com') {
+                try { $sw2 = [Diagnostics.Stopwatch]::StartNew(); [void](Resolve-DnsName -Name $nmx -Server $c[1] -Type A -DnsOnly -QuickTimeout -ErrorAction Stop); $sw2.Stop(); $tot += $sw2.ElapsedMilliseconds; $ok++ } catch { }
+            }
+            if ($ok -gt 0) { $dnsSpeed += [pscustomobject]@{ label = $c[0]; ip = $c[1]; ms = [int]($tot / $ok) } }
+        }
+    } catch { }
+}
+
+# --- which programs talk to the internet right now (addresses of your own network are left out)
+$conns = @()
+try {
+    $pm2 = @{}; foreach ($pp in @(Get-Process)) { $pm2[[int]$pp.Id] = [string]$pp.ProcessName }
+    $byP = @{}
+    foreach ($c in @(Get-NetTCPConnection -State Established -ErrorAction Stop)) {
+        $ra = [string]$c.RemoteAddress
+        if ($ra -match '^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|::1|fe80|fc|fd)') { continue }
+        $pn = [string]$pm2[[int]$c.OwningProcess]; if (-not $pn) { $pn = 'unknown' }
+        if (-not $byP.ContainsKey($pn)) { $byP[$pn] = New-Object System.Collections.ArrayList }
+        [void]$byP[$pn].Add($ra + ':' + $c.RemotePort)
+    }
+    $conns = @($byP.Keys | ForEach-Object { [pscustomobject]@{ process = $_; n = $byP[$_].Count; remotes = @($byP[$_] | Select-Object -Unique | Select-Object -First 3) } } | Sort-Object n -Descending | Select-Object -First 25)
+} catch { }
+
+$extras | Add-Member -NotePropertyName more -NotePropertyValue ([pscustomobject]@{
+    accounts = $accounts; signatures = [pscustomobject]@{ checked = $sigChecked; flagged = $sigFlags }; wifiSaved = $wifiSaved; browserExt = $browserExt
+    lock = $lockInfo; bitlockerKeys = $blKeys; thermal = $thermal; inventory = $inventory; office = $office; certs = $certs; wu = $wuInfo
+    oneDrive = $oneDriveInfo; slowStart = $slowStart; dnsSpeed = $dnsSpeed; connections = $conns
+}) -Force
+
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }
 
@@ -1089,12 +1376,16 @@ try {
     $bootAvg = $null; if (@($boots).Count -gt 0) { $bootAvg = [math]::Round((@($boots | Select-Object -First 5 | ForEach-Object { [double]$_.seconds }) | Measure-Object -Average).Average, 1) }
     $crashTot = 0; foreach ($cc in $crashList) { $crashTot += [int]$cc.count }
     $startN = $null; try { $startN = @($startup.items | ForEach-Object { $_.name } | Select-Object -Unique).Count } catch { }
+    $ssdWear = $null; try { $ww = @($disks | Where-Object { $null -ne $_.wearPercent } | ForEach-Object { [int]$_.wearPercent }); if ($ww.Count -gt 0) { $ssdWear = ($ww | Measure-Object -Maximum).Maximum } } catch { }
+    $batWear = $null; try { if ($battery -and $battery.present) { $batWear = $battery.wearPercent } } catch { }
+    $tempMax = $null; try { $tempMax = $extras.more.thermal.tempC } catch { }
     $hl = [ordered]@{
         t = Iso (Get-Date); v = $script:Version; mode = $(if ($Quick) { 'quick' } else { 'full' })
         freeC = $(if ($cVol) { [double]$cVol.freeGB } else { $null }); bootS = $bootAvg
         sysErr = [int]$events.system.errors; appErr = [int]$events.application.errors; crashes = $crashTot
         patchDays = $lastPatchDays; startup = $startN; outdated = $(if ($Quick) { $null } else { @($outdated).Count })
         reliability = $relIndex; dumps = @($dumps).Count
+        ssdWear = $ssdWear; batWear = $batWear; tempMax = $tempMax
     }
     $line = ($hl | ConvertTo-Json -Compress)
     $u8 = New-Object System.Text.UTF8Encoding($false)

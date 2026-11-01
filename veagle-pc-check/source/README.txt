@@ -13,7 +13,10 @@ IT IS SAFE
 - It only LOOKS. It does not change, install or delete anything on your PC.
 - It does not send your files, passwords or personal data anywhere. The report stays on your PC.
 - The only things it asks the internet: which of your programs have updates (winget), one
-  "ping" to your own router, and one lookup of the website name www.microsoft.com.
+  "ping" to your own router, and a few lookups of website names (www.microsoft.com, and in the
+  full scan a speed comparison of DNS servers: yours, Cloudflare, Google and Quad9).
+- The serial number of the PC is read only for your own inventory file. It is never in the AI
+  package or in the share-safe copy.
 - NOTHING IS EVER CHANGED OR TURNED ON FOR YOU. Every fix is something you do yourself, step by step.
   Even the optional monthly check (see the Tools tab) only exists if you copy its command and run it.
 - You can read every line of the program: app\collector.ps1 opens in Notepad.

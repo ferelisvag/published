@@ -128,8 +128,35 @@ def _tl():
 SAMPLE_TL = _tl()
 SAMPLE_TREND = [dict(t=iso(now - datetime.timedelta(days=7 * (7 - i))), v='0.4.1', mode='full', freeC=round(180 - i * 6.5 + (3 if i % 3 == 0 else 0), 1), bootS=round(44 + i * 5.2, 1), sysErr=300 + i * 90, appErr=40 + i * 12, crashes=2 + i * 6, patchDays=14 + (i % 4) * 9, startup=14 + i, outdated=3 + i, reliability=round(9 - i * 0.6, 1), dumps=i // 3) for i in range(8)]
 
+
+# --- v0.6 extras ("more"): accounts, signatures, add-ons, lock, licences, certificates, updates, network, temperature
+def _more(heavy):
+    return dict(
+      accounts=[dict(name='demo', enabled=True, noPassword=False, neverExpires=True, lastLogonDays=0, isGuest=False, isBuiltinAdmin=False, isAdmin=True),
+                dict(name='Administrator', enabled=heavy, noPassword=heavy, neverExpires=True, lastLogonDays=None, isGuest=False, isBuiltinAdmin=True, isAdmin=True),
+                dict(name='Guest', enabled=heavy, noPassword=True, neverExpires=True, lastLogonDays=None, isGuest=True, isBuiltinAdmin=False, isAdmin=False),
+                dict(name='family', enabled=True, noPassword=heavy, neverExpires=False, lastLogonDays=3, isGuest=False, isBuiltinAdmin=False, isAdmin=False)],
+      signatures=dict(checked=22, flagged=[dict(name='QuickTool', file='quicktool.exe', folder='C:\\Users\\demo\\AppData\\Local\\Temp', status='NotSigned', signer='', oddFolder=True),
+                                        dict(name='SyncHelper', file='synchelper.exe', folder='C:\\Program Files\\Sync', status='NotSigned', signer='', oddFolder=False)] if heavy else [dict(name='SyncHelper', file='synchelper.exe', folder='C:\\Program Files\\Sync', status='NotSigned', signer='', oddFolder=False)]),
+      wifiSaved=[dict(name='Home-5G', auth='WPA2PSK', enc='AES'), dict(name='Airport_Free_WiFi', auth='open', enc='none'), dict(name='Cafe Central', auth='open', enc='none')] if heavy else [dict(name='Home-5G', auth='WPA2PSK', enc='AES')],
+      browserExt=[dict(browser='Chrome', id='a', name='uBlock Origin', version='1.60', risky=['webRequest','webRequestBlocking'], allUrls=True),
+                  dict(browser='Chrome', id='b', name='Super Coupon Finder', version='3.1', risky=['cookies','history','tabs','webRequest'], allUrls=True),
+                  dict(browser='Edge', id='c', name='Dark Reader', version='4.9', risky=[], allUrls=True),
+                  dict(browser='Firefox', id='d', name='Password Manager', version='2.0', risky=['nativeMessaging'], allUrls=False)],
+      lock=dict(screensaverOn=False, screensaverSecure=False, screensaverSec=None, inactivityLimitSec=None, lockOnWake=dict(ac=not heavy, dc=not heavy)),
+      bitlockerKeys=[dict(letter='C:', hasRecoveryKey=not heavy)],
+      thermal=dict(tempC=88 if heavy else 52, throttleEvents30d=14 if heavy else 0, clockMHz=2400, maxClockMHz=4200),
+      inventory=dict(serial='DEMO-0000-SN', maker='Demo Maker', model='Demo Model', biosDate='2025-06-10T00:00:00', osInstall='2025-01-12T10:00:00'),
+      office=dict(installed=True, subscription=False, releaseIds='ProPlus2019Retail', version='16.0.17928', channel='', licences=[dict(name='Office 19, Office19ProPlus2019R_Retail edition', status=1)]),
+      certs=[dict(store='user', name='Work VPN client', days=9, hasKey=True), dict(store='computer', name='Old test cert', days=-40, hasKey=True)],
+      wu=dict(lastSuccessDays=6, failed30=['Feature update to Windows 11, version 25H2 - Error 0x80070002'], serviceDisabled=False, paused=False, policyOff=False, restartPending=True),
+      oneDrive=dict(installed=True, signedIn=not heavy, running=not heavy),
+      slowStart=[dict(kind='app', name='Adobe Updater', n=6, avgSec=9.4), dict(kind='service', name='SearchIndexer', n=4, avgSec=6.2), dict(kind='driver', name='nvlddmkm', n=3, avgSec=4.1), dict(kind='app', name='Teams', n=5, avgSec=3.3)],
+      dnsSpeed=[dict(label='This PC', ip='192.168.1.1', ms=74), dict(label='Cloudflare', ip='1.1.1.1', ms=14), dict(label='Google', ip='8.8.8.8', ms=19), dict(label='Quad9', ip='9.9.9.9', ms=22)],
+      connections=[dict(process='chrome', n=34, remotes=['142.250.1.1:443']), dict(process='Teams', n=9, remotes=['52.1.1.1:443']), dict(process='OneDrive', n=4, remotes=['13.1.1.1:443']), dict(process='svchost', n=6, remotes=['20.1.1.1:443']), dict(process='unknown_tool', n=2, remotes=['185.1.1.1:8080'])])
+
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '0.5.0'
+data['meta']['version'] = '0.6.0'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -146,6 +173,9 @@ data['extras'] = dict(
   gaming=dict(gameDvr=True, gameMode=False, hags=False),
   dumps=[dict(file='101926-9812-01.dmp', time=iso(now - datetime.timedelta(days=6, hours=2)), sizeMB=1, code='0x00000133', params=['0x0','0x501','0x500','0x0']), dict(file='101326-8750-01.dmp', time=iso(now - datetime.timedelta(days=9, hours=5)), sizeMB=1, code='0x00000116', params=['0xffff','0x0','0x0','0x4']), dict(file='100526-8421-01.dmp', time=iso(now - datetime.timedelta(days=11, hours=1)), sizeMB=1, code='0x00000133', params=['0x0','0x501','0x500','0x0'])],
   timeline=SAMPLE_TL)
+for _i, _t in enumerate(SAMPLE_TREND):
+    _t['ssdWear'] = 22 + _i * 1.6; _t['batWear'] = 12 + _i * 2.2; _t['freeC'] = round(150 - _i * 9.5, 1)
+data['extras']['more'] = _more(False)
 data['trend'] = SAMPLE_TREND
 for v in data['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
@@ -168,7 +198,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '0.5.0'
+w['meta']['version'] = '0.6.0'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),
@@ -180,6 +210,7 @@ w['extras'] = dict(
   backup=dict(restorePoints=dict(readable=True, count=0, lastDaysAgo=None), fileHistory=False, oneDriveFolders=dict(documents=False, desktop=False, pictures=False), winRE=False))
 for v in w['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
+w['extras']['more'] = _more(True)
 (out / 'sample-win10-laptop.json').write_text(json.dumps(w, indent=1), encoding='utf-8')
 
 # --- variant: an older, worse scan of the desktop (for Compare)

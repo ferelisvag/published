@@ -212,6 +212,9 @@ function Engine(RAW) {
     'sto-where': [5, 'Easy', 'Safe'], 'sto-installers': [10, 'Easy', 'Safe'], 'sto-winold': [10, 'Easy', 'Safe'], 'sto-wucache': [5, 'Easy', 'Safe'], 'sto-recycle': [3, 'Easy', 'Safe'], 'sto-bigfiles': [10, 'Easy', 'Safe'],
     'soft-pup': [15, 'Medium', 'Safe'], 'soft-avmany': [10, 'Medium', 'Safe'], 'gam-mode': [2, 'Easy', 'Safe'], 'gam-hags': [5, 'Easy', 'Safe'], 'gam-dvr': [2, 'Easy', 'Safe'],
     'cor-start': [20, 'Medium', 'Back up first'], 'cor-wake': [20, 'Medium', 'Safe'], 'cor-disk': [30, 'Ask a pro', 'Back up first'], 'cor-gpu': [15, 'Medium', 'Safe'], 'cor-hours': [10, 'Easy', 'Safe'], 'cor-boot': [10, 'Easy', 'Safe'], 'cor-power': [5, 'Easy', 'Safe'], 'cor-burst': [3, 'Easy', 'Safe'],
+    'sec-guest': [2, 'Easy', 'Safe'], 'sec-nopass': [5, 'Easy', 'Safe'], 'sec-builtinadmin': [3, 'Easy', 'Safe'], 'sec-pwexp': [2, 'Easy', 'Safe'], 'sec-signed': [15, 'Medium', 'Safe'], 'sec-wifi-open': [5, 'Easy', 'Safe'], 'sec-ext': [10, 'Easy', 'Safe'], 'sec-lock': [3, 'Easy', 'Safe'], 'sec-blkey': [10, 'Easy', 'Safe'], 'sec-certs': [10, 'Ask a pro', 'Safe'],
+    'perf-heat': [20, 'Medium', 'Safe'], 'perf-throttle': [15, 'Medium', 'Safe'], 'perf-slowstart': [10, 'Easy', 'Safe'], 'soft-office-eol': [30, 'Medium', 'Safe'], 'soft-office-act': [5, 'Easy', 'Safe'], 'win-eol-11': [45, 'Medium', 'Back up first'], 'upd-fail': [15, 'Medium', 'Safe'], 'upd-off': [3, 'Easy', 'Safe'],
+    'bak-size': [2, 'Easy', 'Safe'], 'bak-onedrive': [5, 'Easy', 'Safe'], 'net-dnsfast': [10, 'Medium', 'Safe'], 'net-conn': [5, 'Easy', 'Safe'], 'pred-disk': [15, 'Easy', 'Safe'], 'pred-ssd': [10, 'Ask a pro', 'Back up first'], 'pred-bat': [5, 'Easy', 'Safe'],
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe']
   };
   var PROFILES = {
@@ -235,7 +238,7 @@ function Engine(RAW) {
   function runRules() {
     var out = [];
     var days = num(g(D, 'events.days', 30), 30);
-    function add(f) { if (f) out.push(f); }
+    function add(f) { if (Array.isArray(f)) { f.forEach(add); } else if (f) out.push(f); }
     function R(fn) { try { add(fn()); } catch (e) { out.push(F('rule-error', 'Software', 'info', 'A check could not run', String(e && e.message || e), [], '')); } }
 
     var apps = arr(g(D, 'apps.list', []));
@@ -1194,6 +1197,249 @@ function Engine(RAW) {
         'When almost everything went wrong on a single day, something happened that day. A one-day burst is often harmless and does not come back. It is more worrying if it repeats.',
         [S('Do you remember what you did that day (new program, update, travel, power cut)?'), S('If the problems have stopped since, there is nothing to do. If they come back, run the scan again in a few days.')],
         that.length ? (function () { var seen = {}, out2 = []; that.forEach(function (e) { var k = e.k + '|' + e.x + '|' + Math.floor(e.t / H); if (!seen[k]) { seen[k] = 1; out2.push(when(e.t) + ' ' + trigName(e)); } }); return out2.slice(0, 6).join('\n') + (out2.length > 6 ? '\n...' : ''); })() : 'No install or update events were found around that day.');
+    });
+
+
+    /* ===== 0.6.0: accounts, signatures, add-ons, lock, licences, certificates, updates, predictions, network ===== */
+    var X6 = EX.more || {};
+    var NOW6 = new Date(g(D, 'meta.generated', Date.now())).getTime();
+    function nameList(a, f, max) { var l = a.map(f); return l.slice(0, max || 12).join('\n') + (l.length > (max || 12) ? '\n... +' + (l.length - (max || 12)) + ' more' : ''); }
+
+    R(function () {
+      var a = arr(X6.accounts).filter(function (u) { return u.isGuest && u.enabled; });
+      if (!a.length) return null;
+      return F('sec-guest', 'Security', 'medium', 'The "Guest" account is switched on',
+        'The Guest account lets anyone use this PC without a real account. Nobody needs it today and it is a favourite door for attackers.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter. It only switches the Guest account off.', 'net user guest /active:no')], 'Account: ' + a[0].name);
+    });
+    R(function () {
+      var a = arr(X6.accounts).filter(function (u) { return u.enabled && u.noPassword && !u.isGuest; });
+      if (!a.length) return null;
+      var adm = a.some(function (u) { return u.isAdmin; });
+      return F('sec-nopass', 'Security', adm ? 'high' : 'medium', a.length + ' account' + (a.length > 1 ? 's do' : ' does') + ' not need a password',
+        'An account without a password lets anybody who can sit at the PC (or reach it over the network) in. ' + (adm ? 'At least one of them is an administrator, which is the most dangerous case.' : ''),
+        [S('Press the Windows key, type "Sign-in options" and open it. Under Password, click Change (or Add) and set a strong password.'), S('Use at least 12 characters. A short sentence you will remember works well.')],
+        nameList(a, function (u) { return u.name + (u.isAdmin ? ' (administrator)' : ''); }));
+    });
+    R(function () {
+      var a = arr(X6.accounts).filter(function (u) { return u.isBuiltinAdmin && u.enabled; });
+      if (!a.length) return null;
+      return F('sec-builtinadmin', 'Security', 'medium', 'The hidden built-in "Administrator" account is switched on',
+        'Windows has a special all-powerful account that is normally off. When it is on, attackers know its name and only need to guess the password.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter. Make sure you can sign in with another administrator account first.', 'net user administrator /active:no')], 'Account: ' + a[0].name);
+    });
+    R(function () {
+      var a = arr(X6.accounts).filter(function (u) { return u.enabled && u.neverExpires && !u.isGuest && !u.noPassword && u.isAdmin; });
+      if (!a.length) return null;
+      return F('sec-pwexp', 'Security', 'info', 'The password of an administrator account never expires',
+        'This is normal at home. At work, a password that never changes means a leaked password stays useful forever.',
+        [S('At home: nothing to do. Just make sure the password is long and not used anywhere else.'), S('At work: ask your IT team if a password policy is needed.')],
+        nameList(a, function (u) { return u.name; }));
+    });
+    R(function () {
+      var s = X6.signatures; if (!s || !arr(s.flagged).length) return null;
+      var f = arr(s.flagged), odd = f.filter(function (x) { return x.oddFolder; });
+      return F('sec-signed', 'Security', odd.length ? 'medium' : 'low', f.length + ' of ' + s.checked + ' start-up programs have no valid digital signature',
+        'A digital signature proves a program comes from a real company and was not changed. Many harmless small tools are unsigned, but malware almost always is. The ones that run from a "Temp" or "Downloads" folder deserve a closer look.',
+        [S('See the list under "Evidence". Do you recognise each program?'), S('If you do not, search its file name on the internet or ask an AI in the AI help tab before you do anything.'), S('To stop one starting with Windows: press Ctrl+Shift+Esc, open the Startup apps tab, right-click it and choose Disable.')],
+        nameList(f, function (x) { return x.name + ' (' + x.file + ') - ' + (x.status === 'NotSigned' ? 'not signed' : x.status) + (x.signer ? ' by ' + x.signer : '') + (x.oddFolder ? ' - runs from: ' + x.folder : ''); }));
+    });
+    R(function () {
+      var w = arr(X6.wifiSaved);
+      var open = w.filter(function (x) { return /^open$/i.test(x.auth) && /^none$/i.test(x.enc); });
+      var weak = w.filter(function (x) { return /^(shared)$/i.test(x.auth) || /^wep$/i.test(x.enc) || /^WPAPSK$/i.test(x.auth) || /^WPA$/i.test(x.auth); });
+      var bad = open.concat(weak); if (!bad.length) return null;
+      return F('sec-wifi-open', 'Security', 'low', bad.length + ' saved Wi-Fi network' + (bad.length > 1 ? 's are' : ' is') + ' open or old and unsafe',
+        'Your PC remembers these networks and joins them by itself. Anyone can copy the name of an open network (for example a cafe) and trick your PC into connecting to a fake one.',
+        [S('Press the Windows key, type "Manage known networks" and open it.'), S('Click each network from the list under "Evidence" and choose Forget.')],
+        nameList(bad, function (x) { return x.name + ' - ' + (/^open$/i.test(x.auth) ? 'no password' : 'old security (' + (x.auth || x.enc) + ')'); }));
+    });
+    R(function () {
+      var ex = arr(X6.browserExt); if (!ex.length) return null;
+      var strong = ex.filter(function (e) { return (e.allUrls && arr(e.risky).length >= 2) || arr(e.risky).some(function (p) { return /^(proxy|debugger|nativeMessaging)$/.test(p); }); });
+      if (!strong.length) return null;
+      return F('sec-ext', 'Security', strong.length >= 5 ? 'medium' : 'low', strong.length + ' browser add-on' + (strong.length > 1 ? 's can' : ' can') + ' see or change everything you do on websites',
+        'Browser add-ons (extensions) are tiny programs inside your browser. Some ask for powers to read every page, passwords you type or your browsing history. A good add-on from a known company is fine, but a forgotten or unknown one is a common way to steal data.',
+        [S('Open your browser and type chrome://extensions (Chrome) or edge://extensions (Edge) in the address bar.'), S('Compare with the list under "Evidence". For every add-on you do not use or do not know, click Remove.'), S('Keep only what you really need.')],
+        nameList(strong, function (e) { return e.browser + ': ' + e.name + ' - ' + (e.allUrls ? 'all websites, ' : '') + arr(e.risky).slice(0, 4).join(', '); }, 15));
+    });
+    R(function () {
+      var L = X6.lock; if (!L) return null;
+      var laptop = !!g(D, 'system.isLaptop', false);
+      var wakeOff = L.lockOnWake && (L.lockOnWake.ac === false || L.lockOnWake.dc === false);
+      var idleLock = L.screensaverSecure || (L.inactivityLimitSec && L.inactivityLimitSec > 0);
+      if (!wakeOff && idleLock) return null;
+      if (!wakeOff && !laptop) return null;
+      return F('sec-lock', 'Security', 'low', wakeOff ? 'The PC does not ask for your password after sleep' : 'The screen does not lock by itself when you walk away',
+        wakeOff ? 'When the PC wakes up from sleep it opens straight on your desktop. Anybody who picks it up sees everything.' : 'If you leave the PC for a few minutes, anybody can sit down and use it. On a laptop this also covers theft.',
+        [S('Press the Windows key, type "Sign-in options" and open it.'), S('Under "If you have been away, when should Windows require you to sign in again?" choose "Every time".'), S('Tip: press Windows key + L to lock the PC yourself whenever you stand up.')], '');
+    });
+    R(function () {
+      var k = arr(X6.bitlockerKeys); if (!k.length) return null;
+      var nokey = k.filter(function (x) { return !x.hasRecoveryKey; });
+      if (nokey.length) return F('sec-blkey', 'Security', 'medium', 'BitLocker is on but has no recovery key',
+        'If Windows ever asks for the recovery key (after a BIOS change or a hardware repair) and you do not have it, the files on the drive are lost for good.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter, then save the long number it prints: manage-bde -protectors -add C: -RecoveryPassword', 'manage-bde -protectors -add C: -RecoveryPassword'), S('Keep the number on paper or in your password manager, never only on this PC.')],
+        nokey.map(function (x) { return x.letter; }).join(', '));
+      return F('sec-blkey', 'Security', 'info', 'Reminder: keep your BitLocker recovery key outside this PC',
+        'Your drive is encrypted. If Windows ever asks for the recovery key, you need it. It is not stored by this app, we never read it.',
+        [S('Go to https://aka.ms/myrecoverykey and sign in with your Microsoft account. If your key is listed there, you are fine.'), S('If not, press the Windows key, type "Manage BitLocker", choose "Back up your recovery key" and save it to a USB stick or print it. Keep it away from this PC.')],
+        k.map(function (x) { return x.letter + ' has a recovery key'; }).join('\n'));
+    });
+    R(function () {
+      var T = X6.thermal; if (!T) return null;
+      var r = [];
+      if (T.tempC != null && T.tempC >= 75) r.push(F('perf-heat', 'Performance', T.tempC >= 90 ? 'high' : (T.tempC >= 82 ? 'medium' : 'low'), 'The PC was hot during the scan (' + T.tempC + ' degrees C)',
+        'The scan itself is light work, so a hot PC at this moment means the cooling is struggling. Heat makes the PC slower, noisy and shortens the life of parts.',
+        [S('Check that the vents are free: nothing under a laptop, nothing in front of the fans.'), S('Blow out dust from the vents with a can of compressed air (PC switched off).'), S('If it stays hot, ask a technician about new thermal paste or a better cooler.')], 'Highest temperature sensor: ' + T.tempC + ' C'));
+      if (num(T.throttleEvents30d) >= 1) r.push(F('perf-throttle', 'Performance', T.throttleEvents30d >= 20 ? 'medium' : 'low', 'The processor was slowed down ' + T.throttleEvents30d + ' time' + (T.throttleEvents30d > 1 ? 's' : '') + ' in the last 30 days',
+        'Windows recorded that the processor had to run slower than normal. The usual reasons are heat, dust or a power limit (battery saver, weak charger).',
+        [S('Plug in the original charger and set the power mode to Balanced or Best performance (Settings, System, Power).'), S('Clean the vents and make sure air can flow.')], T.clockMHz && T.maxClockMHz ? 'Speed during scan: ' + T.clockMHz + ' MHz of ' + T.maxClockMHz + ' MHz' : ''));
+      return r.length > 1 ? r : r[0] || null;
+    });
+    R(function () {
+      var o = X6.office; if (!o || !o.installed) return null;
+      var ids = String(o.releaseIds || ''), ver = String(o.version || '');
+      var yr = null, endDate = null;
+      if (o.subscription) return null;
+      if (/2024/.test(ids)) { yr = 'Office 2024'; endDate = new Date(2029, 9, 9); }
+      else if (/2021/.test(ids)) { yr = 'Office 2021'; endDate = new Date(2026, 9, 13); }
+      else if (/2019/.test(ids)) { yr = 'Office 2019'; endDate = new Date(2025, 9, 14); }
+      else if (/2016/.test(ids) || (!ids && /^16/.test(ver))) { yr = 'Office 2016'; endDate = new Date(2025, 9, 14); }
+      else if (/^15/.test(ver) && !ids) { yr = 'Office 2013'; endDate = new Date(2023, 3, 11); }
+      else if (/^14/.test(ver) && !ids) { yr = 'Office 2010'; endDate = new Date(2020, 9, 13); }
+      if (!endDate) return null;
+      var left = Math.round((endDate.getTime() - NOW6) / 86400000);
+      if (left > 365) return null;
+      var dstr = endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      if (left <= 0) return F('soft-office-eol', 'Software', 'medium', yr + ' no longer gets security updates (ended ' + dstr + ')',
+        'Microsoft stopped fixing security holes in ' + yr + '. Office files from e-mail are a very common way to deliver viruses, so an unpatched Office is a real risk.',
+        [S('Option 1: switch to Microsoft 365 (subscription, always updated) or to Office 2024 (one-time purchase).'), S('Option 2: use the free web versions at office.com in the meantime and open attachments only from people you trust.')], 'Found: ' + ids.replace(/,/g, ', '));
+      return F('soft-office-eol', 'Software', 'low', yr + ' stops getting security updates in ' + left + ' days (' + dstr + ')',
+        'After that date Microsoft will not fix security holes in this Office. Plan the change now.',
+        [S('Choose Microsoft 365 (subscription) or Office 2024 (one-time purchase) before the date.')], 'Found: ' + ids.replace(/,/g, ', '));
+    });
+    R(function () {
+      var o = X6.office; if (!o || !o.installed || o.subscription) return null;
+      var l = arr(o.licences); if (!l.length) return null;
+      if (l.some(function (x) { return x.status === 1; })) return null;
+      return F('soft-office-act', 'Software', 'low', 'Microsoft Office does not show as activated',
+        'An Office that is not activated switches to read-only mode after a while and nags you. (If you sign in to Office with a Microsoft 365 account, ignore this: that kind of licence is not visible to this app.)',
+        [S('Open Word, click File, Account, and read what it says under "Product Information".'), S('If it asks for activation, sign in with the Microsoft account that owns it or enter your product key.')],
+        nameList(l, function (x) { return x.name + ' - status code ' + x.status; }));
+    });
+    R(function () {
+      var b = num(g(D, 'system.os.build', 0)); if (b < 22000) return null;
+      var T = { 22000: ['21H2', '2023-10-10', '2024-10-08'], 22621: ['22H2', '2024-10-08', '2025-10-14'], 22631: ['23H2', '2025-11-11', '2026-11-10'], 26100: ['24H2', '2026-10-13', '2027-10-12'], 26200: ['25H2', '2027-10-12', '2028-10-10'], 28000: ['26H1', '2028-03-14', '2029-03-13'] };
+      var t = T[b]; if (!t) return null;
+      var ent = /Enterprise|Education/i.test(String(g(D, 'system.os.edition', '')));
+      var end = new Date((ent ? t[2] : t[1]) + 'T00:00:00'), left = Math.round((end.getTime() - NOW6) / 86400000);
+      if (left > 365) return null;
+      var dstr = end.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      if (left <= 0) return F('win-eol-11', 'Updates', 'high', 'This version of Windows 11 (' + t[0] + ') no longer gets security updates (ended ' + dstr + ')',
+        'Every Windows 11 version is supported for a limited time (24 months for Home and Pro). Yours has passed its end date, so new security holes stay open. The fix is free: move to the newest Windows 11 version.',
+        [S('Press the Windows key, type "Windows Update" and open it. Click "Check for updates".'), S('If a "Feature update to Windows 11, version 25H2 (or newer)" is offered, click "Download and install". It keeps your files and programs.'), S('Make a backup of your important files first, just in case.')], 'Windows 11 ' + t[0] + ' (build ' + b + '), edition ' + (g(D, 'system.os.edition', '?')) + ', end of updates ' + dstr);
+      return F('win-eol-11', 'Updates', left <= 60 ? 'medium' : 'low', 'This version of Windows 11 (' + t[0] + ') stops getting security updates in ' + left + ' days (' + dstr + ')',
+        'Windows 11 versions are supported for a limited time. A newer version is free and keeps your files and programs.',
+        [S('Press the Windows key, type "Windows Update" and open it. Click "Check for updates".'), S('When the newest Windows 11 version is offered, click "Download and install".')], 'Windows 11 ' + t[0] + ' (build ' + b + '), end of updates ' + dstr);
+    });
+    R(function () {
+      var c = arr(X6.certs).filter(function (x) { return x.hasKey && x.days <= 30; });
+      if (!c.length) return null;
+      var exp = c.filter(function (x) { return x.days < 0; });
+      return F('sec-certs', 'Security', exp.length ? 'medium' : 'low', c.length + ' certificate' + (c.length > 1 ? 's' : '') + (exp.length ? ' expired or expire' : ' expire') + ' within 30 days',
+        'A certificate is a digital ID card used for e-mail signing, VPN, Wi-Fi at work or websites. When it expires, the thing that uses it stops working, often with a confusing error.',
+        [S('See the list under "Evidence" with the days left.'), S('At work, give the list to your IT team. At home, if you do not know what it is for, you can ignore it.')],
+        nameList(c, function (x) { return x.name + ' (' + (x.store === 'computer' ? 'computer' : 'your user') + ') - ' + (x.days < 0 ? 'expired ' + (-x.days) + ' days ago' : x.days + ' days left'); }));
+    });
+    R(function () {
+      var w = X6.wu; if (!w) return null;
+      var r = [];
+      if (arr(w.failed30).length) r.push(F('upd-fail', 'Updates', 'medium', arr(w.failed30).length + ' Windows update' + (arr(w.failed30).length > 1 ? 's' : '') + ' failed in the last 30 days',
+        'A failed update means the PC is still missing fixes. It often retries and fails again until you help it.',
+        [S('Press the Windows key, type "Troubleshoot settings", open it, then "Other troubleshooters" and run the one called "Windows Update".'), S('Restart the PC and run Windows Update again.'), S('If it fails again, copy the update name from "Evidence" and search it on the internet or ask an AI in the AI help tab.')], arr(w.failed30).join('\n')));
+      if (w.serviceDisabled || w.policyOff || w.paused) r.push(F('upd-off', 'Updates', w.serviceDisabled || w.policyOff ? 'medium' : 'low', w.paused ? 'Windows updates are paused' : 'Windows updates are switched off',
+        w.paused ? 'Somebody pressed "Pause updates". Until the pause ends, the PC gets no fixes.' : 'A setting or policy stops Windows from updating itself. That leaves the PC without security fixes.',
+        [S('Press the Windows key, type "Windows Update" and open it.'), S('Click "Resume updates" (or "Check for updates"). If the button is missing because of a work policy, ask your IT team.')],
+        (w.paused ? 'Paused. ' : '') + (w.serviceDisabled ? 'The Windows Update service is disabled. ' : '') + (w.policyOff ? 'A policy turns automatic updates off.' : '')));
+      return r.length > 1 ? r : r[0] || null;
+    });
+    R(function () {
+      var vv = vols.filter(function (v) { return num(v.sizeGB) > 0; });
+      if (!vv.length) return null;
+      var used = 0; vv.forEach(function (v) { used += Math.max(0, num(v.sizeGB) - num(v.freeGB)); });
+      var need = used * 1.5, sizes = [250, 500, 1000, 2000, 4000, 8000], pick = sizes.filter(function (s) { return s * 0.93 >= need; })[0] || 8000;
+      return F('bak-size', 'Backup', 'info', 'A full backup of this PC needs about ' + fmtGB(used),
+        'This is how much space your files, programs and Windows use right now. To keep a few versions you need more than that.',
+        [S('Buy an external drive of at least ' + (pick >= 1000 ? (pick / 1000) + ' TB' : pick + ' GB') + ' (about 1.5 times what you use).'), S('Or back up only your documents and photos to OneDrive or another cloud. That usually needs far less space.')],
+        vv.map(function (v) { return v.letter + ' used ' + fmtGB(num(v.sizeGB) - num(v.freeGB)) + ' of ' + fmtGB(v.sizeGB); }).join('\n'));
+    });
+    R(function () {
+      var o = X6.oneDrive; if (!o || !o.installed) return null;
+      if (o.signedIn && o.running) return null;
+      return F('bak-onedrive', 'Backup', 'low', o.signedIn ? 'OneDrive is installed but is not running' : 'OneDrive is installed but you are not signed in',
+        'OneDrive can keep your Desktop, Documents and Pictures safe in the cloud, but only while it is signed in and running.',
+        [S('Press the Windows key, type OneDrive and open it.'), S('Sign in with your Microsoft account. Then right-click the OneDrive cloud icon near the clock, choose Settings, Sync and backup, and switch on the folders you want protected.')], '');
+    });
+    R(function () {
+      var s = arr(X6.slowStart).filter(function (x) { return x.avgSec >= 3; });
+      if (!s.length) return null;
+      return F('perf-slowstart', 'Performance', 'low', s.length + ' program' + (s.length > 1 ? 's' : '') + ' or driver' + (s.length > 1 ? 's' : '') + ' slow down the start-up of Windows',
+        'Windows measures what delays every start-up and writes it down. These items were named by Windows itself, most often and slowest first. Fewer slow items means the PC is ready sooner.',
+        [S('Look at the list under "Evidence". For a program: press Ctrl+Shift+Esc, open the Startup apps tab, right-click it and choose Disable.'), S('For a driver or service, do not turn it off. Instead update it or ask an AI in the AI help tab.')],
+        nameList(s, function (x) { return x.name + ' (' + x.kind + ') - about ' + x.avgSec + ' s, seen ' + x.n + ' time' + (x.n > 1 ? 's' : ''); }));
+    });
+    R(function () {
+      var d = arr(X6.dnsSpeed); if (d.length < 2) return null;
+      var cur = d[0], best = d.slice(1).sort(function (a, b) { return a.ms - b.ms; })[0];
+      if (cur.label !== 'This PC' || cur.ms - best.ms < 25 || best.ms > cur.ms * 0.6) return null;
+      return F('net-dnsfast', 'Network', 'info', 'A faster DNS is available (' + best.label + ' is about ' + (cur.ms - best.ms) + ' ms quicker)',
+        'DNS is the phone book of the internet: it turns a website name into an address. Yours answers in about ' + cur.ms + ' ms. ' + best.label + ' answered in about ' + best.ms + ' ms from here. The change is small and can be undone any time.',
+        [S('Nothing is changed by this app. If you want to try: press the Windows key, type "Network status", open it, click Properties on your connection, then Edit next to "DNS server assignment", choose Manual, switch IPv4 on and type ' + best.ip + ' as the preferred DNS.'), S('To undo it, choose Automatic (DHCP) in the same place.')],
+        d.map(function (x) { return x.label + ' (' + x.ip + '): ' + x.ms + ' ms'; }).join('\n'));
+    });
+    R(function () {
+      var c = arr(X6.connections); if (!c.length) return null;
+      var tot = 0; c.forEach(function (x) { tot += x.n; });
+      return F('net-conn', 'Network', 'info', c.length + ' programs are talking to the internet right now',
+        'This is a snapshot of which programs have an open connection to the internet at the moment of the scan (addresses of your own home network are left out). It is normal for a browser, Windows and your cloud apps to be here. Look for names you do not know.',
+        [S('Read the list under "Evidence". Browsers, svchost, OneDrive, Teams and similar are normal.'), S('If you see a name you do not know, search it on the internet or ask an AI in the AI help tab before you decide anything.')],
+        nameList(c, function (x) { return x.process + ' (' + x.n + ' connection' + (x.n > 1 ? 's' : '') + ') ' + arr(x.remotes).join(', '); }, 15));
+    });
+
+    /* ---- predictions from the history of scans ---- */
+    function series(key) {
+      return arr(D.trend).filter(function (x) { return x && x.t && x[key] != null && isFinite(x[key]); }).map(function (x) { return [new Date(x.t).getTime() / 86400000, Number(x[key])]; }).filter(function (p) { return isFinite(p[0]); }).sort(function (a, b) { return a[0] - b[0]; });
+    }
+    function slope(p) {
+      var n = p.length, sx = 0, sy = 0, sxx = 0, sxy = 0; p.forEach(function (q) { sx += q[0]; sy += q[1]; sxx += q[0] * q[0]; sxy += q[0] * q[1]; });
+      var den = n * sxx - sx * sx; return den ? (n * sxy - sx * sy) / den : 0;
+    }
+    R(function () {
+      var p = series('freeC'); if (p.length < 3 || p[p.length - 1][0] - p[0][0] < 7) return null;
+      var m = slope(p), cur = p[p.length - 1][1];
+      if (m >= -0.02 || cur <= 0) return null;
+      var daysLeft = cur / -m; if (daysLeft > 730) return null;
+      var when = new Date(NOW6 + daysLeft * 86400000).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+      return F('pred-disk', 'Storage', daysLeft <= 60 ? 'medium' : (daysLeft <= 180 ? 'low' : 'info'), 'At this pace drive C: will be full in about ' + (daysLeft < 60 ? Math.round(daysLeft) + ' days' : Math.round(daysLeft / 30) + ' months') + ' (' + when + ')',
+        'Your free space has been shrinking by about ' + (Math.round(-m * 30 * 10) / 10) + ' GB per month over the ' + p.length + ' scans in the history. A full drive makes Windows slow and updates fail.',
+        [S('Open the Storage findings of this report: it shows the biggest folders and what is safe to remove.'), S('Move photos, videos and old downloads to an external drive or the cloud.')], p.length + ' scans, free space from ' + Math.round(p[0][1]) + ' GB to ' + Math.round(cur) + ' GB');
+    });
+    R(function () {
+      var p = series('ssdWear'); if (p.length < 3 || p[p.length - 1][0] - p[0][0] < 14) return null;
+      var m = slope(p), cur = p[p.length - 1][1]; if (m <= 0.002 || cur >= 80) return null;
+      var daysLeft = (80 - cur) / m; if (daysLeft > 3650) return null;
+      return F('pred-ssd', 'Storage', daysLeft <= 365 ? 'medium' : 'low', 'The SSD wears out by about ' + (Math.round(m * 30 * 10) / 10) + ' % a month: ' + Math.round(daysLeft / 30) + ' months until 80 % worn',
+        'Every SSD has a limited number of writes. At 80 % worn it is time to plan a replacement before it fails. This is an estimate from your scan history.',
+        [S('Make sure you have a backup of everything important.'), S('Plan a new SSD around that time. A technician can copy Windows to it without losing anything.')], p.length + ' scans, wear from ' + p[0][1] + ' % to ' + cur + ' %');
+    });
+    R(function () {
+      var p = series('batWear'); if (p.length < 3 || p[p.length - 1][0] - p[0][0] < 14) return null;
+      var m = slope(p), cur = p[p.length - 1][1]; if (m <= 0.005 || cur >= 40) return null;
+      var daysLeft = (40 - cur) / m; if (daysLeft > 1825) return null;
+      return F('pred-bat', 'Performance', daysLeft <= 365 ? 'low' : 'info', 'The battery loses about ' + (Math.round(m * 30 * 10) / 10) + ' % of its capacity a month: ' + Math.round(daysLeft / 30) + ' months until it is 40 % worn',
+        'A battery that has lost 40 % of its capacity only lasts a little over half as long as when it was new.',
+        [S('Plan a battery replacement around that time. Many laptops let a repair shop change it in minutes.')], p.length + ' scans, battery wear from ' + p[0][1] + ' % to ' + cur + ' %');
     });
 
     out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });

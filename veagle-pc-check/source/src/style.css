@@ -526,3 +526,5 @@ body.th-cyber #tab-summary > .summary, body.th-cyber #tab-summary > .vz2 { displ
 @media print { body.th-cockpit #tab-summary > .summary, body.th-cyber #tab-summary > .summary { display: block !important; } body.th-guide #tab-summary > :not(#thHero) { display: block !important; } }
 body.th-guide .topbar { position: static; } .gd-do li { font-weight: 400; }
 body.th-clean .bver, body.th-guide .bver { color: #fff; }
+
+.accbox { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; border: 1px solid var(--line); background: var(--panel); padding: 12px 16px; margin-bottom: 14px; font-size: 13.5px; } .accbox span { flex: 1 1 360px; }

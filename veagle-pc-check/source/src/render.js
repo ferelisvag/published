@@ -310,7 +310,12 @@ var UI = (function (V) {
     drawFindings();
     $('#goodList').innerHTML = V.good.length ? V.good.map(function (x) { return mark('ok', esc(x.label) + (x.detail ? ' <span class="sub">- ' + esc(x.detail) + '</span>' : '')); }).join('') : '<div class="sub">No checks passed or nothing was collected.</div>';
   }
+  function accBox() {
+    var el = $('#accBox'); if (!el) return; var n = V.acceptedCount();
+    el.innerHTML = n ? '<div class="accbox"><span>' + esc(V.I('You accepted ' + n + (n === 1 ? ' finding' : ' findings') + '. Accepted findings do not count against your score. Changed your mind? This makes them all count again. Nothing on your PC is touched.', 'Έχεις αποδεχτεί ' + n + (n === 1 ? ' εύρημα' : ' ευρήματα') + '. Τα αποδεκτά δεν μετράνε στον βαθμό σου. Άλλαξες γνώμη; Με αυτό το κουμπί μετράνε ξανά όλα. Δεν αγγίζεται τίποτα στον υπολογιστή σου.')) + '</span><button class="btn sm" type="button" data-clear-acc>' + esc(V.I('Clear accepted (' + n + ')', 'Καθάρισε τα αποδεκτά (' + n + ')')) + '</button></div>' : '';
+  }
   function drawFindings(openId) {
+    accBox();
     var q = state.q.toLowerCase();
     var list = V.findings.filter(function (f) { return (state.sev === 'all' || f.sev === state.sev) && (!state.area || f.area === state.area) && (!q || (f.title + ' ' + f.why + ' ' + f.area + ' ' + f.evidence).toLowerCase().indexOf(q) >= 0); });
     if (state.sort === 'quick') list = list.slice().sort(function (a, b) { return (V.META[a.id] ? V.META[a.id][0] : 10) - (V.META[b.id] ? V.META[b.id][0] : 10); });

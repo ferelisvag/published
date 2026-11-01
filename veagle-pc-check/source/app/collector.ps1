@@ -5,11 +5,11 @@
 # Output: Reports\<timestamp>\report.html, data.json and a raw\ folder with the exported files.
 # -Quick skips the slow parts (msinfo32, winget, DISM, optional features, old drivers, folder sizes).
 
-param([switch]$Quick, [switch]$NoOpen)
+param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.8.0'
+$script:Version = '0.9.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -1707,3 +1707,11 @@ Write-Host '   Nothing was changed on this PC and nothing was uploaded.' -Foregr
 Write-Host '   The report opens in your browser now.' -ForegroundColor Gray
 
 if (-not $NoOpen -and (Test-Path (Join-Path $out 'report.html'))) { try { Start-Process (Join-Path $out 'report.html') } catch { } }
+# Only when you asked for it in the scheduled command: a small message that asks (and only asks) if you want to open the report.
+if ($Notify -and (Test-Path (Join-Path $out 'report.html'))) {
+    try {
+        Add-Type -AssemblyName PresentationFramework
+        $ans = [System.Windows.MessageBox]::Show("Your scheduled VEAGLE PC Check has finished.`nOpen the report now?", 'VEAGLE PC Check', 'YesNo', 'Information')
+        if ($ans -eq 'Yes') { Start-Process (Join-Path $out 'report.html') }
+    } catch { }
+}

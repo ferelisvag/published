@@ -82,6 +82,35 @@ var PRO = (function (V, AI) {
       '<p class="sub" style="margin-top:8px">' + esc(I(n + ' of ' + b.length + ' badges earned. Grey ones show what to do to earn them.', n + ' από ' + b.length + ' επιτεύγματα. Τα γκρι δείχνουν τι να κάνεις για να τα κερδίσεις.')) + '</p>';
   }
 
+
+  /* ---------- 8: your progress over time (kept only in this browser) ---------- */
+  var HK = 'veagle.pccheck.hist.' + String(g(D, 'meta.computer', 'pc'));
+  function loadHist() { try { return JSON.parse(localStorage.getItem(HK) || '[]') || []; } catch (e) { return []; } }
+  function trackScan() {
+    var h = loadHist(), gen = g(D, 'meta.generated', ''); if (!gen || !V.scoreRaw) return h;
+    if (!h.some(function (x) { return x.t === gen; })) { h.push({ t: gen, s: V.scoreRaw.score, hi: V.countsRaw.high, me: V.countsRaw.medium, lo: V.countsRaw.low, ver: g(D, 'meta.version', '') }); h.sort(function (a, b) { return a.t < b.t ? -1 : 1; }); if (h.length > 80) h = h.slice(-80); try { localStorage.setItem(HK, JSON.stringify(h)); } catch (e) { } }
+    return h;
+  }
+  function ticksTotal() {
+    var pre = 'veagle.pccheck.chk.' + String(g(D, 'meta.computer', 'pc')) + '.', n = 0;
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf(pre) === 0) { try { n += Object.keys(JSON.parse(localStorage.getItem(k) || '{}')).length; } catch (e) { } } } } catch (e) { }
+    return n;
+  }
+  function progressHtml() {
+    var h = trackScan(), first = h[0], last = h[h.length - 1], best = h.reduce(function (m, x) { return Math.max(m, x.s); }, 0);
+    var tile = function (v, l) { return '<div class="pst"><b>' + esc(v) + '</b><small>' + esc(l) + '</small></div>'; };
+    var pts = h.map(function (x) { return x.s; });
+    var chart = '';
+    if (pts.length >= 2) {
+      var w = 520, hh = 90, mn = Math.min.apply(null, pts.concat([0])), mx = 100, xy = pts.map(function (v, i) { return [10 + i * (w - 20) / (pts.length - 1), hh - 10 - (v - mn) / (mx - mn) * (hh - 20)]; });
+      var line = xy.map(function (p, i) { return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join(' ');
+      chart = '<svg viewBox="0 0 ' + w + ' ' + hh + '" width="100%" role="img" aria-label="' + esc(I('Score of each scan', 'Βαθμός κάθε σάρωσης')) + '"><path d="' + line + '" fill="none" stroke="#3ddc84" stroke-width="2.5"/>' + xy.map(function (p, i) { return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="4" fill="#3ddc84"><title>' + esc(dt(h[i].t) + ': ' + h[i].s) + '</title></circle>'; }).join('') + '</svg>';
+    }
+    var delta = h.length >= 2 ? last.s - first.s : null;
+    return '<div class="pstats">' + tile(String(h.length), I('reports opened for this PC', 'αναφορές που άνοιξες για αυτό το PC')) + tile(String(last ? last.s : '-'), I('score of the latest scan', 'βαθμός της τελευταίας σάρωσης')) + tile(String(best), I('best score so far', 'καλύτερος βαθμός ως τώρα')) + (delta != null ? tile((delta > 0 ? '+' : '') + delta, I('since the first report', 'από την πρώτη αναφορά')) : '') + tile(String(ticksTotal()), I('steps you ticked', 'βήματα που τσέκαρες')) + tile(String(V.acceptedCount()), I('items you accepted', 'πράγματα που αποδέχτηκες')) + '</div>' + chart +
+      '<p class="sub" style="margin-top:8px">' + esc(I('These numbers are kept only in this browser, on this PC. If you open the reports on another PC or clear the browser data, they start again from zero. Nothing is sent anywhere.', 'Αυτά τα νούμερα κρατιούνται μόνο σε αυτόν τον browser, σε αυτόν τον υπολογιστή. Αν ανοίξεις τα reports σε άλλον υπολογιστή ή καθαρίσεις τα δεδομένα του browser, ξεκινούν ξανά από το μηδέν. Δεν στέλνεται τίποτα πουθενά.')) + '</p>';
+  }
+
   /* ---------- summary additions ---------- */
   function summary() {
     var el = $('#tab-summary'); if (!el) return;
@@ -99,6 +128,7 @@ var PRO = (function (V, AI) {
     }
     var tail = document.createElement('div');
     tail.innerHTML = sect(I('What improved', 'Τι βελτιώθηκε'), I('your last scan against this one', 'η προηγούμενη σάρωση απέναντι σε αυτή')) + '<div class="win"><div class="body">' + beforeAfterHtml() + '</div></div>' +
+      sect(I('Your progress', 'Η πρόοδός σου'), I('how your PC and your fixes developed over time', 'πώς εξελίχθηκαν ο υπολογιστής σου και οι διορθώσεις σου')) + '<div class="win"><div class="body">' + progressHtml() + '</div></div>' +
       sect(I('Your badges', 'Τα επιτεύγματά σου'), I('small goals for a healthy PC', 'μικροί στόχοι για έναν υγιή υπολογιστή')) + '<div class="win"><div class="body">' + badgesHtml() + '</div></div>';
     var btns = el.querySelector('.btns:last-child');
     if (btns) el.insertBefore(tail, btns); else el.appendChild(tail);

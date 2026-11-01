@@ -205,14 +205,7 @@ var TOOLS = (function (V, AI, CMP) {
       '<label class="drop" for="fleetFile" id="fleetDrop"><b>' + I('Choose or drop the other reports here', 'Διάλεξε ή σύρε εδώ τις άλλες αναφορές') + '</b></label><input class="sr" type="file" id="fleetFile" multiple accept=".json,.html,application/json,text/html">' +
       '<div id="fleetOut" style="margin-top:14px">' + fleetHtml() + '</div><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="fleetSave">' + I('Save table as CSV', 'Αποθήκευση πίνακα ως CSV') + '</button></div>');
 
-    h += sect(I('A scan every month? Your choice', 'Σάρωση κάθε μήνα; Δική σου επιλογή'), I('optional, nothing is turned on for you', 'προαιρετικό, τίποτα δεν ενεργοποιείται για σένα'));
-    h += box('monthly_check.txt', I('you decide', 'αποφασίζεις εσύ'),
-      '<p>' + I('<b>Why do it:</b> small problems (a full disk, old antivirus definitions, a failing drive) are easy to fix early. A short check once a month catches them. The report is saved in the <span class="mono">Reports</span> folder and the "Summary" tab then shows what changed since last time.', '<b>Γιατί να το κάνεις:</b> τα μικρά προβλήματα (γεμάτος δίσκος, παλιοί ορισμοί antivirus, δίσκος που χαλάει) διορθώνονται εύκολα νωρίς. Ένας σύντομος έλεγχος μία φορά τον μήνα τα πιάνει. Η αναφορά αποθηκεύεται στον φάκελο <span class="mono">Reports</span> και η καρτέλα «Σύνοψη» δείχνει τι άλλαξε από την προηγούμενη φορά.') + '</p>' +
-      '<p>' + I('<b>What it would do:</b> every 4 weeks, in the background, it runs the <b>quick</b> scan without opening a window and without opening the report. It only reads. It changes nothing and sends nothing anywhere. It only runs if the PC is on and you are logged in (it catches up when the PC starts again).', '<b>Τι θα έκανε:</b> κάθε 4 εβδομάδες, στο παρασκήνιο, τρέχει τη <b>γρήγορη</b> σάρωση χωρίς να ανοίξει παράθυρο και χωρίς να ανοίξει την αναφορά. Μόνο διαβάζει. Δεν αλλάζει τίποτα και δεν στέλνει τίποτα πουθενά. Τρέχει μόνο αν ο υπολογιστής είναι ανοιχτός και είσαι συνδεδεμένος (αναπληρώνει όταν ξαναξεκινήσει).') + '</p>' +
-      '<p>' + I('<b>Nothing happens by itself.</b> This app never creates the task. Only if YOU copy the command below and paste it into PowerShell (as administrator) will Windows create it. Prefer something simpler? Put a repeating reminder in your phone calendar: "Run VEAGLE PC Check".', '<b>Τίποτα δεν γίνεται μόνο του.</b> Αυτή η εφαρμογή δεν δημιουργεί ποτέ την εργασία. Μόνο αν ΕΣΥ αντιγράψεις την εντολή παρακάτω και την επικολλήσεις στο PowerShell (ως διαχειριστής) θα τη δημιουργήσουν τα Windows. Προτιμάς κάτι πιο απλό; Βάλε επαναλαμβανόμενη υπενθύμιση στο ημερολόγιο του κινητού: «Τρέξε VEAGLE PC Check».') + '</p>' +
-      '<div class="lbl" style="margin-top:12px">' + I('1. Turn it on (optional)', '1. Ενεργοποίηση (προαιρετικό)') + '</div><textarea id="schOn" class="mono" rows="6" readonly style="width:100%"></textarea><div class="btns" style="margin-top:8px"><button class="btn sm" type="button" id="schOnCopy">' + I('Copy the "turn on" command', 'Αντιγραφή της εντολής ενεργοποίησης') + '</button></div>' +
-      '<div class="lbl" style="margin-top:14px">' + I('2. Turn it off again any time', '2. Απενεργοποίηση όποτε θες') + '</div><textarea id="schOff" class="mono" rows="2" readonly style="width:100%"></textarea><div class="btns" style="margin-top:8px"><button class="btn sm" type="button" id="schOffCopy">' + I('Copy the "turn off" command', 'Αντιγραφή της εντολής απενεργοποίησης') + '</button></div>' +
-      '<p class="sub" style="margin-top:12px">' + I('To paste: press the Windows key, type PowerShell, right-click it, choose "Run as administrator", right-click inside the window and press Enter. To see if it is on: Start, type "Task Scheduler", look for "VEAGLE PC Check monthly".', 'Για επικόλληση: πάτα το πλήκτρο Windows, πληκτρολόγησε PowerShell, δεξί κλικ, «Εκτέλεση ως διαχειριστής», δεξί κλικ μέσα στο παράθυρο και Enter. Για να δεις αν είναι ενεργό: Έναρξη, πληκτρολόγησε «Χρονοδιάγραμμα εργασιών» και ψάξε το «VEAGLE PC Check monthly».') + '</p>');
+    if (typeof TOOLS2 !== 'undefined') h += TOOLS2.html();
 
     h += sect(I('Windows secrets, just for fun', 'Μυστικά των Windows, για πλάκα'), I('nothing here changes your PC settings', 'τίποτα εδώ δεν αλλάζει τις ρυθμίσεις του PC σου'));
     h += box('secrets.txt', I('3 easter eggs', '3 easter eggs'),
@@ -228,6 +221,7 @@ var TOOLS = (function (V, AI, CMP) {
     root.innerHTML = h;
     refreshTexts();
     wire();
+    if (typeof TOOLS2 !== 'undefined') TOOLS2.wire();
     if (typeof PRO !== 'undefined') PRO.wireTools();
   }
 

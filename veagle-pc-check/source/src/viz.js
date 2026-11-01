@@ -138,6 +138,7 @@ var VIZ = (function (V) {
   var AK = 'veagle.pccheck.acc.' + String((V.D && V.D.meta && V.D.meta.computer) || 'pc'), acc = {};
   try { acc = JSON.parse(localStorage.getItem(AK) || '{}') || {}; } catch (e) { acc = {}; }
   V.isAccepted = function (id) { return !!acc[id]; };
+  V.acceptedCount = function () { return Object.keys(acc).length; };
   V.setAccepted = function (id, on) { if (on) acc[id] = 1; else delete acc[id]; try { localStorage.setItem(AK, JSON.stringify(acc)); } catch (e) { } V.userAdjust(); };
   V.isResolved = function (f) { return !!(f && (acc[f.id] || VIZ.findingDone(f))); };
   V.active = function () { return V.findings.filter(function (f) { return !V.isResolved(f); }); };

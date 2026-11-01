@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v0.8.0
+VEAGLE PC CHECK  v0.9.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -20,7 +20,7 @@ IT IS SAFE
 - The serial number of the PC is read only for your own inventory file. It is never in the AI
   package or in the share-safe copy.
 - NOTHING IS EVER CHANGED OR TURNED ON FOR YOU. Every fix is something you do yourself, step by step.
-  Even the optional monthly check (see the Tools tab) only exists if you copy its command and run it.
+  Even the optional scheduled check (see the Tools tab: you pick how often, which day and which time) only exists if you copy its command and run it. The optional message that asks whether to open the report only asks.
 - You can read every line of the program: app\collector.ps1 opens in Notepad.
 
 HOW TO USE IT (5 steps, about 5 minutes)
@@ -70,7 +70,7 @@ Findings    every problem, in plain words, with the fix.
 Hardware / Software / Events   all the details, for people who want them.
 Compare     compare with an older scan to see your progress.
 Tools       beginner guide, summary for a helper, safe fix script (you tick what goes in), Excel/CSV export,
-            many PCs in one table, an optional monthly check (you decide), Windows secrets, explained words.
+            many PCs in one table, an optional scheduled check (you decide), quick network repairs, system repair steps, an internet speed test link, Windows secrets, explained words.
 AI help     ask an AI (Claude first) to explain things to you. Personal data is removed.
 PC type     top right: Home, Work or Gaming. It changes which problems count more.
 Since last scan   the report remembers your previous scan and shows what got better or worse.

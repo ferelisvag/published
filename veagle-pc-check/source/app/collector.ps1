@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.5.0'
+$script:Version = '0.5.1'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -990,7 +990,7 @@ try {
     $infoSys = @(Get-WinEvent -FilterHashtable @{ LogName = 'System'; Id = 19, 1074, 7045, 42, 107; StartTime = $since } -MaxEvents 700 -ErrorAction SilentlyContinue)
     foreach ($e in $infoSys) {
         $pr = [string]$e.ProviderName; $id = [int]$e.Id
-        if ($pr -match 'WindowsUpdateClient' -and $id -eq 19) { Add-Tl $e 'update' (FirstLine $e.Message 70) }
+        if ($pr -match 'WindowsUpdateClient' -and $id -eq 19) { $ut = Ev-Prop $e 0; if (-not $ut) { $ut = FirstLine $e.Message 70 }; Add-Tl $e 'update' $ut }
         elseif ($pr -eq 'User32' -and $id -eq 1074) { $pn = Ev-Prop $e 0; if ($pn -match '[\\/]') { $pn = Split-Path -Leaf $pn }; Add-Tl $e 'shutdown' ((Ev-Prop $e 4) + ' ' + $pn) }
         elseif ($pr -eq 'Service Control Manager' -and $id -eq 7045) { Add-Tl $e 'svcinst' (Ev-Prop $e 0) }
         elseif ($pr -match 'Kernel-Power' -and $id -eq 42) { Add-Tl $e 'sleep' '' }

@@ -197,7 +197,7 @@ function Engine(RAW) {
 
   var META = {
     'stab-shutdown': [10, 'Easy', 'Safe'], 'stab-bsod': [20, 'Medium', 'Safe'], 'stab-bsod-codes': [5, 'Easy', 'Safe'], 'stab-whea': [30, 'Ask a pro', 'Careful'], 'stab-gpu': [10, 'Easy', 'Safe'],
-    'stab-disk': [20, 'Medium', 'Back up first'], 'stab-dism': [60, 'Medium', 'Safe'], 'stab-crashes': [10, 'Easy', 'Safe'], 'stab-crashes-gone': [2, 'Easy', 'Safe'], 'stab-services': [10, 'Easy', 'Safe'], 'stab-ports': [15, 'Ask a pro', 'Safe'],
+    'stab-disk': [20, 'Medium', 'Back up first'], 'stab-dism': [60, 'Medium', 'Safe'], 'stab-crashes': [10, 'Easy', 'Safe'], 'stab-crashes-gone': [2, 'Easy', 'Safe'], 'stab-bsod-old': [2, 'Easy', 'Safe'], 'stab-services': [10, 'Easy', 'Safe'], 'stab-ports': [15, 'Ask a pro', 'Safe'],
     'stab-hangs': [5, 'Easy', 'Safe'], 'stab-search': [10, 'Easy', 'Safe'], 'stab-vss': [5, 'Medium', 'Safe'], 'stab-wu': [10, 'Easy', 'Safe'], 'stab-pending': [2, 'Easy', 'Safe'], 'stab-uptime': [2, 'Easy', 'Safe'], 'stab-index': [10, 'Easy', 'Safe'],
     'sto-health': [5, 'Ask a pro', 'Back up first'], 'sto-smart': [5, 'Ask a pro', 'Back up first'], 'sto-space': [15, 'Easy', 'Safe'], 'sto-trim': [5, 'Medium', 'Safe'], 'sto-hdd': [60, 'Medium', 'Back up first'], 'sto-temp': [10, 'Easy', 'Safe'],
     'sec-av': [10, 'Easy', 'Safe'], 'sec-av2': [15, 'Medium', 'Safe'], 'sec-avold': [5, 'Easy', 'Safe'], 'sec-fw': [2, 'Easy', 'Safe'], 'sec-uac': [2, 'Easy', 'Safe'], 'sec-sb': [15, 'Ask a pro', 'Careful'], 'sec-tpm': [15, 'Ask a pro', 'Careful'], 'sec-tpm2': [5, 'Medium', 'Safe'],
@@ -267,7 +267,7 @@ function Engine(RAW) {
     });
     R(function () {
       var bs = evCount('system', /WER-SystemErrorReporting/, [1001]);
-      var dumps = num(g(D, 'crashDumps.dumps', 0));
+      var dl = arr(EX.dumps), dumps = dl.length ? dl.filter(function (x) { return (new Date(g(D, 'meta.generated', Date.now())).getTime() - new Date(x.time).getTime()) <= 30 * 86400000; }).length : num(g(D, 'crashDumps.dumps', 0));
       var n = Math.max(bs, dumps);
       if (n < 1) return null;
       return F('stab-bsod', 'Stability', 'high', 'Blue screen crashes (' + n + ')',
@@ -740,15 +740,27 @@ function Engine(RAW) {
     var SEC = EX.securityMore || {}, NT = EX.networkTest || {}, BK = EX.backup || {}, REL = EX.reliability || {};
 
     R(function () {
+      var dl = arr(EX.dumps); if (!dl.length) return null;
+      var gen = new Date(g(D, 'meta.generated', Date.now())).getTime();
+      var recent = dl.filter(function (x) { return gen - new Date(x.time).getTime() <= 30 * 86400000; }).length;
+      if (recent > 0 || evCount('system', /WER-SystemErrorReporting/, [1001]) > 0) return null;
+      var newest = dl.map(function (x) { return new Date(x.time).getTime(); }).sort(function (a, b) { return b - a; })[0];
+      var days = Math.round((gen - newest) / 86400000);
+      return F('stab-bsod-old', 'Stability', 'info', 'Old blue screen files from ' + days + ' days ago (none in the last 30 days)',
+        'Windows keeps a small file for each blue screen. Yours are from ' + days + ' days ago and no new ones appeared since, so this is history, not a current problem.',
+        [S('Nothing to do while no new blue screens appear.'), S('Optional: delete the old files to free a little space. Open File Explorer, go to C:\\Windows\\Minidump and delete the files inside.')],
+        dl.slice(0, 4).map(function (x) { return fmtDT(x.time) + (x.code ? ' ' + x.code : ''); }).join('\n'));
+    });
+    R(function () {
       var codes = arr(REL.bugchecks).filter(function (b) { return b.code; });
       if (!codes.length) codes = arr(EX.dumps).filter(function (b) { return b.code; });
       if (!codes.length) return null;
       var seen = {}, lines = [];
       codes.forEach(function (b) {
         var k = bugKey(b.code); if (seen[k]) { seen[k].n++; return; }
-        seen[k] = { n: 1 }; lines.push({ k: k, code: b.code });
+        seen[k] = { n: 1 }; lines.push({ k: k, code: b.code, time: b.time });
       });
-      var plain = lines.map(function (l) { var d = BUGCODES[l.k]; return l.code + (seen[l.k].n > 1 ? ' (x' + seen[l.k].n + ')' : '') + ': ' + (d ? d[0] + '. ' + d[1] : 'Windows did not record a name for this code, search the code on the internet.'); });
+      var plain = lines.map(function (l) { var d = BUGCODES[l.k]; return l.code + (seen[l.k].n > 1 ? ' (x' + seen[l.k].n + ')' : '') + (l.time ? ' (' + fmtDate(l.time) + ')' : '') + ': ' + (d ? d[0] + '. ' + d[1] : 'Windows did not record a name for this code, search the code on the internet.'); });
       return F('stab-bsod-codes', 'Stability', 'info', 'What your blue screens meant',
         'Every blue screen has a code. The code is a clue to what went wrong. Here is what yours say in plain words.',
         [S('Read the list under "Evidence" below. The part after the code is the likely cause.'),
@@ -1061,6 +1073,7 @@ function Engine(RAW) {
     /* ================= v0.5: connecting the dots between events and problems ================= */
     var TL = arr(EX.timeline).map(function (e) { return { t: new Date(e.t).getTime(), k: e.k, x: String(e.x || '') }; }).filter(function (e) { return isFinite(e.t); }).sort(function (a, b) { return a.t - b.t; });
     var H = 3600000, MIN = 60000;
+    var end30 = new Date(g(D, 'meta.generated', Date.now())).getTime() - 30 * 86400000;
     var BAD = { crash: 1, unclean: 1, bsod: 1, hang: 1, gpu: 1, disk: 1, svc: 1, whea: 1 };
     function ofKind() { var ks = Array.prototype.slice.call(arguments); return TL.filter(function (e) { return ks.indexOf(e.k) >= 0; }); }
     function when(ms) { return fmtDT(new Date(ms).toISOString()); }
@@ -1074,6 +1087,7 @@ function Engine(RAW) {
       Object.keys(BAD).forEach(function (kind) {
         var evs = ofKind(kind); if (evs.length < 4) return;
         var first = evs[0].t;
+        if (first - end30 < 5 * 86400000) return;
         var trig = TL.filter(function (e) { return (e.k === 'update' || e.k === 'install' || e.k === 'svcinst') && e.t <= first && first - e.t <= 72 * H; }).pop();
         if (!trig) return;
         var before = evs.filter(function (e) { return e.t < trig.t; }).length;
@@ -1179,7 +1193,7 @@ function Engine(RAW) {
       return F('cor-burst', 'Stability', 'info', 'Most problems (' + perDay[top] + ' of ' + bad.length + ') happened on one day: ' + new Date(top).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
         'When almost everything went wrong on a single day, something happened that day. A one-day burst is often harmless and does not come back. It is more worrying if it repeats.',
         [S('Do you remember what you did that day (new program, update, travel, power cut)?'), S('If the problems have stopped since, there is nothing to do. If they come back, run the scan again in a few days.')],
-        that.length ? that.map(function (e) { return when(e.t) + ' ' + trigName(e); }).join('\n') : 'No install or update events were found around that day.');
+        that.length ? (function () { var seen = {}, out2 = []; that.forEach(function (e) { var k = e.k + '|' + e.x + '|' + Math.floor(e.t / H); if (!seen[k]) { seen[k] = 1; out2.push(when(e.t) + ' ' + trigName(e)); } }); return out2.slice(0, 6).join('\n') + (out2.length > 6 ? '\n...' : ''); })() : 'No install or update events were found around that day.');
     });
 
     out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });

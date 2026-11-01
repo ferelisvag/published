@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.7.0'
+$script:Version = '0.7.1'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -1346,7 +1346,7 @@ try {
 # --- printers (virtual ones are left out)
 $printers = @()
 try {
-    $printers = @(Get-CimInstance Win32_Printer -ErrorAction Stop | Where-Object { $_.Name -notmatch '(?i)PDF|XPS|OneNote|Fax|Snagit|Send To|Print to' } | Select-Object -First 20 | ForEach-Object {
+    $printers = @(Get-CimInstance Win32_Printer -ErrorAction Stop | Where-Object { $_.Name -notmatch '(?i)PDF|XPS|OneNote|Fax|Snagit|Send To|Print to|RustDesk|AnyDesk|TeamViewer|Parsec|Splashtop|Zoom|Webex|Remote' } | Select-Object -First 20 | ForEach-Object {
         [pscustomobject]@{ name = [string]$_.Name; driver = [string]$_.DriverName; port = [string]$_.PortName; isDefault = [bool]$_.Default; network = [bool]$_.Network; shared = [bool]$_.Shared; offline = [bool]$_.WorkOffline }
     })
 } catch { }
@@ -1391,14 +1391,14 @@ try { $vpns = @(@(Get-VpnConnection -ErrorAction Stop) + @(Get-VpnConnection -Al
 # --- neighbours the PC already knows about (only reads the PC's own ARP memory, nothing is scanned)
 $neighbours = @()
 try {
-    $neighbours = @(Get-NetNeighbor -AddressFamily IPv4 -ErrorAction Stop | Where-Object { [string]$_.State -match 'Reachable|Stale|Delay|Probe' -and [string]$_.LinkLayerAddress -match '^[0-9A-Fa-f]{2}(-[0-9A-Fa-f]{2}){5}$' -and [string]$_.IPAddress -notmatch '^(224\.|239\.|255\.|169\.254\.)' -and [string]$_.LinkLayerAddress -ne 'FF-FF-FF-FF-FF-FF' } | Select-Object -First 40 | ForEach-Object {
+    $neighbours = @(Get-NetNeighbor -AddressFamily IPv4 -ErrorAction Stop | Where-Object { [string]$_.State -match '^(Reachable|Stale|Delay|Probe)$' -and [string]$_.LinkLayerAddress -ne '00-00-00-00-00-00' -and [string]$_.LinkLayerAddress -match '^[0-9A-Fa-f]{2}(-[0-9A-Fa-f]{2}){5}$' -and [string]$_.IPAddress -notmatch '^(224\.|239\.|255\.|169\.254\.)' -and [string]$_.LinkLayerAddress -ne 'FF-FF-FF-FF-FF-FF' } | Select-Object -First 40 | ForEach-Object {
         [pscustomobject]@{ ip = [string]$_.IPAddress; mac = ([string]$_.LinkLayerAddress).ToUpper(); state = [string]$_.State }
     })
 } catch { }
 
 # --- board, enclosure, last user, browsers
 $board = $null
-try { $enc = Get-CimInstance Win32_SystemEnclosure | Select-Object -First 1; $board = [pscustomobject]@{ assetTag = $(if ($enc) { ([string]$enc.SMBIOSAssetTag).Trim() } else { '' }); chassisSerial = $(if ($enc) { ([string]$enc.SerialNumber).Trim() } else { '' }) } } catch { }
+try { $enc = Get-CimInstance Win32_SystemEnclosure | Select-Object -First 1; $jk = '(?i)default string|to be filled|system serial|not specified|o\.e\.m|^none$|^0+$|^n/a$'; $at = $(if ($enc) { ([string]$enc.SMBIOSAssetTag).Trim() } else { '' }); $cs2 = $(if ($enc) { ([string]$enc.SerialNumber).Trim() } else { '' }); if ($at -match $jk) { $at = '' }; if ($cs2 -match $jk) { $cs2 = '' }; $board = [pscustomobject]@{ assetTag = $at; chassisSerial = $cs2 } } catch { }
 $lastUser = $null
 try { $lastUser = [pscustomobject]@{ user = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI' 'LastLoggedOnUser'); display = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI' 'LastLoggedOnDisplayName') } } catch { }
 $browsers = @()

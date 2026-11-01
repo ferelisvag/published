@@ -1236,7 +1236,7 @@ function Engine(RAW) {
       var a = arr(X6.accounts).filter(function (u) { return u.enabled && u.noPassword && !u.isGuest; });
       if (!a.length) return null;
       var adm = a.some(function (u) { return u.isAdmin; });
-      return F('sec-nopass', 'Security', 'medium', a.length + ' account' + (a.length > 1 ? 's are' : ' is') + ' allowed to have no password',
+      return F('sec-nopass', 'Security', 'low', a.length + ' account' + (a.length > 1 ? 's are' : ' is') + ' allowed to have no password',
         'Windows says ' + (a.length > 1 ? 'these accounts do not have to have' : 'this account does not have to have') + ' a password. That does not mean it is empty: accounts that sign in with a PIN or a Microsoft account often show like this. But if it really is empty, anybody who can sit at the PC could use it. ' + (adm ? 'At least one of them is an administrator, so it is worth checking.' : ''),
         [S('Press the Windows key, type "Sign-in options" and open it. If you see "Password" with a Change button, a password exists and you are fine.'), S('If it says "Add" instead, add a strong password (12 characters or more; a short sentence you will remember works well).')],
         nameList(a, function (u) { return u.name + (u.isAdmin ? ' (administrator)' : ''); }));
@@ -1584,9 +1584,10 @@ function Engine(RAW) {
     }
     R(function () {
       var hs = hardScore(); if (!hs) return null;
-      var fails = hardList().filter(function (x) { return x.pass === false; }), wsum = fails.reduce(function (a, x) { return a + x.w; }, 0);
+      var OFFICE = { llmnrOff: 1, netbiosOff: 1, smbSign: 1, psLogging: 1, credGuard: 1, asrRules: 1, netProt: 1, ntlmV2: 1, anonRestricted: 1 };
+      var known = hardList().filter(function (x) { return x.pass !== null && x.pass !== undefined && !OFFICE[x.id]; }), fails = known.filter(function (x) { return x.pass === false; }), wsum = fails.reduce(function (a, x) { return a + x.w; }, 0);
       if (wsum < 3) return null;
-      return F('sec-hardening', 'Security', hs.score < 50 ? 'medium' : 'low', fails.length + ' of ' + hs.total + ' extra security settings are not switched on (hardening score ' + hs.score + '/100)',
+      return F('sec-hardening', 'Security', hs.score < 50 ? 'medium' : 'low', fails.length + ' of ' + known.length + ' everyday security settings are not switched on (hardening score ' + hs.score + '/100)',
         'Windows has many protection switches that are off by default because they can get in the way. Each one that is on makes an attack harder. The Insights tab lists all of them with a plain explanation and how to switch them on. Some are only worth it in an office. Do not switch things on that you do not understand.',
         [S('Open the Insights tab and read the "Extra security settings" box.'), S('Start with the ones marked "Easy". For the rest, ask your IT person or an AI in the AI help tab.')],
         fails.slice(0, 12).map(function (x) { return x.en; }).join('\n'));

@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '0.6.1'
+$script:Version = '0.6.2'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -1209,7 +1209,8 @@ try {
 # --- inventory (the serial number stays on this PC: it is removed from the AI package and from the share-safe copy)
 $inventory = $null
 try {
-    $inventory = [pscustomobject]@{ serial = [string]$bios.SerialNumber; maker = [string]$cs.Manufacturer; model = [string]$cs.Model; biosDate = Iso $bios.ReleaseDate; osInstall = Iso $os.InstallDate }
+    $snum = [string]$bios.SerialNumber; if ($snum -match '(?i)default string|to be filled|system serial|not specified|o\.e\.m|^none$|^0+$|^n/a$') { $snum = '' }
+    $inventory = [pscustomobject]@{ serial = $snum; maker = [string]$cs.Manufacturer; model = [string]$cs.Model; biosDate = Iso $bios.ReleaseDate; osInstall = Iso $os.InstallDate }
 } catch { }
 
 # --- Office and licences
@@ -1274,6 +1275,7 @@ try {
             $xm = [xml]$e.ToXml(); $d = @{}
             foreach ($n in @($xm.Event.EventData.Data)) { $d[[string]$n.Name] = [string]$n.'#text' }
             $nm = $d['FriendlyName']; if (-not $nm) { $nm = $d['Name'] }; if (-not $nm) { $nm = $d['FileName'] }; if (-not $nm) { continue }
+            if ($nm -match '^vmmem') { continue }
             $kind = 'app'; if ($e.Id -eq 102) { $kind = 'driver' } elseif ($e.Id -eq 103) { $kind = 'service' }
             $tm = 0; try { $tm = [int]$d['TotalTime'] } catch { }
             $k = $kind + '|' + $nm
@@ -1290,7 +1292,7 @@ if (-not $Quick) {
     try {
         $cur = [string](@(Get-DnsClientServerAddress -AddressFamily IPv4 | Where-Object { $_.ServerAddresses } | ForEach-Object { $_.ServerAddresses } | Select-Object -First 1))
         $cands = @(); if ($cur) { $cands += , @('This PC', $cur) }
-        $cands += , @('Cloudflare', '1.1.1.1'); $cands += , @('Google', '8.8.8.8'); $cands += , @('Quad9', '9.9.9.9')
+        foreach ($pub in @(@('Cloudflare', '1.1.1.1'), @('Google', '8.8.8.8'), @('Quad9', '9.9.9.9'))) { if ($pub[1] -ne $cur) { $cands += , $pub } }
         foreach ($c in $cands) {
             $tot = 0; $ok = 0
             foreach ($nmx in 'www.microsoft.com', 'www.wikipedia.org', 'www.bbc.com') {

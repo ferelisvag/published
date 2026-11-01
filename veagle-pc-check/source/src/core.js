@@ -238,6 +238,7 @@ function Engine(RAW) {
   function runRules() {
     var out = [];
     var days = num(g(D, 'events.days', 30), 30);
+    var EX = g(D, 'extras', null) || {};
     function add(f) { if (Array.isArray(f)) { f.forEach(add); } else if (f) out.push(f); }
     function R(fn) { try { add(fn()); } catch (e) { out.push(F('rule-error', 'Software', 'info', 'A check could not run', String(e && e.message || e), [], '')); } }
 
@@ -1216,9 +1217,9 @@ function Engine(RAW) {
       var a = arr(X6.accounts).filter(function (u) { return u.enabled && u.noPassword && !u.isGuest; });
       if (!a.length) return null;
       var adm = a.some(function (u) { return u.isAdmin; });
-      return F('sec-nopass', 'Security', adm ? 'high' : 'medium', a.length + ' account' + (a.length > 1 ? 's do' : ' does') + ' not need a password',
-        'An account without a password lets anybody who can sit at the PC (or reach it over the network) in. ' + (adm ? 'At least one of them is an administrator, which is the most dangerous case.' : ''),
-        [S('Press the Windows key, type "Sign-in options" and open it. Under Password, click Change (or Add) and set a strong password.'), S('Use at least 12 characters. A short sentence you will remember works well.')],
+      return F('sec-nopass', 'Security', 'medium', a.length + ' account' + (a.length > 1 ? 's are' : ' is') + ' allowed to have no password',
+        'Windows says ' + (a.length > 1 ? 'these accounts do not have to have' : 'this account does not have to have') + ' a password. That does not mean it is empty: accounts that sign in with a PIN or a Microsoft account often show like this. But if it really is empty, anybody who can sit at the PC could use it. ' + (adm ? 'At least one of them is an administrator, so it is worth checking.' : ''),
+        [S('Press the Windows key, type "Sign-in options" and open it. If you see "Password" with a Change button, a password exists and you are fine.'), S('If it says "Add" instead, add a strong password (12 characters or more; a short sentence you will remember works well).')],
         nameList(a, function (u) { return u.name + (u.isAdmin ? ' (administrator)' : ''); }));
     });
     R(function () {
@@ -1258,8 +1259,8 @@ function Engine(RAW) {
       var ex = arr(X6.browserExt); if (!ex.length) return null;
       var strong = ex.filter(function (e) { return (e.allUrls && arr(e.risky).length >= 2) || arr(e.risky).some(function (p) { return /^(proxy|debugger|nativeMessaging)$/.test(p); }); });
       if (!strong.length) return null;
-      return F('sec-ext', 'Security', strong.length >= 5 ? 'medium' : 'low', strong.length + ' browser add-on' + (strong.length > 1 ? 's can' : ' can') + ' see or change everything you do on websites',
-        'Browser add-ons (extensions) are tiny programs inside your browser. Some ask for powers to read every page, passwords you type or your browsing history. A good add-on from a known company is fine, but a forgotten or unknown one is a common way to steal data.',
+      return F('sec-ext', 'Security', 'low', strong.length + ' browser add-on' + (strong.length > 1 ? 's have' : ' has') + ' wide powers: they can see or change what you do on websites',
+        'Browser add-ons (extensions) are tiny programs inside your browser. Some need wide powers to do their job: ad blockers, VPNs, password managers and crypto wallets are normal examples. The risk is a forgotten or unknown add-on with the same powers, a common way to steal data. So: keep the ones you know and use, remove the rest.',
         [S('Open your browser and type chrome://extensions (Chrome) or edge://extensions (Edge) in the address bar.'), S('Compare with the list under "Evidence". For every add-on you do not use or do not know, click Remove.'), S('Keep only what you really need.')],
         nameList(strong, function (e) { return e.browser + ': ' + e.name + ' - ' + (e.allUrls ? 'all websites, ' : '') + arr(e.risky).slice(0, 4).join(', '); }, 15));
     });

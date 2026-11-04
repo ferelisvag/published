@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veagle Notes · σαν το OneNote, με τα δεδομένα στα χέρια σου</title>
+<meta name="description" content="Εφαρμογή σημειώσεων με επικόλληση εικόνων και στιγμιότυπων οθόνης. Τα δεδομένα μένουν σε φάκελο στον υπολογιστή σου και μεταφέρονται με ένα ZIP.">
+<link rel="icon" href="assets/icon-192.png">
+<style>
+:root{--ink:#1f2430;--mute:#5d6577;--line:#dfe3ec;--bg:#f5f6f8;--brand:#0d1626;--accent:#2f4b7c;--accent2:#c8102e}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.6;font-size:17px}
+a{color:var(--accent)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+nav{position:sticky;top:0;z-index:10;background:rgba(11,12,16,.96);backdrop-filter:blur(6px)}
+nav .wrap{display:flex;align-items:center;gap:20px;height:60px}
+nav img{height:38px}
+nav b{color:#fff;font-size:18px;margin-right:auto}
+nav a{color:#c9cfdd;text-decoration:none;font-size:15px}nav a:hover{color:#fff}
+.hero{background:radial-gradient(1200px 500px at 80% -10%,#26324a 0,#0b0c10 60%);color:#fff;padding:70px 0 60px}
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
+.hero h1{font-size:46px;line-height:1.12;margin:0 0 16px}
+.hero p{color:#c9cfdd;font-size:19px;margin:0 0 26px}
+.btn{display:inline-block;padding:13px 22px;border-radius:10px;font-weight:600;text-decoration:none;margin:0 10px 10px 0}
+.btn.p{background:#fff;color:#0b0c10}.btn.s{border:1px solid #6b7488;color:#fff}
+.hero img.shot{width:100%;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.5);border:1px solid #333}
+section{padding:64px 0}section.alt{background:var(--bg)}
+h2{font-size:32px;margin:0 0 10px}.lead{color:var(--mute);font-size:19px;margin:0 0 34px;max-width:760px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}
+.card .i{font-size:30px}.card h3{margin:8px 0 6px;font-size:19px}.card p{margin:0;color:var(--mute);font-size:16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center}
+.two img{width:100%;border-radius:12px;border:1px solid var(--line);box-shadow:0 10px 30px rgba(20,30,60,.12)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;position:relative;padding:0 0 16px 52px}
+.steps li:before{content:counter(s);position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+table{border-collapse:collapse;width:100%;font-size:16px}th,td{border:1px solid var(--line);padding:10px 14px;text-align:left;vertical-align:top}th{background:var(--bg)}
+.yes{color:#15803d;font-weight:600}.no{color:#b45309;font-weight:600}
+details{border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:10px 0;background:#fff}summary{cursor:pointer;font-weight:600}
+footer{background:var(--brand);color:#aab0c0;padding:40px 0;font-size:15px}
+footer .wrap{display:flex;gap:30px;align-items:center;flex-wrap:wrap}
+footer .logos{display:flex;gap:16px;align-items:center}
+footer .chip{background:#fff;border-radius:10px;padding:6px 10px;display:flex}footer .chip img{height:48px}
+footer a{color:#fff}
+@media(max-width:860px){.hero .wrap,.two{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.hero h1{font-size:34px}nav a.h{display:none}}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><img src="assets/logo-eagle-white.png" alt="Vagelis Ferelis"><b>Veagle Notes</b><a class="h" href="#xaraktiristika">Χαρακτηριστικά</a><a class="h" href="#metafora">Μεταφορά</a><a class="h" href="#onenote">OneNote</a><a href="odigies.html">Οδηγίες</a><a href="app.html"><b style="color:#fff;margin:0">Άνοιγμα ›</b></a></div></nav>
+
+<header class="hero"><div class="wrap">
+  <div>
+    <h1>Veagle Notes: σημειώσεις σαν το OneNote.<br>Τα δεδομένα είναι <u>δικά σου</u>.</h1>
+    <p>Γράφεις, επικολλάς εικόνες και στιγμιότυπα οθόνης με ένα Ctrl+V, και όλα μένουν σε έναν φάκελο στον υπολογιστή σου. Χωρίς λογαριασμό, χωρίς συνδρομή, χωρίς internet.</p>
+    <a class="btn p" href="app.html">Άνοιγμα της εφαρμογής</a><a class="btn s" href="odigies.html">Οδηγίες εγκατάστασης &amp; χρήσης</a>
+  </div>
+  <img class="shot" src="assets/shot-2-main.png" alt="Η εφαρμογή Veagle Notes με μια σελίδα που περιέχει στιγμιότυπο οθόνης">
+</div></header>
+
+<section id="xaraktiristika"><div class="wrap">
+  <h2>Φτιαγμένο για αυτό που χρειάζεσαι καθημερινά</h2>
+  <p class="lead">Λίγα πράγματα, και όλα να δουλεύουν σωστά.</p>
+  <div class="grid">
+    <div class="card"><div class="i">🖼</div><h3>Επικόλληση εικόνων &amp; Print Screen</h3><p>Πατάς Print Screen (ή Win+Shift+S), πηγαίνεις στη σελίδα και πατάς Ctrl+V. Η εικόνα μπαίνει εκεί που γράφεις. Δουλεύει και με σύρσιμο εικόνων και με εικόνες που αντιγράφεις από άλλα προγράμματα.</p></div>
+    <div class="card"><div class="i">📁</div><h3>Κανονικά αρχεία, όχι «κλειστή βάση»</h3><p>Κάθε ενότητα είναι φάκελος, κάθε σελίδα ένα αρχείο .html και κάθε εικόνα ένα αρχείο PNG. Τα ανοίγεις και χωρίς την εφαρμογή, τα αντιγράφεις, τα βάζεις σε OneDrive ή USB.</p></div>
+    <div class="card"><div class="i">📦</div><h3>Export / Import με ένα ZIP</h3><p>Ένα κλικ φτιάχνει αντίγραφο όλων των σημειώσεων. Σε άλλον υπολογιστή το εισάγεις χωρίς να χαθεί τίποτα. Υπάρχει και έλεγχος ότι το ZIP είναι σωστό.</p></div>
+    <div class="card"><div class="i">📄</div><h3>Εισαγωγή από OneNote</h3><p>Εξάγεις το σημειωματάριο από το OneNote ως .mht (ή ως Word) και το φέρνεις εδώ με μία κίνηση, με κείμενο, λίστες, πίνακες και εικόνες.</p></div>
+    <div class="card"><div class="i">🔍</div><h3>Ενότητες, σελίδες, αναζήτηση</h3><p>Οργάνωσε τα πάντα σε ενότητες και βρες οτιδήποτε με μία αναζήτηση σε όλες τις σελίδες.</p></div>
+    <div class="card"><div class="i">🛡</div><h3>Τίποτα δεν γίνεται κρυφά</h3><p>Αποθηκεύεις εσύ. Οι διαγραφές πάνε σε φάκελο «_trash». Η εισαγωγή δεν γράφει ποτέ πάνω σε υπάρχοντα αρχεία. Η αυτόματη αποθήκευση είναι προαιρετική.</p></div>
+    <div class="card"><div class="i">🎨</div><h3>Διαλέγεις εσύ τα χρώματα</h3><p>Έξι χρώματα εφαρμογής και ανοιχτή ή σκούρη σελίδα γραφής. Η επιλογή σου μένει στον υπολογιστή σου και δεν αγγίζει τις σημειώσεις.</p></div>
+  </div>
+</div></section>
+
+<section class="alt"><div class="wrap two">
+  <div><h2>Ένα Ctrl+V και η εικόνα είναι μέσα</h2>
+    <p class="lead" style="margin-bottom:16px">Κάνε κλικ πάνω στην εικόνα για να τη μικρύνεις ή να τη μεγαλώσεις. Διπλό κλικ την ανοίγει σε πλήρη οθόνη.</p>
+    <ol class="steps"><li><b>Print Screen</b> ή <b>Win + Shift + S</b> για να διαλέξεις περιοχή της οθόνης.</li><li>Άνοιξε μια σελίδα στο Veagle Notes.</li><li>Πάτα <b>Ctrl + V</b>. Έτοιμο.</li></ol></div>
+  <img src="assets/shot-3-imagebar.png" alt="Επιλογή μεγέθους εικόνας">
+</div></section>
+
+<section id="metafora"><div class="wrap two">
+  <img src="assets/shot-4-backup.png" alt="Παράθυρο αντιγράφων ασφαλείας και εισαγωγής">
+  <div><h2>Μετάφερε τα πάντα σε άλλον υπολογιστή</h2>
+    <p class="lead" style="margin-bottom:16px">Όλες οι σελίδες και οι εικόνες σε ένα αρχείο.</p>
+    <ol class="steps"><li>Στον παλιό υπολογιστή: <b>Αντίγραφα &amp; Εισαγωγή → Όλες οι σημειώσεις</b>.</li><li>Πέρασε το ZIP με USB, OneDrive ή email.</li><li>Στον νέο: άνοιξε την εφαρμογή και πάτα <b>Εισαγωγή από ZIP</b>.</li></ol>
+    <p>Αν υπάρχει ήδη κάτι με το ίδιο όνομα, κρατιούνται και τα δύο. Τίποτα δεν χάνεται.</p></div>
+</div></section>
+
+<section id="onenote" class="alt"><div class="wrap">
+  <h2>Έρχεσαι από το OneNote;</h2>
+  <p class="lead">Στο OneNote για Windows: Αρχείο → Εξαγωγή → Notebook → <b>Single File Web Page (.mht)</b>. Μετά το διαλέγεις στο Veagle Notes και όλες οι σελίδες περνούν μαζί, με τίτλους, ημερομηνίες, κείμενο, λίστες, πίνακες και εικόνες. Δουλεύει και με αρχεία Word (.docx).</p>
+  <p>Δεν περνούν: χειρόγραφες σημειώσεις και σχέδια, ήχος και βίντεο, αρχεία επισυναπτόμενα, και η ελεύθερη διάταξη (τα κουτιά κειμένου μπαίνουν σε σειρά). Δείτε τις <a href="odigies.html#onenote">αναλυτικές οδηγίες</a>.</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Τι κάνει και τι δεν κάνει</h2><p class="lead">Για να ξέρεις από την αρχή τι να περιμένεις.</p>
+  <table>
+    <tr><th>Ναι</th><th>Όχι (προς το παρόν)</th></tr>
+    <tr><td class="yes">Λειτουργεί χωρίς internet και χωρίς λογαριασμό</td><td class="no">Δεν συγχρονίζεται μόνο του μεταξύ υπολογιστών (βάλε τον φάκελο σε OneDrive ή Google Drive, ή χρησιμοποίησε το ZIP)</td></tr>
+    <tr><td class="yes">Τα δεδομένα είναι απλά αρχεία στον δικό σου φάκελο</td><td class="no">Δεν υπάρχει χειρόγραφο / στυλό</td></tr>
+    <tr><td class="yes">Δουλεύει σε Chrome και Edge (Windows, Mac, Linux)</td><td class="no">Δεν δουλεύει σε Firefox και Safari</td></tr>
+    <tr><td class="yes">Εικόνες με Ctrl+V, σύρσιμο ή από αρχείο</td><td class="no">Δεν έχει κοινή επεξεργασία από πολλούς ταυτόχρονα</td></tr>
+  </table>
+</div></section>
+
+<section class="alt"><div class="wrap">
+  <h2>Συχνές ερωτήσεις</h2>
+  <details><summary>Πού αποθηκεύονται οι σημειώσεις μου;</summary><p>Στον φάκελο που διαλέγεις την πρώτη φορά. Δεν στέλνεται τίποτα πουθενά: η εφαρμογή δεν χρησιμοποιεί internet.</p></details>
+  <details><summary>Τι γίνεται αν χαλάσει ο υπολογιστής μου;</summary><p>Αν έχεις κάνει αντίγραφο ZIP (ή ο φάκελος είναι σε OneDrive/USB), τα παίρνεις πίσω σε άλλον υπολογιστή με «Εισαγωγή από ZIP». Η εφαρμογή σου θυμίζει πότε έκανες το τελευταίο αντίγραφο.</p></details>
+  <details><summary>Χρειάζεται εγκατάσταση;</summary><p>Όχι. Είναι ένα αρχείο που ανοίγεις με διπλό κλικ στον Chrome ή στον Edge. Δες τις <a href="odigies.html#egkatastasi">οδηγίες εγκατάστασης</a> για συντόμευση στην επιφάνεια εργασίας.</p></details>
+  <details><summary>Μπορώ να ανοίξω τις σελίδες χωρίς την εφαρμογή;</summary><p>Ναι. Είναι κανονικά αρχεία .html και ανοίγουν με οποιονδήποτε browser.</p></details>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="logos"><span class="chip"><img src="assets/logo-eagle-shield-name.png" alt="Vagelis Ferelis"></span><span class="chip"><img src="assets/logo-ferelis-photo.png" alt="Ferelis"></span></div>
+  <div>Σχεδίαση &amp; υλοποίηση: <b style="color:#fff">Vagelis Ferelis</b> · <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a><br>Healthcare IT Specialist · Φωτογράφος · Αθήνα</div>
+</div></footer>
+</body>
+</html>

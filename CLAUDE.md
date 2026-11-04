@@ -64,7 +64,7 @@ Repo `ferelisvag/published` (public), δημοσιεύεται με GitHub Pages
 - Χωρίς παρακολούθηση. localStorage μόνο για τον μετρητή «τέλεια αυγά».
 
 ## veagle-notes/ — Veagle Notes (σημειώσεις σαν το OneNote)
-- `index.html` = σελίδα προϊόντος, `odigies.html` = οδηγίες εγκατάστασης και χρήσης, `app.html` = η ίδια η εφαρμογή (ένα αρχείο, inline CSS/JS, δουλεύει και αποθηκευμένο τοπικά). Στο `assets/` τα λογότυπα και τα screenshots.
+- `index.html` = σελίδα προϊόντος, `readme_instructions.html` = οδηγίες εγκατάστασης και χρήσης, `veaglenotes.html` = η ίδια η εφαρμογή (ένα αρχείο, inline CSS/JS, δουλεύει και αποθηκευμένο τοπικά). Στο `assets/` τα λογότυπα και τα screenshots.
 - Μόνο Chrome/Edge (File System Access API). Φάκελος `Ενότητα/Σελίδα.html` με `_images/` και `_trash/`, εικόνες ως blobs μέχρι το «Αποθήκευση». Export/import ZIP με δικό μας ZipWriter (manifest `notes-manifest.json`), εισαγωγή από OneNote μέσω .mht και .docx (το .onepkg δεν μπορεί).
 - Εμφάνιση Α: σκούρο πλαίσιο, ανοιχτό «χαρτί». Ρυθμίσεις χρώματος (6 χρώματα + ανοιχτή/σκούρη σελίδα) στο localStorage `vm-theme`, ορίζονται μόνο από τον χρήστη. Το σύστημα δεν αλλάζει το θέμα αυτόματα.
 - Η παραλλαγή για την InterMedica (Intermedica Notes) ΔΕΝ ζει εδώ αλλά στο private repo `ferelisvag/IM`, γιατί έχει το λογότυπό τους. Το ίδιο κείμενο «Ιδέα και σχεδιασμός: Vagelis Ferelis» (όχι «υλοποίηση»).

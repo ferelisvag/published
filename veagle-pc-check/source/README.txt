@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v1.0.2
+VEAGLE PC CHECK  v1.1.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -50,6 +50,12 @@ READING THE REPORT
 - You never have to fix everything. Start with the red HIGH ones, one at a time.
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
+
+NEW IN 1.1.0
+- Scan notes: if a check could not read everything (for example it was not run as Administrator), the Summary says which step may be incomplete. This is not a problem with your PC.
+- Findings: switch between "For you" (only what to do) and "For a technician" (all details).
+- Print / PDF always makes the clean report sheet, in any theme. In the print window choose "Save as PDF".
+- Links to the official support pages of your PC maker and graphics card, and a button that opens the download page so you can check for a newer version. The app never checks the internet by itself.
 
 COMFORT AND LOOK
 ----------------

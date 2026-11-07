@@ -26,6 +26,7 @@
       if ((t = e.target.closest('[data-tab-go]'))) { go(t.getAttribute('data-tab-go')); return; }
       if ((t = e.target.closest('[data-open]'))) { var id = t.getAttribute('data-open'); UI.state.sev = 'all'; UI.state.q = ''; UI.state.area = ''; go('findings'); UI.drawFindings(id); return; }
       if ((t = e.target.closest('[data-copy]'))) { var ok = AI.copyText(t.getAttribute('data-copy')); AI.toast(ok ? 'Command copied. Paste it into PowerShell (as Administrator where noted).' : 'Copy failed. Select the text and press Ctrl+C.'); return; }
+      var vb = e.target.closest('[data-view]'); if (vb) { UI.setView(vb.getAttribute('data-view')); return; }
       if (e.target.closest('[data-clear-acc]')) { V.clearAccepted(); refreshScore(); AI.toast(V.I('Cleared. All findings count again.', 'Καθαρίστηκαν. Όλα τα ευρήματα μετράνε ξανά.')); return; }
       if ((t = e.target.closest('[data-accept]'))) { var aid = t.getAttribute('data-accept'); V.setAccepted(aid, !V.isAccepted(aid)); refreshScore(); AI.toast(V.isAccepted(aid) ? V.I('Accepted. It no longer counts against your score. You can undo it any time.', 'Αποδεκτό. Δεν μετράει πια στον βαθμό σου. Μπορείς να το αναιρέσεις οποτεδήποτε.') : V.I('It counts again.', 'Μετράει ξανά.')); return; }
       if ((t = e.target.closest('[data-ask]'))) { var f = findFinding(t.getAttribute('data-ask')); AI.setFocus(f ? f.title : ''); var fo = $('#aiFocus'); if (fo && f) { fo.value = 'Please explain finding "' + f.title + '" and how to fix it safely.'; } AI.refresh(); go('ai'); return; }
@@ -34,7 +35,7 @@
     });
     $('#findQ').addEventListener('input', function (e) { UI.state.q = e.target.value; UI.drawFindings(); });
     document.addEventListener('input', function (e) { if (e.target && e.target.id === 'appQ') { UI.setAppQ(e.target.value); UI.drawApps(); } });
-    $('#btnPrint').addEventListener('click', function () { window.print(); });
+    $('#btnPrint').addEventListener('click', function () { AI.toast(V.I('In the print window choose "Save as PDF" as the printer.', 'Στο παράθυρο εκτύπωσης διάλεξε «Αποθήκευση ως PDF» ως εκτυπωτή.')); PRO.printClient(); });
     $('#btnTheme').addEventListener('click', function () { VIZ.toggle('light'); });
     $('#btnBig').addEventListener('click', function () { VIZ.toggle('big'); });
     document.addEventListener('change', function (e) { var c = e.target && e.target.getAttribute && e.target.getAttribute('data-chk'); if (!c) return; var p = c.split('|'); var f0 = findFinding(p[0]), was = f0 && VIZ.findingDone(f0); VIZ.chkSet(p[0], +p[1], e.target.checked); var li = e.target.closest('li'); if (li) li.classList.toggle('done', e.target.checked); var fi = e.target.closest('.finding'); var f = findFinding(p[0]); if (fi && f) fi.classList.toggle('fdone', VIZ.findingDone(f)); var st = VIZ.chkStats(), tx = $('#progTxt'); if (tx) tx.textContent = V.I('You have done ' + st.done + ' of ' + st.total + ' steps', 'Έχεις κάνει ' + st.done + ' από ' + st.total + ' βήματα'); var pb = $('.pbar i'); if (pb) pb.style.width = Math.round(st.done / Math.max(1, st.total) * 100) + '%'; if (f0 && was !== VIZ.findingDone(f0)) refreshScore(); });

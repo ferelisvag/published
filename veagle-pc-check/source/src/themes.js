@@ -175,7 +175,7 @@ var THEMES = (function (V) {
     try { localStorage.setItem(KEY, cur); } catch (e) { }
     guide.step = 0;
     if (cur !== 'classic' || fromUser) VIZ.set('light', t.light);
-    if (fromUser) VIZ.set('big', t.big);
+    if (fromUser) { VIZ.set('big', t.big); if (cur === 'guide') UI.setView('simple'); }
     applyClass();
     if (fromUser) { UI.renderAll(); VIZ.applyPrefs(); I18N.apply(); }
   }

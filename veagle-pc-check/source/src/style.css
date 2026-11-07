@@ -528,3 +528,18 @@ body.th-guide .topbar { position: static; } .gd-do li { font-weight: 400; }
 body.th-clean .bver, body.th-guide .bver { color: #fff; }
 
 .accbox { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; border: 1px solid var(--line); background: var(--panel); padding: 12px 16px; margin-bottom: 14px; font-size: 13.5px; } .accbox span { flex: 1 1 360px; }
+
+/* 1.1.0: findings view for you / for a technician */
+.viewsw{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 10px}
+.viewsw .btn.on{background:var(--accent,#e0312f);color:#fff;border-color:transparent}
+body.view-simple .finding .metachips,body.view-simple .finding .ev,body.view-simple .finding .fid,body.view-simple .finding .area,body.view-simple .finding [data-ask]{display:none}
+.supp{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media print{.supp{display:none}}
+/* 1.1.0: the printed client sheet is always black on white, whatever theme is on screen */
+@media print {
+  html:has(body.printclient), body.printclient { background: #fff !important; color: #111 !important; }
+  body.printclient::before, body.printclient::after { display: none !important; }
+  body.printclient #clientDoc { background: #fff !important; color: #111 !important; }
+  body.printclient #clientDoc :where(p, li, td, th, dt, dd, h1, h2, h3, b, span, small, div, br):not(.cd-stamp):not(.cd-score):not(.cd-score *) { color: #111 !important; background: transparent !important; text-shadow: none !important; }
+  body.printclient #clientDoc .cd-line span, body.printclient #clientDoc small { color: #52525b !important; }
+}

@@ -13,6 +13,7 @@ var SHARE = (function (V, AI) {
     var clean = walk(V.RAW);
     delete clean.previous; // the earlier scan is not part of a share-safe copy
     clean.meta = clean.meta || {};
+    (clean.meta.stepIssues || []).forEach && (clean.meta.stepIssues || []).forEach(function (x) { x.samples = []; }); // error texts are not shared
     try {
       var mo = clean.extras && clean.extras.more;
       if (mo) {

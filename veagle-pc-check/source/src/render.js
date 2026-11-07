@@ -152,7 +152,7 @@ var UI = (function (V) {
     h += '<div class="btns" style="margin-top:18px"><button class="btn sm" type="button" data-tab-go="dashboard">See all details</button><button class="btn sm" type="button" data-tab-go="tools">Beginner guide</button><button class="btn sm" type="button" id="btnPrint2">Print this page</button></div>';
     el.innerHTML = h;
     var sb = $('#sinceBox2'); if (sb) { var src = $('#sinceBox'); sb.innerHTML = src ? src.innerHTML : ''; }
-    var pb = $('#btnPrint2'); if (pb) pb.addEventListener('click', function () { window.print(); });
+    var pb = $('#btnPrint2'); if (pb) pb.addEventListener('click', function () { PRO.printClient(); });
   }
   function rCpu() {
     var c = g(D, 'system.cpu', null);
@@ -302,6 +302,20 @@ var UI = (function (V) {
 
   /* ---------------- findings ---------------- */
   var state = { sev: 'all', q: '', area: '', sort: 'prio' };
+  /* "For you" (simple) or "For a technician" view of the findings, remembered in the browser */
+  function getView() { try { return localStorage.getItem('veagle.pccheck.view') === 'simple' ? 'simple' : 'tech'; } catch (e) { return 'tech'; } }
+  function setView(v) {
+    try { localStorage.setItem('veagle.pccheck.view', v); } catch (e) { }
+    applyView();
+  }
+  function applyView() {
+    var v = getView();
+    document.body.classList.toggle('view-simple', v === 'simple');
+    var b = $('#viewSw'); if (!b) return;
+    b.innerHTML = '<span class="lbl">' + esc(V.I('View:', 'Προβολή:')) + '</span>' +
+      '<button type="button" class="btn sm' + (v === 'simple' ? ' on' : '') + '" data-view="simple" aria-pressed="' + (v === 'simple') + '">' + esc(V.I('For you (what to do)', 'Για εσένα (τι να κάνεις)')) + '</button>' +
+      '<button type="button" class="btn sm' + (v === 'tech' ? ' on' : '') + '" data-view="tech" aria-pressed="' + (v === 'tech') + '">' + esc(V.I('For a technician (all details)', 'Για τεχνικό (όλες οι λεπτομέρειες)')) + '</button>';
+  }
   function rFindings() {
     var c = V.counts;
     $('#findSummary').textContent = (c.high + c.medium + c.low) + ' findings, ' + c.info + (c.info === 1 ? ' tip' : ' tips');
@@ -316,6 +330,7 @@ var UI = (function (V) {
   }
   function drawFindings(openId) {
     accBox();
+    applyView();
     var q = state.q.toLowerCase();
     var list = V.findings.filter(function (f) { return (state.sev === 'all' || f.sev === state.sev) && (!state.area || f.area === state.area) && (!q || (f.title + ' ' + f.why + ' ' + f.area + ' ' + f.evidence).toLowerCase().indexOf(q) >= 0); });
     if (state.sort === 'quick') list = list.slice().sort(function (a, b) { return (V.META[a.id] ? V.META[a.id][0] : 10) - (V.META[b.id] ? V.META[b.id][0] : 10); });
@@ -324,7 +339,7 @@ var UI = (function (V) {
       var f = V.tf(f0);
       var steps = f.steps.length ? '<ol class="steps">' + f.steps.map(function (s, si) { var on = VIZ.chkOn(f.id, si); return '<li' + (on ? ' class="done"' : '') + '><label class="chk"><input type="checkbox" data-chk="' + esc(f.id) + '|' + si + '"' + (on ? ' checked' : '') + '><span>' + gloss(esc(s.t)) + '</span></label>' + (s.cmd ? cmdBox(s.cmd) : '') + '</li>'; }).join('') + '</ol><p class="sub chkhint">' + esc(V.I('Tick each step when you have done it. This only marks your progress, nothing is run.', 'Τσέκαρε κάθε βήμα όταν το κάνεις. Αυτό μόνο σημειώνει την πρόοδό σου, δεν τρέχει τίποτα.')) + '</p>' : '';
       return '<div class="finding' + (f.id === openId ? ' open' : '') + (VIZ.findingDone(f) ? ' fdone' : '') + (V.isAccepted(f.id) ? ' facc' : '') + '" data-id="' + esc(f.id) + '"><button class="fh" type="button" aria-expanded="' + (f.id === openId) + '"><span class="fid">#' + String(V.findings.indexOf(f0) + 1).padStart(2, '0') + '</span>' + tag(f.sev) + '<span class="t">' + esc(f.title) + (V.isAccepted(f.id) ? ' <small class="accn">' + esc(V.I('accepted', 'αποδεκτό')) + '</small>' : '') + '</span><span class="area">' + esc(f.area) + '</span></button>' +
-        '<div class="fb">' + metaChips(f) + '<div class="lbl">In plain words</div><p class="why">' + gloss(esc(f.why)) + '</p>' + (f.evidence ? '<div class="ev"><span class="lbl">What we found</span><br>' + esc(f.evidence).replace(/\n/g, '<br>') + '</div>' : '') + steps +
+        '<div class="fb">' + metaChips(f) + '<div class="lbl">In plain words</div><p class="why">' + gloss(esc(f.why)) + '</p>' + (f.evidence ? '<div class="ev"><span class="lbl">What we found</span><br>' + esc(f.evidence).replace(/\n/g, '<br>') + '</div>' : '') + steps + (typeof SUPPORT !== 'undefined' ? SUPPORT.row(f) : '') +
         '<div class="btns" style="margin-top:14px"><button class="btn sm" type="button" data-ask="' + esc(f.id) + '">Ask an AI about this</button>' + (f.sev === 'info' ? '' : '<button class="btn sm" type="button" data-accept="' + esc(f.id) + '" title="' + esc(V.I('You know about it and decided to keep things as they are. It stops counting against the score. You can undo this any time.', 'Το ξέρεις και αποφάσισες να μείνουν όπως είναι. Δεν μετράει πια στον βαθμό. Μπορείς να το αναιρέσεις οποτεδήποτε.')) + '">' + esc(V.isAccepted(f.id) ? V.I('Undo: count it again', 'Αναίρεση: να μετράει ξανά') : V.I('I accept this (do not count it)', 'Το αποδέχομαι (να μην μετράει)')) + '</button>') + '</div></div></div>';
     }).join('') : '<div class="win"><div class="body sub">No findings match.</div></div>';
     if (openId) { var el = $('.finding[data-id="' + openId + '"]'); if (el) el.scrollIntoView({ block: 'center' }); }
@@ -452,5 +467,5 @@ var UI = (function (V) {
     VIZ.animateRings(document);
   }
 
-  return { renderAll: renderAll, countUp: countUp, drawFindings: drawFindings, state: state, drawApps: drawApps, setAppQ: function (q) { appQ = q; } };
+  return { getView: getView, setView: setView, applyView: applyView, renderAll: renderAll, countUp: countUp, drawFindings: drawFindings, state: state, drawApps: drawApps, setAppQ: function (q) { appQ = q; } };
 })(V);

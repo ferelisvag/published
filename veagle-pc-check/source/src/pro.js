@@ -111,6 +111,22 @@ var PRO = (function (V, AI) {
       '<p class="sub" style="margin-top:8px">' + esc(I('These numbers are kept only in this browser, on this PC. If you open the reports on another PC or clear the browser data, they start again from zero. Nothing is sent anywhere.', 'Αυτά τα νούμερα κρατιούνται μόνο σε αυτόν τον browser, σε αυτόν τον υπολογιστή. Αν ανοίξεις τα reports σε άλλον υπολογιστή ή καθαρίσεις τα δεδομένα του browser, ξεκινούν ξανά από το μηδέν. Δεν στέλνεται τίποτα πουθενά.')) + '</p>';
   }
 
+  /* ---------- steps of the scan that may be incomplete (1.1.0) ---------- */
+  function stepIssuesHtml() {
+    var a = (V.RAW && V.RAW.meta && V.RAW.meta.stepIssues) || [];
+    if (!Array.isArray(a)) a = [a];
+    a = a.filter(function (x) { return x && x.step; });
+    if (!a.length) return '';
+    var li = a.map(function (x) {
+      var sm = (x.samples || []); if (!Array.isArray(sm)) sm = [sm];
+      return '<li><b>' + esc(I('Step ', 'Βήμα ') + x.step + ': ' + (x.label || '')) + '</b> <span class="sub">(' + esc(I(x.errors + ' small error(s)', x.errors + ' μικρό(ά) σφάλμα(τα)')) + ')</span>' +
+        (sm.length ? '<div class="sub" style="font-family:monospace;font-size:11px;opacity:.8">' + sm.map(esc).join('<br>') + '</div>' : '') + '</li>';
+    }).join('');
+    return '<details class="howto on" id="stepIssues"><summary>' + esc(I('Scan notes: ' + a.length + ' check(s) may be incomplete', 'Σημειώσεις σάρωσης: ' + a.length + ' έλεγχος(οι) μπορεί να είναι ελλιπείς')) + '</summary><div>' +
+      '<p>' + esc(I('While scanning, some small checks could not read everything. This is usually because the scan was not run as Administrator, or because a Windows feature does not exist on this PC. It does NOT mean there is a problem with your PC. It only means the result for these steps may be less complete.', 'Κατά τη σάρωση, μερικοί μικροί έλεγχοι δεν μπόρεσαν να διαβάσουν τα πάντα. Συνήθως επειδή η σάρωση δεν έτρεξε ως Διαχειριστής ή επειδή κάποιο χαρακτηριστικό των Windows δεν υπάρχει σε αυτόν τον υπολογιστή. ΔΕΝ σημαίνει ότι έχει πρόβλημα ο υπολογιστής σου. Σημαίνει μόνο ότι το αποτέλεσμα αυτών των βημάτων μπορεί να είναι λιγότερο πλήρες.')) + '</p>' +
+      '<ul>' + li + '</ul><p class="sub">' + esc(I('Tip: run the scan again with "Run as administrator" to get the most complete result.', 'Συμβουλή: τρέξε ξανά τη σάρωση με «Εκτέλεση ως διαχειριστής» για το πιο πλήρες αποτέλεσμα.')) + '</p></div></details>';
+  }
+
   /* ---------- summary additions ---------- */
   function summary() {
     var el = $('#tab-summary'); if (!el) return;
@@ -126,6 +142,8 @@ var PRO = (function (V, AI) {
       var sp = el.querySelector('.summary .sub'); 
       if (sp) { var nt = document.createElement('p'); nt.className = 'sub est'; nt.innerHTML = '<b>' + esc(I('Scan result: ' + V.scoreRaw.score + '. With the steps you ticked and what you accepted: ' + V.score.score + '.', 'Αποτέλεσμα σάρωσης: ' + V.scoreRaw.score + '. Με τα βήματα που τικάρισες και όσα αποδέχτηκες: ' + V.score.score + '.')) + '</b> ' + esc(I('This is an estimate. Run the scan again to confirm what you fixed.', 'Είναι εκτίμηση. Τρέξε ξανά τη σάρωση για να επιβεβαιωθεί ό,τι διόρθωσες.')); sp.parentNode.insertBefore(nt, sp.nextSibling); }
     }
+    var si = stepIssuesHtml();
+    if (si) { var sb = document.createElement('div'); sb.innerHTML = si; var anc = el.querySelector('.vz2') || el.querySelector('.summary'); if (anc) anc.insertAdjacentElement('afterend', sb.firstChild); }
     var tail = document.createElement('div');
     tail.innerHTML = sect(I('What improved', 'Τι βελτιώθηκε'), I('your last scan against this one', 'η προηγούμενη σάρωση απέναντι σε αυτή')) + '<div class="win"><div class="body">' + beforeAfterHtml() + '</div></div>' +
       sect(I('Your progress', 'Η πρόοδός σου'), I('how your PC and your fixes developed over time', 'πώς εξελίχθηκαν ο υπολογιστής σου και οι διορθώσεις σου')) + '<div class="win"><div class="body">' + progressHtml() + '</div></div>' +
@@ -426,5 +444,5 @@ var PRO = (function (V, AI) {
     });
   })();
 
-  return { summary: summary, insights: insights, decorate: decorate, toolsHtml: toolsHtml, wireTools: wireTools, inventoryCsv: inventoryCsv, badges: badges, beforeAfterHtml: beforeAfterHtml };
+  return { printClient: printClient, summary: summary, insights: insights, decorate: decorate, toolsHtml: toolsHtml, wireTools: wireTools, inventoryCsv: inventoryCsv, badges: badges, beforeAfterHtml: beforeAfterHtml };
 })(V, AI);

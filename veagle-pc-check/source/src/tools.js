@@ -206,6 +206,7 @@ var TOOLS = (function (V, AI, CMP) {
       '<div id="fleetOut" style="margin-top:14px">' + fleetHtml() + '</div><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="fleetSave">' + I('Save table as CSV', 'Αποθήκευση πίνακα ως CSV') + '</button></div>');
 
     if (typeof TOOLS2 !== 'undefined') h += TOOLS2.html();
+    if (typeof SUPPORT !== 'undefined') h += SUPPORT.html();
 
     h += sect(I('Windows secrets, just for fun', 'Μυστικά των Windows, για πλάκα'), I('nothing here changes your PC settings', 'τίποτα εδώ δεν αλλάζει τις ρυθμίσεις του PC σου'));
     h += box('secrets.txt', I('3 easter eggs', '3 easter eggs'),

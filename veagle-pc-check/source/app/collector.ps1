@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '1.0.2'
+$script:Version = '1.1.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -19,7 +19,46 @@ $root = Split-Path -Parent $appDir
 # ---------------------------------------------------------------- helpers
 function Warn([string]$m) { [void]$script:Warnings.Add($m) }
 
+# Keeps a short note of any errors a step hit, so the report can say which checks may be incomplete.
+# Only a count and a few short messages (your user and PC names are replaced). Nothing is sent anywhere.
+$MaximumErrorCount = 32768
+$script:StepIssues = New-Object System.Collections.ArrayList
+$script:CurStep = 0
+$script:CurLabel = ''
+$script:ErrMark = 0
+function Flush-StepErrors {
+    try {
+        if ($script:CurStep -gt 0) {
+            $cnt = $Error.Count - $script:ErrMark
+            if ($cnt -gt 0) {
+                # "does not exist / not found" is normal (a setting nobody set, a file Windows does not have): not counted.
+                # Only real failures (access denied, not allowed, operation failed...) are kept.
+                $benign = 'Cannot find path|does not exist|No matching .* objects|No MSFT_|Cannot find a process|Cannot find drive|Cannot find an object|Property .* cannot be found|was not found|Could not find a part of the path|Could not find file|Could not find a file'
+                $real = 0
+                $msgs = New-Object System.Collections.ArrayList
+                $take = [math]::Min($cnt, 300)
+                for ($i = 0; $i -lt $take; $i++) {
+                    $m = ([string]$Error[$i]) -replace '\s+', ' '
+                    if ($m -match $benign) { continue }
+                    $real++
+                    if ($msgs.Count -lt 3) {
+                        if ($env:USERNAME) { $m = $m -replace [regex]::Escape($env:USERNAME), '<user>' }
+                        if ($env:COMPUTERNAME) { $m = $m -replace [regex]::Escape($env:COMPUTERNAME), '<pc>' }
+                        if ($m.Length -gt 150) { $m = $m.Substring(0, 150) }
+                        if ($m -and -not $msgs.Contains($m)) { [void]$msgs.Add($m) }
+                    }
+                }
+                if ($real -gt 0) { [void]$script:StepIssues.Add([pscustomobject]@{ step = $script:CurStep; label = $script:CurLabel; errors = [int]$real; samples = @($msgs) }) }
+            }
+        }
+    } catch { }
+    $script:ErrMark = $Error.Count
+}
+
 function Step([int]$n, [int]$total, [string]$label) {
+    Flush-StepErrors
+    $script:CurStep = $n
+    $script:CurLabel = $label
     $w = 20
     $f = [int][math]::Floor($w * ($n - 1) / $total)
     $bar = ('#' * $f) + ('-' * ($w - $f))
@@ -1598,6 +1637,8 @@ if ($msinfoProc) {
     try { if (-not $msinfoProc.HasExited) { Stop-Process -Id $msinfoProc.Id -Force; Warn 'msinfo32 export did not finish in time' } } catch { }
 }
 
+Flush-StepErrors
+
 $meta = [ordered]@{
     tool       = 'VEAGLE PC Check'
     version    = $script:Version
@@ -1611,6 +1652,7 @@ $meta = [ordered]@{
     root       = $root
     durationSec = [int]$swTotal.Elapsed.TotalSeconds
     warnings   = @($script:Warnings)
+    stepIssues = @($script:StepIssues)
 }
 
 $data = [ordered]@{

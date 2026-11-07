@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v1.1.0
+VEAGLE PC CHECK  v1.2.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -50,6 +50,13 @@ READING THE REPORT
 - You never have to fix everything. Start with the red HIGH ones, one at a time.
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
+
+NEW IN 1.2.0
+- Windows 11 readiness with the exact reasons (TPM, Secure Boot, UEFI, memory, drive size). The processor list of Microsoft cannot be checked offline.
+- Scheduled tasks and background services that start from unusual folders or with hidden commands (only reading, nothing is stopped).
+- Result of the Windows memory test and of the last system file check (SFC), read from the logs. Nothing is run.
+- Stuck print jobs, and old .NET and Java runtimes.
+- The scan has 19 steps now.
 
 NEW IN 1.1.0
 - Scan notes: if a check could not read everything (for example it was not run as Administrator), the Summary says which step may be incomplete. This is not a problem with your PC.

@@ -234,7 +234,8 @@ function Engine(RAW) {
     'perf-heat': [20, 'Medium', 'Safe'], 'perf-throttle': [15, 'Medium', 'Safe'], 'perf-slowstart': [10, 'Easy', 'Safe'], 'soft-office-eol': [30, 'Medium', 'Safe'], 'soft-office-act': [5, 'Easy', 'Safe'], 'win-eol-11': [45, 'Medium', 'Back up first'], 'upd-fail': [15, 'Medium', 'Safe'], 'upd-off': [3, 'Easy', 'Safe'],
     'bak-size': [2, 'Easy', 'Safe'], 'bak-onedrive': [5, 'Easy', 'Safe'], 'net-dnsfast': [10, 'Medium', 'Safe'], 'net-conn': [5, 'Easy', 'Safe'], 'pred-disk': [15, 'Easy', 'Safe'], 'pred-ssd': [10, 'Ask a pro', 'Back up first'], 'pred-bat': [5, 'Easy', 'Safe'],
     'sto-diskhealth': [20, 'Ask a pro', 'Back up first'], 'perf-gpuheat': [20, 'Medium', 'Safe'], 'hw-age': [2, 'Easy', 'Safe'], 'perf-bottleneck': [10, 'Easy', 'Safe'], 'sec-persist': [20, 'Ask a pro', 'Safe'], 'sec-hardening': [30, 'Medium', 'Safe'], 'sec-privacy': [15, 'Easy', 'Safe'], 'sto-caches': [5, 'Easy', 'Safe'], 'soft-unused': [15, 'Easy', 'Back up first'], 'sec-browser-old': [3, 'Easy', 'Safe'],
-    'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe']
+    'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe'],
+    'win-ready-11': [10, 'Medium', 'Safe'], 'cfg-tasks-unusual': [15, 'Medium', 'Safe'], 'sec-svc-path': [15, 'Medium', 'Safe'], 'sec-svc-unquoted': [2, 'Ask a pro', 'Safe'], 'stab-memdiag': [60, 'Medium', 'Back up first'], 'stab-sfc': [40, 'Medium', 'Safe'], 'prn-stuck': [5, 'Easy', 'Safe'], 'soft-runtime-eol': [10, 'Medium', 'Safe']
   };
   var PROFILES = {
     home: { label: 'Home PC', note: 'Balanced advice for a normal home computer.' },
@@ -1655,6 +1656,93 @@ function Engine(RAW) {
       return F('sec-browser-old', 'Security', 'low', b.length + ' browser' + (b.length > 1 ? 's have' : ' has') + ' not been updated for over 3 months',
         'Browsers normally update themselves every few weeks. One that has not changed for months is one of the most common ways to catch an infection, because it reads everything from the internet.',
         [S('Open the browser, click the three dots (or the menu), then Help, About. It checks and updates by itself. Restart it when it asks.'), S('If you no longer use it, uninstall it (Settings, Apps, Installed apps).')], b.map(function (x) { return x.name + ' ' + x.version + ', last changed ' + x.fileDays + ' days ago'; }).join('\n'));
+    });
+    /* ---- 1.2.0: Windows 11 readiness, odd tasks and services, memory test, system files, print queue, old runtimes ---- */
+    var X3 = EX.more3 || {};
+    R(function () {
+      var w = X3.win11; if (!w) return null;
+      var b = num(g(D, 'system.os.build', 0)); if (b >= 22000) return null; // already Windows 11
+      var bad = [], tip = [];
+      if (w.uefi === false) bad.push('The PC starts in the old BIOS mode (Windows 11 needs UEFI)');
+      if (w.tpmPresent === false || (w.tpmVersion && parseFloat(w.tpmVersion) < 2)) bad.push(w.tpmPresent === false ? 'No TPM chip was found (it may only be switched off in the BIOS)' : 'The TPM is version ' + w.tpmVersion + ' (Windows 11 needs 2.0)');
+      if (w.uefi !== false && w.secureBootOn === false) bad.push('Secure Boot is switched off (it can usually be switched on in the BIOS)');
+      if (w.ramGB != null && num(w.ramGB) < 3.8) bad.push('Memory is ' + w.ramGB + ' GB (Windows 11 needs at least 4 GB)');
+      if (w.sysDiskGB != null && num(w.sysDiskGB) < 64) bad.push('The Windows drive is ' + w.sysDiskGB + ' GB (Windows 11 needs at least 64 GB)');
+      if (w.cores != null && num(w.cores) < 2) bad.push('The processor has ' + w.cores + ' core (Windows 11 needs at least 2)');
+      if (w.ghz != null && num(w.ghz) < 1) bad.push('The processor speed is ' + w.ghz + ' GHz (Windows 11 needs at least 1 GHz)');
+      if (w.is64 === false) bad.push('The processor or Windows is 32-bit (Windows 11 is 64-bit only)');
+      var ev = 'Processor: ' + (w.cpuName || '?') + '\nUEFI: ' + (w.uefi === null ? '?' : (w.uefi ? 'yes' : 'no')) + ', Secure Boot: ' + (w.secureBootOn === null ? '?' : (w.secureBootOn ? 'on' : 'off')) + ', TPM: ' + (w.tpmPresent ? (w.tpmVersion || 'yes') : 'none') + '\nMemory: ' + w.ramGB + ' GB, Windows drive: ' + w.sysDiskGB + ' GB, cores: ' + w.cores + ', speed: ' + w.ghz + ' GHz';
+      if (!bad.length) return F('win-ready-11', 'Updates', 'info', 'This PC meets the Windows 11 requirements that can be checked here',
+        'Memory, drive size, TPM, UEFI and Secure Boot are all fine. One thing cannot be checked offline: Microsoft keeps a list of supported processors. The free "PC Health Check" app from Microsoft checks that too.',
+        [S('Open Settings, then Windows Update. If it says "Windows 11 is available", you can upgrade there.'), S('If it does not say that, download the free "PC Health Check" app from Microsoft and press "Check now". It tells you if the processor is the reason.')], ev);
+      return F('win-ready-11', 'Updates', 'low', 'This PC may not be able to run Windows 11 yet (' + bad.length + ' reason' + (bad.length > 1 ? 's' : '') + ')',
+        'Windows 11 has minimum requirements. Some of them are only switches in the BIOS (TPM, Secure Boot), others are hardware. Knowing the reason tells you if a free fix exists or if it is time to plan a new PC.',
+        [S('Read the reasons under "What we found". The ones about TPM or Secure Boot can often be fixed for free in the BIOS settings.'), S('Switching on TPM or Secure Boot changes your BIOS. If you are not sure, ask someone who has done it before, and back up your files first.'), S('If the reason is the hardware (memory, drive size, processor), upgrading the part may be enough. Otherwise plan for a newer PC before support for Windows 10 gets harder to find.')],
+        bad.join('\n') + '\n\n' + ev);
+    });
+    R(function () {
+      var t = arr(X3.taskDetail).filter(function (x) { return x.unusual; }); if (!t.length) return null;
+      return F('cfg-tasks-unusual', 'Security', 'medium', t.length + ' scheduled task' + (t.length > 1 ? 's' : '') + ' with an unusual way of running',
+        'Windows can start programs by itself on a schedule or at sign-in. Updaters do this all the time, so most tasks are fine. These ones run from a temporary or shared folder, or use a hidden or encoded command. That is how some unwanted programs hide, but a few legitimate tools do it too.',
+        [S('Press the Windows key, type "Task Scheduler" and open it. Click "Task Scheduler Library" on the left.'), S('Find each task named under "What we found". Click it and read the "Actions" tab: it shows exactly what it starts.'), S('If you recognise it (a program you installed), leave it. If you do not recognise it, right-click it and choose "Disable" (not Delete), then see if anything stops working. Ask someone you trust if unsure.')],
+        nameList(t, function (x) { return x.name + ' - ' + x.unusual + ' - ' + x.path + (x.runAs ? ' (as ' + x.runAs + ')' : ''); }));
+    });
+    R(function () {
+      var s = arr(X3.svcDetail).filter(function (x) { return x.unusual; }); if (!s.length) return null;
+      var tempish = s.some(function (x) { return /temporary|shared/.test(x.unusual); });
+      return F('sec-svc-path', 'Security', tempish ? 'medium' : 'low', s.length + ' background service' + (s.length > 1 ? 's' : '') + ' that start from an unusual folder',
+        'A service is a program that Windows starts by itself in the background. Normal ones live in "Program Files" or "Windows". These live in a user profile, a download or a temporary folder, which is unusual and is one of the places unwanted software likes to hide.',
+        [S('Press the Windows key, type "Services" and open it. Find each service named under "What we found".'), S('Double-click it and read "Path to executable" and the description. Do you recognise the program?'), S('If you do, leave it. If not, search for the file name on the internet first. If it looks unwanted, ask a helper before stopping it, and run a full antivirus scan.')],
+        nameList(s, function (x) { return (x.display || x.name) + ' - ' + x.unusual + ' - ' + x.path + (x.installed ? ' (file created ' + String(x.installed).slice(0, 10) + ')' : ''); }));
+    });
+    R(function () {
+      var s = arr(X3.svcDetail).filter(function (x) { return x.unquoted && /localsystem/i.test(String(x.runAs || '')); }); if (!s.length) return null;
+      return F('sec-svc-unquoted', 'Security', 'low', s.length + ' service' + (s.length > 1 ? 's have' : ' has') + ' a path with spaces and no quotes',
+        'When a service runs as the most powerful Windows account and its path has spaces but no quotes, Windows can be tricked into starting a different program placed in a parent folder. It needs someone who already has access to the PC, so the risk is small, but it is a known weakness the maker of the program should fix.',
+        [S('You do not have to do anything now. This is information.'), S('If the program is up to date and the finding stays, tell its maker or your IT helper. They can fix it by adding quotes to the service path.')],
+        nameList(s, function (x) { return (x.display || x.name) + ' - ' + x.path; }));
+    });
+    R(function () {
+      var m = X3.memDiag; if (!m || !m.errors) return null;
+      return F('stab-memdiag', 'Stability', 'high', 'The Windows memory test found errors',
+        'Windows ran its memory test and wrote that it found errors. Faulty memory causes random crashes, blue screens and damaged files, and the problem gets worse with time.',
+        [S('Back up your important files today, in case the PC stops working.'), S('If you have two or more memory sticks, shut the PC down, remove all but one and test each stick alone to find the bad one. Take care: touch the metal case first to discharge static electricity.'), S('Replace the faulty stick. Memory is cheap compared to losing files. If you do not want to open the PC, ask a shop to test it.')],
+        'Test finished ' + String(m.time || '').slice(0, 16).replace('T', ' ') + ' (event ' + m.eventId + ')');
+    });
+    R(function () {
+      var s = X3.sfcLast; if (!s || !(num(s.cannotRepair) > 0)) return null;
+      return F('stab-sfc', 'Stability', 'medium', 'The last system file check could not repair ' + s.cannotRepair + ' file' + (s.cannotRepair > 1 ? 's' : ''),
+        'Windows has a built-in check (called SFC) that repairs damaged system files. The log shows the last run found damaged files that it could not fix by itself. Damaged system files can cause crashes and failing updates. This scan only read the log; it did not run anything.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter. It repairs the Windows image from Microsoft. It takes 10 to 30 minutes and needs internet.', 'DISM /Online /Cleanup-Image /RestoreHealth'), S('When it finishes, run the system file check again.', 'sfc /scannow'), S('If it still says it could not repair files, ask a helper. A repair install of Windows (keeps your files) is the next step.')],
+        'Last check: ' + (s.lastRun ? String(s.lastRun).slice(0, 16).replace('T', ' ') : 'unknown') + '\nCould not repair: ' + s.cannotRepair + ', repaired: ' + (s.repaired || 0));
+    });
+    R(function () {
+      var q = arr(X3.printQueue).filter(function (x) { return num(x.stuck) > 0; }); if (!q.length) return null;
+      return F('prn-stuck', 'Software', 'low', q.length + ' printer' + (q.length > 1 ? 's have' : ' has') + ' print jobs that are stuck',
+        'A stuck job blocks everything behind it, so nothing prints. The usual cure is to clear the queue and restart the print service. Clearing deletes only the waiting print jobs, nothing else.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste these three lines one after the other. They stop the print service, delete the waiting jobs and start the service again.', 'Stop-Service Spooler -Force\nRemove-Item "$env:SystemRoot\\System32\\spool\\PRINTERS\\*" -Force -ErrorAction SilentlyContinue\nStart-Service Spooler'), S('Try printing a test page. If it gets stuck again, check that the printer is on, has paper and is connected.')],
+        nameList(q, function (x) { return x.printer + ' - ' + x.jobs + ' job(s), ' + x.stuck + ' stuck'; }));
+    });
+    R(function () {
+      var EOLN = { 1: 1, 2: 1, 3: 1, 5: 1, 6: 1, 7: 1 }, bad = [], soon = [];
+      arr(X3.dotnet).forEach(function (v) { var mj = parseInt(String(v).split('.')[0], 10); if (EOLN[mj]) bad.push('.NET ' + v); else if (mj === 8 || mj === 9) soon.push('.NET ' + v); });
+      arr(D.apps && D.apps.list).forEach(function (a) {
+        var n = String(a.name || ''), m = /^(java\(tm\)|java) ?(se|\d)|java.*(runtime|development kit)|\b(jre|jdk)\b/i.test(n) ? /(?:\b|\D)(\d{1,2})(?:\b| update|\.\d)/.exec(n.replace(/^Java\(TM\) SE /i, '')) : null;
+        if (m && parseInt(m[1], 10) <= 7) bad.push(n + (a.version ? ' ' + a.version : ''));
+      });
+      var out = bad.length ? bad : null;
+      if (!out && !soon.length) return null;
+      var now8 = new Date('2026-11-10T00:00:00').getTime() <= NOW6;
+      if (!out) {
+        if (!now8) return null;
+        return F('soft-runtime-eol', 'Software', 'info', soon.length + ' .NET runtime' + (soon.length > 1 ? 's' : '') + ' reached the end of support on 10 November 2026',
+          'Programs keep working, but Microsoft no longer fixes security holes in .NET 8 and .NET 9. Newer programs use .NET 10. This is only a heads-up: install .NET 10 when a program you use asks for it.',
+          [S('Nothing to do now. Keep your programs updated: their makers move them to .NET 10 over time.'), S('Do not remove a runtime that a program still needs. If something stops working after removal, reinstall it.')], soon.join('\n'));
+      }
+      return F('soft-runtime-eol', 'Software', 'low', out.length + ' old runtime' + (out.length > 1 ? 's' : '') + ' that no longer get security updates',
+        'Runtimes (.NET, Java) are helper software that some programs need. These versions are too old to get security fixes. Removing them is safe only if no program needs them.',
+        [S('Open Settings, Apps, Installed apps. Find each one named under "What we found".'), S('First check if a program you use still needs it (the program maker says so, or the program stops working without it). If nothing needs it, click the three dots and Uninstall.'), S('If a program does need it, ask its maker for a newer version that uses a supported runtime.')],
+        out.concat(soon).join('\n'));
     });
     /* basic security checklist in five groups (used by Insights and the client report) */
     function basicList() {

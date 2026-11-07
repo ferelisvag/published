@@ -63,6 +63,11 @@ function fixtures() {
     for (const tab of ['summary', 'findings', 'tools', 'events']) {
       await page.evaluate(t => { const b = document.querySelector('[data-tab="' + t + '"]'); if (b) b.click(); }, tab);
     }
+    // 1.2.0 rules fire on the heavy sample
+    if (name === 'win10-laptop') {
+      const ids = await page.evaluate(() => V.findings.map(f => f.id));
+      for (const id of ['win-ready-11', 'cfg-tasks-unusual', 'sec-svc-path', 'sec-svc-unquoted', 'stab-memdiag', 'stab-sfc', 'prn-stuck', 'soft-runtime-eol']) ok(ids.includes(id), 'finding ' + id + ' appears');
+    }
     // views
     await page.evaluate(() => UI.setView('simple'));
     ok(await page.evaluate(() => document.body.classList.contains('view-simple')), 'simple view on');

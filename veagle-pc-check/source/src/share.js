@@ -23,6 +23,13 @@ var SHARE = (function (V, AI) {
         (mo.certs || []).forEach(function (c, i) { c.name = '<CERTIFICATE ' + (i + 1) + '>'; });
         (mo.signatures && mo.signatures.flagged || []).forEach(function (s) { s.folder = '<PATH>'; });
       }
+      var m3 = clean.extras && clean.extras.more3;
+      if (m3) {
+        (m3.taskDetail || []).forEach(function (x, i) { x.path = x.path ? '<PATH>' : ''; x.runAs = '<ACCOUNT>'; });
+        (m3.svcDetail || []).forEach(function (x) { x.path = x.path ? '<PATH>' : ''; if (!/^(localsystem|nt |local service|network service)/i.test(String(x.runAs || ''))) x.runAs = '<ACCOUNT>'; });
+        m3.gpo = (m3.gpo || []).map(function (x, i) { return '<POLICY ' + (i + 1) + '>'; });
+        (m3.printQueue || []).forEach(function (x, i) { x.printer = '<PRINTER ' + (i + 1) + '>'; });
+      }
       var m2 = clean.extras && clean.extras.more2;
       if (m2) {
         m2.neighbours = []; m2.usbHistory = []; m2.recentRuns = [];

@@ -156,6 +156,22 @@ def _more(heavy):
       connections=[dict(process='chrome', n=34, remotes=['142.250.1.1:443']), dict(process='Teams', n=9, remotes=['52.1.1.1:443']), dict(process='OneDrive', n=4, remotes=['13.1.1.1:443']), dict(process='svchost', n=6, remotes=['20.1.1.1:443']), dict(process='unknown_tool', n=2, remotes=['185.1.1.1:8080'])])
 
 
+
+# --- v1.2 extras ("more3")
+def _more3(heavy):
+    if not heavy:
+        return dict(win11=dict(uefi=True, secureBootOn=True, tpmPresent=True, tpmVersion='2.0', ramGB=31.9, cores=8, ghz=3.6, is64=True, sysDiskGB=931, gpt=True, cpuName='11th Gen Intel Core i7-11700K'),
+            taskDetail=[dict(name='GoogleUpdateTaskMachineCore', path='C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe', runAs='SYSTEM', highest=False, trigger='Logon, Time', unusual='')],
+            svcDetail=[dict(name='Spooler2', display='Demo Helper', state='Running', runAs='LocalSystem', path='C:\\Program Files\\Demo\\helper.exe', installed=iso(now - datetime.timedelta(days=300)), unusual='', unquoted=False)],
+            memDiag=dict(time=iso(now - datetime.timedelta(days=40)), errors=False, eventId=1201), sfcLast=dict(lastRun=iso(now - datetime.timedelta(days=12)), cannotRepair=0, repaired=0),
+            printQueue=[], dotnet=['8.0.5', '6.0.30'], gpo=[])
+    return dict(win11=dict(uefi=False, secureBootOn=None, tpmPresent=True, tpmVersion='1.2', ramGB=3.9, cores=2, ghz=2.4, is64=True, sysDiskGB=119, gpt=False, cpuName='Intel Core i5-3320M'),
+        taskDetail=[dict(name='UpdaterHelper', path='C:\\Users\\demo\\AppData\\Local\\Temp\\upd.exe', runAs='DEMO-PC\\demo', highest=True, trigger='Logon', unusual='runs from a temporary or shared folder')],
+        svcDetail=[dict(name='DemoSvc', display='Demo Sync Service', state='Running', runAs='LocalSystem', path='C:\\Users\\demo\\AppData\\Roaming\\demo\\svc.exe', installed=iso(now - datetime.timedelta(days=9)), unusual='runs from a user profile folder', unquoted=False),
+            dict(name='OldVendor', display='Old Vendor Agent', state='Running', runAs='LocalSystem', path='C:\\Program Files\\Old Vendor\\agent.exe', installed=None, unusual='', unquoted=True)],
+        memDiag=dict(time=iso(now - datetime.timedelta(days=3)), errors=True, eventId=1202), sfcLast=dict(lastRun=iso(now - datetime.timedelta(days=2)), cannotRepair=3, repaired=1),
+        printQueue=[dict(printer='Demo LaserJet', jobs=4, stuck=3)], dotnet=['3.1.32', '8.0.5'], gpo=['Default Domain Policy'])
+
 # --- v0.7 extras ("more2")
 def _more2(heavy):
     rnd2 = random.Random(5 if heavy else 6)
@@ -200,7 +216,7 @@ def _addwin(d):
     ev['days'] = 60; ev['appHangs1'] = ev.get('appHangs', 0) // 20; ev['appHangs7'] = ev.get('appHangs', 0) // 5; ev['appHangs30'] = ev.get('appHangs', 0) * 6 // 10
 
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '1.1.0'
+data['meta']['version'] = '1.2.0'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -221,6 +237,7 @@ for _i, _t in enumerate(SAMPLE_TREND):
     _t['ssdWear'] = 22 + _i * 1.6; _t['batWear'] = 12 + _i * 2.2; _t['freeC'] = round(150 - _i * 9.5, 1)
 data['extras']['more'] = _more(False)
 data['extras']['more2'] = _more2(False)
+data['extras']['more3'] = _more3(False)
 data['trend'] = SAMPLE_TREND
 _addwin(data)
 for v in data['network']['adapters']:
@@ -244,7 +261,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '1.1.0'
+w['meta']['version'] = '1.2.0'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),
@@ -258,6 +275,7 @@ for v in w['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
 w['extras']['more'] = _more(True)
 w['extras']['more2'] = _more2(True)
+w['extras']['more3'] = _more3(True)
 _addwin(w)
 (out / 'sample-win10-laptop.json').write_text(json.dumps(w, indent=1), encoding='utf-8')
 

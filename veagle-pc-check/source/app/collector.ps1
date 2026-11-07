@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '1.1.0'
+$script:Version = '1.2.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -33,13 +33,14 @@ function Flush-StepErrors {
             if ($cnt -gt 0) {
                 # "does not exist / not found" is normal (a setting nobody set, a file Windows does not have): not counted.
                 # Only real failures (access denied, not allowed, operation failed...) are kept.
-                $benign = 'Cannot find path|does not exist|No matching .* objects|No MSFT_|Cannot find a process|Cannot find drive|Cannot find an object|Property .* cannot be found|was not found|Could not find a part of the path|Could not find file|Could not find a file'
+                $benign = 'Cannot find path|does not exist|No matching .* objects|No MSFT_|Cannot find a process|Cannot find drive|Cannot find an object|Property .* cannot be found|was not found|No events were found|0x800106ba|Requested registry access is not allowed|Could not find a part of the path|Could not find file|Could not find a file'
                 $real = 0
                 $msgs = New-Object System.Collections.ArrayList
                 $take = [math]::Min($cnt, 300)
                 for ($i = 0; $i -lt $take; $i++) {
                     $m = ([string]$Error[$i]) -replace '\s+', ' '
                     if ($m -match $benign) { continue }
+                    try { $ln = ([string]$Error[$i].InvocationInfo.Line).Trim() -replace '\s+', ' '; if ($ln.Length -gt 90) { $ln = $ln.Substring(0, 90) }; if ($ln) { $m = $m + ' [in: ' + $ln + ']' } } catch { }
                     $real++
                     if ($msgs.Count -lt 3) {
                         if ($env:USERNAME) { $m = $m -replace [regex]::Escape($env:USERNAME), '<user>' }
@@ -252,7 +253,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 18
+$TOTAL = 19
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -277,9 +278,19 @@ $chassisName = $chassisNames[$chassisId]
 if (-not $chassisName) { $chassisName = 'Unknown' }
 $isLaptop = @(8, 9, 10, 11, 14, 30, 31, 32) -contains $chassisId
 
-$peType = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control' 'PEFirmwareType'
+# UEFI or old BIOS mode (PEFirmwareType only exists inside Windows setup, so it is not used)
+function Test-Uefi {
+    try { [void](Confirm-SecureBootUEFI -ErrorAction Stop); return $true } catch { }
+    try { if (Test-Path -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\State') { return $true } } catch { }
+    try {
+        $efi = @(Get-Partition -ErrorAction Stop | Where-Object { $_.GptType -eq '{c12a7328-f81f-11d2-ba4b-00a0c93ec93b}' })
+        return ($efi.Count -gt 0)
+    } catch { }
+    return $null
+}
+$isUefi = Test-Uefi
 $firmware = ''
-if ($peType -eq 2) { $firmware = 'UEFI' } elseif ($peType -eq 1) { $firmware = 'BIOS' }
+if ($isUefi -eq $true) { $firmware = 'UEFI' } elseif ($isUefi -eq $false) { $firmware = 'BIOS' }
 
 $build = [int]$os.BuildNumber
 $productName = [string](Read-Reg $cv 'ProductName')
@@ -1626,6 +1637,140 @@ $extras | Add-Member -NotePropertyName more2 -NotePropertyValue ([pscustomobject
     monitors = $monitors; printers = $printers; peripherals = $periph; management = $mgmt; windowsLicence = $winLic; mappedDrives = $mapped; vpn = $vpns
     neighbours = $neighbours; board = $board; lastUser = $lastUser; browsers = $browsers; defaultBrowser = $defBrowser; perf = $perf; gpuSmi = $gpuSmi
     usbHistory = $usbHist; persistence = $persist; hardening = [pscustomobject]$hard; privacy = [pscustomobject]$priv; caches = $caches; recentRuns = $ran
+}) -Force
+
+# ---------------------------------------------------------------- 19. readiness, tasks, services, memory test, system files, print queue, runtimes
+Step 19 $TOTAL 'Windows 11 readiness, tasks and services, memory test, system files, print queue, runtimes'
+
+# --- is this PC ready for Windows 11 (only reading; the CPU list of Microsoft cannot be checked offline)
+$w11 = $null
+try {
+    $csR = Get-CimInstance Win32_ComputerSystem
+    $cpuR = @(Get-CimInstance Win32_Processor)[0]
+    $bootD = $null; try { $bootD = @(Get-Disk -ErrorAction Stop | Where-Object { $_.IsBoot -or $_.IsSystem })[0] } catch { }
+    $sysVol = $null; try { $sysVol = Get-Volume -DriveLetter ([string]$env:SystemDrive).Substring(0, 1) -ErrorAction Stop } catch { }
+    $w11 = [pscustomobject]@{
+        uefi = $isUefi
+        secureBootOn = $secureBoot
+        tpmPresent = $(if ($tpm) { [bool]$tpm.present } else { $false })
+        tpmVersion = $(if ($tpm) { [string]$tpm.specVersion } else { '' })
+        ramGB = Round1 ($csR.TotalPhysicalMemory / 1GB)
+        cores = $(if ($cpuR) { [int]$cpuR.NumberOfCores } else { $null })
+        ghz = $(if ($cpuR) { Round1 ([double]$cpuR.MaxClockSpeed / 1000) } else { $null })
+        is64 = $(if ($cpuR) { ([int]$cpuR.AddressWidth -eq 64) } else { $null })
+        sysDiskGB = $(if ($sysVol) { [int]($sysVol.Size / 1GB) } else { $null })
+        gpt = $(if ($bootD) { ([string]$bootD.PartitionStyle -eq 'GPT') } else { $null })
+        cpuName = $(if ($cpuR) { ([string]$cpuR.Name).Trim() } else { '' })
+    }
+} catch { }
+
+# --- scheduled tasks that are not Microsoft's: what they run, as whom, when (no command arguments are saved)
+$taskDetail = @()
+try {
+    foreach ($t in @(Get-ScheduledTask -ErrorAction Stop | Where-Object { $_.TaskPath -notlike '\Microsoft\*' -and $_.State -ne 'Disabled' } | Select-Object -First 80)) {
+        $ac = @($t.Actions | Where-Object { $_.Execute })[0]
+        $exe = ''; $why = ''
+        if ($ac) {
+            $exe = [Environment]::ExpandEnvironmentVariables([string]$ac.Execute).Trim('"')
+            $al = ([string]$ac.Arguments).ToLower()
+            if ($exe -match '(?i)\\(temp|downloads)\\|\\users\\public\\') { $why = 'runs from a temporary or shared folder' }
+            elseif ($exe -match '(?i)(powershell|pwsh)\.exe$' -and $al -match '-enc|-encodedcommand|-w(indowstyle)? +hidden') { $why = 'hidden or encoded PowerShell' }
+            elseif ($exe -match '(?i)(mshta|wscript|cscript|regsvr32|rundll32)\.exe$' -and $al -match 'http') { $why = 'script engine that loads something from the internet' }
+        }
+        $trg = @($t.Triggers | ForEach-Object { ([string]$_.CimClass.CimClassName) -replace '^MSFT_Task', '' -replace 'Trigger$', '' } | Select-Object -Unique) -join ', '
+        if ($exe.Length -gt 160) { $exe = $exe.Substring(0, 160) }
+        $taskDetail += [pscustomobject]@{ name = [string]$t.TaskName; path = $exe; runAs = [string]$t.Principal.UserId; highest = ([string]$t.Principal.RunLevel -eq 'Highest'); trigger = $trg; unusual = $why }
+    }
+} catch { }
+
+# --- services that are not from Windows and start by themselves: where the file is, since when, as whom
+$svcDetail = @()
+try {
+    foreach ($s in @($svc | Where-Object { $_.StartMode -eq 'Auto' -and $_.PathName -notmatch '(?i)\\windows\\|system32|svchost' } | Select-Object -First 80)) {
+        $pn = [string]$s.PathName
+        $ep = Get-ExePath $pn
+        $inst = $null; if ($ep -and (Test-Path -LiteralPath $ep)) { try { $inst = Iso (Get-Item -LiteralPath $ep).CreationTime } catch { } }
+        $why = ''
+        if ($ep -match '(?i)\\(temp|downloads)\\|\\users\\public\\') { $why = 'runs from a temporary or shared folder' }
+        elseif ($ep -match '(?i)\\users\\[^\\]+\\appdata\\') { $why = 'runs from a user profile folder' }
+        $unq = ($pn -notmatch '^\s*"') -and ($pn -match '(?i)^[a-z]:\\[^"]*\s[^"]*\.exe')
+        $svcDetail += [pscustomobject]@{ name = [string]$s.Name; display = [string]$s.DisplayName; state = [string]$s.State; runAs = [string]$s.StartName; path = $(if ($ep -and $ep.Length -gt 160) { $ep.Substring(0, 160) } else { [string]$ep }); installed = $inst; unusual = $why; unquoted = [bool]$unq }
+    }
+} catch { }
+
+# --- result of the Windows memory test (only if it was ever run: event 1201 = no errors, 1202 = errors)
+$memDiag = $null
+try {
+    $me = @(Get-WinEvent -FilterHashtable @{ LogName = 'System'; ProviderName = 'Microsoft-Windows-MemoryDiagnostics-Results' } -MaxEvents 3 -ErrorAction Stop)
+    if ($me.Count -gt 0) { $memDiag = [pscustomobject]@{ time = Iso $me[0].TimeCreated; errors = ([int]$me[0].Id -eq 1202); eventId = [int]$me[0].Id } }
+} catch { }
+
+# --- last result of the system file check (reads the log only; sfc is not run). Full scan only.
+$sfcLast = $null
+if (-not $Quick) {
+    try {
+        $cbs = Join-Path $env:windir 'Logs\CBS\CBS.log'
+        if ((Test-Path -LiteralPath $cbs) -and ((Get-Item -LiteralPath $cbs).Length -lt 200MB)) {
+            $sr = @(Select-String -LiteralPath $cbs -Pattern '\[SR\] (Verify complete|Cannot repair member file|Repairing corrupted file|Repair complete)' -ErrorAction Stop | Select-Object -Last 300)
+            if ($sr.Count -gt 0) {
+                $lastV = $null; $cannot = 0; $fixed = 0
+                foreach ($l in $sr) {
+                    $tm = [regex]::Match([string]$l.Line, '^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})')
+                    $when = $null; if ($tm.Success) { try { $when = [datetime]::ParseExact($tm.Groups[1].Value, 'yyyy-MM-dd HH:mm:ss', [Globalization.CultureInfo]::InvariantCulture) } catch { } }
+                    if ($l.Line -match 'Verify complete') { $lastV = $when; $cannot = 0; $fixed = 0 }
+                    elseif ($l.Line -match 'Cannot repair member file') { $cannot++ }
+                    elseif ($l.Line -match 'Repairing corrupted file') { $fixed++ }
+                }
+                $sfcLast = [pscustomobject]@{ lastRun = $(if ($lastV) { Iso $lastV } else { $null }); cannotRepair = $cannot; repaired = $fixed }
+            }
+        }
+    } catch { }
+}
+
+# --- print queue: jobs that are stuck (waiting for more than an hour or in an error state)
+$printQueue = @()
+try {
+    foreach ($pq in @(Get-Printer -ErrorAction Stop | Where-Object { $_.Name -notmatch '(?i)pdf|onenote|xps|fax|remote|teams' })) {
+        $jobsQ = @(Get-PrintJob -PrinterName $pq.Name -ErrorAction SilentlyContinue)
+        if ($jobsQ.Count -gt 0) {
+            $stuckQ = @($jobsQ | Where-Object { ([string]$_.JobStatus) -match 'Error|Offline|Paused|Blocked|UserIntervention|PaperOut' -or ($_.SubmittedTime -and $_.SubmittedTime -lt (Get-Date).AddHours(-1)) }).Count
+            $printQueue += [pscustomobject]@{ printer = [string]$pq.Name; jobs = [int]$jobsQ.Count; stuck = [int]$stuckQ }
+        }
+    }
+} catch { }
+
+# --- .NET runtimes that are installed (registry only)
+$dotnet = @()
+try {
+    foreach ($rk in @('HKLM:\SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.NETCore.App', 'HKLM:\SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App', 'HKLM:\SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.AspNetCore.App', 'HKLM:\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.NETCore.App', 'HKLM:\SOFTWARE\WOW6432Node\dotnet\Setup\InstalledVersions\x86\sharedfx\Microsoft.WindowsDesktop.App')) {
+        try { $ipR = Get-ItemProperty -LiteralPath $rk -ErrorAction Stop; foreach ($pr in $ipR.PSObject.Properties) { if ($pr.Name -match '^\d+\.\d+') { $dotnet += [string]$pr.Name } } } catch { }
+    }
+    # also look at the folders, because some installs do not write the registry
+    foreach ($pf in @($env:ProgramFiles, ${env:ProgramFiles(x86)})) {
+        if (-not $pf) { continue }
+        foreach ($fx in @('Microsoft.NETCore.App', 'Microsoft.WindowsDesktop.App', 'Microsoft.AspNetCore.App')) {
+            $dd = Join-Path $pf ('dotnet\shared\' + $fx)
+            if (Test-Path -LiteralPath $dd) { foreach ($vd in @(Get-ChildItem -LiteralPath $dd -Directory -ErrorAction SilentlyContinue)) { if ($vd.Name -match '^\d+\.\d+') { $dotnet += [string]$vd.Name } } }
+        }
+    }
+    $dotnet = @($dotnet | Select-Object -Unique | Select-Object -First 30)
+} catch { }
+
+# --- which group policies are applied (names only)
+$gpoNames = @()
+try {
+    $gh = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\History'
+    foreach ($gk in @(Get-ChildItem -LiteralPath $gh -ErrorAction Stop)) {
+        foreach ($gi in @(Get-ChildItem -LiteralPath $gk.PSPath -ErrorAction SilentlyContinue)) {
+            $dn = ''; try { $dn = [string](Get-Item -LiteralPath $gi.PSPath -ErrorAction Stop).GetValue('DisplayName') } catch { }
+            if ($dn -and $gpoNames -notcontains $dn) { $gpoNames += $dn }
+        }
+    }
+    $gpoNames = @($gpoNames | Select-Object -First 30)
+} catch { }
+
+$extras | Add-Member -NotePropertyName more3 -NotePropertyValue ([pscustomobject]@{
+    win11 = $w11; taskDetail = $taskDetail; svcDetail = $svcDetail; memDiag = $memDiag; sfcLast = $sfcLast; printQueue = $printQueue; dotnet = $dotnet; gpo = $gpoNames
 }) -Force
 
 # ---------------------------------------------------------------- finish

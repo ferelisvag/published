@@ -9,7 +9,35 @@ src=open(H+'/dashboard.html').read()
 head=src[:src.index('<body>')]
 head=re.sub(r'<link rel="(icon|preconnect)"[^>]*>\n?','',head)
 head=re.sub(r'<link href="https://fonts[^>]*>\n?','',head)
-head=head.replace('<title>Google Timeline by Veagle</title>','<title>Google Timeline by Veagle · Χρονολόγιο Χαρτών Google</title>\n<meta name="description" content="Φόρτωσε το Timeline.json από το κινητό σου και δες σε χάρτη πού έχεις πάει: μέρη, διαδρομές, χώρες και ταξίδια. Όλα γίνονται στον browser σου, τίποτα δεν ανεβαίνει πουθενά.">\n<meta name="theme-color" content="#050708">\n<link rel="icon" href="favicon.svg" type="image/svg+xml">\n<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">\n<link rel="apple-touch-icon" href="apple-touch-icon.png">\n<link rel="manifest" href="manifest.webmanifest">\n<meta name="apple-mobile-web-app-title" content="Πού έχω πάει">')
+head=re.sub(r'<meta name="theme-color"[^>]*>\n?','',head)
+SEO_TITLE='Google Timeline by Veagle · Google Maps Timeline viewer (Χρονολόγιο Χαρτών Google)'
+SEO_DESC='See where you have been: load your Google Maps Timeline.json and get a map, routes, countries and trips. Everything runs in your browser, nothing is uploaded. · Φόρτωσε το Timeline.json σου και δες σε χάρτη πού έχεις πάει: μέρη, διαδρομές, χώρες και ταξίδια. Τίποτα δεν ανεβαίνει πουθενά.'
+SEO_URL='https://ferelisvag.github.io/published/googletimelinebyveagle/'
+LD=json.dumps({"@context":"https://schema.org","@type":"WebApplication","name":"Google Timeline by Veagle","alternateName":["Πού έχω πάει","Χρονολόγιο Χαρτών Google"],"url":SEO_URL,"description":SEO_DESC,"applicationCategory":"TravelApplication","operatingSystem":"Any (web browser)","browserRequirements":"Requires a modern browser (Chrome, Edge, Firefox, Safari 16.4+)","inLanguage":["el","en"],"isAccessibleForFree":True,"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"image":SEO_URL+"icon-512.png","publisher":{"@type":"Person","name":"Vagelis Ferelis","url":"https://ferelis.gr/"}},ensure_ascii=False)
+def esc_attr(x):return x.replace('&','&amp;').replace('"','&quot;')
+SEO='\n'.join([
+ '<title>%s</title>'%SEO_TITLE,
+ '<meta name="description" content="%s">'%esc_attr(SEO_DESC),
+ '<meta name="robots" content="index,follow,max-image-preview:large">',
+ '<link rel="canonical" href="%s">'%SEO_URL,
+ '<meta name="theme-color" content="#050708">',
+ '<meta name="color-scheme" content="dark">',
+ '<meta name="application-name" content="Google Timeline by Veagle">',
+ '<meta name="apple-mobile-web-app-title" content="Timeline Veagle">',
+ '<meta name="apple-mobile-web-app-capable" content="yes">',
+ '<meta property="og:type" content="website">','<meta property="og:site_name" content="ferelis.gr">',
+ '<meta property="og:title" content="Google Timeline by Veagle">',
+ '<meta property="og:description" content="%s">'%esc_attr(SEO_DESC),
+ '<meta property="og:url" content="%s">'%SEO_URL,
+ '<meta property="og:image" content="%sicon-512.png">'%SEO_URL,'<meta property="og:image:width" content="512">','<meta property="og:image:height" content="512">',
+ '<meta property="og:locale" content="el_GR">','<meta property="og:locale:alternate" content="en_GB">',
+ '<meta name="twitter:card" content="summary">','<meta name="twitter:title" content="Google Timeline by Veagle">',
+ '<meta name="twitter:description" content="%s">'%esc_attr(SEO_DESC),'<meta name="twitter:image" content="%sicon-512.png">'%SEO_URL,
+ '<link rel="icon" href="favicon.svg" type="image/svg+xml">','<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">',
+ '<link rel="apple-touch-icon" href="apple-touch-icon.png">','<link rel="manifest" href="manifest.webmanifest">',
+ '<script type="application/ld+json">%s</script>'%LD])
+head=head.replace('<title>Google Timeline by Veagle</title>',SEO)
+head=head.replace('<html lang="el">','<html lang="el">')
 head=head.replace("--font-anthropic-sans:'IBM Plex Sans',system-ui,sans-serif;--font-anthropic-serif:'Space Grotesk',system-ui,sans-serif;","--font-anthropic-sans:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;--font-anthropic-serif:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;")
 assert 'fonts.g' not in head and 'system-ui,-apple-system' in head
 a=src.index('<style>\n.tl{');b=src.index('<script src="d3.min.js">')
@@ -19,11 +47,15 @@ def rep(s,o,n):
     assert o in s,o[:40];return s.replace(o,n,1)
 app=rep(app,"setView(24.5,38.6,10)","setView(window.TLHOME[1],window.TLHOME[0],10)")
 app=rep(app,"['Αθήνα',23.75,38.0,0.5]","['Σπίτι',window.TLHOME[1],window.TLHOME[0],0.5]")
-app=re.sub(r"const names=\{GR:.*?\};","const names=new Proxy({},{get:(t,k)=>{try{return new Intl.DisplayNames(['el'],{type:'region'}).of(String(k))}catch(e){return String(k)}}});",app,count=1,flags=re.S)
+app=re.sub(r"const names=\{GR:.*?\};","const names=new Proxy({},{get:(t,k)=>{try{return new Intl.DisplayNames([window.LANG],{type:'region'}).of(String(k))}catch(e){return String(k)}}});",app,count=1,flags=re.S)
+app=re.sub(r"'([^'\\\n]*[Α-ωά-ώ][^'\\\n]*)'",lambda m:"GT('"+m.group(1)+"')",app)
+assert "'el-GR'" in app and "'el')" in app
+app=app.replace("'el-GR'",'window.LOC').replace("String(y),'el')","String(y),window.LANG)")
 page=rep(page,'Η έδρα ήταν η Καβάλα και από το 2025 η Αθήνα.','Έδρα θεωρείται το σημείο που το κινητό σου ονόμασε «σπίτι» (<span id="homeName">—</span>).')
 d3=open(H+'/d3.min.js').read();assert '</script>' not in d3
 outline=json.load(open(H+'/outline.json'))
 cities=base64.b64encode(open(H+'/cities.json.gz','rb').read()).decode()
+EN_JSON=json.dumps(json.load(open(H+'/en.json')),ensure_ascii=False,separators=(',',':')).replace('</','<\\/')
 proc=open(H+'/proc.js').read().replace('</script>','<\\/script>')
 FOOT='<p class="app-foot">Google Timeline by Veagle · <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a> · '+VER+'</p>'
 css='''<style>
@@ -73,13 +105,15 @@ css='''<style>
 
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(60rem 40rem at 12% -8%,rgba(91,141,239,.18),transparent 60%),radial-gradient(50rem 36rem at 100% 8%,rgba(232,44,45,.10),transparent 60%),radial-gradient(40rem 30rem at 50% 110%,rgba(52,211,153,.07),transparent 60%)}
 #imp .hero{position:relative;overflow:hidden;border:1px solid var(--color-border-line);border-radius:22px;padding:34px 26px 26px;margin:0 0 18px;background:linear-gradient(145deg,rgba(91,141,239,.14),rgba(13,17,22,.6) 55%,rgba(232,44,45,.09))}
-#imp .hero svg.map{position:absolute;right:-20px;top:-10px;width:62%;max-width:430px;opacity:.55;pointer-events:none}
+#imp .hero svg.map{position:absolute;right:-20px;top:-10px;width:62%;max-width:430px;opacity:.38;pointer-events:none}
 #imp .hero svg .rt{fill:none;stroke:#5b8def;stroke-width:2.4;stroke-linecap:round;stroke-dasharray:6 7;animation:dash 22s linear infinite}
 #imp .hero svg .rt2{stroke:#e82c2d;animation-duration:30s}
 #imp .hero svg .pt{fill:#fff;stroke:#5b8def;stroke-width:2}
 #imp .hero svg .gr{stroke:rgba(255,255,255,.07);stroke-width:1}
 @keyframes dash{to{stroke-dashoffset:-260}}
 #imp .hero>*:not(svg){position:relative}
+#imp .hero>.langbtn{position:absolute!important;top:14px;right:14px;z-index:3;font:600 12px var(--font-anthropic-sans);color:var(--color-fg);background:rgba(255,255,255,.07);border:1px solid var(--color-border-line);border-radius:999px;padding:6px 12px;cursor:pointer}
+#imp .langbtn:hover{background:rgba(255,255,255,.14)}
 #imp .kicker{display:inline-block;font:600 12px var(--font-anthropic-sans);letter-spacing:.08em;text-transform:uppercase;color:#9db8f5;background:rgba(91,141,239,.14);border:1px solid rgba(91,141,239,.3);padding:4px 11px;border-radius:999px}
 #imp .hero h1{font-size:clamp(34px,8vw,56px);margin:14px 0 10px;letter-spacing:-.01em}
 #imp .hero h1 em{font-style:normal;background:linear-gradient(90deg,#7aa5ff,#ff6b6e);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -132,6 +166,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 </style>'''
 INTRO='''<div id="imp" hidden>
 <section class="hero">
+<button class="langbtn" id="btnLang" type="button"></button>
 <svg class="map" viewBox="0 0 400 300" aria-hidden="true"><g class="gr"><path d="M0 60H400M0 120H400M0 180H400M0 240H400M80 0V300M160 0V300M240 0V300M320 0V300"/></g>
 <path class="rt" d="M40 230C90 190 110 120 170 130S250 210 300 150 350 60 372 52"/><path class="rt rt2" d="M60 90C120 70 150 40 210 70S270 120 250 190 190 262 150 250"/>
 <circle class="pt" cx="40" cy="230" r="7"/><circle class="pt" cx="170" cy="130" r="6"/><circle class="pt" cx="300" cy="150" r="6"/><circle class="pt" cx="372" cy="52" r="8"/><circle class="pt" cx="210" cy="70" r="5"/><circle class="pt" cx="150" cy="250" r="6"/></svg>
@@ -243,7 +278,7 @@ INTRO='''<div id="imp" hidden>
 '''+FOOT+'''
 </div>'''
 body='''<body>
-<div id="tools" hidden><button id="btnNew" type="button" title="Γυρίζει στις οδηγίες για να φορτώσεις άλλο αρχείο. Δεν σβήνει τίποτα.">Άλλο αρχείο</button><button id="btnDel" type="button" title="Σβήνει ό,τι έχει αποθηκευτεί σε αυτόν τον browser. Θα σε ρωτήσει πρώτα.">Διαγραφή δεδομένων</button></div>
+<div id="tools" hidden><button id="btnLang2" type="button"></button><button id="btnNew" type="button" title="Γυρίζει στις οδηγίες για να φορτώσεις άλλο αρχείο. Δεν σβήνει τίποτα.">Άλλο αρχείο</button><button id="btnDel" type="button" title="Σβήνει ό,τι έχει αποθηκευτεί σε αυτόν τον browser. Θα σε ρωτήσει πρώτα.">Διαγραφή δεδομένων</button></div>
 '''+INTRO+'''
 <div id="appwrap" hidden>
 <div id="demoBar" hidden><span>🎭 <b>Δείγμα με φανταστικά δεδομένα.</b> Δεν είναι κανενός. Έτσι θα δείχνει η δική σου σελίδα.</span><button type="button" id="btnReal">Φόρτωσε το δικό μου αρχείο</button></div>
@@ -255,6 +290,12 @@ body='''<body>
 <script type="text/plain" id="app-main">'''+app+'''</script>
 <script type="text/plain" id="proc-src">'''+proc+'''</script>
 <script>
+var EN='''+EN_JSON+''';
+var LANG=(function(){try{var l=localStorage.getItem('gtv-lang');if(l==='en'||l==='el')return l}catch(e){}return /^el/i.test(navigator.language||'el')?'el':'en'})();
+window.LANG=LANG;window.LOC=LANG==='en'?'en-GB':'el-GR';
+function GT(s){if(LANG!=='en'||typeof s!=='string')return s;var t=s.trim();if(!t)return s;var e=EN[t];if(e===undefined)return s;var a=s.indexOf(t);return s.slice(0,a)+e+s.slice(a+t.length)}
+window.GT=GT;
+function L(el,en){return LANG==='en'?en:el}
 var CITIES_B64="'''+cities+'''";
 var OUTLINE='''+json.dumps(outline,separators=(',',':'))+''';
 (function(){
@@ -266,23 +307,23 @@ var OUTLINE='''+json.dumps(outline,separators=(',',':'))+''';
   function del(){return idb('readwrite',function(s){s.delete('data')}).catch(function(){})}
   function inject(id){var s=document.createElement('script');s.textContent=$(id).textContent;document.body.appendChild(s)}
   var started=false;
-  function start(data,saved,demo){
+  function start(data,saved,demo){curSaved=!!saved;
     window.TLDATA=data;window.TLDEMO=!!demo;window.TLHOME=data.meta&&data.meta.home||[38,24.5];hasData=true;
     $('imp').hidden=true;$('appwrap').hidden=false;$('tools').hidden=false;$('btnDel').hidden=!saved;$('demoBar').hidden=!demo;
     var hn=$('homeName');if(hn&&data.meta)hn.textContent=data.meta.homeName;
-    if(!started){started=true;inject('app-shim');inject('app-main');try{extras(data)}catch(e){}}
+    if(!started){started=true;inject('app-shim');inject('app-main');try{extras(data)}catch(e){}trDom(document.body)}
     else if(saved){location.reload()}
     else{idb('readwrite',function(s){s.put(data,'tmp')}).then(function(){try{sessionStorage.setItem('pep-tmp','1')}catch(e){}location.reload()},function(){location.reload()})}
   }
   function showImp(){$('btnDemo').hidden=started;$('demoLine').hidden=started;$('imp').hidden=false;$('appwrap').hidden=true;$('tools').hidden=true;$('backWrap').hidden=!(hasData&&started);window.scrollTo(0,0)}
-  function setP(p,m){$('bar').style.display='block';$('bari').style.width=Math.round(p*100)+'%';$('stage').textContent=m||''}
-  function fail(m){$('err').textContent=m;$('bar').style.display='none';$('stage').textContent=''}
+  function setP(p,m){$('bar').style.display='block';$('bari').style.width=Math.round(p*100)+'%';$('stage').textContent=GT(m||'')}
+  function fail(m){$('err').textContent=GT(m);$('bar').style.display='none';$('stage').textContent=''}
   function process(file){
     $('err').textContent='';
     file.slice(0,300).text().then(function(h){
       if(h.slice(0,2)==='PK')return fail('Αυτό είναι αρχείο ZIP. Άνοιξε (αποσυμπίεσε) το ZIP και διάλεξε το αρχείο που τελειώνει σε .json από μέσα.');
       var t=h.replace(/^\\uFEFF/,'').trim().charAt(0);
-      if(t!=='{'&&t!=='[')return fail('Αυτό το αρχείο ('+file.name+') δεν μοιάζει με Timeline.json. Χρειάζεται το αρχείο .json που βγάζει το κινητό από το «Εξαγωγή δεδομένων Χρονολογίου» (Βήμα 1).');
+      if(t!=='{'&&t!=='[')return fail(GT('Αυτό το αρχείο (')+file.name+GT(') δεν μοιάζει με Timeline.json. Χρειάζεται το αρχείο .json που βγάζει το κινητό από το «Εξαγωγή δεδομένων Χρονολογίου» (Βήμα 1).'));
       run(file);
     }).catch(function(){fail('Δεν μπόρεσα να διαβάσω το αρχείο. Δοκίμασε να το διαλέξεις ξανά.')});
   }
@@ -292,29 +333,45 @@ var OUTLINE='''+json.dumps(outline,separators=(',',':'))+''';
     var wsrc=$('proc-src').textContent+'\\nfunction unpack(b64){var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"))).text().then(function(t){var c=JSON.parse(t),n=c.rows.length,la=new Float32Array(n),lo=new Float32Array(n),ad=new Uint16Array(n),cc=new Uint16Array(n),nm=new Array(n);for(var i=0;i<n;i++){var p=c.rows[i].split("|");la[i]=+p[0];lo[i]=+p[1];nm[i]=p[2];ad[i]=+p[3];cc[i]=+p[4]}return{n:nm,la:la,lo:lo,ad:ad,cc:cc,admins:c.admins,ccs:c.ccs}})}\\nonmessage=function(e){var m=e.data;m.file.text().then(function(t){return unpack(m.cities).then(function(c){return processTimeline(t,c,m.outline,function(p,s){postMessage({p:p,m:s})})})}).then(function(o){postMessage({done:o})}).catch(function(x){postMessage({err:x&&x.message||String(x)})})};';
     var w;try{w=new Worker(URL.createObjectURL(new Blob([wsrc],{type:'text/javascript'})))}catch(e){return fail('Αυτός ο browser δεν μπορεί να κάνει την επεξεργασία. Δοκίμασε Chrome, Edge ή Firefox.')}
     w.onmessage=function(e){var d=e.data;if(d.p!=null)setP(d.p,d.m);else if(d.err){w.terminate();fail(/JSON|Unexpected|position/.test(d.err)?'Το αρχείο δεν είναι ολόκληρο ή δεν είναι σωστό JSON. Δοκίμασε να το εξαγάγεις ξανά από το κινητό.':/memory|allocation/i.test(d.err)?'Το αρχείο είναι πολύ μεγάλο για αυτή τη συσκευή. Δοκίμασε σε υπολογιστή με Chrome ή Edge.':d.err)}else if(d.done){w.terminate();setP(1,'Έτοιμο!');var fin=function(sv){start(d.done,sv,demo)};if(demo)fin(false);else if(remember)put(d.done).then(function(){fin(true)},function(){fin(false)});else del().then(function(){fin(false)})}};
-    w.onerror=function(e){fail('Κάτι πήγε στραβά στην επεξεργασία ('+(e.message||'άγνωστο σφάλμα')+'). Αν το αρχείο είναι πολύ μεγάλο, δοκίμασε σε υπολογιστή.')};
+    w.onerror=function(e){fail(GT('Κάτι πήγε στραβά στην επεξεργασία (')+(e.message||GT('άγνωστο σφάλμα'))+GT('). Αν το αρχείο είναι πολύ μεγάλο, δοκίμασε σε υπολογιστή.'))};
     w.postMessage({file:file,cities:CITIES_B64,outline:OUTLINE});
   }
 
+  function trDom(root){
+    if(LANG!=='en')return;
+    var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),n,list=[];
+    while(n=w.nextNode()){if(!n.parentElement||n.parentElement.closest('script,style'))continue;if(/[Α-ωά-ώ]/.test(n.nodeValue))list.push(n)}
+    list.forEach(function(n){var v=GT(n.nodeValue);v=v.replace('Έκδοση','Version');if(v!==n.nodeValue)n.nodeValue=v});
+    [].forEach.call(root.querySelectorAll('[title],[aria-label],[placeholder],[alt]'),function(e){['title','aria-label','placeholder','alt'].forEach(function(a){var v=e.getAttribute(a);if(v&&/[Α-ωά-ώ]/.test(v)){var g=GT(v);if(g!==v)e.setAttribute(a,g)}})});
+  }
+  var curSaved=false;
+  function setLang(l){
+    try{localStorage.setItem('gtv-lang',l)}catch(e){}
+    if(hasData&&started){
+      if(window.TLDEMO){try{sessionStorage.setItem('pep-tmp','demo')}catch(e){}location.reload()}
+      else if(curSaved)location.reload();
+      else idb('readwrite',function(s){s.put(window.TLDATA,'tmp')}).then(function(){try{sessionStorage.setItem('pep-tmp','1')}catch(e){}location.reload()},function(){location.reload()});
+    }else location.reload();
+  }
   function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-  function nf(n,d){return Number(n).toLocaleString('el-GR',{maximumFractionDigits:d||0})}
+  function nf(n,d){return Number(n).toLocaleString(LOC,{maximumFractionDigits:d||0})}
   function dl(blob,fn){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},600)}
   function facts(data){
     var box=$('facts');if(!box){box=document.createElement('div');box.id='facts';var t=document.querySelector('#overview .tiles');if(!t)return;t.parentNode.insertBefore(box,t)}
     var km=0;(data.acts||[]).forEach(function(a){km+=a.km});
     var F=[],home=data.meta&&data.meta.homeName;
-    if(km>=100){var laps=km/40075;F.push(['🌍',laps>=1?'Έχεις διανύσει <b>'+nf(km)+' χλμ</b>, δηλαδή <b>'+nf(laps,1)+' φορές</b> τον γύρο της Γης.':'Έχεις διανύσει <b>'+nf(km)+' χλμ</b>, δηλαδή το <b>'+nf(laps*100)+'%</b> του γύρου της Γης.'])}
-    if(km>=20000)F.push(['🌙','Μέχρι τη Σελήνη είναι 384.400 χλμ. Εσύ έχεις κάνει το <b>'+nf(km/384400*100,1)+'%</b> του δρόμου.']);
+    if(km>=100){var laps=km/40075;F.push(['🌍',laps>=1?L('Έχεις διανύσει <b>'+nf(km)+' χλμ</b>, δηλαδή <b>'+nf(laps,1)+' φορές</b> τον γύρο της Γης.','You have travelled <b>'+nf(km)+' km</b>, that is <b>'+nf(laps,1)+' times</b> around the Earth.'):L('Έχεις διανύσει <b>'+nf(km)+' χλμ</b>, δηλαδή το <b>'+nf(laps*100)+'%</b> του γύρου της Γης.','You have travelled <b>'+nf(km)+' km</b>, that is <b>'+nf(laps*100)+'%</b> of the way around the Earth.')])}
+    if(km>=20000)F.push(['🌙',L('Μέχρι τη Σελήνη είναι 384.400 χλμ. Εσύ έχεις κάνει το <b>'+nf(km/384400*100,1)+'%</b> του δρόμου.','The Moon is 384,400 km away. You have done <b>'+nf(km/384400*100,1)+'%</b> of the way.')]);
     var yr={},cd={};
     (data.visits||[]).forEach(function(v){yr[v.y]=(yr[v.y]||0)+1;var pl=data.places[v.p];if(pl&&pl.city!==home){var c=cd[pl.city]||(cd[pl.city]={});c[v.d]=1}});
     var ys=Object.keys(yr).sort(function(a,b){return yr[b]-yr[a]});
-    if(ys.length>1)F.push(['📅','Η πιο γεμάτη χρονιά ήταν το <b>'+ys[0]+'</b>, με <b>'+nf(yr[ys[0]])+'</b> επισκέψεις σε μέρη.']);
+    if(ys.length>1)F.push(['📅',L('Η πιο γεμάτη χρονιά ήταν το <b>'+ys[0]+'</b>, με <b>'+nf(yr[ys[0]])+'</b> επισκέψεις σε μέρη.','Your busiest year was <b>'+ys[0]+'</b>, with <b>'+nf(yr[ys[0]])+'</b> visits to places.')]);
     var cs=Object.keys(cd).map(function(k){return[k,Object.keys(cd[k]).length]}).sort(function(a,b){return b[1]-a[1]});
-    if(cs.length)F.push(['📍','Εκτός από το σπίτι, πήγες πιο συχνά στην περιοχή <b>'+esc(cs[0][0])+'</b>: σε <b>'+nf(cs[0][1])+'</b> διαφορετικές ημέρες.']);
+    if(cs.length)F.push(['📍',L('Εκτός από το σπίτι, πήγες πιο συχνά στην περιοχή <b>'+esc(cs[0][0])+'</b>: σε <b>'+nf(cs[0][1])+'</b> διαφορετικές ημέρες.','Apart from home, you went most often to <b>'+esc(cs[0][0])+'</b>: on <b>'+nf(cs[0][1])+'</b> different days.')]);
     var tr=(data.trips||[]).slice().sort(function(a,b){return b.days-a.days})[0];
-    if(tr)F.push(['🧳','Το μεγαλύτερο ταξίδι σου κράτησε <b>'+tr.days+' ημέρες</b> ('+esc(String(tr.places).split(', ').slice(0,2).join(', '))+').']);
+    if(tr)F.push(['🧳',L('Το μεγαλύτερο ταξίδι σου κράτησε <b>'+tr.days+' ημέρες</b> ('+esc(String(tr.places).split(', ').slice(0,2).join(', '))+').','Your longest trip lasted <b>'+tr.days+' days</b> ('+esc(String(tr.places).split(', ').slice(0,2).join(', '))+').')]);
     var fr=(data.trips||[]).slice().sort(function(a,b){return b.far_km-a.far_km})[0];
-    if(fr&&fr.far_km>0)F.push(['📏','Το πιο μακρινό σου σημείο ήταν <b>'+nf(fr.far_km)+' χλμ</b> από το σπίτι ('+esc(String(fr.places).split(', ')[0])+').']);
+    if(fr&&fr.far_km>0)F.push(['📏',L('Το πιο μακρινό σου σημείο ήταν <b>'+nf(fr.far_km)+' χλμ</b> από το σπίτι ('+esc(String(fr.places).split(', ')[0])+').','Your farthest point was <b>'+nf(fr.far_km)+' km</b> from home ('+esc(String(fr.places).split(', ')[0])+').')]);
     box.innerHTML=F.slice(0,6).map(function(f){return '<div><i>'+f[0]+'</i><span>'+f[1]+'</span></div>'}).join('');
     box.hidden=!F.length;
   }
@@ -323,7 +380,7 @@ var OUTLINE='''+json.dumps(outline,separators=(',',':'))+''';
     rows.push([].map.call(t.querySelectorAll('thead th'),function(h){return h.textContent.trim()}));
     [].forEach.call(t.querySelectorAll('tbody tr'),function(tr){if(tr.hidden||tr.style.display==='none')return;rows.push([].map.call(tr.children,function(c){return c.textContent.trim()}))});
     var q=function(x){x=String(x);return(x.indexOf(';')>=0||x.indexOf('"')>=0||x.indexOf(String.fromCharCode(10))>=0)?'"'+x.split('"').join('""')+'"':x};
-    var txt=String.fromCharCode(65279)+rows.map(function(r){return r.map(q).join(';')}).join(NL)+NL+NL+'Δημιουργήθηκε με Google Timeline by Veagle · ferelis.gr'+NL;
+    var txt=String.fromCharCode(65279)+rows.map(function(r){return r.map(q).join(';')}).join(NL)+NL+NL+GT('Δημιουργήθηκε με Google Timeline by Veagle · ferelis.gr')+NL;
     dl(new Blob([txt],{type:'text/csv;charset=utf-8'}),fname);
   }
   function extras(data){
@@ -394,10 +451,15 @@ var OUTLINE='''+json.dumps(outline,separators=(',',':'))+''';
   window.addEventListener('drop',function(e){var f=e.dataTransfer&&e.dataTransfer.files[0];if(f&&!$('imp').hidden)process(f)});
   $('btnNew').onclick=showImp;$('btnReal').onclick=showImp;$('btnDemo').onclick=runDemo;$('btnDemo2').onclick=runDemo;
   $('btnBack').onclick=function(){$('imp').hidden=true;$('appwrap').hidden=false;$('tools').hidden=false};
-  $('btnDel').onclick=function(){if(confirm('Να διαγραφούν τα αποθηκευμένα δεδομένα από αυτόν τον browser;\\n\\nΤο αρχικό σου αρχείο Timeline.json δεν πειράζεται.'))del().then(function(){location.reload()})};
-  var tf=false;try{tf=sessionStorage.getItem('pep-tmp')==='1';sessionStorage.removeItem('pep-tmp')}catch(e){}
+  $('btnDel').onclick=function(){if(confirm(GT('Να διαγραφούν τα αποθηκευμένα δεδομένα από αυτόν τον browser;\\n\\nΤο αρχικό σου αρχείο Timeline.json δεν πειράζεται.')))del().then(function(){location.reload()})};
+  document.documentElement.lang=LANG;
+  document.title=LANG==='en'?'Google Timeline by Veagle · Google Maps Timeline viewer':'Google Timeline by Veagle · Χρονολόγιο Χαρτών Google';
+  trDom(document.body);
+  [$('btnLang'),$('btnLang2')].forEach(function(b){b.textContent=LANG==='en'?'EL':'EN';b.setAttribute('aria-label',LANG==='en'?'Ελληνικά':'English');b.title=LANG==='en'?'Ελληνικά':'English';b.onclick=function(){setLang(LANG==='en'?'el':'en')}});
+  var fl=null;try{fl=sessionStorage.getItem('pep-tmp');sessionStorage.removeItem('pep-tmp')}catch(e){}
+  var tf=fl==='1';
   var first=tf?idb('readonly',function(s){return s.get('tmp')}).then(function(d){idb('readwrite',function(s){s.delete('tmp')}).catch(function(){});return d}).catch(function(){return null}):get();
-  first.then(function(d){if(d&&d.places)start(d,!tf);else showImp()}).catch(showImp);
+  if(fl==='demo'){showImp();runDemo()}else first.then(function(d){if(d&&d.places)start(d,!tf);else showImp()}).catch(showImp);
 })();
 </script>
 </body>

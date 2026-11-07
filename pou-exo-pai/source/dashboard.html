@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Πού έχω πάει</title>
+<meta name="theme-color" content="#050708">
+<link rel="icon" type="image/png" href="../../images/icon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --color-fg:#e7ecf3;--color-fg-muted:#7c8697;--color-bg:#050708;--color-panel:#0d1116;--color-border-line:#222a33;
+  --cds-radius:12px;--cds-gap-xs:4px;--cds-gap-sm:8px;--cds-gap-md:14px;--cds-pad-xs:4px;--cds-pad-sm:10px;--cds-pad-md:12px;--cds-pad-lg:16px;
+  --cds-font-size-caption:12px;--cds-font-size-body:14px;--cds-font-size-heading:15px;--cds-font-size-title:30px;--cds-font-weight-medium:500;
+  --cds-chart-grid:#1a2027;--cds-surface-popover:#10151a;--cds-border:#2a323c;--cds-text-secondary:#7c8697;--cds-shadow-popover:0 10px 28px rgba(0,0,0,.55);
+  --font-anthropic-sans:'IBM Plex Sans',system-ui,sans-serif;--font-anthropic-serif:'Space Grotesk',system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--color-bg);color:var(--color-fg);font:14px/1.5 var(--font-anthropic-sans);-webkit-font-smoothing:antialiased;padding:18px max(16px,env(safe-area-inset-right)) 40px max(16px,env(safe-area-inset-left))}
+.back{display:block;max-width:1200px;margin:0 auto 12px;font:500 12px 'Space Grotesk',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--color-fg-muted);text-decoration:none}
+.back:hover{color:#ff1e38}
+.dash-skeleton{background:linear-gradient(90deg,#12161b,#1b2128,#12161b);background-size:200% 100%;animation:sk 1.4s linear infinite;border-radius:8px}
+@keyframes sk{to{background-position:-200% 0}}
+button:focus-visible,input:focus-visible{outline:2px solid #ff1e38;outline-offset:2px}
+</style>
+</head>
+<body>
+<a class="back" href="../../index.html">← Veagle OS</a>
+<style>
+.tl{max-width:1200px;margin-inline:auto;position:relative;font-family:var(--font-anthropic-sans);color:var(--color-fg)}
+.tl h1{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);margin:0 0 var(--cds-gap-xs)}
+.tl .lead{margin:0 0 var(--cds-gap-md);color:var(--color-fg-muted);font-size:var(--cds-font-size-body)}
+.tl .tabs{display:flex;gap:var(--cds-gap-xs);flex-wrap:wrap;border-bottom:1px solid var(--color-border-line);margin-bottom:var(--cds-gap-md)}
+.tl .tab{background:none;border:0;border-bottom:2px solid transparent;color:var(--color-fg-muted);padding:var(--cds-pad-xs) var(--cds-pad-sm);font:inherit;font-size:var(--cds-font-size-body);cursor:pointer}
+.tl .tab[aria-selected=true]{color:var(--color-fg);border-bottom-color:var(--color-fg)}
+.tl section[hidden]{display:none}
+.tl .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr));gap:var(--cds-gap-md);margin-bottom:var(--cds-gap-md)}
+.tl .tile{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-md) var(--cds-pad-lg)}
+.tl .tile .v{display:block;font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);font-variant-numeric:tabular-nums}
+.tl .tile .l{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.tl .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:var(--cds-gap-md);margin-bottom:var(--cds-gap-md)}
+.tl .card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);min-width:0}
+.tl .card h2{margin:0;font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium)}
+.tl .card .note{margin:2px 0 var(--cds-gap-sm);color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.tl .chart{min-height:220px;position:relative}
+.tl .chart svg{display:block;width:100%}
+.tl .chart text{fill:var(--color-fg-muted);font-size:11px;font-family:var(--font-anthropic-sans)}
+.tl .legend{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm);margin-top:var(--cds-gap-xs);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.tl .legend i{display:inline-block;width:.6rem;height:.6rem;border-radius:2px;margin-right:4px;vertical-align:baseline}
+.tl .controls{display:flex;flex-wrap:wrap;gap:var(--cds-gap-sm) var(--cds-gap-md);align-items:center;margin-bottom:var(--cds-gap-sm)}
+.tl .chips{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.tl .chips .cl{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);margin-right:4px}
+.tl .chip{border:1px solid var(--color-border-line);background:transparent;color:var(--color-fg);border-radius:999px;padding:2px 10px;font:inherit;font-size:var(--cds-font-size-caption);cursor:pointer}
+.tl .chip[aria-pressed=true]{background:var(--color-fg);color:var(--color-bg);border-color:var(--color-fg)}
+.tl .mapwrap{position:relative;height:clamp(360px,64vh,620px);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);overflow:hidden}
+.tl .mapwrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+.tl .zoom{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px}
+.tl .zoom button{width:28px;height:28px;border-radius:var(--cds-radius);border:1px solid var(--color-border-line);background:var(--color-panel);color:var(--color-fg);font:inherit;cursor:pointer}
+.tl .tt{position:absolute;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);z-index:5;max-width:16rem}
+.tl .tt[hidden]{display:none}
+.tl .tt .t1{color:var(--cds-text-secondary)}
+.tl .tbox{max-height:34rem;overflow:auto;border-top:1px solid var(--color-border-line)}
+.tl table{width:100%;border-collapse:collapse;font-size:var(--cds-font-size-caption);font-variant-numeric:tabular-nums}
+.tl th,.tl td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--color-border-line);vertical-align:top}
+.tl th{position:sticky;top:0;background:var(--color-panel);font-weight:var(--cds-font-weight-medium);white-space:nowrap}
+.tl th button{all:unset;cursor:pointer}
+.tl td.n,.tl th.n{text-align:right}
+.tl input[type=search]{font:inherit;font-size:var(--cds-font-size-caption);padding:4px 10px;border:1px solid var(--color-border-line);border-radius:var(--cds-radius);background:var(--color-bg);color:var(--color-fg);min-width:12rem;margin-bottom:var(--cds-gap-sm)}
+.tl .tbl{overflow-x:auto}
+[data-dash-source-state=empty]{color:transparent}
+</style>
+<div class="tl" id="dash-page">
+<header>
+<h1 id="top">Πού έχω πάει</h1>
+<p class="lead" id="lead"><span data-source="kpi" data-field="value" data-where="key=places" data-fill="places">—</span> μέρη σε <span data-source="kpi" data-field="value" data-where="key=localities" data-fill="localities">—</span> περιοχές και <span data-source="kpi" data-field="value" data-where="key=countries" data-fill="countries">—</span> χώρες, από το <span data-source="kpi" data-field="value" data-where="key=first_year" data-fill="first_year">—</span> μέχρι σήμερα.</p>
+</header>
+<div class="tabs" role="tablist" id="tabs">
+<button class="tab" role="tab" data-tab="overview" aria-selected="true">Επισκόπηση</button>
+<button class="tab" role="tab" data-tab="map" aria-selected="false">Χάρτης</button>
+<button class="tab" role="tab" data-tab="areas" aria-selected="false">Περιοχές</button>
+<button class="tab" role="tab" data-tab="trips" aria-selected="false">Ταξίδια</button>
+</div>
+
+<section id="overview">
+<div class="tiles">
+<div class="tile"><b class="v" data-source="kpi" data-field="value" data-where="key=places" data-fill="places">—</b><span class="l">μέρη</span></div>
+<div class="tile"><b class="v" data-source="kpi" data-field="value" data-where="key=localities" data-fill="localities">—</b><span class="l">περιοχές</span></div>
+<div class="tile"><b class="v" data-source="kpi" data-field="value" data-where="key=countries" data-fill="countries">—</b><span class="l">χώρες</span></div>
+<div class="tile"><b class="v" data-source="kpi" data-field="value" data-where="key=km_total" data-fill="km_total">—</b><span class="l">χιλιόμετρα συνολικά</span></div>
+<div class="tile"><b class="v" data-source="kpi" data-field="value" data-where="key=trips" data-fill="trips">—</b><span class="l">ταξίδια εκτός έδρας</span></div>
+<div class="tile"><b class="v" data-source="kpi" data-field="value" data-where="key=days" data-fill="days">—</b><span class="l">ημέρες με επισκέψεις</span></div>
+</div>
+<div class="grid">
+<div class="card"><h2 id="h-places">Μέρη ανά έτος</h2><p class="note">Διαφορετικά μέρη που επισκέφτηκες κάθε χρόνο</p><div class="chart dash-skeleton" id="ch-places" data-source="byyear"></div></div>
+<div class="card"><h2 id="h-km">Χιλιόμετρα ανά έτος</h2><p class="note">Ανά μέσο μετακίνησης</p><div class="chart dash-skeleton" id="ch-km" data-source="byyear"></div><div class="legend" id="lg-km"></div></div>
+</div>
+<div class="grid">
+<div class="card"><h2 id="h-countries">Χώρες</h2><p class="note">Ημέρες με επισκέψεις ανά χώρα</p>
+<div class="tbl"><table id="tb-countries" data-source="countries" data-row-key="cc"><thead><tr><th data-field="country">Χώρα</th><th class="n" data-field="days">Ημέρες</th><th class="n" data-field="visits">Επισκέψεις</th><th class="n" data-field="first">Από</th><th class="n" data-field="last">Έως</th></tr></thead><tbody></tbody></table></div></div>
+<div class="card"><h2 id="h-modes">Μετακινήσεις</h2><p class="note">Χιλιόμετρα ανά μέσο, όλα τα χρόνια</p><div class="chart dash-skeleton" id="ch-modes" data-source="modes"></div></div>
+</div>
+<div class="card"><h2 id="h-top">Οι περιοχές που επισκέφτηκες περισσότερο</h2><p class="note">Αριθμός επισκέψεων, πρώτες 12 περιοχές</p><div class="chart dash-skeleton" id="ch-top" data-source="cities"></div></div>
+</section>
+
+<section id="map" hidden>
+<div class="controls">
+<div class="chips" id="chips-year"><span class="cl">Έτος</span></div>
+<div class="chips" id="chips-mode"><span class="cl">Διαδρομές</span></div>
+<div class="chips" id="chips-layer"><span class="cl">Στρώματα</span></div>
+<div class="chips" id="chips-view"><span class="cl">Προβολή</span></div>
+</div>
+<div class="mapwrap" id="mapwrap" data-source="places visits routes outline"><canvas id="cv" aria-label="Χάρτης με τα μέρη και τις διαδρομές"></canvas>
+<div class="zoom"><button id="zin" aria-label="Μεγέθυνση">+</button><button id="zout" aria-label="Σμίκρυνση">−</button></div></div>
+<div class="legend" id="lg-map"></div>
+</section>
+
+<section id="areas" hidden>
+<div class="card"><h2 id="h-areas">Όλες οι περιοχές</h2><p class="note">Ταξινόμησε με κλικ στην επικεφαλίδα. Οι ώρες είναι ο χρόνος που πέρασες στην περιοχή.</p>
+<input type="search" id="q-areas" placeholder="Αναζήτηση περιοχής" aria-label="Αναζήτηση περιοχής">
+<div class="tbox"><table id="tb-areas" data-source="cities" data-row-key="name"><thead><tr>
+<th data-field="name"><button data-k="name">Περιοχή</button></th><th data-field="cc"><button data-k="cc">Χώρα</button></th>
+<th class="n" data-field="visits"><button data-k="visits">Επισκέψεις</button></th><th class="n" data-field="days"><button data-k="days">Ημέρες</button></th>
+<th class="n" data-field="hours"><button data-k="hours">Ώρες</button></th><th class="n" data-field="places"><button data-k="places">Μέρη</button></th>
+<th class="n" data-field="first"><button data-k="first">Από</button></th><th class="n" data-field="last"><button data-k="last">Έως</button></th>
+</tr></thead><tbody></tbody></table></div></div>
+</section>
+
+<section id="trips" hidden>
+<div class="card"><h2 id="h-trips">Ταξίδια εκτός έδρας</h2><p class="note">Διαδοχικές ημέρες περισσότερο από 80 χλμ από το σπίτι. Η έδρα ήταν η Καβάλα και από το 2025 η Αθήνα.</p>
+<input type="search" id="q-trips" placeholder="Αναζήτηση προορισμού ή χώρας" aria-label="Αναζήτηση ταξιδιού">
+<div class="tbox"><table id="tb-trips" data-source="trips" data-row-key="start"><thead><tr>
+<th data-field="start"><button data-k="start">Έναρξη</button></th><th data-field="end"><button data-k="end">Λήξη</button></th>
+<th class="n" data-field="days"><button data-k="days">Ημέρες</button></th><th data-field="places"><button data-k="places">Μέρη</button></th>
+<th data-field="countries"><button data-k="countries">Χώρες</button></th><th class="n" data-field="far_km"><button data-k="far_km">Μακρύτερα (χλμ)</button></th>
+<th class="n" data-field="total_km"><button data-k="total_km">Διαδρομή (χλμ)</button></th><th class="n" data-field="moto_km"><button data-k="moto_km">Μηχανή (χλμ)</button></th>
+</tr></thead><tbody></tbody></table></div></div>
+</section>
+<div class="tt" id="tt" hidden></div>
+</div>
+
+
+<script src="d3.min.js"></script>
+<script src="data.js"></script>
+<script>
+/* Τοπική αντικατάσταση του dash API: τα δεδομένα έρχονται από το data.js. */
+(function(){
+  var store={},cbs=[],t;
+  Object.keys(window.TLDATA).forEach(function(k){store[k]=window.TLDATA[k];});
+  window.dash={
+    colors:['#ff1e38','#5b8def','#2ee6a6','#f5b342','#e7ecf3','#8a94a6','#b794f6','#c9764f'],
+    data:function(id){return store[id]?{status:'ok',data:store[id],message:'',refreshing:false,meta:[]}:{status:'missing',data:[],message:'',refreshing:false,meta:[]};},
+    calc:function(id,o){store[id]=o.fn.apply(null,o.inputs.map(function(i){return store[i];}));},
+    onData:function(f){cbs.push(f);f();},
+    setLink:function(){},params:function(){return {};},setParams:function(){},resetParams:function(){},refresh:function(){}
+  };
+  window.addEventListener('resize',function(){clearTimeout(t);t=setTimeout(function(){cbs.forEach(function(f){f();});},120);});
+})();
+</script>
+<script>
+const IDS=['places','visits','acts','trips','routes','outline'];
+const CALCS=['kpi','byyear','cities','countries','modes'];
+const nf=new Intl.NumberFormat('el-GR');
+const fmt=n=>nf.format(Math.round(n));
+const root=document.getElementById('dash-page');
+const tt=document.getElementById('tt');
+const GROUPS={moto:{l:'Μηχανή',c:0},car:{l:'Αυτοκίνητο',c:1},walk:{l:'Περπάτημα',c:2},air:{l:'Πτήσεις και πλοία',c:3},other:{l:'Άλλα',c:5}};
+const GORDER=['moto','car','walk','air','other'];
+const MODEGROUP={moto:'moto',car:'car',walk:'walk',fly:'air',ferry:'air',fly_l:'air',ferry_l:'air',bike:'other',transit:'other',other:'other'};
+const state={tab:'overview',year:'all',modes:new Set(GORDER),layers:new Set(['dots','routes'])};
+const V={cx:24.5,cy:0,k:100};
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const probe=document.createElement('span');probe.style.display='none';root.appendChild(probe);
+const rc=c=>{probe.style.color='';probe.style.color=c;return getComputedStyle(probe).color;};
+const merc=lat=>Math.log(Math.tan(Math.PI/4+lat*Math.PI/360))*180/Math.PI;
+V.cy=merc(38.6);
+let M=null,dots=[],drag=null,ready=false;
+const gcol=g=>dash.colors[GROUPS[g].c%dash.colors.length];
+
+function allOk(){return IDS.concat(CALCS).every(id=>dash.data(id).status==='ok');}
+
+/* ---------- derived data ---------- */
+function prep(){
+  const P=dash.data('places').data,Vs=dash.data('visits').data,R=dash.data('routes').data,O=dash.data('outline').data;
+  if(M&&M.src===Vs)return M;
+  const pm=new Map();
+  P.forEach(p=>pm.set(Number(p.i),{i:Number(p.i),lat:Number(p.lat),lon:Number(p.lon),my:merc(Number(p.lat)),name:p.name}));
+  const routes=R.map(r=>{
+    const path=new Path2D();
+    String(r.lines).split('|').forEach(l=>{
+      const pts=l.split(';');
+      for(let j=0;j<pts.length;j++){const a=pts[j].split(',');const x=Number(a[1]),y=merc(Number(a[0]));if(j===0)path.moveTo(x,y);else path.lineTo(x,y);}
+    });
+    return {year:Number(r.year),group:MODEGROUP[r.mode]||'other',path};
+  });
+  const world=new Path2D(),detail=new Path2D();
+  O.forEach(o=>{
+    const path=o.layer==='gr'?detail:world;const pts=String(o.pts).split(';');
+    for(let j=0;j<pts.length;j++){const a=pts[j].split(',');const x=Number(a[0]),y=merc(Math.max(-85,Math.min(85,Number(a[1]))));if(j===0)path.moveTo(x,y);else path.lineTo(x,y);}
+    path.closePath();
+  });
+  const years=[...new Set(Vs.map(v=>Number(v.y)))].sort((a,b)=>a-b);
+  M={src:Vs,pm,routes,world,detail,years,visits:Vs};
+  return M;
+}
+
+/* ---------- tooltip ---------- */
+function showTip(lines,ev){
+  tt.replaceChildren();
+  lines.forEach((t,i)=>{const d=document.createElement('div');if(i===0)d.className='t1';d.textContent=t;tt.appendChild(d);});
+  tt.hidden=false;
+  const r=root.getBoundingClientRect();let x=ev.clientX-r.left+12,y=ev.clientY-r.top+12;
+  const w=tt.offsetWidth,h=tt.offsetHeight;
+  if(x+w>r.width)x=Math.max(0,ev.clientX-r.left-w-12);
+  if(y+h>r.height)y=Math.max(0,ev.clientY-r.top-h-12);
+  tt.style.left=x+'px';tt.style.top=y+'px';
+}
+const hideTip=()=>{tt.hidden=true;};
+
+/* ---------- charts ---------- */
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function txt(parent,s,attrs){const t=el('text',attrs,parent);t.textContent=s;return t;}
+function clearChart(box){box.replaceChildren();box.classList.add('dash-skeleton');}
+function setup(box,H){const W=box.clientWidth;box.classList.remove('dash-skeleton');box.replaceChildren();if(!W)return null;const s=el('svg',{width:'100%',viewBox:`0 0 ${W} ${H}`,height:H});box.appendChild(s);return {s,W,H};}
+function stacked(box,rows,keys,colors,labels,unit){
+  const g=setup(box,230);if(!g)return;
+  const m={t:8,r:6,b:22,l:38};
+  const x=d3.scaleBand().domain(rows.map(r=>r.year)).range([m.l,g.W-m.r]).padding(.25);
+  const tot=r=>keys.reduce((s,k)=>s+Number(r[k]),0);
+  const y=d3.scaleLinear().domain([0,d3.max(rows,tot)*1.05]).nice().range([g.H-m.b,m.t]);
+  y.ticks(4).forEach(t=>{el('line',{x1:m.l,x2:g.W-m.r,y1:y(t),y2:y(t),stroke:'var(--cds-chart-grid)'},g.s);txt(g.s,d3.format('~s')(t),{x:m.l-6,y:y(t)+4,'text-anchor':'end'});});
+  rows.forEach(r=>{
+    let acc=0;
+    keys.forEach((k,i)=>{const v=Number(r[k]);if(v<=0)return;const y0=y(acc),y1=y(acc+v);acc+=v;
+      const rect=el('rect',{x:x(r.year),y:y1,width:x.bandwidth(),height:Math.max(0,y0-y1),fill:colors[i]},g.s);
+      rect.addEventListener('pointermove',ev=>showTip([String(r.year)].concat(keys.map((kk,j)=>labels[j]+': '+fmt(r[kk])+' '+unit).filter((_,j)=>Number(r[keys[j]])>0)),ev));
+      rect.addEventListener('pointerleave',hideTip);});
+    txt(g.s,String(r.year),{x:x(r.year)+x.bandwidth()/2,y:g.H-6,'text-anchor':'middle'});
+  });
+}
+function bars(box,rows,xk,yk,color,tipFn){
+  const g=setup(box,230);if(!g)return;
+  const m={t:8,r:6,b:22,l:38};
+  const x=d3.scaleBand().domain(rows.map(r=>r[xk])).range([m.l,g.W-m.r]).padding(.25);
+  const y=d3.scaleLinear().domain([0,d3.max(rows,r=>Number(r[yk]))*1.05]).nice().range([g.H-m.b,m.t]);
+  y.ticks(4).forEach(t=>{el('line',{x1:m.l,x2:g.W-m.r,y1:y(t),y2:y(t),stroke:'var(--cds-chart-grid)'},g.s);txt(g.s,fmt(t),{x:m.l-6,y:y(t)+4,'text-anchor':'end'});});
+  rows.forEach(r=>{
+    const rect=el('rect',{x:x(r[xk]),y:y(Number(r[yk])),width:x.bandwidth(),height:Math.max(0,g.H-m.b-y(Number(r[yk]))),rx:3,fill:color},g.s);
+    rect.addEventListener('pointermove',ev=>showTip(tipFn(r),ev));rect.addEventListener('pointerleave',hideTip);
+    txt(g.s,String(r[xk]),{x:x(r[xk])+x.bandwidth()/2,y:g.H-6,'text-anchor':'middle'});
+  });
+}
+function hbars(box,rows,lk,vk,color,tipFn){
+  const rowH=24,H=rows.length*rowH+8;const g=setup(box,H);if(!g)return;
+  const probeT=txt(g.s,'',{x:0,y:0});let lw=0;rows.forEach(r=>{probeT.textContent=r[lk];lw=Math.max(lw,probeT.getComputedTextLength());});probeT.remove();
+  const l=Math.min(lw+10,g.W*.5),rr=64;
+  const x=d3.scaleLinear().domain([0,d3.max(rows,r=>Number(r[vk]))]).range([0,Math.max(10,g.W-l-rr)]);
+  rows.forEach((r,i)=>{const y=4+i*rowH;
+    const t=txt(g.s,r[lk],{x:l-6,y:y+15,'text-anchor':'end'});
+    const rect=el('rect',{x:l,y:y+3,width:Math.max(2,x(Number(r[vk]))),height:rowH-8,rx:3,fill:color},g.s);
+    txt(g.s,fmt(r[vk]),{x:l+x(Number(r[vk]))+5,y:y+15});
+    [rect,t].forEach(n=>{n.addEventListener('pointermove',ev=>showTip(tipFn(r),ev));n.addEventListener('pointerleave',hideTip);});
+  });
+}
+
+/* ---------- tables ---------- */
+const TB={};
+function initTable(id,cols,key,search,def){
+  const t=document.getElementById(id),body=t.tBodies[0],q=search?document.getElementById(search):null;
+  const st={k:def.k,dir:def.dir,q:''};TB[id]={t,body,cols,key,st,q};
+  t.querySelectorAll('th button').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;if(st.k===k)st.dir*=-1;else{st.k=k;st.dir=cols.find(c=>c.f===k).num?-1:1;}renderTable(id);}));
+  if(q)q.addEventListener('input',()=>{st.q=q.value.trim().toLowerCase();renderTable(id);});
+}
+function renderTable(id){
+  const T=TB[id];if(!T||!T.rows)return;const {st,cols}=T;
+  let rows=T.rows;
+  if(st.q)rows=rows.filter(r=>cols.some(c=>String(r[c.f]).toLowerCase().includes(st.q)));
+  const c0=cols.find(c=>c.f===st.k);
+  rows=rows.slice().sort((a,b)=>{const x=a[st.k],y=b[st.k];return (c0.num?Number(x)-Number(y):String(x).localeCompare(String(y),'el'))*st.dir;});
+  const frag=document.createDocumentFragment();
+  rows.forEach(r=>{const tr=document.createElement('tr');tr.dataset.key=r[T.key];
+    cols.forEach(c=>{const td=document.createElement('td');if(c.num)td.className='n';td.textContent=c.raw?String(r[c.f]):(c.num?fmt(r[c.f]):String(r[c.f]));tr.appendChild(td);});frag.appendChild(tr);});
+  T.body.replaceChildren(frag);
+  T.t.querySelectorAll('th').forEach(th=>{const b=th.querySelector('button');th.removeAttribute('aria-sort');if(b&&b.dataset.k===st.k)th.setAttribute('aria-sort',st.dir>0?'ascending':'descending');});
+}
+initTable('tb-areas',[{f:'name',raw:1},{f:'cc',raw:1},{f:'visits',num:1},{f:'days',num:1},{f:'hours',num:1},{f:'places',num:1},{f:'first',num:1,raw:1},{f:'last',num:1,raw:1}],'name','q-areas',{k:'visits',dir:-1});
+initTable('tb-trips',[{f:'start',raw:1},{f:'end',raw:1},{f:'days',num:1},{f:'places'},{f:'countries',raw:1},{f:'far_km',num:1},{f:'total_km',num:1},{f:'moto_km',num:1}],'start','q-trips',{k:'start',dir:-1});
+
+/* ---------- overview ---------- */
+function renderOverview(){
+  const by=dash.data('byyear').data.map(r=>({year:Number(r.year),places:Number(r.places),visits:Number(r.visits),km_moto:Number(r.km_moto),km_car:Number(r.km_car),km_walk:Number(r.km_walk),km_air:Number(r.km_air),km_other:Number(r.km_other)}));
+  bars(document.getElementById('ch-places'),by,'year','places',dash.colors[0],r=>[String(r.year),fmt(r.places)+' μέρη',fmt(r.visits)+' επισκέψεις']);
+  const keys=['km_moto','km_car','km_walk','km_air','km_other'],labs=['Μηχανή','Αυτοκίνητο','Περπάτημα','Πτήσεις και πλοία','Άλλα'];
+  const cols=GORDER.map(gcol);
+  stacked(document.getElementById('ch-km'),by,keys,cols,labs,'χλμ');
+  const lg=document.getElementById('lg-km');lg.replaceChildren();
+  labs.forEach((l,i)=>{const s=document.createElement('span');const sw=document.createElement('i');sw.style.background=cols[i];s.appendChild(sw);s.appendChild(document.createTextNode(l));lg.appendChild(s);});
+  const modes=dash.data('modes').data.filter(r=>Number(r.km)>0).sort((a,b)=>Number(b.km)-Number(a.km));
+  hbars(document.getElementById('ch-modes'),modes,'label','km',dash.colors[1],r=>[r.label,fmt(r.km)+' χλμ',fmt(r.n)+' μετακινήσεις']);
+  const top=dash.data('cities').data.slice().sort((a,b)=>Number(b.visits)-Number(a.visits)).slice(0,12);
+  hbars(document.getElementById('ch-top'),top,'name','visits',dash.colors[2],r=>[r.name,fmt(r.visits)+' επισκέψεις',fmt(r.days)+' ημέρες, '+fmt(r.hours)+' ώρες']);
+  const kpi=new Map(dash.data('kpi').data.map(r=>[r.key,Number(r.value)]));
+  document.querySelectorAll('[data-fill]').forEach(n=>{const v=kpi.get(n.dataset.fill);n.textContent=n.dataset.fill==='first_year'?String(v):fmt(v);});
+  const cb=document.getElementById('tb-countries').tBodies[0];const frag=document.createDocumentFragment();
+  dash.data('countries').data.forEach(r=>{const tr=document.createElement('tr');tr.dataset.key=r.cc;[[r.country,0],[r.days,1],[r.visits,1],[r.first,2],[r.last,2]].forEach(([v,k])=>{const td=document.createElement('td');if(k)td.className='n';td.textContent=k===1?fmt(v):String(v);tr.appendChild(td);});frag.appendChild(tr);});
+  cb.replaceChildren(frag);
+}
+
+/* ---------- map ---------- */
+function buildChips(){
+  const m=prep();
+  const cy=document.getElementById('chips-year');
+  if(cy.querySelectorAll('button').length)return;
+  const mk=(parent,label,on,fn)=>{const b=document.createElement('button');b.className='chip';b.textContent=label;b.setAttribute('aria-pressed',on?'true':'false');b.addEventListener('click',()=>fn(b));parent.appendChild(b);return b;};
+  const yb=[];
+  const sel=()=>yb.forEach(([b,y])=>b.setAttribute('aria-pressed',String(state.year===y)));
+  yb.push([mk(cy,'Όλα',true,()=>{state.year='all';sel();drawMap();}),'all']);
+  m.years.forEach(y=>yb.push([mk(cy,String(y),false,()=>{state.year=y;sel();drawMap();}),y]));
+  const cm=document.getElementById('chips-mode');
+  GORDER.forEach(g=>mk(cm,GROUPS[g].l,true,b=>{if(state.modes.has(g))state.modes.delete(g);else state.modes.add(g);b.setAttribute('aria-pressed',String(state.modes.has(g)));drawMap();}));
+  const cl=document.getElementById('chips-layer');
+  [['dots','Μέρη'],['routes','Διαδρομές']].forEach(([k,l])=>mk(cl,l,true,b=>{if(state.layers.has(k))state.layers.delete(k);else state.layers.add(k);b.setAttribute('aria-pressed',String(state.layers.has(k)));drawMap();}));
+  const cvw=document.getElementById('chips-view');
+  [['Αθήνα',23.75,38.0,0.5],['Ελλάδα',24.5,38.6,10],['Ευρώπη',14,48,50],['Κόσμος',-20,30,300]].forEach(([l,lo,la,span])=>mk(cvw,l,false,b=>{setView(lo,la,span);b.setAttribute('aria-pressed','false');}));
+  const lg=document.getElementById('lg-map');lg.replaceChildren();
+  GORDER.forEach(g=>{const s=document.createElement('span');const sw=document.createElement('i');sw.dataset.g=g;s.appendChild(sw);s.appendChild(document.createTextNode(GROUPS[g].l));lg.appendChild(s);});
+  const s=document.createElement('span');s.textContent='Οι κύκλοι μεγαλώνουν με τον αριθμό επισκέψεων.';lg.appendChild(s);
+}
+function setView(lo,la,span){const w=cv.clientWidth||800;V.cx=lo;V.cy=merc(la);V.k=w/span;drawMap();}
+function drawMap(){
+  if(!ready||state.tab!=='map')return;
+  const m=prep(),w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;
+  const dpr=window.devicePixelRatio||1;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const sea=rc('var(--color-bg)'),land=rc('var(--color-panel)'),line=rc('var(--color-border-line)');
+  ctx.fillStyle=sea;ctx.fillRect(0,0,w,h);
+  document.querySelectorAll('#lg-map i').forEach(i=>{i.style.background=rc(gcol(i.dataset.g));});
+  ctx.save();ctx.translate(w/2,h/2);ctx.scale(V.k,-V.k);ctx.translate(-V.cx,-V.cy);
+  ctx.lineJoin='round';
+  ctx.fillStyle=land;ctx.strokeStyle=line;ctx.lineWidth=1/V.k;
+  ctx.fill(m.world);if(V.k<14)ctx.stroke(m.world);
+  if(V.k>=14){
+    ctx.fillStyle=sea;ctx.fillRect(17,merc(33),14,merc(43)-merc(33));
+    ctx.fillStyle=land;ctx.fill(m.detail);ctx.stroke(m.detail);
+  }
+  if(state.layers.has('routes')){
+    ctx.lineCap='round';
+    ctx.globalAlpha=.5;
+    m.routes.forEach(r=>{
+      if(state.year!=='all'&&r.year!==state.year)return;
+      if(!state.modes.has(r.group))return;
+      ctx.strokeStyle=rc(gcol(r.group));ctx.lineWidth=(r.group==='walk'?1.1:1.5)/1*(1/V.k);
+      ctx.lineWidth=Math.max(1,r.group==='walk'?1.1:1.5)/V.k;
+      ctx.stroke(r.path);
+    });
+    ctx.globalAlpha=1;
+  }
+  ctx.restore();
+  dots=[];
+  if(state.layers.has('dots')){
+    const agg=new Map();
+    m.visits.forEach(v=>{if(state.year!=='all'&&Number(v.y)!==state.year)return;const p=Number(v.p);let a=agg.get(p);if(!a){a={n:0,h:0,y0:9999,y1:0};agg.set(p,a);}a.n++;a.h+=Number(v.h);a.y0=Math.min(a.y0,Number(v.y));a.y1=Math.max(a.y1,Number(v.y));});
+    const col=rc(dash.colors[4%dash.colors.length]);
+    const list=[...agg.entries()].sort((a,b)=>b[1].n-a[1].n);
+    list.forEach(([p,a])=>{
+      const pt=m.pm.get(p);if(!pt)return;
+      const sx=(pt.lon-V.cx)*V.k+w/2,sy=h/2-(pt.my-V.cy)*V.k;
+      if(sx<-20||sy<-20||sx>w+20||sy>h+20)return;
+      const r=Math.min(16,2.5+Math.sqrt(a.n)*0.9);
+      dots.push({sx,sy,r,pt,a});
+    });
+    ctx.fillStyle=col;ctx.strokeStyle=rc('var(--color-fg)');ctx.lineWidth=.6;
+    for(let i=dots.length-1;i>=0;i--){const d=dots[i];ctx.globalAlpha=.45;ctx.beginPath();ctx.arc(d.sx,d.sy,d.r,0,6.2832);ctx.fill();ctx.globalAlpha=.7;ctx.stroke();}
+    ctx.globalAlpha=1;
+  }
+}
+function hit(ev){
+  const r=cv.getBoundingClientRect(),x=ev.clientX-r.left,y=ev.clientY-r.top;let best=null,bd=1e9;
+  for(const d of dots){const dd=Math.hypot(d.sx-x,d.sy-y);if(dd<=d.r+4&&dd<bd){bd=dd;best=d;}}
+  return best;
+}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function zoomAt(f,px,py){
+  const w=cv.clientWidth,h=cv.clientHeight;
+  const wx=V.cx+(px-w/2)/V.k,wy=V.cy-(py-h/2)/V.k;
+  V.k=clamp(V.k*f,w/400,80000);
+  V.cx=wx-(px-w/2)/V.k;V.cy=wy+(py-h/2)/V.k;drawMap();
+}
+const ptrs=new Map();let pinch=0;
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});cv.style.cursor='grabbing';hideTip();if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch=Math.hypot(a.x-b.x,a.y-b.y);}});
+cv.addEventListener('pointermove',e=>{
+  if(ptrs.has(e.pointerId)){
+    const p=ptrs.get(e.pointerId);const dx=e.clientX-p.x,dy=e.clientY-p.y;
+    if(ptrs.size===1){V.cx-=dx/V.k;V.cy+=dy/V.k;p.x=e.clientX;p.y=e.clientY;drawMap();}
+    else{p.x=e.clientX;p.y=e.clientY;const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(pinch){const r=cv.getBoundingClientRect();zoomAt(d/pinch,(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top);}pinch=d;}
+    return;
+  }
+  const d=hit(e);
+  if(d){const n=d.a;showTip([d.pt.name,fmt(n.n)+' επισκέψεις, '+fmt(n.h)+' ώρες',n.y0===n.y1?String(n.y0):n.y0+'–'+n.y1],e);}else hideTip();
+});
+const up=e=>{ptrs.delete(e.pointerId);pinch=0;cv.style.cursor='grab';};
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);cv.addEventListener('pointerleave',hideTip);
+cv.addEventListener('wheel',e=>{e.preventDefault();const r=cv.getBoundingClientRect();zoomAt(Math.exp(-e.deltaY*0.0015),e.clientX-r.left,e.clientY-r.top);},{passive:false});
+document.getElementById('zin').addEventListener('click',()=>zoomAt(1.6,cv.clientWidth/2,cv.clientHeight/2));
+document.getElementById('zout').addEventListener('click',()=>zoomAt(1/1.6,cv.clientWidth/2,cv.clientHeight/2));
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>drawMap());
+new MutationObserver(()=>drawMap()).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','class']});
+
+/* ---------- tabs ---------- */
+const tabs=[...document.querySelectorAll('.tab')];
+let viewSet=false;
+function showTab(id,fromLink){
+  state.tab=id;
+  tabs.forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===id)));
+  ['overview','map','areas','trips'].forEach(s=>{document.getElementById(s).hidden=s!==id;});
+  if(!fromLink)dash.setLink(id);
+  render();
+}
+tabs.forEach(t=>t.addEventListener('click',()=>showTab(t.dataset.tab)));
+
+function clearAll(){
+  ['ch-places','ch-km','ch-modes','ch-top'].forEach(i=>clearChart(document.getElementById(i)));
+  ready=false;
+}
+function render(){
+  if(!allOk()){clearAll();return;}
+  ready=true;
+  prep();
+  if(state.tab==='overview')renderOverview();
+  if(state.tab==='map'){buildChips();if(!viewSet&&cv.clientWidth){viewSet=true;setView(24.5,38.6,10);}else drawMap();}
+  if(state.tab==='areas'){TB['tb-areas'].rows=dash.data('cities').data;renderTable('tb-areas');}
+  if(state.tab==='trips'){TB['tb-trips'].rows=dash.data('trips').data;renderTable('tb-trips');}
+}
+
+/* ---------- datasets calcs ---------- */
+dash.calc('kpi',{inputs:['places','visits','acts','trips'],title:'Βασικά στοιχεία',description:'Σύνολα από τα μέρη, τις επισκέψεις, τις μετακινήσεις και τα ταξίδια.',
+fn:(places,visits,acts,trips)=>{
+  const used=new Set(visits.map(v=>Number(v.p)));
+  const pm=new Map(places.map(p=>[Number(p.i),p]));
+  const loc=new Set(),cc=new Set();
+  used.forEach(i=>{const p=pm.get(i);if(p){loc.add(p.name);cc.add(p.cc);}});
+  const days=new Set(visits.map(v=>Number(v.d)));
+  const km=acts.reduce((s,a)=>s+Number(a.km),0);
+  return [
+    {key:'places',value:used.size},{key:'localities',value:loc.size},{key:'countries',value:cc.size},
+    {key:'km_total',value:Math.round(km)},{key:'trips',value:trips.length},{key:'days',value:days.size},
+    {key:'first_year',value:Math.min(...visits.map(v=>Number(v.y)))}
+  ];
+}});
+dash.calc('byyear',{inputs:['visits','acts'],title:'Στατιστικά ανά έτος',description:'Επισκέψεις, μέρη και χιλιόμετρα ανά έτος και μέσο.',
+fn:(visits,acts)=>{
+  const ys=[...new Set(visits.map(v=>Number(v.y)).concat(acts.map(a=>Number(a.year))))].sort((a,b)=>a-b);
+  return ys.map(y=>{
+    const vs=visits.filter(v=>Number(v.y)===y);
+    const km=ms=>Math.round(acts.filter(a=>Number(a.year)===y&&ms.includes(a.mode)).reduce((s,a)=>s+Number(a.km),0));
+    const row={year:y,visits:vs.length,places:new Set(vs.map(v=>Number(v.p))).size,km_moto:km(['moto']),km_car:km(['car']),km_walk:km(['walk']),km_air:km(['fly','ferry']),km_other:km(['bike','transit','other'])};
+    row.km_total=row.km_moto+row.km_car+row.km_walk+row.km_air+row.km_other;
+    return row;
+  });
+}});
+dash.calc('cities',{inputs:['places','visits'],title:'Στατιστικά ανά περιοχή',description:'Επισκέψεις, ημέρες και ώρες ανά κοντινότερη πόλη.',
+fn:(places,visits)=>{
+  const pm=new Map(places.map(p=>[Number(p.i),p]));const g=new Map();
+  visits.forEach(v=>{const p=pm.get(Number(v.p));if(!p)return;let r=g.get(p.name);
+    if(!r){r={name:p.name,cc:p.cc,visits:0,hours:0,days:new Set(),places:new Set(),first:9999,last:0};g.set(p.name,r);}
+    r.visits++;r.hours+=Number(v.h);r.days.add(Number(v.d));r.places.add(Number(v.p));r.first=Math.min(r.first,Number(v.y));r.last=Math.max(r.last,Number(v.y));});
+  return [...g.values()].map(r=>({name:r.name,cc:r.cc,visits:r.visits,days:r.days.size,hours:Math.round(r.hours),places:r.places.size,first:r.first,last:r.last})).sort((a,b)=>b.hours-a.hours);
+}});
+dash.calc('countries',{inputs:['places','visits'],title:'Στατιστικά ανά χώρα',description:'Ημέρες και επισκέψεις ανά χώρα.',
+fn:(places,visits)=>{
+  const names={GR:'Ελλάδα',DE:'Γερμανία',US:'ΗΠΑ',HU:'Ουγγαρία',BG:'Βουλγαρία',TR:'Τουρκία',MK:'Βόρεια Μακεδονία'};
+  const pm=new Map(places.map(p=>[Number(p.i),p]));const g=new Map();
+  visits.forEach(v=>{const p=pm.get(Number(v.p));if(!p)return;let r=g.get(p.cc);
+    if(!r){r={cc:p.cc,country:names[p.cc]||p.cc,visits:0,days:new Set(),first:9999,last:0};g.set(p.cc,r);}
+    r.visits++;r.days.add(Number(v.d));r.first=Math.min(r.first,Number(v.y));r.last=Math.max(r.last,Number(v.y));});
+  return [...g.values()].map(r=>({cc:r.cc,country:r.country,visits:r.visits,days:r.days.size,first:r.first,last:r.last})).sort((a,b)=>b.days-a.days);
+}});
+dash.calc('modes',{inputs:['acts'],title:'Μετακινήσεις ανά μέσο',description:'Πλήθος και χιλιόμετρα ανά μέσο μετακίνησης.',
+fn:(acts)=>{
+  const labels={moto:'Μηχανή',car:'Αυτοκίνητο',walk:'Περπάτημα',bike:'Ποδήλατο',fly:'Πτήσεις',ferry:'Πλοίο',transit:'Συγκοινωνίες',other:'Άλλο'};
+  const g=new Map();
+  acts.forEach(a=>{let r=g.get(a.mode);if(!r){r={mode:a.mode,label:labels[a.mode]||a.mode,n:0,km:0};g.set(a.mode,r);}r.n+=Number(a.n);r.km+=Number(a.km);});
+  return [...g.values()].map(r=>({mode:r.mode,label:r.label,n:r.n,km:Math.round(r.km)})).sort((a,b)=>b.km-a.km);
+}});
+
+dash.onData(render);
+const named=location.hash.slice(1);
+if(['overview','map','areas','trips'].includes(named))showTab(named,true);
+</script>
+
+</body>
+</html>

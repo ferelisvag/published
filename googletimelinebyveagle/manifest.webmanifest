@@ -1,6 +1,6 @@
 {
-  "name": "Πού έχω πάει",
-  "short_name": "Πού έχω πάει",
+  "name": "Google Timeline by Veagle",
+  "short_name": "Timeline Veagle",
   "description": "Δες σε χάρτη πού έχεις πάει, από το Χρονολόγιο των Χαρτών Google. Όλα γίνονται στον browser σου.",
   "lang": "el",
   "start_url": "./",

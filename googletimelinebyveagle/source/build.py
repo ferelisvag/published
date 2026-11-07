@@ -9,7 +9,7 @@ src=open(H+'/dashboard.html').read()
 head=src[:src.index('<body>')]
 head=re.sub(r'<link rel="(icon|preconnect)"[^>]*>\n?','',head)
 head=re.sub(r'<link href="https://fonts[^>]*>\n?','',head)
-head=head.replace('<title>Πού έχω πάει</title>','<title>Πού έχω πάει · Χρονολόγιο Χαρτών Google</title>\n<meta name="description" content="Φόρτωσε το Timeline.json από το κινητό σου και δες σε χάρτη πού έχεις πάει: μέρη, διαδρομές, χώρες και ταξίδια. Όλα γίνονται στον browser σου, τίποτα δεν ανεβαίνει πουθενά.">\n<meta name="theme-color" content="#050708">\n<link rel="icon" href="favicon.svg" type="image/svg+xml">\n<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">\n<link rel="apple-touch-icon" href="apple-touch-icon.png">\n<link rel="manifest" href="manifest.webmanifest">\n<meta name="apple-mobile-web-app-title" content="Πού έχω πάει">')
+head=head.replace('<title>Google Timeline by Veagle</title>','<title>Google Timeline by Veagle · Χρονολόγιο Χαρτών Google</title>\n<meta name="description" content="Φόρτωσε το Timeline.json από το κινητό σου και δες σε χάρτη πού έχεις πάει: μέρη, διαδρομές, χώρες και ταξίδια. Όλα γίνονται στον browser σου, τίποτα δεν ανεβαίνει πουθενά.">\n<meta name="theme-color" content="#050708">\n<link rel="icon" href="favicon.svg" type="image/svg+xml">\n<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">\n<link rel="apple-touch-icon" href="apple-touch-icon.png">\n<link rel="manifest" href="manifest.webmanifest">\n<meta name="apple-mobile-web-app-title" content="Πού έχω πάει">')
 head=head.replace("--font-anthropic-sans:'IBM Plex Sans',system-ui,sans-serif;--font-anthropic-serif:'Space Grotesk',system-ui,sans-serif;","--font-anthropic-sans:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;--font-anthropic-serif:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;")
 assert 'fonts.g' not in head and 'system-ui,-apple-system' in head
 a=src.index('<style>\n.tl{');b=src.index('<script src="d3.min.js">')
@@ -25,9 +25,10 @@ d3=open(H+'/d3.min.js').read();assert '</script>' not in d3
 outline=json.load(open(H+'/outline.json'))
 cities=base64.b64encode(open(H+'/cities.json.gz','rb').read()).decode()
 proc=open(H+'/proc.js').read().replace('</script>','<\\/script>')
-FOOT='<p class="app-foot">Πού έχω πάει · <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a> · '+VER+'</p>'
+FOOT='<p class="app-foot">Google Timeline by Veagle · <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a> · '+VER+'</p>'
 css='''<style>
-#imp[hidden],#tools[hidden],#appwrap[hidden],#back[hidden]{display:none!important}
+#imp[hidden],#tools[hidden],#appwrap[hidden],#back[hidden],#imp [hidden]{display:none!important}
+#appwrap{padding-top:30px}
 #imp{max-width:760px;margin:0 auto;padding:6px 0 30px;font-family:var(--font-anthropic-sans);color:var(--color-fg);line-height:1.6}
 #imp h1{font:600 clamp(28px,6vw,40px)/1.15 var(--font-anthropic-serif);margin:6px 0 10px}
 #imp h2{font:600 22px/1.25 var(--font-anthropic-serif);margin:34px 0 10px}
@@ -68,12 +69,85 @@ css='''<style>
 .app-foot{max-width:760px;margin:28px auto 0;text-align:center;font-size:12px;color:var(--color-fg-muted)}
 .app-foot a{color:inherit}
 #appwrap .app-foot{max-width:1200px}
-@media(max-width:600px){#tools{position:static;margin:0 0 10px;justify-content:flex-end}}
+@media(max-width:600px){#appwrap{padding-top:0}#tools{position:static;margin:0 0 10px;justify-content:flex-end}}
+
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(60rem 40rem at 12% -8%,rgba(91,141,239,.18),transparent 60%),radial-gradient(50rem 36rem at 100% 8%,rgba(232,44,45,.10),transparent 60%),radial-gradient(40rem 30rem at 50% 110%,rgba(52,211,153,.07),transparent 60%)}
+#imp .hero{position:relative;overflow:hidden;border:1px solid var(--color-border-line);border-radius:22px;padding:34px 26px 26px;margin:0 0 18px;background:linear-gradient(145deg,rgba(91,141,239,.14),rgba(13,17,22,.6) 55%,rgba(232,44,45,.09))}
+#imp .hero svg.map{position:absolute;right:-20px;top:-10px;width:62%;max-width:430px;opacity:.55;pointer-events:none}
+#imp .hero svg .rt{fill:none;stroke:#5b8def;stroke-width:2.4;stroke-linecap:round;stroke-dasharray:6 7;animation:dash 22s linear infinite}
+#imp .hero svg .rt2{stroke:#e82c2d;animation-duration:30s}
+#imp .hero svg .pt{fill:#fff;stroke:#5b8def;stroke-width:2}
+#imp .hero svg .gr{stroke:rgba(255,255,255,.07);stroke-width:1}
+@keyframes dash{to{stroke-dashoffset:-260}}
+#imp .hero>*:not(svg){position:relative}
+#imp .kicker{display:inline-block;font:600 12px var(--font-anthropic-sans);letter-spacing:.08em;text-transform:uppercase;color:#9db8f5;background:rgba(91,141,239,.14);border:1px solid rgba(91,141,239,.3);padding:4px 11px;border-radius:999px}
+#imp .hero h1{font-size:clamp(34px,8vw,56px);margin:14px 0 10px;letter-spacing:-.01em}
+#imp .hero h1 em{font-style:normal;background:linear-gradient(90deg,#7aa5ff,#ff6b6e);-webkit-background-clip:text;background-clip:text;color:transparent}
+#imp .hero .lead{max-width:34rem}
+#imp .cta{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 6px}
+#imp a.btn,#imp button.btn{display:inline-block;text-decoration:none;font:600 15px var(--font-anthropic-sans);color:#fff;background:#3b6fd8;border:1px solid transparent;border-radius:12px;padding:12px 20px;cursor:pointer;transition:.15s}
+#imp a.btn:hover,#imp button.btn:hover{background:#4a7de8;transform:translateY(-1px)}
+#imp .btn.ghost{background:rgba(255,255,255,.05);border-color:var(--color-border-line);color:var(--color-fg)}
+#imp .btn.ghost:hover{background:rgba(255,255,255,.1)}
+#imp .badges{list-style:none;display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:14px 0 0}
+#imp .badges li{margin:0;font-size:13px;color:var(--color-fg-muted);background:rgba(255,255,255,.04);border:1px solid var(--color-border-line);border-radius:999px;padding:4px 11px}
+#imp .feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+#imp .feat div{border:1px solid var(--color-border-line);border-radius:14px;padding:13px 14px;background:rgba(255,255,255,.025)}
+#imp .feat b{display:block;font-size:15px;margin:2px 0 2px}
+#imp .feat span{font-size:13px;color:var(--color-fg-muted);line-height:1.45}
+#imp .feat i{font-style:normal;font-size:22px}
+#imp h2{display:flex;align-items:center;gap:11px;scroll-margin-top:14px}
+#imp h2 .sn{flex:none;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#5b8def,#3b6fd8);color:#fff;font:700 15px var(--font-anthropic-sans);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(59,111,216,.4)}
+#imp .drop{padding:46px 18px;border-radius:20px;background:linear-gradient(145deg,rgba(91,141,239,.08),rgba(91,141,239,.02))}
+#imp .drop i{display:block;font-style:normal;font-size:38px;margin-bottom:6px}
+#imp .demoline{text-align:center;font-size:14px;color:var(--color-fg-muted);margin:6px 0 0}
+#imp .demoline button{all:unset;cursor:pointer;color:#9db8f5;text-decoration:underline}
+#imp details{transition:.15s}#imp details[open]{border-color:rgba(91,141,239,.4);background:rgba(91,141,239,.04)}
+#demoBar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto 12px;padding:10px 14px;border-radius:12px;background:rgba(245,183,0,.1);border:1px solid rgba(245,183,0,.35);color:var(--color-fg);font-size:14px}
+#demoBar[hidden]{display:none!important}
+#demoBar button{font:600 13px var(--font-anthropic-sans);color:#14181e;background:#f5b700;border:0;border-radius:9px;padding:7px 13px;cursor:pointer}
+#appwrap .tl h1{font-weight:700;letter-spacing:-.01em;font-size:clamp(28px,5vw,40px);background:linear-gradient(90deg,#e7ecf3,#9db8f5 60%,#ff8a8c);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+#appwrap .tl .lead{font-size:15px}
+#appwrap .tl .tabs{border:0;gap:6px;background:rgba(255,255,255,.04);padding:5px;border-radius:14px;display:inline-flex;margin-bottom:16px}
+#appwrap .tl .tab{border:0;border-radius:10px;padding:8px 16px}
+#appwrap .tl .tab[aria-selected=true]{background:#e7ecf3;color:#0b0e12;font-weight:600}
+#appwrap .tl .tile{position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01));padding:16px 18px;transition:.15s}
+#appwrap .tl .tile:hover{transform:translateY(-2px);border-color:#34404d}
+#appwrap .tl .tile::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--ac,#5b8def)}
+#appwrap .tl .tile:nth-child(1){--ac:#5b8def}#appwrap .tl .tile:nth-child(2){--ac:#34d399}#appwrap .tl .tile:nth-child(3){--ac:#f5b700}
+#appwrap .tl .tile:nth-child(4){--ac:#e82c2d}#appwrap .tl .tile:nth-child(5){--ac:#c084fc}#appwrap .tl .tile:nth-child(6){--ac:#22d3ee}
+#appwrap .tl .tile .v{font-weight:700;font-size:clamp(26px,4vw,34px);color:var(--ac)}
+#appwrap .tl .card{border-radius:16px;background:linear-gradient(170deg,rgba(255,255,255,.035),rgba(255,255,255,.008))}
+#appwrap .tl .card h2{font-size:16px;font-weight:600}
+#appwrap .tl tbody tr:hover td{background:rgba(91,141,239,.08)}
+#facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,17rem),1fr));gap:10px;margin:0 0 14px}
+#facts div{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border-radius:14px;border:1px solid var(--color-border-line);background:rgba(91,141,239,.06);font-size:14px;line-height:1.45;color:var(--color-fg-muted)}
+#facts div b{color:var(--color-fg)}#facts div i{font-style:normal;font-size:22px;line-height:1}
+.csvbtn,.pngbtn{font:500 12px var(--font-anthropic-sans);color:var(--color-fg);background:rgba(255,255,255,.05);border:1px solid var(--color-border-line);border-radius:999px;padding:5px 12px;cursor:pointer;margin-left:6px}
+.csvbtn:hover,.pngbtn:hover{background:rgba(255,255,255,.12)}
+.exportrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}
+@media(max-width:600px){#imp .hero{padding:26px 18px 20px}#imp .hero svg.map{opacity:.28;width:90%}}
+@media(prefers-reduced-motion:reduce){#imp .hero svg .rt{animation:none}#appwrap .tl .tile,#imp a.btn,#imp button.btn{transition:none}}
+@media print{#tools,#demoBar,.csvbtn,.pngbtn{display:none!important}body::before{display:none}}
 </style>'''
 INTRO='''<div id="imp" hidden>
-<h1>Πού έχω πάει</h1>
-<p class="lead">Το κινητό σου θυμάται πού πηγαίνεις (αν έχεις ανοιχτό το «Χρονολόγιο» στους Χάρτες Google). Εδώ φορτώνεις αυτό το αρχείο και βλέπεις τη ζωή σου σε χάρτη: μέρη, διαδρομές, χιλιόμετρα, χώρες και ταξίδια.</p>
+<section class="hero">
+<svg class="map" viewBox="0 0 400 300" aria-hidden="true"><g class="gr"><path d="M0 60H400M0 120H400M0 180H400M0 240H400M80 0V300M160 0V300M240 0V300M320 0V300"/></g>
+<path class="rt" d="M40 230C90 190 110 120 170 130S250 210 300 150 350 60 372 52"/><path class="rt rt2" d="M60 90C120 70 150 40 210 70S270 120 250 190 190 262 150 250"/>
+<circle class="pt" cx="40" cy="230" r="7"/><circle class="pt" cx="170" cy="130" r="6"/><circle class="pt" cx="300" cy="150" r="6"/><circle class="pt" cx="372" cy="52" r="8"/><circle class="pt" cx="210" cy="70" r="5"/><circle class="pt" cx="150" cy="250" r="6"/></svg>
+<span class="kicker">Δωρεάν · Χωρίς λογαριασμό</span>
+<h1>Google Timeline <em>by Veagle</em></h1>
+<p class="lead">Το κινητό σου θυμάται πού πηγαίνεις (αν έχεις ανοιχτό το «Χρονολόγιο» στους Χάρτες Google). Φόρτωσε το αρχείο και δες τη ζωή σου σε χάρτη: μέρη, διαδρομές, χιλιόμετρα, χώρες και ταξίδια.</p>
+<div class="cta" id="demoCta"><a class="btn" href="#step1">Ξεκίνα · 5 λεπτά →</a><button class="btn ghost" id="btnDemo" type="button" title="Ανοίγει την εφαρμογή με φανταστικά δεδομένα, για να δεις πώς δείχνει. Δεν αποθηκεύεται τίποτα.">▶ Δες πρώτα ένα δείγμα</button></div>
+<ul class="badges"><li>🔒 Δεν ανεβαίνει πουθενά</li><li>🚫 Χωρίς παρακολούθηση</li><li>📱 Android και iPhone</li><li>🆓 Δωρεάν</li></ul>
+</section>
 <p id="backWrap" hidden><button class="btn" id="btnBack" type="button">← Πίσω στα αποτελέσματά μου</button></p>
+<div class="feat">
+<div><i>🗺️</i><b>Χάρτης</b><span>Όλα τα μέρη και οι διαδρομές σου, με φίλτρα ανά έτος και μέσο.</span></div>
+<div><i>📊</i><b>Γραφήματα</b><span>Μέρη και χιλιόμετρα ανά χρόνο, ποιες περιοχές επισκέπτεσαι πιο συχνά.</span></div>
+<div><i>🌍</i><b>Χώρες</b><span>Πόσες χώρες και πόλεις έχεις δει και πόσες ημέρες έμεινες.</span></div>
+<div><i>🧳</i><b>Ταξίδια</b><span>Οι εξορμήσεις σου μακριά από το σπίτι, με ημερομηνίες. Λήψη σε CSV.</span></div>
+</div>
 
 <div class="card">
 <p><b>Πριν ξεκινήσεις, τρία πράγματα να ξέρεις:</b></p>
@@ -91,7 +165,7 @@ INTRO='''<div id="imp" hidden>
 <li>Περίπου <b>5 λεπτά</b>.</li>
 </ul>
 
-<h2>Βήμα 1 · Κατέβασε το αρχείο από το κινητό σου</h2>
+<h2 id="step1"><span class="sn">1</span>Κατέβασε το αρχείο από το κινητό σου</h2>
 <p>Διάλεξε το δικό σου κινητό. Πατάς το βέλος για να ανοίξουν τα βήματα.</p>
 <details open><summary>📱 Έχω Android (Samsung, Xiaomi, Pixel, κ.λπ.)</summary><div>
 <div class="step"><span class="n">1</span><div class="t">Άνοιξε τις <b>Ρυθμίσεις</b> του τηλεφώνου (το εικονίδιο με το γρανάζι).</div></div>
@@ -123,7 +197,7 @@ INTRO='''<div id="imp" hidden>
 </ol>
 </div></details>
 
-<h2>Βήμα 2 · Φέρε το αρχείο εκεί που θα το ανοίξεις</h2>
+<h2><span class="sn">2</span>Φέρε το αρχείο εκεί που θα το ανοίξεις</h2>
 <p>Αν θα το ανοίξεις <b>στο ίδιο κινητό</b>, πήγαινε κατευθείαν στο Βήμα 3. Αν θες να το δεις στον <b>υπολογιστή</b> (πιο άνετα), στείλε το αρχείο εκεί με όποιον τρόπο σου αρέσει:</p>
 <ul>
 <li><b>Google Drive:</b> αν το σώσεις στο Drive από το κινητό, το κατεβάζεις από τον υπολογιστή στο drive.google.com.</li>
@@ -133,14 +207,15 @@ INTRO='''<div id="imp" hidden>
 </ul>
 <div class="note"><p>Το αρχείο περιέχει <b>όλο το ιστορικό τοποθεσιών σου</b>. Μην το στέλνεις σε άγνωστους και μην το ανεβάζεις σε δημόσιο μέρος.</p></div>
 
-<h2>Βήμα 3 · Φόρτωσέ το εδώ</h2>
-<div class="drop" id="drop" tabindex="0" role="button" aria-label="Επιλογή αρχείου Timeline.json"><b>Πάτα εδώ και διάλεξε το Timeline.json</b><span>ή σύρε το αρχείο μέσα σε αυτό το πλαίσιο</span></div>
+<h2><span class="sn">3</span>Φόρτωσέ το εδώ</h2>
+<div class="drop" id="drop" tabindex="0" role="button" aria-label="Επιλογή αρχείου Timeline.json"><i>📂</i><b>Πάτα εδώ και διάλεξε το Timeline.json</b><span>ή σύρε το αρχείο μέσα σε αυτό το πλαίσιο</span></div>
 <input type="file" id="file" hidden>
 <label class="opt"><input type="checkbox" id="rem"><div><b>Να θυμάται τα αποτελέσματα αυτός ο υπολογιστής (προαιρετικό)</b><span>Αν το τσεκάρεις, την επόμενη φορά που θα ανοίξεις τη σελίδα δεν θα χρειαστεί να ξαναφορτώσεις το αρχείο. Τα αποτελέσματα μένουν αποθηκευμένα <b>μόνο σε αυτόν τον browser</b>, όχι στο internet. <b>Μην το τσεκάρεις σε υπολογιστή που δεν είναι δικός σου.</b> Αν δεν το τσεκάρεις, μόλις κλείσεις τη σελίδα όλα σβήνουν. Μπορείς να τα σβήσεις όποτε θες με το κουμπί «Διαγραφή δεδομένων».</span></div></label>
 <div class="bar" id="bar"><i id="bari"></i></div><div id="stage" style="font-size:14px;color:var(--color-fg-muted)"></div><div class="err" id="err"></div>
 <p style="font-size:14px">Αν το αρχείο είναι μεγάλο (πολλές δεκάδες MB), κάνε λίγη υπομονή: συνήθως παίρνει από λίγα δευτερόλεπτα μέχρι ένα λεπτό. Μην κλείσεις τη σελίδα.</p>
 
-<h2>Βήμα 4 · Δες τα αποτελέσματα</h2>
+<p class="demoline" id="demoLine">Δεν έχεις ακόμα το αρχείο; <button type="button" id="btnDemo2">Δες ένα δείγμα με φανταστικά δεδομένα</button></p>
+<h2><span class="sn">4</span>Δες τα αποτελέσματα</h2>
 <p>Μόλις τελειώσει, ανοίγει η σελίδα με 4 καρτέλες:</p>
 <ul>
 <li><b>Επισκόπηση:</b> συνολικά νούμερα (μέρη, χώρες, χιλιόμετρα) και γραφήματα ανά χρόνο.</li>
@@ -171,6 +246,7 @@ body='''<body>
 <div id="tools" hidden><button id="btnNew" type="button" title="Γυρίζει στις οδηγίες για να φορτώσεις άλλο αρχείο. Δεν σβήνει τίποτα.">Άλλο αρχείο</button><button id="btnDel" type="button" title="Σβήνει ό,τι έχει αποθηκευτεί σε αυτόν τον browser. Θα σε ρωτήσει πρώτα.">Διαγραφή δεδομένων</button></div>
 '''+INTRO+'''
 <div id="appwrap" hidden>
+<div id="demoBar" hidden><span>🎭 <b>Δείγμα με φανταστικά δεδομένα.</b> Δεν είναι κανενός. Έτσι θα δείχνει η δική σου σελίδα.</span><button type="button" id="btnReal">Φόρτωσε το δικό μου αρχείο</button></div>
 '''+page+'''
 '''+FOOT+'''
 </div>
@@ -190,14 +266,15 @@ var OUTLINE='''+json.dumps(outline,separators=(',',':'))+''';
   function del(){return idb('readwrite',function(s){s.delete('data')}).catch(function(){})}
   function inject(id){var s=document.createElement('script');s.textContent=$(id).textContent;document.body.appendChild(s)}
   var started=false;
-  function start(data,saved){
-    window.TLDATA=data;window.TLHOME=data.meta&&data.meta.home||[38,24.5];hasData=true;
-    $('imp').hidden=true;$('appwrap').hidden=false;$('tools').hidden=false;$('btnDel').hidden=!saved;
+  function start(data,saved,demo){
+    window.TLDATA=data;window.TLDEMO=!!demo;window.TLHOME=data.meta&&data.meta.home||[38,24.5];hasData=true;
+    $('imp').hidden=true;$('appwrap').hidden=false;$('tools').hidden=false;$('btnDel').hidden=!saved;$('demoBar').hidden=!demo;
     var hn=$('homeName');if(hn&&data.meta)hn.textContent=data.meta.homeName;
-    if(!started){started=true;inject('app-shim');inject('app-main')}
-    else{location.reload()}
+    if(!started){started=true;inject('app-shim');inject('app-main');try{extras(data)}catch(e){}}
+    else if(saved){location.reload()}
+    else{idb('readwrite',function(s){s.put(data,'tmp')}).then(function(){try{sessionStorage.setItem('pep-tmp','1')}catch(e){}location.reload()},function(){location.reload()})}
   }
-  function showImp(){$('imp').hidden=false;$('appwrap').hidden=true;$('tools').hidden=true;$('backWrap').hidden=!(hasData&&started);window.scrollTo(0,0)}
+  function showImp(){$('btnDemo').hidden=started;$('demoLine').hidden=started;$('imp').hidden=false;$('appwrap').hidden=true;$('tools').hidden=true;$('backWrap').hidden=!(hasData&&started);window.scrollTo(0,0)}
   function setP(p,m){$('bar').style.display='block';$('bari').style.width=Math.round(p*100)+'%';$('stage').textContent=m||''}
   function fail(m){$('err').textContent=m;$('bar').style.display='none';$('stage').textContent=''}
   function process(file){
@@ -209,25 +286,118 @@ var OUTLINE='''+json.dumps(outline,separators=(',',':'))+''';
       run(file);
     }).catch(function(){fail('Δεν μπόρεσα να διαβάσω το αρχείο. Δοκίμασε να το διαλέξεις ξανά.')});
   }
-  function run(file){
+  function run(file,demo){
     setP(.01,'Ξεκινάω…');
-    var remember=$('rem').checked;
+    var remember=!demo&&$('rem').checked;
     var wsrc=$('proc-src').textContent+'\\nfunction unpack(b64){var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"))).text().then(function(t){var c=JSON.parse(t),n=c.rows.length,la=new Float32Array(n),lo=new Float32Array(n),ad=new Uint16Array(n),cc=new Uint16Array(n),nm=new Array(n);for(var i=0;i<n;i++){var p=c.rows[i].split("|");la[i]=+p[0];lo[i]=+p[1];nm[i]=p[2];ad[i]=+p[3];cc[i]=+p[4]}return{n:nm,la:la,lo:lo,ad:ad,cc:cc,admins:c.admins,ccs:c.ccs}})}\\nonmessage=function(e){var m=e.data;m.file.text().then(function(t){return unpack(m.cities).then(function(c){return processTimeline(t,c,m.outline,function(p,s){postMessage({p:p,m:s})})})}).then(function(o){postMessage({done:o})}).catch(function(x){postMessage({err:x&&x.message||String(x)})})};';
     var w;try{w=new Worker(URL.createObjectURL(new Blob([wsrc],{type:'text/javascript'})))}catch(e){return fail('Αυτός ο browser δεν μπορεί να κάνει την επεξεργασία. Δοκίμασε Chrome, Edge ή Firefox.')}
-    w.onmessage=function(e){var d=e.data;if(d.p!=null)setP(d.p,d.m);else if(d.err){w.terminate();fail(/JSON|Unexpected|position/.test(d.err)?'Το αρχείο δεν είναι ολόκληρο ή δεν είναι σωστό JSON. Δοκίμασε να το εξαγάγεις ξανά από το κινητό.':/memory|allocation/i.test(d.err)?'Το αρχείο είναι πολύ μεγάλο για αυτή τη συσκευή. Δοκίμασε σε υπολογιστή με Chrome ή Edge.':d.err)}else if(d.done){w.terminate();setP(1,'Έτοιμο!');var fin=function(sv){start(d.done,sv)};if(remember)put(d.done).then(function(){fin(true)},function(){fin(false)});else del().then(function(){fin(false)})}};
+    w.onmessage=function(e){var d=e.data;if(d.p!=null)setP(d.p,d.m);else if(d.err){w.terminate();fail(/JSON|Unexpected|position/.test(d.err)?'Το αρχείο δεν είναι ολόκληρο ή δεν είναι σωστό JSON. Δοκίμασε να το εξαγάγεις ξανά από το κινητό.':/memory|allocation/i.test(d.err)?'Το αρχείο είναι πολύ μεγάλο για αυτή τη συσκευή. Δοκίμασε σε υπολογιστή με Chrome ή Edge.':d.err)}else if(d.done){w.terminate();setP(1,'Έτοιμο!');var fin=function(sv){start(d.done,sv,demo)};if(demo)fin(false);else if(remember)put(d.done).then(function(){fin(true)},function(){fin(false)});else del().then(function(){fin(false)})}};
     w.onerror=function(e){fail('Κάτι πήγε στραβά στην επεξεργασία ('+(e.message||'άγνωστο σφάλμα')+'). Αν το αρχείο είναι πολύ μεγάλο, δοκίμασε σε υπολογιστή.')};
     w.postMessage({file:file,cities:CITIES_B64,outline:OUTLINE});
   }
+
+  function esc(x){return String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+  function nf(n,d){return Number(n).toLocaleString('el-GR',{maximumFractionDigits:d||0})}
+  function dl(blob,fn){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},600)}
+  function facts(data){
+    var box=$('facts');if(!box){box=document.createElement('div');box.id='facts';var t=document.querySelector('#overview .tiles');if(!t)return;t.parentNode.insertBefore(box,t)}
+    var km=0;(data.acts||[]).forEach(function(a){km+=a.km});
+    var F=[],home=data.meta&&data.meta.homeName;
+    if(km>=100){var laps=km/40075;F.push(['🌍',laps>=1?'Έχεις διανύσει <b>'+nf(km)+' χλμ</b>, δηλαδή <b>'+nf(laps,1)+' φορές</b> τον γύρο της Γης.':'Έχεις διανύσει <b>'+nf(km)+' χλμ</b>, δηλαδή το <b>'+nf(laps*100)+'%</b> του γύρου της Γης.'])}
+    if(km>=20000)F.push(['🌙','Μέχρι τη Σελήνη είναι 384.400 χλμ. Εσύ έχεις κάνει το <b>'+nf(km/384400*100,1)+'%</b> του δρόμου.']);
+    var yr={},cd={};
+    (data.visits||[]).forEach(function(v){yr[v.y]=(yr[v.y]||0)+1;var pl=data.places[v.p];if(pl&&pl.city!==home){var c=cd[pl.city]||(cd[pl.city]={});c[v.d]=1}});
+    var ys=Object.keys(yr).sort(function(a,b){return yr[b]-yr[a]});
+    if(ys.length>1)F.push(['📅','Η πιο γεμάτη χρονιά ήταν το <b>'+ys[0]+'</b>, με <b>'+nf(yr[ys[0]])+'</b> επισκέψεις σε μέρη.']);
+    var cs=Object.keys(cd).map(function(k){return[k,Object.keys(cd[k]).length]}).sort(function(a,b){return b[1]-a[1]});
+    if(cs.length)F.push(['📍','Εκτός από το σπίτι, πήγες πιο συχνά στην περιοχή <b>'+esc(cs[0][0])+'</b>: σε <b>'+nf(cs[0][1])+'</b> διαφορετικές ημέρες.']);
+    var tr=(data.trips||[]).slice().sort(function(a,b){return b.days-a.days})[0];
+    if(tr)F.push(['🧳','Το μεγαλύτερο ταξίδι σου κράτησε <b>'+tr.days+' ημέρες</b> ('+esc(String(tr.places).split(', ').slice(0,2).join(', '))+').']);
+    var fr=(data.trips||[]).slice().sort(function(a,b){return b.far_km-a.far_km})[0];
+    if(fr&&fr.far_km>0)F.push(['📏','Το πιο μακρινό σου σημείο ήταν <b>'+nf(fr.far_km)+' χλμ</b> από το σπίτι ('+esc(String(fr.places).split(', ')[0])+').']);
+    box.innerHTML=F.slice(0,6).map(function(f){return '<div><i>'+f[0]+'</i><span>'+f[1]+'</span></div>'}).join('');
+    box.hidden=!F.length;
+  }
+  function csvOf(id,fname){
+    var t=$(id),rows=[],NL=String.fromCharCode(13,10);
+    rows.push([].map.call(t.querySelectorAll('thead th'),function(h){return h.textContent.trim()}));
+    [].forEach.call(t.querySelectorAll('tbody tr'),function(tr){if(tr.hidden||tr.style.display==='none')return;rows.push([].map.call(tr.children,function(c){return c.textContent.trim()}))});
+    var q=function(x){x=String(x);return(x.indexOf(';')>=0||x.indexOf('"')>=0||x.indexOf(String.fromCharCode(10))>=0)?'"'+x.split('"').join('""')+'"':x};
+    var txt=String.fromCharCode(65279)+rows.map(function(r){return r.map(q).join(';')}).join(NL)+NL+NL+'Δημιουργήθηκε με Google Timeline by Veagle · ferelis.gr'+NL;
+    dl(new Blob([txt],{type:'text/csv;charset=utf-8'}),fname);
+  }
+  function extras(data){
+    facts(data);
+    if($('csvAreas'))return;
+    [['q-areas','tb-areas','csvAreas','googletimelinebyveagle-perioches.csv'],['q-trips','tb-trips','csvTrips','googletimelinebyveagle-taxidia.csv']].forEach(function(c){
+      var inp=$(c[0]);if(!inp)return;var b=document.createElement('button');b.type='button';b.id=c[2];b.className='csvbtn';b.textContent='⬇ Λήψη CSV (Excel)';
+      b.title='Κατεβάζει τον πίνακα όπως φαίνεται τώρα, για να τον ανοίξεις στο Excel.';b.onclick=function(){csvOf(c[1],c[3])};inp.insertAdjacentElement('afterend',b)});
+    var ctl=document.querySelector('#map .controls');
+    if(ctl){var pb=document.createElement('button');pb.type='button';pb.className='pngbtn';pb.textContent='📷 Αποθήκευση εικόνας χάρτη';pb.title='Κατεβάζει τον χάρτη όπως τον βλέπεις τώρα, ως εικόνα PNG.';
+      pb.onclick=function(){var cv=$('cv');if(!cv)return;var o=document.createElement('canvas');o.width=cv.width;o.height=cv.height+Math.max(30,Math.round(cv.width/40));var x=o.getContext('2d');x.fillStyle='#050708';x.fillRect(0,0,o.width,o.height);x.drawImage(cv,0,0);x.fillStyle='#9aa6b6';x.font='600 '+Math.max(13,Math.round(o.width/60))+'px system-ui,sans-serif';x.fillText('Google Timeline by Veagle · ferelis.gr',14,o.height-10);o.toBlob(function(b){if(b)dl(b,'googletimelinebyveagle-xartis.png')})};
+      ctl.appendChild(pb)}
+  }
+  function demoJSON(){
+    var seed=11;function R(){seed=(seed*16807)%2147483647;return seed/2147483647}
+    var S=[],D=864e5,H=36e5;
+    function LL(p){return p[0].toFixed(5)+'°, '+p[1].toFixed(5)+'°'}
+    function T(day,h){return new Date(day+h*H).toISOString().slice(0,19)+'.000+00:00'}
+    function km(a,b){var x=Math.sin((b[0]-a[0])*Math.PI/360),y=Math.sin((b[1]-a[1])*Math.PI/360);return 12742*Math.asin(Math.sqrt(x*x+Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*y*y))}
+    function visit(d,h0,h1,p,t){S.push({startTime:T(d,h0),endTime:T(d,h1),visit:{topCandidate:{semanticType:t||'UNKNOWN',placeLocation:{latLng:LL(p)}}}})}
+    function act(d,h0,h1,a,b,t){
+      S.push({startTime:T(d,h0),endTime:T(d,h1),activity:{start:{latLng:LL(a)},end:{latLng:LL(b)},distanceMeters:String(Math.round(km(a,b)*1250)),topCandidate:{type:t}}});
+      var n=t==='FLYING'?2:9,pts=[];
+      for(var i=0;i<=n;i++){var f=i/n,j=(t==='FLYING'||i===0||i===n)?0:(R()-.5)*.012;pts.push({point:LL([a[0]+(b[0]-a[0])*f+j,a[1]+(b[1]-a[1])*f-j]),time:T(d,h0+(h1-h0)*f)})}
+      S.push({startTime:T(d,h0),endTime:T(d,h1),timelinePath:pts});
+    }
+    var HOME=[37.9838,23.7275],WORK=[38.0170,23.7870],CAFE=[37.9755,23.7348],GYM=[37.9921,23.7361],PARK=[37.9715,23.7257],MKT=[37.9795,23.7215],SUN=[37.6496,24.0243],NAF=[37.5675,22.8008],PIR=[37.9420,23.6470];
+    var W='WALKING',C='IN_PASSENGER_VEHICLE';
+    var OFF=[[0,0],[.006,.01],[-.008,.004],[.002,-.012]];
+    var TR=[['2024-03-15',3,[40.6401,22.9444],C],['2024-07-20',7,[35.3387,25.1442],'FLYING'],['2024-10-05',4,[41.9028,12.4964],'FLYING'],['2025-04-18',4,[39.6650,20.8537],C],['2025-08-02',8,[37.1036,25.3764],'IN_FERRY'],['2025-12-27',5,[48.8566,2.3522],'FLYING'],['2026-05-01',3,[37.5675,22.8008],C],['2026-09-05',6,[38.7223,-9.1393],'FLYING']].map(function(t){return{s:Date.parse(t[0]+'T00:00:00Z'),n:t[1],p:t[2],m:t[3]}});
+    function dur(a,b,m){var k=km(a,b);return m==='FLYING'?Math.min(5,1.5+k/700):m==='IN_FERRY'?Math.min(6,1+k/30):Math.max(.5,k/70)}
+    function go(d,h,a,b,m){var u=dur(a,b,m);act(d,h,h+u,a,b,m);return h+u}
+    for(var d=Date.parse('2024-01-01T00:00:00Z');d<=Date.parse('2026-10-31T00:00:00Z');d+=D){
+      var tr=null,k=0;
+      for(var i=0;i<TR.length;i++)if(d>=TR[i].s&&d<TR[i].s+TR[i].n*D){tr=TR[i];k=Math.round((d-tr.s)/D)}
+      var sp=function(j){return[tr.p[0]+OFF[j][0],tr.p[1]+OFF[j][1]]};
+      if(tr){
+        if(k===0){
+          visit(d,0,6,HOME,'HOME');var h=7;
+          if(tr.m==='IN_FERRY'){h=go(d,h,HOME,PIR,C);h=go(d,h+.5,PIR,tr.p,'IN_FERRY')}else h=go(d,h,HOME,tr.p,tr.m);
+          visit(d,h+.3,h+2,sp(0));visit(d,h+2.5,h+4.5,sp(1));visit(d,Math.max(h+5,20),23.9,sp(3))
+        }else if(k===tr.n-1){
+          visit(d,0,8,sp(3));visit(d,9,11,sp(2));var h2=11.5;
+          if(tr.m==='IN_FERRY'){h2=go(d,h2,tr.p,PIR,'IN_FERRY');h2=go(d,h2+.5,PIR,HOME,C)}else h2=go(d,h2,tr.p,HOME,tr.m);
+          visit(d,Math.min(h2+.5,22),23.9,HOME,'HOME')
+        }else{visit(d,0,8,sp(3));visit(d,9,12,sp(k%3));visit(d,13,15.5,sp((k+1)%3));visit(d,16.5,19,sp((k+2)%3));visit(d,20,23.9,sp(3))}
+        continue;
+      }
+      var dow=new Date(d).getUTCDay();
+      if(dow>=1&&dow<=5){
+        visit(d,0,7.4,HOME,'HOME');act(d,7.5,7.8,HOME,CAFE,W);visit(d,7.8,8.4,CAFE);act(d,8.4,9,CAFE,WORK,C);visit(d,9,17,WORK,'WORK');
+        if(R()<.4){act(d,17,17.4,WORK,GYM,C);visit(d,17.4,18.6,GYM);act(d,18.6,19,GYM,HOME,C)}else act(d,17,17.6,WORK,HOME,C);
+        visit(d,19.2,23.9,HOME,'HOME')
+      }else{
+        visit(d,0,9.8,HOME,'HOME');
+        if(dow===0&&R()<.18){var DS=R()<.5?SUN:NAF;act(d,9.8,11.3,HOME,DS,'MOTORCYCLING');visit(d,11.3,14,DS);act(d,14,15.6,DS,HOME,'MOTORCYCLING');visit(d,16,23.9,HOME,'HOME')}
+        else{act(d,10,10.4,HOME,PARK,W);visit(d,10.4,12,PARK);act(d,12,12.3,PARK,MKT,W);visit(d,12.3,13,MKT);act(d,13,13.4,MKT,HOME,W);visit(d,13.6,23.9,HOME,'HOME')}
+      }
+    }
+    return JSON.stringify({semanticSegments:S});
+  }
+  function runDemo(){$('err').textContent='';try{$('bar').scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}run(new Blob([demoJSON()],{type:'application/json'}),true)}
   var inp=$('file'),drop=$('drop');
   drop.onclick=function(){inp.click()};drop.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();inp.click()}};
   inp.onchange=function(){var f=inp.files[0];if(f){process(f);inp.value=''}};
   ['dragenter','dragover'].forEach(function(t){window.addEventListener(t,function(e){e.preventDefault();if(!$('imp').hidden)drop.classList.add('over')})});
   ['dragleave','drop'].forEach(function(t){window.addEventListener(t,function(e){e.preventDefault();drop.classList.remove('over')})});
   window.addEventListener('drop',function(e){var f=e.dataTransfer&&e.dataTransfer.files[0];if(f&&!$('imp').hidden)process(f)});
-  $('btnNew').onclick=showImp;
+  $('btnNew').onclick=showImp;$('btnReal').onclick=showImp;$('btnDemo').onclick=runDemo;$('btnDemo2').onclick=runDemo;
   $('btnBack').onclick=function(){$('imp').hidden=true;$('appwrap').hidden=false;$('tools').hidden=false};
   $('btnDel').onclick=function(){if(confirm('Να διαγραφούν τα αποθηκευμένα δεδομένα από αυτόν τον browser;\\n\\nΤο αρχικό σου αρχείο Timeline.json δεν πειράζεται.'))del().then(function(){location.reload()})};
-  get().then(function(d){if(d&&d.places)start(d,true);else showImp()}).catch(showImp);
+  var tf=false;try{tf=sessionStorage.getItem('pep-tmp')==='1';sessionStorage.removeItem('pep-tmp')}catch(e){}
+  var first=tf?idb('readonly',function(s){return s.get('tmp')}).then(function(d){idb('readwrite',function(s){s.delete('tmp')}).catch(function(){});return d}).catch(function(){return null}):get();
+  first.then(function(d){if(d&&d.places)start(d,!tf);else showImp()}).catch(showImp);
 })();
 </script>
 </body>

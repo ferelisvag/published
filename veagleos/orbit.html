@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Veagle Orbit</title>
+<meta name="description" content="Veagle OS σε λειτουργία Orbit: πιλοτήριο με αστερισμούς.">
+<meta name="theme-color" content="#010208">
+<link rel="icon" type="image/png" sizes="32x32" href="images/icon-32.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#010208;color:#eef2f8;font:14px/1.45 'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc,#fff);outline-offset:2px}
+canvas#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}canvas#cv.hot{cursor:pointer}canvas#cv.drag{cursor:grabbing}
+
+</style>
+</head>
+<body>
+<canvas id="cv" aria-label="Πιλοτήριο. Σύρε για να κοιτάξεις γύρω, πάτα ένα αστέρι για άνοιγμα."></canvas>
+<script src="js/catalog.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/linkhub.js"></script>
+<script src="js/modelib.js"></script>
+<script src="js/m-orbit.js"></script>
+</body>
+</html>

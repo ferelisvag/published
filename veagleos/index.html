@@ -1,0 +1,456 @@
+<!--
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@#%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@#.:@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@%. .%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@:   +@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@+    .@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@:     =@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@%@@@@@@@@@@@#      .%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@.#@@@@@@@@@@:      .+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@* .@@@@@@@@@@        .#@@@@@@@@@@@@@@@%%%%%%%%%%%%%%%%%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@=  -@@@@@@@@%         :@@@.                                          ..-=*#%@@@@@@@@@@@@@@@
+@@@@@@@@@-   =@@@@@@@%          =@@*.                                                      ..=@@@@@@
+@@@@@@@@@-    +@@@@@@%          .+@@*                                                        :@@@@@@
+@@@@@@@@@-    .+@@@@@@.          .@@@+-=+*#%%%@@@@@@@@@@@@@@@@@@@@%%%#*+=-:...               :@@@@@@
+@@@@@@@@@=      *@@@@@*           .%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%%#:     :@@@@@@
+@@@@@@@@@+      .+@@@@@.           .@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:     :@@@@@@
+@@@@@@@@@%       .=@@@@+            .@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:     :@@@@@@
+@@@@@@@@@@=        -@@@@=            .%@@@@@@@@@@@@@@@@@#-.       .-#@@@@@@@@@@@@@@@@@@:     :@@@@@@
+@@@@@@@@@@@:        .%@@@-            .%@@@@@@@@@@@@@@-..:.   .-==-. .%@@@@@@@@@@@@@@@@.     =@@@@@@
+@@@@@@@@@@@#.        .#@@@=.            *@@@@@@@@@@@==+:.        ..     .#@@@@@@@@@@@@%.     *@@@@@@
+@@@@@@@@@@@@*.         =@@@+.            -@@@@@@@@@@-                     *@@@@@@@@@@@*      %@@@@@@
+@@@@@@@@@@@@@+.         .%@@%.            .%@@@@@@+.              .:=#%*-.-@@@@@@@@@@@-     .@@@@@@@
+@@@@@@@@@@@@@@#.          -@@@+.           .+@@@@- ..            .#=@@@@@+@@@@@@@@@@@@.     =@@@@@@@
+@@@@@@*@@@@@@@@@:           *@@@=.           .%@%.%:            -+ @@@@@@@@@@@@@@@@@@*     .*@@@@@@@
+@@@@@@@.#@@@@@@@@*.          .%@@@*.           .@@@@*           +..@@@@@@@@@@@@@@@@@@=     .%@@@@@@@
+@@@@@@@%.:@@@@@@@@@=.          .%@@@%:          .:@@@@+        .: .@@@@@@@@@@@@@@@@@@.     :@@@@@@@@
+@@@@@@@@@:.:@@@@@@@@@=           .%@@@@#.         .:@@@@+.     ..  -@@@@@@@@@@@@@@@@=      %@@@@@@@@
+@@@@@@@@@@: .:%@@@@@@@@+.          .=@@@@@#..        .#@@@#.       .-@@@@@@@@@@@@@@%.     -@@@@@@@@@
+@@@@@@@@@@@+   .*@@@@@@@@%-.         .:%@@@@@%+.       .=@@@%-       -@@@@@@@@@@@@@+      *@@@@@@@@@
+@@@@@@@@@@@@%.   .-%@@@@@@@@#:.         .=%@@@@@@#+.      .*@@@*..   :@@@@@@@@@@@@@.     .@@@@@@@@@@
+@@@@@@@@@@@@@@+.    .=@@@@@@@@@%+.         .-#@@@@@@@@*=..  .:*@@@+. .%@@@@@@@@@@@-     .%@@@@@@@@@@
+@@@@@=#@@@@@@@@@=      .-#@@@@@@@@@%=:         .+%@@@@@@@@@@*=-..+%@@+%@@@@@@@@@@#.     -@@@@@@@@@@@
+@@@@@@=.*@@@@@@@@@+.       .+#@@@@@@@@@@%=-..      .=#@@@@@@@@@@@@@@#@@@@@@@@@@@%.     .@@@@@@@@@@@@
+@@@@@@@#..=@@@@@@@@@#:         .-#@@@@@@@@@@@@@#=-:..  ..-#%@@@@@@@@@@@@@@@@@@@@:     .#@@@@@@@@@@@@
+@@@@@@@@@=  .+@@@@@@@@@+..          .:#%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@-      =@@@@@@@@@@@@@
+@@@@@@@@@@@:    -%@@@@@@@@%:.             ..=%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=      =@@@@@@@@@@@@@@
+@@@@@@@@@@@@@:     .-@@@@@@@@@@+.                 ..:=%@@@@@@@@@@@@@@@@@@@@@@=      .@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@+.      ..:#@@@@@@@@@@@%*-:....:=#%@@@@@@@@@@@@@@@@@@@@@@@@@@+.     :@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@=.        ...:-+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@-      .@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@%-.             .....::::-=@@@@@@@@@@@@@@@@@@@@@@@@@@:.     :@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@#+:.           .:+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@.      -@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=       =@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%.       *@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@-...    -@@@@@@@@@@@@@@@@@@@@@@@@-       :@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+.      .=@@@@@@@@@@@@@@@@@@@@=.      .*@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:.       =@@@@@@@@@@@@@@@@=.       -@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%:       .:%@@@@@@@@@@#:.       :@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%.         -@@@@@@-         .%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%:.         ..         .:%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=.                .+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%-            =@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*.    .*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@*@@@@@@@@+%@@@*++++++*@@@@@@@@@*#@@@@@@@@%+++++++#@@@@@*#@@@@@@@@@@+++++++*@@@@@@@@@@@@@@
+@@@@@@@@@@@:.+@@@@+.:%@@# -####*:.@@@@@@#...-@@@@@@= =#####*.-@@@@.:@@@@@@@@@* -####*:.@@@@@@@@@@@@@
+@@@@@@@@@@@@*.:%%:.+@@@@# .....:@@@@@@@: :#*..*@@@@- @@@@@-...%@@@.:@@@@@@@@@* ......@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@:. :%@@@@@# :*****..@@@*..------.:@@@+ -******:.%@@@..-----=%@@* :*****..@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@%%@@@@@@@@#######%@@@@@%@@@@@@@@#@@@@@#######%@@@@@%#######@@@@#######%@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+  Ιδέα και σχεδιασμός: Vagelis Ferelis · ferelis.gr
+-->
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Veagle OS</title>
+<meta name="description" content="Veagle OS: ένα φανταστικό λειτουργικό σύστημα στον browser, με τα δικά σου links, εφαρμογές και dashboards. Δωρεάν, χωρίς λογαριασμό, τίποτα δεν φεύγει από τον υπολογιστή σου.">
+<meta name="theme-color" content="#050708" id="tcolor">
+<link rel="icon" type="image/png" sizes="32x32" href="images/icon-32.png">
+<link rel="apple-touch-icon" href="images/icon-180.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<script>try{var __m=localStorage.getItem("veagleos.mode");if(/[?&]stay=1/.test(location.search)){localStorage.setItem("veagleos.mode","desktop")}else if(/^(cyber|galaxy|city|orbit|reactor|ocean|wall|mindmap)$/.test(__m)){if(!/[?&]open=/.test(location.search)&&!location.hash)location.replace(__m+".html")}}catch(e){}</script>
+<script>try{var __s=JSON.parse(localStorage.getItem("veagleos.settings.v1")||"{}");if(__s.theme)document.documentElement.setAttribute("data-theme",__s.theme)}catch(e){}</script>
+<style>
+:root,html[data-theme="veagle"]{
+  --bg:#050708; --bg2:#0a0d10; --line:#191d22; --line2:#262c34;
+  --text:#e7ecf3; --dim:#7c8697; --accent:#ff1e38; --glow:rgba(255,30,56,.2); --onacc:#fff;
+  --glass:rgba(10,13,16,.78); --ok:#2ee6a6;
+  --ar:255,30,56; --fr:255,255,255; --br:5,7,8; --termbg:rgba(3,4,5,.7);
+  --ic1:#1b2027; --ic2:#12161b; --icmix:#fff; --fold:#0d1115;
+  --disp:'Space Grotesk',system-ui,sans-serif; --body:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+/* Θέματα: αλλάζουν μόνο μεταβλητές */
+html[data-theme="terminal"]{
+  --bg:#020a04; --bg2:#04120a; --line:#0f2e18; --line2:#1b5a2c;
+  --text:#b8ffc9; --dim:#4fa566; --accent:#39ff6e; --glow:rgba(57,255,110,.22); --onacc:#021407;
+  --glass:rgba(2,12,6,.82); --ok:#39ff6e;
+  --ar:57,255,110; --fr:57,255,110; --br:2,10,4; --termbg:rgba(0,6,2,.8);
+  --ic1:#06200f; --ic2:#041509; --icmix:#39ff6e; --fold:#041a0b;
+  --disp:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace; --body:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+html[data-theme="clinic"]{
+  --bg:#eef3f6; --bg2:#ffffff; --line:#d5e0e7; --line2:#bccbd5;
+  --text:#14232d; --dim:#5d7482; --accent:#d9142c; --glow:rgba(217,20,44,.14); --onacc:#fff;
+  --glass:rgba(255,255,255,.82); --ok:#0f9d6e;
+  --ar:217,20,44; --fr:20,35,45; --br:255,255,255; --termbg:rgba(255,255,255,.7);
+  --ic1:#ffffff; --ic2:#e6eef3; --icmix:#0e8a9e; --fold:#ffffff;
+  --eaglefx:invert(1); color-scheme:light;
+}
+html[data-theme="aegean"]{
+  --bg:#04101f; --bg2:#081a30; --line:#10304f; --line2:#1d4a75;
+  --text:#e8f4ff; --dim:#7fa6c8; --accent:#4cc9f0; --glow:rgba(76,201,240,.24); --onacc:#04101f;
+  --glass:rgba(8,26,48,.78); --ok:#5eead4;
+  --ar:76,201,240; --fr:180,215,255; --br:4,16,31; --termbg:rgba(2,10,20,.75);
+  --ic1:#0d2a4a; --ic2:#08203a; --icmix:#ffffff; --fold:#071a30;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font:14px/1.5 var(--body);-webkit-font-smoothing:antialiased;user-select:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#netbg{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:.6;pointer-events:none}
+.os{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column}
+
+/* γραμμή συστήματος */
+.bar{flex:none;height:34px;display:flex;align-items:center;gap:14px;padding:0 max(12px,env(safe-area-inset-right)) 0 max(12px,env(safe-area-inset-left));background:rgba(var(--br),.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);font-family:var(--disp);font-size:12px;letter-spacing:.04em;position:relative;z-index:60}
+.start{white-space:nowrap;display:flex;align-items:center;gap:8px;padding:3px 8px 3px 4px;border-radius:7px;font-weight:600;letter-spacing:.16em;font-size:11px}
+.start:hover{background:rgba(var(--fr),.06)}
+.start img{width:18px;height:19px;object-fit:contain;animation:beat 1.05s infinite}
+@keyframes beat{0%,100%{filter:var(--eaglefx,none) drop-shadow(0 0 0 transparent)}22%{filter:var(--eaglefx,none) drop-shadow(0 0 6px var(--accent))}}
+.search{flex:1 1 0;min-width:110px;max-width:340px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:3px 12px;border:1px solid var(--line2);border-radius:999px;color:var(--dim);background:rgba(var(--fr),.03);text-align:left}
+.search svg{width:14px;height:14px;flex:none}
+.search span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.search kbd{font:11px var(--mono);padding:0 5px;border:1px solid var(--line2);border-radius:4px}
+.search:hover{border-color:var(--dim);color:var(--text)}
+.tray{display:flex;align-items:center;gap:12px;color:var(--dim);white-space:nowrap}
+.tray b{color:var(--text);font-weight:500}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok);margin-right:5px;vertical-align:1px}
+.dot.bad{background:var(--accent)}
+#ecg{width:84px;height:22px;display:block}
+.bar .addbtn{display:grid;place-items:center;width:24px;height:24px;border-radius:6px;color:var(--dim)}
+.bar .addbtn:hover{background:rgba(var(--fr),.06);color:var(--text)}
+.bar .addbtn svg{width:16px;height:16px}
+
+/* επιφάνεια */
+.desk{flex:1;position:relative;overflow:hidden}
+.center{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;padding-bottom:70px}
+.brand{text-align:center}
+.brand h1{font:700 clamp(34px,7vw,84px)/1 var(--disp);letter-spacing:.34em;padding-left:.34em;color:var(--text);text-shadow:0 0 40px var(--glow)}
+.brand h1 i{font-style:normal;color:var(--accent)}
+.brand p{margin-top:14px;font:12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.brand .hello{margin-top:6px;color:var(--text);letter-spacing:.06em;text-transform:none;font-family:var(--body);font-size:15px}
+.icons{position:absolute;left:max(12px,env(safe-area-inset-left));top:14px;bottom:80px;display:grid;grid-auto-flow:column;grid-template-rows:repeat(auto-fill,86px);grid-auto-columns:92px;gap:0 4px;align-content:start}
+.fi,.item{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 4px;border-radius:12px;text-align:center;min-width:0}
+.fi:hover,.item:hover{background:rgba(var(--fr),.05)}
+.fi .nm,.item .nm{font:500 12px/1.25 var(--disp);letter-spacing:.02em;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
+.item .sub{font:10px var(--mono);color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:-4px}
+.ic{position:relative;width:52px;height:52px;flex:none;border-radius:14px;display:grid;place-items:center;color:var(--text);background:linear-gradient(150deg,color-mix(in srgb,var(--c,var(--ic1)) 78%,var(--icmix) 7%),var(--c,var(--ic2)));border:1px solid rgba(var(--fr),.09);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 0 rgba(var(--fr),.07);transition:transform .15s,border-color .15s,box-shadow .15s}
+.ic svg{width:26px;height:26px}
+.ic img{width:28px;height:30px;object-fit:contain}
+.ic.fold{color:var(--accent);--c:var(--fold)}
+.fi:hover .ic,.item:hover .ic,.dk:hover .ic{transform:translateY(-2px);border-color:rgba(var(--ar),.55);box-shadow:0 8px 22px rgba(0,0,0,.45),0 0 18px var(--glow)}
+.ic .lock{position:absolute;right:-4px;bottom:-4px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:1px solid var(--line2);display:grid;place-items:center;color:var(--dim)}
+.ic .lock svg{width:9px;height:9px}
+.item.soon .ic,.item.slot .ic{background:transparent;border:1px dashed var(--line2);box-shadow:none;color:var(--dim)}
+.item.slot{opacity:.55}.item.slot:hover,.item.soon:hover{opacity:1}
+.item.soon .nm{color:var(--dim)}
+.item .del{position:absolute;top:2px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:1px solid var(--line2);color:var(--dim);font-size:13px;line-height:15px;display:none}
+.item:hover .del,.item:focus-within .del{display:block}
+.item .del:hover{color:var(--accent);border-color:var(--accent)}
+
+/* widgets */
+.widgets{position:absolute;right:max(14px,env(safe-area-inset-right));top:14px;width:248px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.card{min-width:0}
+.card{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h2{font:600 10px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.time{font:600 44px/1 var(--disp);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.time small{font-size:18px;color:var(--accent);margin-left:4px}
+.date{color:var(--dim);font-size:13px;margin-top:6px;text-transform:capitalize}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font:12px var(--mono)}
+.kv span{color:var(--dim)}.kv b{font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+.notes{width:100%;height:92px;resize:none;background:rgba(var(--fr),.03);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px 10px;font:12.5px/1.45 var(--body);user-select:text}
+input::placeholder,textarea::placeholder{color:var(--dim);opacity:.7}
+
+/* dock */
+.dock{position:absolute;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;padding:8px 10px;max-width:calc(100% - 20px);background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line2);border-radius:20px;z-index:40;overflow-x:auto}
+.dk{position:relative;flex:none;padding-bottom:6px}
+.dk .ic{width:44px;height:44px;border-radius:12px}
+.dk .ic svg{width:22px;height:22px}
+.dk.on::after{content:"";position:absolute;left:50%;bottom:0;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.dock .sep{width:1px;height:36px;background:var(--line2);flex:none;margin-bottom:6px}
+
+/* παράθυρα */
+.win{position:absolute;width:min(580px,calc(100% - 20px));max-height:calc(100% - 100px);display:flex;flex-direction:column;background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line2);border-radius:12px;box-shadow:0 26px 70px rgba(0,0,0,.6);z-index:20;animation:pop .18s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}}
+.win.on{border-color:rgba(var(--ar),.5);box-shadow:0 26px 70px rgba(0,0,0,.65),0 0 0 1px rgba(var(--ar),.12),0 0 40px var(--glow)}
+.win.min{display:none}
+.win.full{left:8px!important;top:8px!important;width:calc(100% - 16px);height:calc(100% - 100px);max-height:none}
+.wbar{flex:none;display:flex;align-items:center;gap:12px;padding:0 0 0 14px;min-height:36px;overflow:hidden;border-radius:inherit;border-bottom:1px solid var(--line);cursor:default;touch-action:none}
+.wbar.drag{cursor:grabbing}
+.dots{display:flex;gap:0;margin-left:auto;align-self:stretch}
+.d{width:46px;min-height:36px;display:flex;align-items:center;justify-content:center;background:transparent;color:var(--dim);border:0;padding:0;border-radius:0;cursor:default}
+.win.on .d{color:var(--text)}
+.d:hover{background:rgba(var(--fr),.12);color:var(--text)}
+.d.close:hover{background:#c42b1c;color:#fff}
+.wtitle{display:flex;align-items:baseline;gap:10px;min-width:0;overflow:hidden}
+.wtitle b{font:600 13px var(--disp);letter-spacing:.06em;white-space:nowrap}
+.wtitle span{font:11px var(--mono);color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wbody{flex:1;overflow:auto;padding:14px 14px 16px}
+.wmeta{display:flex;justify-content:space-between;gap:12px;color:var(--dim);font-size:12.5px;margin:0 4px 10px}
+.wmeta .cnt{font:11px var(--mono);white-space:nowrap}
+.igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:4px}
+.term{background:var(--termbg);font:12.5px/1.55 var(--mono);user-select:text;min-height:240px}
+.term .dim{color:var(--dim)}.term .cmd{color:var(--text)}.term .err{color:var(--accent)}
+.tout>div{white-space:pre-wrap;word-break:break-word}
+.trow{display:flex;gap:8px;align-items:center}
+.ps{color:var(--accent);white-space:nowrap}
+.tin{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);font:inherit;user-select:text}
+
+/* launcher */
+.launch{position:fixed;inset:0;z-index:80;display:none;background:rgba(var(--br),.84);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:max(5vh,34px) 16px 16px}
+.launch.open{display:block}
+.lwrap{max-width:820px;margin:0 auto;height:100%;display:flex;flex-direction:column;gap:14px}
+.lbox{flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--line2);border-radius:14px;background:var(--bg2)}
+.lbox svg{width:20px;height:20px;color:var(--accent);flex:none}
+.lbox input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);font:400 18px var(--body);user-select:text}
+.lbox button{font:11px var(--mono);color:var(--dim);border:1px solid var(--line2);border-radius:6px;padding:2px 8px}
+.lres{flex:1;overflow:auto;padding-right:4px}
+.lsec{margin-bottom:18px}
+.lsec h3{display:flex;align-items:center;gap:8px;font:600 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:0 4px 6px}
+.lsec h3 svg{width:14px;height:14px;color:var(--accent)}
+.lfoot{flex:none;display:flex;justify-content:space-between;gap:10px;font:11px var(--mono);color:var(--dim)}
+.lfoot button{color:var(--dim);text-decoration:underline;text-underline-offset:3px}
+.rlist{display:grid;gap:4px}
+.item.row{flex-direction:row;align-items:center;text-align:left;gap:14px;padding:8px 12px}
+.item.row .ic{width:40px;height:40px;border-radius:11px}.item.row .ic svg{width:20px;height:20px}
+.item.row .rt{display:flex;flex-direction:column;min-width:0}
+.item.row .rt b{font:500 14px var(--disp)}
+.item.row .rt span{color:var(--dim);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item.row.sel{background:rgba(var(--ar),.1);box-shadow:inset 0 0 0 1px rgba(var(--ar),.4)}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:90;display:none;place-items:center;background:rgba(var(--br),.7);backdrop-filter:blur(6px);padding:16px}
+.modal.open{display:grid}
+.mbox{width:min(460px,100%);background:var(--bg2);border:1px solid var(--line2);border-radius:14px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.7);user-select:text}
+.mbox h2{font:600 15px var(--disp);letter-spacing:.04em;margin-bottom:14px}
+.mbox label{display:block;font:11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:10px 0 4px}
+.mbox input,.mbox select,.mbox textarea{width:100%;padding:8px 10px;background:rgba(var(--fr),.04);border:1px solid var(--line2);border-radius:8px;color:var(--text);font:14px var(--body)}
+.mbox textarea{height:170px;font:12px/1.5 var(--mono);resize:vertical}
+.mbox select option{background:var(--bg2)}
+.mact{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.btn{padding:7px 16px;border-radius:8px;border:1px solid var(--line2);font:500 13px var(--disp)}
+.btn:hover{border-color:var(--dim)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--onacc)}
+.btn.pri:hover{filter:brightness(1.12)}
+.toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,12px);background:var(--bg2);border:1px solid var(--line2);border-radius:10px;padding:8px 16px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:100}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* boot */
+.boot{position:fixed;inset:0;z-index:120;background:var(--bg);display:grid;place-items:center;transition:opacity .45s;cursor:pointer}
+.boot.off{opacity:0;pointer-events:none}
+.boot .bx{width:min(380px,86vw)}
+.boot img{width:64px;display:block;margin:0 auto 22px;animation:beat 1.05s infinite}
+.boot .bl{font:12px/1.8 var(--mono);color:var(--dim);min-height:9em}
+.boot .bl div:last-child{color:var(--text)}
+.boot .bl div:first-child{color:var(--accent);letter-spacing:.2em}
+
+
+.ic .fav{width:28px;height:28px;border-radius:6px;object-fit:contain}
+.ic .ltr{font:700 20px var(--disp)}
+.start img,.boot img{filter:var(--eaglefx,none)}
+.ic .st{position:absolute;left:-3px;top:-3px;width:10px;height:10px;border-radius:50%;background:var(--dim);border:2px solid var(--bg)}
+.ic .st.ok{background:var(--ok)}.ic .st.bad{background:var(--accent)}
+.wsec{font:600 10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin:14px 4px 6px}
+.wsw{display:flex;gap:2px}
+.wsb{font:500 11px var(--disp);padding:3px 9px;border-radius:999px;color:var(--dim);white-space:nowrap}
+.wsb:hover{color:var(--text)}.wsb[aria-pressed="true"]{background:rgba(var(--ar),.16);color:var(--text);box-shadow:inset 0 0 0 1px rgba(var(--ar),.4)}
+.wsname{position:absolute;left:14px;bottom:84px;font:11px var(--mono);color:var(--dim);letter-spacing:.1em;pointer-events:none}
+.pi{position:fixed;right:14px;bottom:14px;z-index:30;width:26px;height:26px;border-radius:50%;font:600 14px var(--body);color:var(--dim);opacity:.35}
+.pi:hover{opacity:1;color:var(--accent)}
+.card .row2{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.wx{display:flex;align-items:center;gap:12px}
+.wx .big{font:600 30px/1 var(--disp)}
+.wx .ico{width:34px;height:34px;color:var(--accent)}
+.wxsub{font:11.5px var(--mono);color:var(--dim);margin-top:8px;display:grid;grid-template-columns:auto 1fr;gap:2px 10px}
+.wxsub b{font-weight:500;color:var(--text);text-align:right}
+.tasks .add{display:flex;gap:6px;margin-bottom:8px}
+.tasks input[type=text],.fld{flex:1;min-width:0;padding:6px 9px;background:rgba(var(--fr),.04);border:1px solid var(--line);border-radius:8px;color:var(--text);font:13px var(--body);user-select:text}
+.tasks ul{list-style:none;max-height:130px;overflow:auto}
+.tasks li{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:13px}
+.tasks li.done span{text-decoration:line-through;color:var(--dim)}
+.tasks li button{margin-left:auto;color:var(--dim);font-size:15px;line-height:1}
+.tasks li button:hover{color:var(--accent)}
+.tasks input[type=checkbox]{accent-color:var(--accent)}
+.tasks .none{color:var(--dim);font-size:12px}
+.app{display:grid;gap:10px;user-select:text}
+.app h4{font:600 10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.app .r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.app label{font:11px var(--mono);color:var(--dim)}
+.app select,.app input,.app textarea{padding:7px 10px;background:rgba(var(--fr),.04);border:1px solid var(--line2);border-radius:8px;color:var(--text);font:14px var(--body);min-width:0}
+.app select option{background:var(--bg2)}
+.app .out{font:600 24px var(--disp);font-variant-numeric:tabular-nums;word-break:break-all}
+.app .mono{font:13px var(--mono);word-break:break-all}
+.app .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.keys button{padding:12px 0;border-radius:10px;border:1px solid var(--line2);font:500 17px var(--disp);background:rgba(var(--fr),.03)}
+.keys button:hover{border-color:var(--accent)}.keys button.op{color:var(--accent)}.keys button.eq{background:var(--accent);color:var(--onacc);border-color:var(--accent)}
+.tprev{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.tp{border:1px solid var(--line2);border-radius:12px;padding:8px;text-align:left;background:transparent}
+.tp[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.tp .sw{height:56px;border-radius:8px;display:flex;align-items:flex-end;gap:4px;padding:6px;margin-bottom:6px;border:1px solid rgba(128,128,128,.25)}
+.tp .sw i{flex:1;height:10px;border-radius:3px}
+.tp b{font:600 13px var(--disp);display:block}.tp span{font-size:11.5px;color:var(--dim)}
+.sw2{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+.sw2 span small{display:block;color:var(--dim);font-size:11.5px}
+.tg{width:38px;height:22px;border-radius:999px;background:var(--line2);position:relative;flex:none}
+.tg::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--text);transition:.15s}
+.tg[aria-pressed="true"]{background:var(--accent)}.tg[aria-pressed="true"]::after{left:19px;background:var(--onacc)}
+.chg{list-style:none;display:grid;gap:6px;font-size:13px}
+.chg li{padding:6px 0;border-bottom:1px solid var(--line)}
+.chg small{display:block;font:11px var(--mono);color:var(--dim)}
+.vault li{list-style:none;display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.vault code{font:12px var(--mono);color:var(--accent)}
+.vault .lk{color:var(--dim)}
+body.fx-flip .os{transform:rotate(180deg);transition:transform 1s}
+.modes{display:flex;gap:2px}.modes a{font:500 11px var(--disp);padding:3px 9px;border-radius:999px;color:var(--dim);white-space:nowrap}.modes a:hover{color:var(--text)}.modes a[aria-current]{background:rgba(var(--ar),.16);color:var(--text);box-shadow:inset 0 0 0 1px rgba(var(--ar),.4)}
+@media (max-width:1560px){.tray #ecg{display:none}}
+@media (max-width:1500px){.tray .opt[title]{display:none}}
+@media (max-width:900px){.tray .opt{display:none}}
+@media (max-width:720px){#langbtn{display:none}.bar{gap:8px}.start span,.start b{display:none}}
+@media (max-width:1280px){.modes{display:none}}
+.tray{flex:none}
+@media (max-width:720px){.wsw{display:none}.wsname{display:none}}
+/* στενές οθόνες */
+@media (max-width:900px){.widgets{display:none}}
+@media (max-width:720px){
+  .tray .opt,.tray #ecg{display:none}
+  .search kbd{display:none}
+  .icons{grid-auto-flow:row;grid-template-rows:none;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));grid-auto-columns:auto;right:max(12px,env(safe-area-inset-right));bottom:84px;overflow:auto;align-content:start;gap:4px}
+  .center{padding-bottom:0;align-items:end;padding-bottom:110px}
+  .brand h1{font-size:28px}
+  .win{left:0!important;top:auto!important;bottom:0;width:100%;max-height:calc(100% - 20px);height:calc(100% - 20px);border-radius:14px 14px 0 0}
+  .win.full{width:100%;height:calc(100% - 20px);left:0!important;top:auto!important}
+  .dock{gap:6px;padding:6px 8px}
+}
+.app-foot{position:fixed;left:14px;bottom:8px;font:11px var(--mono);color:var(--dim);letter-spacing:.04em;z-index:3}.app-foot a{color:var(--dim);text-decoration:none}.app-foot a:hover{color:var(--text)}@media (max-width:720px){.app-foot{display:none}}
+@media print{.app-foot{display:block;position:fixed;bottom:4px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<!-- SEO -->
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://ferelisvag.github.io/published/veagleos/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ferelis.gr">
+<meta property="og:title" content="Veagle OS">
+<meta property="og:description" content="Veagle OS: ένα φανταστικό λειτουργικό σύστημα στον browser, με τα δικά σου links, εφαρμογές και dashboards. Δωρεάν, χωρίς λογαριασμό, τίποτα δεν φεύγει από τον υπολογιστή σου.">
+<meta property="og:url" content="https://ferelisvag.github.io/published/veagleos/">
+<meta property="og:image" content="https://ferelisvag.github.io/published/veagleos/icon-192.png">
+<meta property="og:locale" content="el_GR">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Veagle OS">
+<meta name="twitter:description" content="Veagle OS: ένα φανταστικό λειτουργικό σύστημα στον browser, με τα δικά σου links, εφαρμογές και dashboards. Δωρεάν, χωρίς λογαριασμό, τίποτα δεν φεύγει από τον υπολογιστή σου.">
+<meta name="twitter:image" content="https://ferelisvag.github.io/published/veagleos/icon-192.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Veagle OS", "url": "https://ferelisvag.github.io/published/veagleos/", "description": "Veagle OS: ένα φανταστικό λειτουργικό σύστημα στον browser, με τα δικά σου links, εφαρμογές και dashboards. Δωρεάν, χωρίς λογαριασμό, τίποτα δεν φεύγει από τον υπολογιστή σου.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Any (web browser)", "inLanguage": ["el", "en"], "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "image": "https://ferelisvag.github.io/published/veagleos/icon-192.png", "publisher": {"@type": "Person", "name": "Vagelis Ferelis", "url": "https://ferelis.gr/"}}</script>
+</head>
+<body>
+<canvas id="netbg" aria-hidden="true"></canvas>
+
+<div class="os">
+  <header class="bar">
+    <button class="start" id="startbtn" aria-label="Μενού εφαρμογών"><img src="images/eagle-white.png" alt=""><span>VEAGLE OS</span></button>
+    <button class="search" id="searchbtn" aria-label="Αναζήτηση"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><span>Αναζήτηση εφαρμογών ή ιστού</span><kbd>Ctrl K</kbd></button>
+    <nav class="modes opt" id="modes" aria-label="Λειτουργία"><a href="index.html?stay=1" aria-current="page">Desktop</a><a href="cyber.html" data-m="cyber">Cyber</a><a href="galaxy.html" data-m="galaxy">Galaxy</a><a href="city.html" data-m="city">City</a><a href="orbit.html" data-m="orbit">Orbit</a><a href="reactor.html" data-m="reactor">Reactor</a><a href="ocean.html" data-m="ocean">Ocean</a><a href="wall.html" data-m="wall">Wall</a><a href="mindmap.html" data-m="mindmap">Mind Map</a></nav>
+    <div class="wsw" id="wsw" role="group" aria-label="Επιφάνειες εργασίας"></div>
+    <div class="tray">
+      <canvas id="ecg" class="opt" aria-hidden="true"></canvas>
+      <span class="opt"><i class="dot" id="netdot"></i><b id="net">online</b> · <b id="ping">--</b></span>
+      <span class="opt" title="Μπαταρία"><b id="bat"></b></span>
+      <button class="addbtn" id="addbtn" aria-label="Νέα εφαρμογή" title="Νέα εφαρμογή"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="addbtn" id="setbtn" aria-label="Ρυθμίσεις" title="Ρυθμίσεις"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h8M18 6h2M4 12h2M12 12h8M4 18h10M20 18h0"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
+      <span><b id="clkdate"></b> <b id="clk"></b></span>
+    </div>
+  </header>
+
+  <main class="desk" id="desk">
+    <div class="center"><div class="brand">
+      <h1>VEAGLE<i> OS</i></h1>
+      <p>Show me the problem.</p>
+      <p class="hello" id="greet"></p>
+    </div></div>
+
+    <nav class="icons" id="icons" aria-label="Φάκελοι"></nav>
+
+    <aside class="widgets" aria-label="Widgets">
+      <div class="card"><div class="time"><span id="wtime"></span><small id="wsec"></small></div><div class="date" id="wdate"></div></div>
+      <div class="card" id="wxcard"><h2>Καιρός</h2><div id="wxbody" class="wx"><span style="color:var(--dim);font-size:12px">φόρτωση…</span></div></div>
+      <div class="card tasks" id="taskcard"><h2>Εκκρεμότητες</h2></div>
+      <div class="card"><h2>Σύστημα</h2><div class="kv">
+        <span>Έκδοση</span><b id="ver">2.0</b>
+        <span>Εφαρμογές</span><b id="nitems">0</b>
+        <span>Φάκελοι</span><b id="nfold">0</b>
+        <span>Λειτουργεί</span><b id="up">00:00:00</b>
+      </div></div>
+      <div class="card"><h2>Σημειώσεις</h2><textarea class="notes" id="notes" placeholder="Γράψε κάτι για να μην το ξεχάσεις" aria-label="Σημειώσεις"></textarea></div>
+    </aside>
+    <div class="wsname" id="wsname"></div>
+    <div class="app-foot">Veagle OS · <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a> · Έκδοση 8.11 · 14:51</div>
+
+    <div class="dock" id="dock" role="toolbar" aria-label="Dock"></div>
+  </main>
+</div>
+
+<div class="launch" id="launch" role="dialog" aria-label="Αναζήτηση">
+  <div class="lwrap">
+    <div class="lbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+      <input id="lq" type="text" placeholder="Γράψε όνομα εφαρμογής, διεύθυνση ή αναζήτηση" autocomplete="off" spellcheck="false" aria-label="Αναζήτηση"><button id="lclose" type="button">Esc</button></div>
+    <div class="lres" id="lres"></div>
+    <div class="lfoot"><span>↑ ↓ επιλογή · Enter · <span id="lhint"></span></span><span><button id="lsettings" type="button">Ρυθμίσεις</button> · <button id="lexport" type="button">Εξαγωγή δικών μου</button></span></div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="mbox">
+    <h2 id="mtitle">Νέα εφαρμογή</h2>
+    <form id="mform">
+      <label for="mname">Όνομα</label><input id="mname" required maxlength="40" autocomplete="off">
+      <label for="murl">Διεύθυνση</label><input id="murl" required placeholder="https://" autocomplete="off">
+      <label for="mdesc">Περιγραφή (προαιρετικά)</label><input id="mdesc" maxlength="80" autocomplete="off">
+      <label for="mfolder">Φάκελος</label><select id="mfolder"></select>
+      <div class="mact"><button type="button" class="btn" id="mcancel">Άκυρο</button><button type="submit" class="btn pri">Προσθήκη</button></div>
+    </form>
+    <div id="mexp" hidden>
+      <p style="color:var(--dim);font-size:13px;margin-bottom:8px">Αντίγραψε τις γραμμές και βάλ’ τες στο ITEMS του <code>js/catalog.js</code>, για να μείνουν μόνιμα στο repo.</p>
+      <textarea id="mtext" readonly></textarea>
+      <div class="mact"><button type="button" class="btn" id="mclose">Κλείσιμο</button><button type="button" class="btn pri" id="mcopy">Αντιγραφή</button></div>
+    </div>
+  </div>
+</div>
+
+<button class="pi" id="pi" aria-label="π" title="π">π</button>
+<div class="toast" id="toast" role="status"></div>
+
+<div class="boot" id="boot" aria-hidden="true"><div class="bx"><img src="images/eagle-white.png" alt=""><div class="bl" id="bootlines"></div></div></div>
+
+<script src="js/netbg.js"></script>
+<script src="js/catalog.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/os.js"></script>
+<script src="js/themes.js"></script>
+<script src="js/widgets.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/eye.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/eggs.js"></script>
+<script>OS.start();Array.prototype.forEach.call(document.querySelectorAll("#modes a[data-m]"),function(a){a.addEventListener("click",function(){OS.lsSet("veagleos.mode",a.dataset.m)})});</script>
+</body>
+</html>

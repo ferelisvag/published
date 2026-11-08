@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veagle Eye · See what your PC is doing, locally</title>
+<meta name="description" content="Veagle Eye: free Windows program that shows live what your computer is doing and who it talks to, in plain language. Everything stays on your PC. Δωρεάν, τοπικά, χωρίς λογαριασμό.">
+<meta name="theme-color" content="#050708">
+<link rel="icon" type="image/png" href="source/static/eagle-white.png">
+<link rel="stylesheet" href="../veagleos/fonts/fonts.css">
+<style>
+:root{--bg:#050708;--panel:#0a0d10;--line:#191d22;--line2:#262c34;--text:#e7ecf3;--dim:#8a95a6;--red:#ff1e38;--ok:#2ee6a6;--disp:'Space Grotesk',system-ui,sans-serif;--body:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--body)}
+a{color:var(--red)}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header.top{display:flex;align-items:center;gap:14px;padding:14px 0}
+header.top .brand{display:flex;align-items:center;gap:10px;font:700 14px var(--disp);letter-spacing:.18em}
+header.top .brand img{width:22px;height:23px}
+header.top .brand b{color:var(--red)}
+.sp{flex:1}
+.langbtn{font:600 12px var(--mono);background:none;color:var(--text);border:1px solid var(--line2);border-radius:999px;padding:5px 12px;cursor:pointer}
+.langbtn:hover{border-color:var(--red)}
+.hero{padding:44px 0 30px;text-align:center}
+.hero h1{font:700 clamp(34px,7vw,64px)/1.05 var(--disp);letter-spacing:.04em;margin:0 0 14px}
+.hero h1 b{color:var(--red)}
+.hero p.lead{max-width:640px;margin:0 auto 26px;color:var(--dim);font-size:18px}
+.btn{display:inline-block;background:var(--red);color:#fff;text-decoration:none;font:600 16px var(--disp);padding:14px 26px;border-radius:10px;margin:4px}
+.btn.ghost{background:none;border:1px solid var(--line2);color:var(--text)}
+.btn:hover{filter:brightness(1.12)}
+.meta{color:var(--dim);font:12px var(--mono);margin-top:12px}
+.shot{border:1px solid var(--line2);border-radius:12px;overflow:hidden;box-shadow:0 30px 80px -40px var(--red)}
+.shot img{display:block;width:100%;height:auto}
+section{padding:34px 0;border-top:1px solid var(--line)}
+h2{font:700 24px var(--disp);letter-spacing:.04em;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h3{font:600 16px var(--disp);margin:0 0 6px}.card p{margin:0;color:var(--dim);font-size:14.5px}
+.priv{border-color:#14573f;background:rgba(46,230,166,.06)}
+ol.steps{padding-left:22px}ol.steps li{margin:8px 0}
+code,.mono{font-family:var(--mono);font-size:.9em;background:#10151a;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0}summary{cursor:pointer;font-weight:600}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:18px}
+footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--dim);font:12px var(--mono);text-align:center}
+footer a{color:var(--dim)}
+html[lang=en] .el,html[lang=el] .en{display:none!important}
+</style>
+<!-- SEO -->
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://ferelisvag.github.io/published/veagle-eye/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ferelis.gr">
+<meta property="og:title" content="Veagle Eye · See what your PC is doing, locally">
+<meta property="og:description" content="Veagle Eye: free Windows program that shows live what your computer is doing and who it talks to, in plain language. Everything stays on your PC. Δωρεάν, τοπικά, χωρίς λογαριασμό.">
+<meta property="og:url" content="https://ferelisvag.github.io/published/veagle-eye/">
+<meta property="og:image" content="https://ferelisvag.github.io/published/veagle-eye/icon-192.png">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="el_GR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Veagle Eye · See what your PC is doing, locally">
+<meta name="twitter:description" content="Veagle Eye: free Windows program that shows live what your computer is doing and who it talks to, in plain language. Everything stays on your PC. Δωρεάν, τοπικά, χωρίς λογαριασμό.">
+<meta name="twitter:image" content="https://ferelisvag.github.io/published/veagle-eye/icon-192.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Veagle Eye · See what your PC is doing, locally", "url": "https://ferelisvag.github.io/published/veagle-eye/", "description": "Veagle Eye: free Windows program that shows live what your computer is doing and who it talks to, in plain language. Everything stays on your PC. Δωρεάν, τοπικά, χωρίς λογαριασμό.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows 10, Windows 11", "inLanguage": ["en", "el"], "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "image": "https://ferelisvag.github.io/published/veagle-eye/icon-192.png", "publisher": {"@type": "Person", "name": "Vagelis Ferelis", "url": "https://ferelis.gr/"}}</script>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><img src="source/static/eagle-white.png" alt=""><span>VEAGLE <b>EYE</b></span></div>
+  <div class="sp"></div>
+  <a href="../veagleos/" class="en">Open Veagle OS</a><a href="../veagleos/" class="el">Άνοιγμα Veagle OS</a>
+  <button class="langbtn" id="lang" type="button" aria-label="Switch language">EL</button>
+</header>
+
+<div class="hero">
+  <h1>VEAGLE <b>EYE</b></h1>
+  <p class="lead en">See live what your computer is doing and who it talks to, in plain language. A free Windows program that works only on your own PC.</p>
+  <p class="lead el">Δες ζωντανά τι κάνει ο υπολογιστής σου και με ποιους μιλά, με απλά λόγια. Δωρεάν πρόγραμμα για Windows που δουλεύει μόνο στον δικό σου υπολογιστή.</p>
+  <a class="btn" href="download/VeagleEye.exe" download><span class="en">Download for Windows</span><span class="el">Λήψη για Windows</span></a>
+  <a class="btn ghost" href="#how"><span class="en">How to use it</span><span class="el">Πώς το χρησιμοποιώ</span></a>
+  <div class="meta"><span class="en">Windows 10 / 11 · free · open source (MIT) · no install · no account</span><span class="el">Windows 10 / 11 · δωρεάν · ανοιχτός κώδικας (MIT) · χωρίς εγκατάσταση · χωρίς λογαριασμό</span></div>
+</div>
+
+<div class="shot"><img src="shots/dashboard.webp" alt="Veagle Eye dashboard: processor, memory, disk, network" width="1280" height="760"></div>
+
+<section>
+  <h2><span class="en">What it shows</span><span class="el">Τι δείχνει</span></h2>
+  <div class="grid">
+    <div class="card"><h3><span class="en">Your PC, simply</span><span class="el">Ο υπολογιστής σου, απλά</span></h3><p><span class="en">Processor, memory, disks and network with a short plain-language note under each (“the processor is working normally”).</span><span class="el">Επεξεργαστής, μνήμη, δίσκοι και δίκτυο, με μια σύντομη εξήγηση κάτω από το καθένα («ο επεξεργαστής δουλεύει κανονικά»).</span></p></div>
+    <div class="card"><h3><span class="en">Who talks to the internet</span><span class="el">Ποιος μιλά με το διαδίκτυο</span></h3><p><span class="en">Every program that is connected, with the address and the country it is talking to.</span><span class="el">Κάθε πρόγραμμα που είναι συνδεδεμένο, με τη διεύθυνση και τη χώρα με την οποία μιλά.</span></p></div>
+    <div class="card"><h3><span class="en">Six views</span><span class="el">Έξι όψεις</span></h3><p><span class="en">Dashboard, World map, Cyber, Orbit, Wall and Mind Map. Keys 1 to 6 switch between them. Made to look good on a second monitor.</span><span class="el">Dashboard, χάρτης World, Cyber, Orbit, Wall και Mind Map. Τα πλήκτρα 1 έως 6 αλλάζουν όψη. Φτιαγμένο να φαίνεται ωραίο σε δεύτερη οθόνη.</span></p></div>
+  </div>
+  <div class="shots">
+    <div class="shot"><img src="shots/world.webp" alt="World map view" loading="lazy" width="1280" height="760"></div>
+    <div class="shot"><img src="shots/mindmap.webp" alt="Mind Map view" loading="lazy" width="1280" height="760"></div>
+  </div>
+</section>
+
+<section>
+  <div class="card priv">
+    <h2><span class="en">Nothing leaves your computer</span><span class="el">Τίποτα δεν φεύγει από τον υπολογιστή σου</span></h2>
+    <p class="en">Veagle Eye runs a small page on your own PC (address <span class="mono">127.0.0.1</span>, reachable only from this computer, protected by a random code that changes on every start). It does not send data anywhere, has no tracking and no account. The country of each address comes from a file bundled inside the program, so no lookups are made on the internet. It only reads information; it never changes anything on your PC.</p>
+    <p class="el">Το Veagle Eye ανοίγει μια μικρή σελίδα στον δικό σου υπολογιστή (διεύθυνση <span class="mono">127.0.0.1</span>, προσβάσιμη μόνο από αυτόν τον υπολογιστή και προστατευμένη με τυχαίο κωδικό που αλλάζει σε κάθε εκκίνηση). Δεν στέλνει δεδομένα πουθενά, δεν έχει παρακολούθηση ούτε λογαριασμό. Η χώρα κάθε διεύθυνσης προκύπτει από αρχείο μέσα στο πρόγραμμα, άρα δεν γίνεται κανένα ερώτημα στο διαδίκτυο. Μόνο διαβάζει πληροφορίες· δεν αλλάζει τίποτα στον υπολογιστή σου.</p>
+  </div>
+</section>
+
+<section id="how">
+  <h2><span class="en">How to use it</span><span class="el">Πώς το χρησιμοποιείς</span></h2>
+  <ol class="steps en">
+    <li>Click <b>Download for Windows</b> and save <span class="mono">VeagleEye.exe</span> (for example in your Downloads folder).</li>
+    <li>Double-click it. A black window opens and your browser opens the Veagle Eye page. <b>Keep the black window open</b>: closing it stops the program.</li>
+    <li>To stop it, close the black window (or press <span class="mono">Ctrl+C</span> in it).</li>
+  </ol>
+  <ol class="steps el">
+    <li>Πάτα <b>Λήψη για Windows</b> και αποθήκευσε το <span class="mono">VeagleEye.exe</span> (π.χ. στα Λήψεις).</li>
+    <li>Κάνε διπλό κλικ. Ανοίγει ένα μαύρο παράθυρο και ο browser σου ανοίγει τη σελίδα του Veagle Eye. <b>Άφησε ανοιχτό το μαύρο παράθυρο</b>: αν το κλείσεις, το πρόγραμμα σταματά.</li>
+    <li>Για να το σταματήσεις, κλείσε το μαύρο παράθυρο (ή πάτα <span class="mono">Ctrl+C</span> μέσα του).</li>
+  </ol>
+  <details>
+    <summary><span class="en">Windows shows a blue “Windows protected your PC” warning</span><span class="el">Τα Windows δείχνουν μπλε προειδοποίηση «Τα Windows προστάτευσαν τον υπολογιστή σου»</span></summary>
+    <p class="en">This is normal for small free programs that are not signed with a paid certificate. Click <b>More info</b>, then <b>Run anyway</b>. The full source code is on this page, so anyone can check what the program does.</p>
+    <p class="el">Είναι φυσιολογικό για μικρά δωρεάν προγράμματα που δεν έχουν υπογραφή με πληρωμένο πιστοποιητικό. Πάτα <b>Περισσότερες πληροφορίες</b> και μετά <b>Εκτέλεση ούτως ή άλλως</b>. Ο πλήρης κώδικας είναι σε αυτή τη σελίδα, ώστε ο καθένας να ελέγξει τι κάνει.</p>
+  </details>
+  <details>
+    <summary><span class="en">Use it inside Veagle OS</span><span class="el">Χρήση μέσα στο Veagle OS</span></summary>
+    <p class="en">Open <a href="../veagleos/">Veagle OS</a>, open the <b>Veagle Eye</b> app in the Apps folder, and paste the address shown in the black window (the line that starts with <span class="mono">http://127.0.0.1</span>). The Eye panel then opens as a window inside Veagle OS. This only happens when you ask for it.</p>
+    <p class="el">Άνοιξε το <a href="../veagleos/">Veagle OS</a>, άνοιξε την εφαρμογή <b>Veagle Eye</b> στον φάκελο Εφαρμογές και επικόλλησε τη διεύθυνση από το μαύρο παράθυρο (η γραμμή που ξεκινά με <span class="mono">http://127.0.0.1</span>). Ο πίνακας του Eye ανοίγει τότε ως παράθυρο μέσα στο Veagle OS. Γίνεται μόνο όταν το ζητήσεις εσύ.</p>
+  </details>
+  <details>
+    <summary><span class="en">Put your PC in your country on the map (optional)</span><span class="el">Βάλε τον υπολογιστή σου στη χώρα σου στον χάρτη (προαιρετικό)</span></summary>
+    <p class="en">By default the PC is shown at sea. Open PowerShell in the folder with the program and run <span class="mono">VeagleEye.exe --home GR</span> (any 2-letter country code: GR, DE, US…).</p>
+    <p class="el">Από προεπιλογή ο υπολογιστής φαίνεται στη θάλασσα. Άνοιξε το PowerShell στον φάκελο του προγράμματος και γράψε <span class="mono">VeagleEye.exe --home GR</span> (οποιοσδήποτε διψήφιος κωδικός χώρας: GR, DE, US…).</p>
+  </details>
+</section>
+
+<section>
+  <h2><span class="en">Source code and credits</span><span class="el">Κώδικας και πηγές</span></h2>
+  <p class="en">Open source under the MIT license. Run it from source (needs Python): <a href="https://github.com/ferelisvag/published/tree/main/veagle-eye/source">browse the code</a>, see <span class="mono">source/README.md</span>. IP geolocation by <a href="https://db-ip.com">DB-IP.com</a> Lite (CC BY 4.0), bundled offline. Map data: Natural Earth (public domain). Fonts: Space Grotesk and IBM Plex (SIL OFL). Idea and design: Vagelis Ferelis.</p>
+  <p class="el">Ανοιχτός κώδικας με άδεια MIT. Τρέχει και από τον κώδικα (θέλει Python): <a href="https://github.com/ferelisvag/published/tree/main/veagle-eye/source">δες τον κώδικα</a>, βλ. <span class="mono">source/README.md</span>. Γεωτοποθέτηση IP από το <a href="https://db-ip.com">DB-IP.com</a> Lite (CC BY 4.0), μέσα στο πρόγραμμα, χωρίς internet. Χάρτης: Natural Earth (δημόσιο πεδίο). Γραμματοσειρές: Space Grotesk και IBM Plex (SIL OFL). Ιδέα και σχεδιασμός: Vagelis Ferelis.</p>
+</section>
+</div>
+<footer>Veagle Eye · <a href="https://ferelis.gr">ferelis.gr</a> · <span class="en">Version</span><span class="el">Έκδοση</span> 8.11 · 15:03</footer>
+<script>
+(function(){var k='veagleeye.page.lang',l=null;try{l=localStorage.getItem(k)}catch(e){}
+if(l!=='el'&&l!=='en')l=String(navigator.language||'en').toLowerCase().indexOf('el')===0?'el':'en';
+function set(v){document.documentElement.lang=v;var b=document.getElementById('lang');b.textContent=v==='en'?'EL':'EN';b.setAttribute('aria-label',v==='en'?'Αλλαγή σε ελληνικά':'Switch to English');
+document.title=v==='en'?'Veagle Eye · See what your PC is doing, locally':'Veagle Eye · Δες τι κάνει ο υπολογιστής σου, τοπικά'}
+set(l);document.getElementById('lang').addEventListener('click',function(){l=l==='en'?'el':'en';try{localStorage.setItem(k,l)}catch(e){}set(l)});})();
+</script>
+</body>
+</html>

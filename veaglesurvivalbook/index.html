@@ -181,13 +181,20 @@ footer.foot a{color:var(--dim)}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.pbar i{transition:none}}
 
+/* floating ετοιμότητα */
+#fab{position:fixed;right:14px;bottom:14px;z-index:30;display:flex;align-items:center;gap:10px;background:rgba(10,13,16,.96);border:1px solid var(--line2);border-radius:999px;padding:6px 16px 6px 6px;box-shadow:0 6px 24px rgba(0,0,0,.6);color:var(--text);text-decoration:none;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .2s,transform .2s}
+#fab.on{opacity:1;transform:none;pointer-events:auto}
+#fab svg{width:46px;height:46px;flex:none}
+#fab b{display:block;font:700 15px var(--disp);line-height:1.1}
+#fab span{display:block;font:500 12px var(--mono);color:var(--dim)}
+@media (prefers-reduced-motion:reduce){#fab{transition:none}}
 /* ---------- ΕΚΤΥΠΩΣΗ ---------- */
 #printSheets{display:none}
 @media print{
  @page{size:A4;margin:14mm 12mm 18mm}
  :root{--bg:#fff;--panel:#fff;--panel2:#fff;--line:#c9ced6;--line2:#8a919c;--text:#000;--dim:#333;color-scheme:light}
  body{background:#fff;color:#000;font-size:11pt;line-height:1.45}
- .bar,#sosPanel,.hero .btn,.viewsw,.printrow,.remember,.calc .in label,.btn,.nofull,#q,.sos{display:none!important}
+ .bar,#sosPanel,#fab,.hero .btn,.viewsw,.printrow,.remember,.calc .in label,.btn,.nofull,#q,.sos{display:none!important}
  .hero{display:block;padding:0}.ring-hero{display:none}
  .hero .logo img{content:url("eagle-black.png")}
  .brand img{content:url("eagle-black.png")}
@@ -831,18 +838,19 @@ footer.foot a{color:var(--dim)}
  <div class="wrap">
   <div>
    <p class="discl">Οι οδηγίες είναι ενδεικτικές και γενικού χαρακτήρα. Δεν αντικαθιστούν τις οδηγίες των αρχών (Πολιτική Προστασία, 112), ούτε ιατρική ή νομική συμβουλή. Σε πραγματική κρίση ακολούθησε πρώτα τις επίσημες οδηγίες. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Η σελίδα δεν κάνει καμία σύνδεση στο internet και δεν στέλνει τίποτα πουθενά.</p>
-   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 08.11 · 18:40</p>
+   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 08.11 · 18:55</p>
   </div>
   <img src="eagle-white.png" alt="" width="34" height="36" style="opacity:.7">
  </div>
 </footer>
 
+<a id="fab" href="#checklist" aria-label="Ετοιμότητα, πήγαινε στην αρχή της λίστας ελέγχου"><svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="24" fill="none" stroke="#191d22" stroke-width="7"/><circle id="fabArc" cx="30" cy="30" r="24" fill="none" stroke="#ff1e38" stroke-width="7" stroke-linecap="round" stroke-dasharray="0 150.8" transform="rotate(-90 30 30)"/><text id="fabPct" x="30" y="35" text-anchor="middle" fill="#e7ecf3" font-family="Space Grotesk, IBM Plex Sans, sans-serif" font-size="14" font-weight="700">0%</text></svg><div><b>Ετοιμότητα</b><span id="fabSub">0 από 0</span></div></a>
 <!-- ΦΥΛΛΑ ΕΚΤΥΠΩΣΗΣ (γεμίζουν από το JS) -->
 <div id="printSheets" aria-hidden="true">
  <div class="sheet check1" id="sh1"></div>
  <div class="sheet check4" id="sh4"></div>
  <div class="sheet contacts" id="shc"></div>
- <div class="pfoot"><span>Veagle Survival Book · ferelis.gr</span><span>Έκδοση 08.11 · 18:40</span></div>
+ <div class="pfoot"><span>Veagle Survival Book · ferelis.gr</span><span>Έκδοση 08.11 · 18:55</span></div>
 </div>
 
 <script>
@@ -850,7 +858,7 @@ footer.foot a{color:var(--dim)}
 'use strict';
 var $=function(s,r){return (r||document).querySelector(s)};
 var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
-var VER='Έκδοση 08.11 · 18:40';
+var VER='Έκδοση 08.11 · 18:55';
 
 /* ---------- δεδομένα λίστας ---------- */
 var CK=[
@@ -941,7 +949,7 @@ function progress(){
  CK.forEach(function(g){var d=0;g.items.forEach(function(it){total++;if(checked[it[0]]){done++;d++}});var e=$('[data-g="'+g.id+'"]');if(e)e.textContent=d+'/'+g.items.length});
  var p=total?Math.round(done*100/total):0;
  $('#ckCount').textContent=done+' από '+total;$('#ckPct').textContent=p+'%';$('#ckBar').style.width=p+'%';
- var C=2*Math.PI*82;$('#ringArc').setAttribute('stroke-dasharray',(C*p/100).toFixed(1)+' '+C.toFixed(1));$('#ringTxt').textContent=p+'%';
+ var C=2*Math.PI*82;$('#ringArc').setAttribute('stroke-dasharray',(C*p/100).toFixed(1)+' '+C.toFixed(1));$('#ringTxt').textContent=p+'%';var FC=2*Math.PI*24;$('#fabArc').setAttribute('stroke-dasharray',(FC*p/100).toFixed(1)+' '+FC.toFixed(1));$('#fabPct').textContent=p+'%';$('#fabSub').textContent=done+' από '+total;
  $('#ringSub').textContent=p===0?'Τσέκαρε τη λίστα ελέγχου και δες πόσο έτοιμος είσαι.':p<100?'Έτοιμα '+done+' από '+total+' βήματα.':'Όλα έτοιμα. Θυμήσου τον έλεγχο κάθε 6 μήνες.';
 }
 function saveChecks(){if(remember)lset(KEY_C,JSON.stringify(checked))}
@@ -1049,6 +1057,9 @@ window.addEventListener('afterprint',cleanup);
 $$('[data-print]').forEach(function(b){if(b.tagName==='BUTTON')b.addEventListener('click',function(){doPrint(b.getAttribute('data-print'))})});
 window.addEventListener('beforeprint',function(){if(!document.body.hasAttribute('data-print')){$$('details.thr').forEach(function(d){d.open=true})}});
 
+/* floating ετοιμότητα: φαίνεται όσο είναι στην οθόνη η λίστα ελέγχου */
+(function(){var f=$('#fab'),sec=$('#checklist');if(!('IntersectionObserver' in window)){f.classList.add('on');return}
+ new IntersectionObserver(function(en){f.classList.toggle('on',en[0].isIntersecting)},{threshold:0.05}).observe($('#ckList'))})();
 /* ---------- εκκίνηση ---------- */
 renderList();progress();calc();
 /* άνοιγμα απειλής από #hash */

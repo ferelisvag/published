@@ -18,6 +18,7 @@ APPS={
  'veagle-eye':('UtilitiesApplication','Windows 10, Windows 11','en_US','el_GR',['en','el']),
  'veagleos':('UtilitiesApplication','Any (web browser)','el_GR','en_US',['el','en']),
  'veagleontheroad':('TravelApplication','Any (web browser)','el_GR','en_US',['el']),
+ 'veaglesurvivalbook':('LifestyleApplication','Any (web browser)','el_GR','en_US',['el']),
  'googletimelinebyveagle':None,   # έχει δικά του tags από το build.py
 }
 def snippet(slug,t,title,desc):

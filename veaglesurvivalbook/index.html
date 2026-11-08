@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veagle Survival Book · Εγχειρίδιο επιβίωσης 10 ημερών</title>
+<meta name="description" content="Veagle Survival Book: εγχειρίδιο επιβίωσης 10 ημερών για ένα άτομο ή οικογένεια. Νερό, τροφή, φαρμακείο, σχέδιο δράσης, σεισμός, πυρκαγιά, πλημμύρα, blackout, με υπολογιστές και εκτυπώσιμες λίστες ελέγχου.">
+<meta name="theme-color" content="#050708">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="stylesheet" href="../veagleos/fonts/fonts.css">
+<style>
+/* Veagle Survival Book. Μαύρο, λευκό, κόκκινο όπως τα υπόλοιπα Veagle. Σκοτεινή οθόνη, ανοιχτό φύλλο στην εκτύπωση. */
+:root{--bg:#050708;--panel:#0a0d10;--panel2:#0e1217;--line:#191d22;--line2:#262c34;--text:#e7ecf3;--dim:#8a95a6;--red:#ff1e38;--ok:#2ee6a6;--warn:#ffb020;--blue:#4aa3ff;--disp:'Space Grotesk','IBM Plex Sans',system-ui,sans-serif;--body:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--body)}
+a{color:var(--red)}
+h1,h2,h3{font-family:var(--disp);text-wrap:balance}
+.wrap{max-width:1040px;margin:0 auto;padding:0 18px}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.ic{width:1.3em;height:1.3em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.25em}
+button{font:inherit;color:inherit;cursor:pointer}
+
+/* πάνω μπάρα */
+.bar{position:sticky;top:0;z-index:20;background:rgba(5,7,8,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:12px;height:56px}
+.brand{display:flex;align-items:center;gap:10px;font:700 14px var(--disp);letter-spacing:.16em;color:var(--text);text-decoration:none;white-space:nowrap}
+.brand img{width:24px;height:25px}.brand b{color:var(--red)}
+.nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1}
+.nav::-webkit-scrollbar{display:none}
+.nav a{color:var(--dim);text-decoration:none;font:500 14px var(--body);padding:6px 11px;border-radius:999px;white-space:nowrap}
+.nav a:hover{color:var(--text);background:var(--panel2)}
+.sos{background:var(--red);color:#fff;border:0;border-radius:999px;padding:7px 14px;font:700 13px var(--disp);letter-spacing:.06em;white-space:nowrap}
+.sos:hover{filter:brightness(1.12)}
+#sosPanel{display:none;background:#1a0509;border-bottom:2px solid var(--red)}
+#sosPanel.open{display:block}
+#sosPanel .wrap{padding-top:16px;padding-bottom:18px}
+.sosgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.sosgrid a{display:block;background:#000;border:1px solid #4a1019;border-radius:10px;padding:10px 12px;text-decoration:none;color:var(--text)}
+.sosgrid a b{display:block;font:700 28px var(--disp);color:#fff}
+.sosgrid a span{font-size:13px;color:#c9a0a6}
+.sosgrid a.big{border-color:var(--red)}
+.sosnote{font-size:13px;color:#c9a0a6;margin:10px 0 0}
+
+/* hero */
+.hero{padding:44px 0 22px;display:grid;grid-template-columns:1.25fr 1fr;gap:28px;align-items:center}
+.hero .logo{display:flex;align-items:center;gap:14px;margin-bottom:12px;font:700 13px var(--mono);letter-spacing:.2em;color:var(--dim)}
+.hero .logo img{width:46px;height:auto}
+.hero h1{font-size:clamp(34px,6.4vw,62px);line-height:1.04;letter-spacing:.02em;margin:0 0 14px}
+.hero h1 b{color:var(--red)}
+.hero p.lead{color:var(--dim);font-size:18px;margin:0 0 20px;max-width:560px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;text-decoration:none;font:600 15px var(--disp);padding:12px 20px;border-radius:10px;border:0;margin:3px 6px 3px 0}
+.btn.ghost{background:none;border:1px solid var(--line2);color:var(--text)}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost:hover{border-color:var(--red)}
+.viewsw{display:inline-flex;border:1px solid var(--line2);border-radius:999px;padding:3px;gap:2px;background:var(--panel)}
+.viewsw button{background:none;border:0;border-radius:999px;padding:6px 14px;font:600 13px var(--disp);color:var(--dim)}
+.viewsw button[aria-pressed=true]{background:var(--red);color:#fff}
+.ring-hero{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center}
+.ring-hero svg{width:100%;max-width:230px;height:auto}
+.ring-hero p{margin:8px 0 0;color:var(--dim);font-size:14px}
+
+section.sec{padding:38px 0;border-top:1px solid var(--line)}
+.kick{font:500 12px var(--mono);letter-spacing:.18em;color:var(--red);text-transform:uppercase;margin:0 0 6px}
+h2{font-size:clamp(24px,4vw,32px);line-height:1.15;margin:0 0 10px;letter-spacing:.01em}
+h3{font-size:18px;margin:22px 0 8px}
+.intro{color:var(--dim);max-width:720px;margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card h3{margin:0 0 6px;display:flex;align-items:center;gap:8px;font-size:16px}
+.card p,.card li{color:var(--dim);font-size:15px}
+.card p{margin:0}
+ul.t,ol.t{margin:6px 0;padding-left:22px}
+ul.t li,ol.t li{margin:5px 0}
+.note{border-left:3px solid var(--warn);background:rgba(255,176,32,.07);padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0;font-size:15px}
+.note.red{border-color:var(--red);background:rgba(255,30,56,.08)}
+.note.ok{border-color:var(--ok);background:rgba(46,230,166,.07)}
+.tw{overflow-x:auto;margin:10px 0}
+table.t{border-collapse:collapse;width:100%;min-width:480px;font-size:15px}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+table.t th{font:600 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);background:var(--panel)}
+table.t td:first-child{color:var(--text)}
+table.t td{color:#c9d1dc}
+table.t .q{font-variant-numeric:tabular-nums;white-space:nowrap;color:#fff;font-weight:600}
+body[data-view="1"] .c4,body[data-view="4"] .c1{display:none}
+
+/* κανόνας των τριών */
+.rule3{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.r3{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+.r3 svg.ic{width:34px;height:34px;color:var(--red)}
+.r3 b{display:block;font:700 40px/1 var(--disp);margin:8px 0 2px}
+.r3 span{display:block;font-weight:600}
+.r3 small{color:var(--dim);font-size:13px}
+.r3track{margin-top:14px}
+.r3track svg{width:100%;height:auto}
+
+/* υπολογιστής */
+.calc{background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:18px;margin:14px 0}
+.calc .in{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.calc label{display:block;font:500 12px var(--mono);letter-spacing:.08em;color:var(--dim);text-transform:uppercase;margin-bottom:4px}
+.calc input,.calc select{width:100%;background:#000;color:var(--text);border:1px solid var(--line2);border-radius:8px;padding:9px 10px;font:16px var(--body)}
+.calc .out{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px}
+.stat{background:#000;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat b{display:block;font:700 30px/1.1 var(--disp);color:#fff;font-variant-numeric:tabular-nums}
+.stat span{color:var(--dim);font-size:13px}
+.bottles{display:flex;flex-wrap:wrap;gap:3px;margin-top:12px;align-items:flex-end}
+.bottles svg{width:14px;height:30px}
+.bottles em{font:500 12px var(--mono);color:var(--dim);align-self:center;margin-left:6px;font-style:normal}
+
+/* μέθοδοι νερού */
+.mx td.y{color:var(--ok);font-weight:700;text-align:center}
+.mx td.p{color:var(--warn);font-weight:700;text-align:center}
+.mx td.n{color:#ff6b7d;font-weight:700;text-align:center}
+.mx th:not(:first-child){text-align:center}
+
+/* λίστα ελέγχου */
+.ckhead{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.pbar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;flex:1;min-width:160px}
+.pbar i{display:block;height:100%;width:0;background:var(--red);transition:width .25s}
+.ckgrp{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+.ckgrp h3{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;font-size:16px}
+.ckgrp h3 em{margin-left:auto;font:500 12px var(--mono);color:var(--dim);font-style:normal}
+.ck{display:flex;gap:12px;align-items:flex-start;padding:10px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+.ck:last-child{border-bottom:0}
+.ck input{appearance:none;width:22px;height:22px;border:2px solid var(--line2);border-radius:6px;background:#000;flex:none;margin-top:2px;cursor:pointer;display:grid;place-items:center}
+.ck input:checked{background:var(--red);border-color:var(--red)}
+.ck input:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.ck .tx{flex:1}
+.ck .qty{display:block;color:var(--dim);font:13px var(--mono);margin-top:2px}
+.ck input:checked ~ .tx{color:var(--dim)}
+.remember{background:var(--panel);border:1px dashed var(--line2);border-radius:10px;padding:12px 14px;margin:12px 0;font-size:14px;color:var(--dim)}
+.remember label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;color:var(--text)}
+.remember input{margin-top:4px}
+.printrow{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+
+/* απειλές */
+details.thr{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+details.thr>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:16px 18px;font:700 20px var(--disp)}
+details.thr>summary::-webkit-details-marker{display:none}
+details.thr>summary .ic{width:30px;height:30px;color:var(--red)}
+details.thr>summary::after{content:"+";margin-left:auto;font:400 28px var(--mono);color:var(--dim)}
+details.thr[open]>summary::after{content:"\2212"}
+details.thr>summary small{font:400 14px var(--body);color:var(--dim);display:block}
+details.thr .body{padding:4px 18px 20px}
+.phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:10px}
+.ph{background:var(--panel2);border:1px solid var(--line);border-top:3px solid var(--line2);border-radius:10px;padding:12px 16px}
+.ph.before{border-top-color:var(--blue)}.ph.during{border-top-color:var(--red)}.ph.after{border-top-color:var(--ok)}
+.ph h4{margin:0 0 4px;font:700 13px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.ph ul,.ph ol{margin:4px 0;padding-left:20px}
+.ph li{margin:6px 0;font-size:15px;color:#c9d1dc}
+.fig{background:#000;border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.fig svg{width:100%;height:auto;display:block}
+.fig figcaption{color:var(--dim);font-size:13px;margin-top:8px}
+
+/* σχέδιο */
+.fill{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.fill label{display:block;font:500 12px var(--mono);letter-spacing:.06em;color:var(--dim);margin-bottom:4px}
+.fill input{width:100%;background:#000;color:var(--text);border:1px solid var(--line2);border-radius:8px;padding:9px 10px;font:15px var(--body)}
+.fill .full{grid-column:1/-1}
+
+footer.foot{border-top:1px solid var(--line);padding:26px 0 44px;color:var(--dim);font:12px var(--mono)}
+footer.foot .wrap{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+footer.foot a{color:var(--dim)}
+.app-foot{margin:0}
+.discl{font:13px/1.55 var(--body);color:var(--dim);max-width:760px;margin:0 0 16px}
+.hide{display:none!important}
+#empty{display:none;color:var(--dim)}
+
+@media (max-width:760px){
+ .hero{grid-template-columns:1fr;padding-top:28px}
+ .rule3{grid-template-columns:repeat(2,1fr)}
+ .bar .wrap{gap:8px}
+ .brand span{display:none}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.pbar i{transition:none}}
+
+/* ---------- ΕΚΤΥΠΩΣΗ ---------- */
+#printSheets{display:none}
+@media print{
+ @page{size:A4;margin:14mm 12mm 18mm}
+ :root{--bg:#fff;--panel:#fff;--panel2:#fff;--line:#c9ced6;--line2:#8a919c;--text:#000;--dim:#333;color-scheme:light}
+ body{background:#fff;color:#000;font-size:11pt;line-height:1.45}
+ .bar,#sosPanel,.hero .btn,.viewsw,.printrow,.remember,.calc .in label,.btn,.nofull,#q,.sos{display:none!important}
+ .hero{display:block;padding:0}.ring-hero{display:none}
+ .hero .logo img{content:url("eagle-black.png")}
+ .brand img{content:url("eagle-black.png")}
+ section.sec{padding:10px 0;break-inside:auto}
+ .card,.ph,.ckgrp,.stat,.r3,.fig,.calc{background:#fff;border-color:#999;break-inside:avoid}
+ .stat b,.r3 b,.sosgrid a b{color:#000}
+ .kick,.r3 svg.ic,details.thr>summary .ic{color:#000}
+ a{color:#000;text-decoration:none}
+ .fig{background:#fff}.fig svg *{filter:none}
+ details.thr>summary::after{content:""}
+ table.t th{background:#eee;color:#000}table.t td{color:#000}
+ .note{background:#f3f3f3;border-color:#000}
+ .ck input{border-color:#000;background:#fff}
+ .ck input:checked::after{border-color:#000}.ck input:checked{background:#fff;border-color:#000}
+ .ck input:checked ~ .tx{color:#000}
+ .fill input,.calc input,.calc select{background:#fff;color:#000;border:1px solid #000}
+ .mx td.y,.mx td.p,.mx td.n{color:#000}
+ /* ό,τι δεν είναι φύλλο εκτύπωσης, κρύβεται όταν διαλέγεις συγκεκριμένο φύλλο */
+ body[data-print]>*:not(#printSheets){display:none!important}
+ body[data-print] #printSheets{display:block}
+ #printSheets .sheet{display:none}
+ body[data-print="check1"] #printSheets .sheet.check1,
+ body[data-print="check4"] #printSheets .sheet.check4,
+ body[data-print="contacts"] #printSheets .sheet.contacts{display:block}
+ .sheet{color:#000;font-family:var(--body)}
+ .sheet .sh{display:flex;align-items:center;gap:12px;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:10px}
+ .sheet .sh img{width:40px;height:auto}
+ .sheet .sh h1{font-size:19pt;margin:0;letter-spacing:.02em}
+ .sheet .sh small{display:block;font:9pt var(--mono);letter-spacing:.14em;color:#333}
+ .sheet .meta{display:flex;gap:24px;font-size:10pt;margin:0 0 10px}
+ .sheet .meta span{flex:1;border-bottom:1px solid #000;padding-bottom:2px}
+ .sheet h2{font-size:12pt;margin:12px 0 4px;border-bottom:1px solid #000;padding-bottom:2px;break-after:avoid}
+ .sheet table{width:100%;border-collapse:collapse;font-size:10.5pt}
+ .sheet td{padding:4px 6px;border-bottom:1px solid #bbb;vertical-align:top}
+ .sheet td.b{width:22px}.sheet td.b i{display:block;width:15px;height:15px;border:1.6px solid #000;border-radius:3px;margin-top:2px}
+ .sheet td.q{width:34%;font-size:9.5pt;color:#222}
+ .sheet td.d{width:20%;border-left:1px solid #bbb}
+ .sheet tr{break-inside:avoid}
+ .sheet .line{border-bottom:1px solid #000;height:22px}
+ .sheet .cut{border:1.5px dashed #000;border-radius:8px;padding:10px 12px;margin:10px 0;break-inside:avoid}
+ .sheet .cut b.big{font:700 20pt var(--disp)}
+ .sheet .cutgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}
+ .sheet .cutgrid div{font-size:10pt}
+ .sheet .pfoot{position:fixed;left:0;right:0;bottom:0;font:8.5pt var(--mono);color:#333;border-top:1px solid #888;padding-top:4px;display:flex;justify-content:space-between}
+ body:not([data-print]) .foot{border-top:1px solid #888}
+ body:not([data-print]) .foot .wrap{display:block}
+ details.thr .body{display:block}
+}
+</style>
+<!-- SEO -->
+<meta name="robots" content="index,follow,max-image-preview:large">
+<!-- SEO -->
+<link rel="canonical" href="https://ferelisvag.github.io/published/veaglesurvivalbook/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ferelis.gr">
+<meta property="og:title" content="Veagle Survival Book · Εγχειρίδιο επιβίωσης 10 ημερών">
+<meta property="og:description" content="Veagle Survival Book: εγχειρίδιο επιβίωσης 10 ημερών για ένα άτομο ή οικογένεια. Νερό, τροφή, φαρμακείο, σχέδιο δράσης, σεισμός, πυρκαγιά, πλημμύρα, blackout, με υπολογιστές και εκτυπώσιμες λίστες ελέγχου.">
+<meta property="og:url" content="https://ferelisvag.github.io/published/veaglesurvivalbook/">
+<meta property="og:image" content="https://ferelisvag.github.io/published/veaglesurvivalbook/icon-512.png">
+<meta property="og:locale" content="el_GR">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Veagle Survival Book · Εγχειρίδιο επιβίωσης 10 ημερών">
+<meta name="twitter:description" content="Veagle Survival Book: εγχειρίδιο επιβίωσης 10 ημερών για ένα άτομο ή οικογένεια. Νερό, τροφή, φαρμακείο, σχέδιο δράσης, σεισμός, πυρκαγιά, πλημμύρα, blackout, με υπολογιστές και εκτυπώσιμες λίστες ελέγχου.">
+<meta name="twitter:image" content="https://ferelisvag.github.io/published/veaglesurvivalbook/icon-512.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Veagle Survival Book · Εγχειρίδιο επιβίωσης 10 ημερών", "url": "https://ferelisvag.github.io/published/veaglesurvivalbook/", "description": "Veagle Survival Book: εγχειρίδιο επιβίωσης 10 ημερών για ένα άτομο ή οικογένεια. Νερό, τροφή, φαρμακείο, σχέδιο δράσης, σεισμός, πυρκαγιά, πλημμύρα, blackout, με υπολογιστές και εκτυπώσιμες λίστες ελέγχου.", "applicationCategory": "LifestyleApplication", "operatingSystem": "Any (web browser)", "inLanguage": ["el"], "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "image": "https://ferelisvag.github.io/published/veaglesurvivalbook/icon-512.png", "publisher": {"@type": "Person", "name": "Vagelis Ferelis", "url": "https://ferelis.gr/"}}</script>
+</head>
+<body data-view="both">
+
+<!-- εικονίδια -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3C12 3 5 11 5 15a7 7 0 0 0 14 0C19 11 12 3 12 3Z"/></symbol>
+<symbol id="i-house" viewBox="0 0 24 24"><path d="M3 11 12 3l9 8M5 10v11h14V10M10 21v-7h4v7"/></symbol>
+<symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h7"/></symbol>
+<symbol id="i-food" viewBox="0 0 24 24"><path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M16 3c-2 2-2 7 0 9v9"/></symbol>
+<symbol id="i-med" viewBox="0 0 24 24"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6Z"/></symbol>
+<symbol id="i-light" viewBox="0 0 24 24"><path d="M9 3h6l2 5H7ZM8 8v11a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V8M12 12v3"/></symbol>
+<symbol id="i-radio" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="m7 8 10-5M15 12h3M15 16h3"/><circle cx="9" cy="14" r="2.5"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6ZM14 3v5h5M9 13h7M9 17h7"/></symbol>
+<symbol id="i-bag" viewBox="0 0 24 24"><path d="M7 8h10a2 2 0 0 1 2 2v10H5V10a2 2 0 0 1 2-2ZM9 8V6a3 3 0 0 1 6 0v2M5 14h14"/></symbol>
+<symbol id="i-quake" viewBox="0 0 24 24"><path d="M2 12h4l2-6 3 12 3-14 2 10 2-2h4"/></symbol>
+<symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 3c1 4 6 6 6 11a6 6 0 0 1-12 0c0-3 2-5 3-7 1 2 2 1 3-4Z"/></symbol>
+<symbol id="i-flood" viewBox="0 0 24 24"><path d="M2 8q3-3 5 0t5 0 5 0 5 0M2 13q3-3 5 0t5 0 5 0 5 0M2 18q3-3 5 0t5 0 5 0 5 0"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 5 13h6l-1 9 9-12h-6Z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></symbol>
+<symbol id="i-snow" viewBox="0 0 24 24"><path d="M12 2v20M3 7l18 10M3 17 21 7"/></symbol>
+<symbol id="i-family" viewBox="0 0 24 24"><circle cx="8" cy="7" r="3"/><path d="M3 20v-4a5 5 0 0 1 10 0v4"/><circle cx="17" cy="9" r="2.5"/><path d="M15 20v-3a4 4 0 0 1 6-3.5"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+<symbol id="i-soap" viewBox="0 0 24 24"><circle cx="8" cy="14" r="4"/><circle cx="16" cy="8" r="3"/><circle cx="17" cy="17" r="2"/></symbol>
+<symbol id="i-clothes" viewBox="0 0 24 24"><path d="M8 3 3 8l3 3 2-2v12h8V9l2 2 3-3-5-5c-1 2-7 2-8 0Z"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 22 20H2ZM12 10v4M12 17v.5"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7Z"/></symbol>
+</defs></svg>
+
+<header class="bar">
+ <div class="wrap">
+  <a class="brand" href="#top"><img src="eagle-white.png" alt="Veagle"><span>VEAGLE <b>SURVIVAL</b> BOOK</span></a>
+  <nav class="nav" aria-label="Ενότητες">
+   <a href="#basics">Βασικά</a><a href="#checklist">Λίστα ελέγχου</a><a href="#plan">Σχέδιο</a><a href="#threats">Απειλές</a><a href="#gobag">Σακίδιο φυγής</a><a href="#keep">Συντήρηση</a><a href="#official">Επίσημα</a>
+  </nav>
+  <button class="sos" id="sosBtn" aria-expanded="false" aria-controls="sosPanel">ΕΚΤΑΚΤΗ ΑΝΑΓΚΗ</button>
+ </div>
+</header>
+<div id="sosPanel" role="region" aria-label="Τηλέφωνα έκτακτης ανάγκης">
+ <div class="wrap">
+  <div class="sosgrid">
+   <a class="big" href="tel:112"><b>112</b><span>Ευρωπαϊκός αριθμός έκτακτης ανάγκης</span></a>
+   <a href="tel:166"><b>166</b><span>ΕΚΑΒ, ασθενοφόρο</span></a>
+   <a href="tel:199"><b>199</b><span>Πυροσβεστική</span></a>
+   <a href="tel:100"><b>100</b><span>Αστυνομία</span></a>
+   <a href="tel:108"><b>108</b><span>Λιμενικό</span></a>
+   <a href="tel:2107793777"><b>210 7793777</b><span>Κέντρο Δηλητηριάσεων</span></a>
+   <a href="tel:11500"><b>11500</b><span>ΔΕΔΔΗΕ, βλάβες ρεύματος</span></a>
+   <a href="tel:1022"><b>1022</b><span>ΕΥΔΑΠ, βλάβες νερού (Αττική)</span></a>
+  </div>
+  <p class="sosnote">Τι λες στο 112: ποιος είσαι, πού ακριβώς βρίσκεσαι, τι συνέβη, πόσοι είναι τραυματίες. Μην κλείσεις πρώτος. Επαλήθευσε τους αριθμούς στις επίσημες σελίδες των φορέων.</p>
+ </div>
+</div>
+
+<main id="top">
+<div class="wrap">
+
+ <div class="hero">
+  <div>
+   <div class="logo"><img src="eagle-white.png" alt="Λογότυπο Veagle"> VEAGLE</div>
+   <h1>Survival <b>Book</b></h1>
+   <p class="lead">Ο οδηγός για να αντέξεις 10 ημέρες χωρίς ρεύμα, νερό και μαγαζιά. Για ένα άτομο ή για οικογένεια. Με υπολογιστές, λίστες που τσεκάρεις και φύλλα για εκτύπωση.</p>
+   <p style="margin:0 0 10px"><span class="viewsw" role="group" aria-label="Τι να δείχνει ο οδηγός"><button type="button" data-v="both" aria-pressed="true">Και τα δύο</button><button type="button" data-v="1" aria-pressed="false">1 άτομο</button><button type="button" data-v="4" aria-pressed="false">Οικογένεια 4</button></span></p>
+   <a class="btn" href="#checklist"><svg class="ic"><use href="#i-check"/></svg> Λίστα ελέγχου</a>
+   <a class="btn ghost" href="#print"><svg class="ic"><use href="#i-print"/></svg> Εκτυπώσεις</a>
+   <p style="margin:12px 0 0"><input id="q" type="search" placeholder="Ψάξε: νερό, σεισμός, φάρμακα…" aria-label="Αναζήτηση στον οδηγό" style="width:100%;max-width:380px;background:var(--panel);color:var(--text);border:1px solid var(--line2);border-radius:999px;padding:9px 16px;font:15px var(--body)"></p>
+   <p id="empty">Δεν βρέθηκε τίποτα. Δοκίμασε άλλη λέξη.</p>
+  </div>
+  <div class="ring-hero">
+   <svg viewBox="0 0 200 200" role="img" aria-label="Πρόοδος ετοιμότητας"><circle cx="100" cy="100" r="82" fill="none" stroke="#191d22" stroke-width="16"/><circle id="ringArc" cx="100" cy="100" r="82" fill="none" stroke="#ff1e38" stroke-width="16" stroke-linecap="round" stroke-dasharray="0 515.2" transform="rotate(-90 100 100)"/><text id="ringTxt" x="100" y="106" text-anchor="middle" fill="#e7ecf3" font-family="Space Grotesk, IBM Plex Sans, sans-serif" font-size="44" font-weight="700">0%</text><text x="100" y="132" text-anchor="middle" fill="#8a95a6" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="2">ΕΤΟΙΜΟΤΗΤΑ</text></svg>
+   <p id="ringSub">Τσέκαρε τη λίστα ελέγχου και δες πόσο έτοιμος είσαι.</p>
+  </div>
+ </div>
+
+ <!-- ΒΑΣΙΚΑ -->
+ <section class="sec" id="basics" data-s>
+  <p class="kick">Βασικά</p>
+  <h2>Ο κανόνας των τριών</h2>
+  <p class="intro">Δείχνει με ποια σειρά φροντίζεις τις ανάγκες σου. Οι αριθμοί είναι ενδεικτικοί και ισχύουν για υγιή ενήλικα. Ξεκίνα με το ελάχιστο των 3 ημερών (72 ωρών) και χτίσε σιγά σιγά μέχρι τις 10.</p>
+  <div class="rule3">
+   <div class="r3"><svg class="ic"><use href="#i-wind"/></svg><b>3</b><span>λεπτά</span><small>χωρίς αέρα, ή σε πυκνό καπνό και τοξικά αέρια</small></div>
+   <div class="r3"><svg class="ic"><use href="#i-house"/></svg><b>3</b><span>ώρες</span><small>χωρίς καταφύγιο σε ακραίο κρύο ή ζέστη</small></div>
+   <div class="r3"><svg class="ic"><use href="#i-drop"/></svg><b>3</b><span>ημέρες</span><small>χωρίς νερό</small></div>
+   <div class="r3"><svg class="ic"><use href="#i-food"/></svg><b>3</b><span>εβδομάδες</span><small>χωρίς τροφή</small></div>
+  </div>
+  <figure class="fig r3track">
+   <svg viewBox="0 0 800 130" role="img" aria-label="Πόσο γρήγορα γίνεται επείγον κάθε πράγμα">
+    <line x1="30" y1="70" x2="770" y2="70" stroke="#262c34" stroke-width="3"/>
+    <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#8a95a6" text-anchor="middle">
+     <circle cx="60" cy="70" r="9" fill="#ff1e38"/><text x="60" y="105">3 λεπτά</text><text x="60" y="38" fill="#e7ecf3">Αέρας</text>
+     <circle cx="250" cy="70" r="9" fill="#ff1e38"/><text x="250" y="105">3 ώρες</text><text x="250" y="38" fill="#e7ecf3">Καταφύγιο</text>
+     <circle cx="480" cy="70" r="9" fill="#ff1e38"/><text x="480" y="105">3 ημέρες</text><text x="480" y="38" fill="#e7ecf3">Νερό</text>
+     <circle cx="740" cy="70" r="9" fill="#ff1e38"/><text x="740" y="105">3 εβδομάδες</text><text x="740" y="38" fill="#e7ecf3">Τροφή</text>
+    </g>
+   </svg>
+   <figcaption>Όσο πιο αριστερά, τόσο πιο επείγον. Για αυτό το νερό μπαίνει πριν από το φαγητό.</figcaption>
+  </figure>
+  <h3>Σειρά προτεραιοτήτων σε κάθε κρίση</h3>
+  <ol class="t">
+   <li>Άμεση ασφάλεια: φωτιά, καπνός, επικίνδυνο κτίριο, πλημμύρα.</li>
+   <li>Τραυματισμοί και πρώτες βοήθειες.</li>
+   <li>Καταφύγιο και θερμοκρασία σώματος.</li>
+   <li>Νερό.</li>
+   <li>Επικοινωνία με την οικογένεια και ενημέρωση από τις αρχές.</li>
+   <li>Τροφή και υγιεινή.</li>
+  </ol>
+
+  <!-- ΝΕΡΟ -->
+  <h2 id="water" style="margin-top:38px" data-s>Νερό: η προτεραιότητα νούμερο 1</h2>
+  <p class="intro">Με 3 λίτρα ανά άτομο την ημέρα καλύπτεις πόση και βασική υγιεινή. Στόχευσε στα 4 αν έχεις μικρά παιδιά, καλοκαίρι ή άτομα που θηλάζουν.</p>
+  <div class="tw"><table class="t">
+   <tr><th>Ποσότητα</th><th class="c1">1 άτομο</th><th class="c4">Οικογένεια 4 ατόμων</th></tr>
+   <tr><td>Ελάχιστο 10 ημερών (3 L ανά άτομο την ημέρα)</td><td class="q c1">30 L</td><td class="q c4">120 L</td></tr>
+   <tr><td>Ιδανικό 10 ημερών (4 L)</td><td class="q c1">40 L</td><td class="q c4">160 L</td></tr>
+   <tr><td>Ελάχιστο 3 ημερών</td><td class="q c1">9 L</td><td class="q c4">36 L</td></tr>
+  </table></div>
+
+  <div class="calc" id="calc">
+   <h3 style="margin:0 0 12px">Υπολογιστής αποθεμάτων</h3>
+   <div class="in">
+    <div><label for="nA">Ενήλικες</label><input id="nA" type="number" min="0" max="12" value="2" inputmode="numeric"></div>
+    <div><label for="nC">Παιδιά</label><input id="nC" type="number" min="0" max="12" value="2" inputmode="numeric"></div>
+    <div><label for="nD">Ημέρες</label><input id="nD" type="number" min="1" max="60" value="10" inputmode="numeric"></div>
+    <div><label for="nL">Νερό ανά άτομο</label><select id="nL"><option value="3">3 L την ημέρα (ελάχιστο)</option><option value="4">4 L την ημέρα (ιδανικό)</option></select></div>
+    <div><label for="nP">Σκύλος (κιλά)</label><input id="nP" type="number" min="0" max="80" value="0" inputmode="numeric"></div>
+   </div>
+   <div class="out">
+    <div class="stat"><b id="oW">0 L</b><span>νερό συνολικά</span></div>
+    <div class="stat"><b id="oB">0</b><span>μπουκάλια 1,5 L (<span id="oB6">0</span> εξάδες)</span></div>
+    <div class="stat"><b id="oW3">0 L</b><span>ελάχιστο για τις πρώτες 72 ώρες</span></div>
+    <div class="stat"><b id="oK">0</b><span>θερμίδες συνολικά</span></div>
+    <div class="stat"><b id="oM">0</b><span>γεύματα MRE αν τα καλύψεις μόνο με αυτά</span></div>
+    <div class="stat"><b id="oBag">0</b><span>σακούλες για τουαλέτα ανάγκης</span></div>
+   </div>
+   <div class="bottles" id="bottles" aria-hidden="true"></div>
+   <p style="color:var(--dim);font-size:13px;margin:10px 0 0">Θερμίδες: 2.250 ανά ενήλικα και 1.750 ανά παιδί την ημέρα (ενδεικτικά). Σκύλος: περίπου 50 ml νερό ανά κιλό την ημέρα, προστίθεται στο σύνολο. Ένα MRE δίνει περίπου 1.250 θερμίδες. Η σελίδα δεν αποθηκεύει τίποτα από όσα γράφεις εδώ.</p>
+  </div>
+
+  <h3>Αποθήκευση</h3>
+  <ul class="t">
+   <li>Χρησιμοποίησε κλειστά μπουκάλια εμφιαλωμένου νερού ή καθαρά δοχεία τροφίμων. Απόφυγε παλιά μπουκάλια γάλακτος ή χυμών, δεν καθαρίζονται καλά.</li>
+   <li>Φύλαξέ τα σε δροσερό, σκοτεινό μέρος και ανανέωσέ τα κάθε 6 μήνες.</li>
+   <li>Μοίρασε το απόθεμα σε δύο σημεία του σπιτιού.</li>
+   <li>Έκτακτο απόθεμα: το νερό του θερμοσίφωνα, αν είναι καθαρό. Κλείσε πρώτα το ρεύμα και την παροχή και άδειασέ το από τη βαλβίδα εκκένωσης.</li>
+   <li>Αν σε προειδοποιήσουν για πρόβλημα στο νερό, γέμισε τη μπανιέρα. Είναι για υγιεινή και καζανάκι, όχι για πόση.</li>
+  </ul>
+
+  <h3>Καθάρισε το νερό πριν το πιεις, αν δεν είσαι σίγουρος για την πηγή</h3>
+  <div class="tw"><table class="t mx">
+   <tr><th>Μέθοδος</th><th>Βακτήρια</th><th>Παράσιτα</th><th>Ιοί</th><th>Χημικά</th><th>Πώς</th></tr>
+   <tr><td>Βρασμός</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="n">✗</td><td>Δυνατός βρασμός τουλάχιστον 1 λεπτό. Άφησέ το να κρυώσει σκεπασμένο.</td></tr>
+   <tr><td>Ταμπλέτες χλωρίου</td><td class="y">✓</td><td class="p">~</td><td class="y">✓</td><td class="n">✗</td><td>Όσο γράφει η συσκευασία (συνήθως 1 ανά λίτρο). Περίμενε 30 λεπτά, περισσότερο αν το νερό είναι κρύο ή θολό.</td></tr>
+   <tr><td>Ταμπλέτες ιωδίου</td><td class="y">✓</td><td class="p">~</td><td class="y">✓</td><td class="n">✗</td><td>Όπως η συσκευασία. Όχι για εγκύους, θυρεοειδή ή μακροχρόνια χρήση.</td></tr>
+   <tr><td>Φίλτρο μεμβράνης (Sawyer, LifeStraw)</td><td class="y">✓</td><td class="y">✓</td><td class="n">✗</td><td class="n">✗</td><td>Φιλτράρισμα απευθείας από την πηγή. Σε αμφίβολο νερό συνδύασέ το με χλώριο ή βρασμό.</td></tr>
+   <tr><td>Απλή χλωρίνη χωρίς άρωμα (~5%)</td><td class="y">✓</td><td class="p">~</td><td class="y">✓</td><td class="n">✗</td><td>Περίπου 2 σταγόνες ανά λίτρο (4 αν είναι θολό), ανάδευση, αναμονή 30 λεπτά. Πρέπει να μυρίζει ελαφρά χλώριο. Αν δεν είσαι σίγουρος, βράσε.</td></tr>
+  </table></div>
+  <p style="color:var(--dim);font-size:13px;margin:0">✓ το αφαιρεί · ~ μερικώς (το κρυπτοσπορίδιο αντέχει στο χλώριο) · ✗ όχι</p>
+  <div class="note red"><b>Μην πίνεις ποτέ</b> θαλασσινό νερό, νερό πλημμύρας, νερό από πισίνα ή νερό που μυρίζει πετρέλαιο ή χημικά, ακόμη κι αν το βράσεις. Αν είναι θολό, φιλτράρισέ το πρώτα με καθαρό πανί ή φίλτρο καφέ και μετά απολύμανέ το.</div>
+ </section>
+
+ <!-- ΤΡΟΦΗ -->
+ <section class="sec" id="food" data-s>
+  <p class="kick">Βασικά</p>
+  <h2>Τροφή και θερμίδες</h2>
+  <p class="intro">Ένας ενήλικας χρειάζεται 2.000 με 2.500 θερμίδες την ημέρα σε κρίση, δηλαδή 20.000 με 25.000 για 10 ημέρες. Τα παιδιά περίπου 1.500 με 2.000. Διάλεξε τρόφιμα που κρατάνε χρόνια, δεν θέλουν ψυγείο και τρώγονται χωρίς μαγείρεμα.</p>
+  <div class="tw"><table class="t">
+   <tr><th>Κατηγορία</th><th class="c1">1 άτομο (10 ημέρες)</th><th class="c4">Οικογένεια 4 ατόμων</th></tr>
+   <tr><td>Κονσέρβες έτοιμες για φαγητό (τόνος, όσπρια, κρέας, λαχανικά)</td><td class="q c1">15–20</td><td class="q c4">60–80</td></tr>
+   <tr><td>Ξηρά τροφή (παξιμάδια, μπάρες, ξηροί καρποί, αποξηραμένα φρούτα, ταχίνι ή φυστικοβούτυρο)</td><td class="q c1">2–3 kg</td><td class="q c4">8–12 kg</td></tr>
+   <tr><td>Ρύζι, ζυμαρικά, βρώμη (θέλουν καυστήρα και νερό)</td><td class="q c1">1 kg</td><td class="q c4">4 kg</td></tr>
+   <tr><td>Λάδι, αλάτι, μέλι, καφές ή τσάι, ηλεκτρολύτες σε σκόνη</td><td class="q c1">μικρή ποσότητα</td><td class="q c4">μικρή ποσότητα</td></tr>
+   <tr><td>Ανοιχτήρι κονσέρβας χειρός</td><td class="q c1">1</td><td class="q c4">2</td></tr>
+  </table></div>
+  <div class="note"><b>Έτοιμα γεύματα (MRE, στρατιωτικά):</b> ζεσταίνονται με χημικό θερμαντήρα χωρίς φωτιά. Ένα MRE δίνει περίπου 1.000 με 1.300 θερμίδες, άρα 10 MRE καλύπτουν μόνο το μισό των 10 ημερών. Υπολόγισε 2 την ημέρα ή συμπλήρωσε με τα παραπάνω.</div>
+  <div class="grid">
+   <div class="card"><h3><svg class="ic"><use href="#i-wind"/></svg>Σειρά κατανάλωσης</h3><ol class="t"><li>Πρώτα το ψυγείο. Χωρίς ρεύμα κρατάει περίπου 4 ώρες αν δεν ανοίγεις την πόρτα.</li><li>Μετά τα κατεψυγμένα. Γεμάτος καταψύκτης που δεν ανοίγει κρατάει περίπου 24–48 ώρες.</li><li>Τέλος κονσέρβες και ξηρά τροφή.</li></ol></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-family"/></svg>Για την οικογένεια</h3><ul class="t"><li>Παιδιά: γάλα σε σκόνη, δημητριακά και σνακ που τους είναι γνώριμα. Βοηθούν και ψυχολογικά.</li><li>Μωρά: βρεφικό γάλα ή τροφές για 10 ημέρες, μπιμπερό, πάνες, μωρομάντηλα. Το νερό για το γάλα το βράζεις.</li><li>Ειδικές ανάγκες (αλλεργίες, διαβήτης, κοιλιοκάκη): πάρε τρόφιμα που ταιριάζουν σε όποιον τα χρειάζεται.</li><li>Κατοικίδια: ξηρά τροφή 10 ημερών και νερό περίπου 50 ml ανά κιλό βάρους την ημέρα.</li></ul></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-check"/></svg>Κανόνας εναλλαγής</h3><p>Φάε τα παλιά και αγόρασε νέα στη θέση τους, ώστε να μη λήγει τίποτα στο ντουλάπι.</p></div>
+  </div>
+ </section>
+
+ <!-- ΦΑΡΜΑΚΕΙΟ -->
+ <section class="sec" id="med" data-s>
+  <p class="kick">Βασικά</p>
+  <h2>Φαρμακείο και πρώτες βοήθειες</h2>
+  <p class="intro">Βάλε το φαρμακείο σε αδιάβροχο κουτί, μακριά από υγρασία και ζέστη, και πες σε όλα τα μέλη πού βρίσκεται.</p>
+  <div class="grid">
+   <div class="card"><h3><svg class="ic"><use href="#i-med"/></svg>Προσωπικά φάρμακα</h3><p>Ποσότητα για 15 ημέρες, ώστε να καλύπτεις και καθυστερήσεις. Κράτα λίστα με τα ονόματα και τις δόσεις. Φάρμακα που θέλουν ψυγείο: ρώτα τον γιατρό ή τον φαρμακοποιό τι κάνεις χωρίς ρεύμα.</p></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-med"/></svg>Τραύματα</h3><p>Αποστειρωμένες γάζες διαφόρων μεγεθών, ελαστικοί επίδεσμοι, λευκοπλάστ, τσιρότα, αντισηπτικό (Betadine ή οινόπνευμα), φυσιολογικός ορός για πλύσιμο, γάντια μίας χρήσης, τρίγωνος επίδεσμος.</p></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-med"/></svg>Γενικής χρήσης</h3><p>Παυσίπονο και αντιπυρετικό (παρακεταμόλη, ιβουπροφαίνη), αντιδιαρροϊκό, αντιισταμινικό, ηλεκτρολύτες σε σκόνη, κρέμα για εγκαύματα.</p></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-med"/></svg>Εργαλεία</h3><p>Ψαλίδι, τσιμπιδάκι, ψηφιακό θερμόμετρο, 2–4 ισοθερμικές κουβέρτες αλουμινίου και μάσκες FFP2.</p></div>
+  </div>
+  <div class="note"><b>Δόσεις:</b> διάβασε πάντα το φύλλο οδηγιών. Για παιδιά η δόση εξαρτάται από το βάρος και το προϊόν, οπότε ρώτα τον φαρμακοποιό ή τον παιδίατρο. Ασπιρίνη δεν δίνεται σε παιδιά.</div>
+  <h3>Βασικές πρώτες βοήθειες</h3>
+  <div class="grid">
+   <div class="card"><h3>Αιμορραγία</h3><p>Πίεσε δυνατά και συνεχόμενα με καθαρή γάζα ή ύφασμα και κάλεσε 166 ή 112.</p></div>
+   <div class="card"><h3>Έγκαυμα</h3><p>Κράτα το σημείο κάτω από δροσερό τρεχούμενο νερό (όχι παγωμένο) για 10–20 λεπτά. Μην βάζεις οδοντόκρεμα ή λάδι.</p></div>
+   <div class="card"><h3>Δεν αναπνέει ή δεν αντιδρά</h3><p>Κάλεσε 166 και ξεκίνα πιέσεις στο κέντρο του στήθους, περίπου 100–120 ανά λεπτό. Ο τηλεφωνητής σε καθοδηγεί.</p></div>
+  </div>
+  <p style="color:var(--dim);font-size:14px">Παρακολούθησε ένα σεμινάριο πρώτων βοηθειών (Ελληνικός Ερυθρός Σταυρός ή άλλος φορέας). Αξίζει περισσότερο από οποιοδήποτε κουτί.</p>
+ </section>
+
+ <!-- ΕΞΟΠΛΙΣΜΟΣ -->
+ <section class="sec" id="gear" data-s>
+  <p class="kick">Βασικά</p>
+  <h2>Φωτισμός, ενέργεια, επικοινωνία και μαγείρεμα</h2>
+  <div class="tw"><table class="t">
+   <tr><th>Είδος</th><th class="c1">1 άτομο</th><th class="c4">Οικογένεια 4 ατόμων</th></tr>
+   <tr><td>Φακός κεφαλής (αφήνει τα χέρια ελεύθερα)</td><td class="q c1">1</td><td class="q c4">4</td></tr>
+   <tr><td>Φακός χειρός ή φανάρι LED</td><td class="q c1">1</td><td class="q c4">2 φανάρια</td></tr>
+   <tr><td>Εφεδρικές μπαταρίες</td><td class="q c1">2 σετ ανά συσκευή</td><td class="q c4">2 σετ ανά συσκευή</td></tr>
+   <tr><td>Power bank (20.000 mAh ≈ 3–4 φορτίσεις κινητού)</td><td class="q c1">20.000 mAh</td><td class="q c4">40.000 mAh και πάνω</td></tr>
+   <tr><td>Ραδιόφωνο FM με μπαταρίες ή δυναμό</td><td class="q c1">1</td><td class="q c4">1</td></tr>
+   <tr><td>Σφυρίχτρα για σήμα κινδύνου</td><td class="q c1">1</td><td class="q c4">1 ανά μέλος</td></tr>
+   <tr><td>Φωτιά: ferro rod, αναπτήρες, αδιάβροχα σπίρτα</td><td class="q c1">1 σετ</td><td class="q c4">1 σετ</td></tr>
+   <tr><td>Πολυεργαλείο με πένσα, λάμα, κατσαβίδι, ανοιχτήρι</td><td class="q c1">1</td><td class="q c4">1–2</td></tr>
+   <tr><td>Εστία camping με φιάλες αερίου</td><td class="q c1">1 και 3 φιάλες</td><td class="q c4">1 και 6 φιάλες</td></tr>
+   <tr><td>Πυροσβεστήρας ABC 6 kg και πυρίμαχη κουβέρτα</td><td class="q c1">1 και 1</td><td class="q c4">1 και 1</td></tr>
+  </table></div>
+  <div class="note red"><b>Ασφάλεια στο μαγείρεμα:</b> χρησιμοποίησε εστία camping ή υγραερίου <b>μόνο σε χώρο με καλό αερισμό</b>, ποτέ σε κλειστό δωμάτιο. Κάρβουνα, ψησταριά και γεννήτρια δεν μπαίνουν μέσα στο σπίτι, στο γκαράζ ή στο μπαλκόνι κοντά σε παράθυρα. Παράγουν μονοξείδιο του άνθρακα, που δεν μυρίζει και σκοτώνει. Αν νιώσεις πονοκέφαλο, ζάλη ή ναυτία, βγες αμέσως έξω στον καθαρό αέρα και κάλεσε 112.</div>
+  <h3>Επικοινωνία χωρίς δίκτυο ή με φορτωμένο δίκτυο</h3>
+  <ul class="t">
+   <li>Στείλε SMS αντί να τηλεφωνείς. Φορτώνει λιγότερο το δίκτυο και καταναλώνει λιγότερη μπαταρία.</li>
+   <li>Βάλε το κινητό σε λειτουργία εξοικονόμησης και κατέβασε χάρτες εκτός σύνδεσης (π.χ. Google Maps offline).</li>
+   <li>Γράψε τα σημαντικά τηλέφωνα σε χαρτί. Το κινητό μπορεί να μην ανάβει.</li>
+   <li>Όρισε μία επαφή <b>εκτός πόλης</b> που θα παίρνουν όλοι. Συχνά πιάνει ένα SMS προς κάποιον μακριά, ενώ οι τοπικές κλήσεις μπλοκάρουν.</li>
+   <li>Μηνύματα <b>112</b> στο κινητό: αν λάβεις, διάβασέ το και ακολούθησε τις οδηγίες.</li>
+  </ul>
+ </section>
+
+ <!-- ΥΓΙΕΙΝΗ -->
+ <section class="sec" id="hygiene" data-s>
+  <p class="kick">Βασικά</p>
+  <h2>Υγιεινή και τουαλέτα ανάγκης</h2>
+  <p class="intro">Χωρίς υγιεινή, οι μολύνσεις και οι γαστρεντερίτιδες εμφανίζονται μέσα σε λίγες ημέρες. Είναι το πρώτο που ξεχνάμε.</p>
+  <div class="tw"><table class="t">
+   <tr><th>Είδος</th><th class="c1">1 άτομο</th><th class="c4">Οικογένεια 4 ατόμων</th></tr>
+   <tr><td>Υγρά μαντηλάκια</td><td class="q c1">2–3 πακέτα</td><td class="q c4">8–10 πακέτα</td></tr>
+   <tr><td>Αντισηπτικό τζελ χεριών (70% αλκοόλ)</td><td class="q c1">2 μπουκάλια</td><td class="q c4">4 μπουκάλια</td></tr>
+   <tr><td>Μεγάλες ανθεκτικές σακούλες απορριμμάτων</td><td class="q c1">15–20</td><td class="q c4">60 και πάνω</td></tr>
+   <tr><td>Χαρτί υγείας</td><td class="q c1">2 ρολά</td><td class="q c4">8 ρολά</td></tr>
+   <tr><td>Σαπούνι, οδοντόκρεμα, είδη περιόδου, πάνες αν χρειάζεται</td><td class="q c1">για 10 ημέρες</td><td class="q c4">για 10 ημέρες</td></tr>
+  </table></div>
+  <div class="grid">
+   <div class="card"><h3><svg class="ic"><use href="#i-soap"/></svg>Τουαλέτα ανάγκης</h3><ol class="t"><li>Βάλε μεγάλη ανθεκτική σακούλα μέσα στη λεκάνη ή σε κουβά με καπάκι.</li><li>Μετά τη χρήση πρόσθεσε μια χούφτα απορροφητικό υλικό, π.χ. άμμο γάτας, πριονίδι ή σόδα φαγητού, για τις οσμές.</li><li>Δέσε τη σακούλα, βάλε την σε δεύτερη και φύλαξέ την σε κλειστό κάδο έξω από το σπίτι.</li><li>Πλύνε τα χέρια με σαπούνι ή αντισηπτικό.</li></ol><p style="margin-top:8px">Μην ρίχνεις χλωρίνη μαζί με ούρα ή άλλα καθαριστικά. Παράγονται τοξικά αέρια.</p></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-drop"/></svg>Καθημερινά</h3><ul class="t"><li>Πλύσιμο χεριών πριν φας, μετά την τουαλέτα και μετά από κάθε άγγιγμα σκουπιδιών.</li><li>Πιάτα και ποτήρια μίας χρήσης, για να μη σπαταλάς νερό.</li><li>Τα σκουπίδια σε κλειστές σακούλες, μακριά από τα τρόφιμα, για να μη φέρνουν έντομα και τρωκτικά.</li></ul></div>
+  </div>
+ </section>
+
+ <!-- ΡΟΥΧΙΣΜΟΣ -->
+ <section class="sec" id="clothes" data-s>
+  <p class="kick">Βασικά</p>
+  <h2>Ρουχισμός και καταφύγιο</h2>
+  <p class="intro">Ακόμη και μέσα στο σπίτι, χωρίς θέρμανση ή κλιματισμό ο σωστός ρουχισμός γίνεται ζήτημα ασφάλειας.</p>
+  <div class="grid">
+   <figure class="fig" style="margin:0">
+    <svg viewBox="0 0 320 190" role="img" aria-label="Τρία στρώματα ρούχων">
+     <rect x="20" y="124" width="280" height="44" rx="8" fill="#0e1217" stroke="#4aa3ff"/><text x="36" y="151" fill="#e7ecf3" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="600">1. Ισοθερμικό: διώχνει τον ιδρώτα</text>
+     <rect x="20" y="72" width="280" height="44" rx="8" fill="#0e1217" stroke="#ffb020"/><text x="36" y="99" fill="#e7ecf3" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="600">2. Fleece ή μάλλινο: κρατάει ζέστη</text>
+     <rect x="20" y="20" width="280" height="44" rx="8" fill="#0e1217" stroke="#ff1e38"/><text x="36" y="47" fill="#e7ecf3" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="600">3. Αδιάβροχο ή αντιανεμικό</text>
+    </svg>
+    <figcaption>Η θεωρία των στρωμάτων. Βάλε ή βγάλε ένα στρώμα όταν ζεσταίνεσαι ή κρυώνεις.</figcaption>
+   </figure>
+   <div class="card"><h3><svg class="ic"><use href="#i-clothes"/></svg>Άκρα και ύπνος</h3><ul class="t"><li>3 ζευγάρια μάλλινες ή συνθετικές κάλτσες. Όχι βαμβακερές, κρατάνε υγρασία.</li><li>1 σκούφος και 1 ζευγάρι γάντια εργασίας ανά άτομο.</li><li>1 υπνόσακος κατάλληλος για τις χειμερινές θερμοκρασίες της περιοχής σου.</li><li>Χαρτόνι ή στρώμα κάτω από τον υπνόσακο. Το κρύο έρχεται από το πάτωμα.</li><li>Κλειστά σταθερά παπούτσια δίπλα στο κρεβάτι.</li></ul></div>
+  </div>
+ </section>
+
+ <!-- ΕΓΓΡΑΦΑ -->
+ <section class="sec" id="docs" data-s>
+  <p class="kick">Βασικά</p>
+  <h2>Έγγραφα και μετρητά</h2>
+  <div class="grid">
+   <div class="card"><h3><svg class="ic"><use href="#i-doc"/></svg>Έγγραφα (αντίγραφα)</h3><ul class="t"><li>Ταυτότητα, διαβατήριο, ΑΜΚΑ, ΑΦΜ, άδεια οδήγησης.</li><li>Πιστοποιητικά οικογενειακής κατάστασης και γέννησης, συμβόλαια ιδιοκτησίας ή μίσθωσης.</li><li>Ασφαλιστήρια (σπίτι, αυτοκίνητο, υγεία), συνταγές και βασικές ιατρικές εξετάσεις.</li><li>Πρόσφατη φωτογραφία κάθε μέλους, για να αναγνωριστεί αν χαθεί.</li></ul></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-doc"/></svg>Πώς τα φυλάς</h3><ul class="t"><li>1 άτομο: USB με σκαναρισμένα έγγραφα, κρυπτογραφημένο, και αδιάβροχη θήκη με τα βασικά.</li><li>Οικογένεια: αδιάβροχος φάκελος και ένα USB ανά ενήλικα.</li><li>Και για τους δύο: φωτογραφίες των εγγράφων στο κινητό και σε ασφαλές cloud.</li></ul></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-bolt"/></svg>Μετρητά</h3><p>Σε κρίση οι κάρτες και τα ΑΤΜ μπορεί να μην δουλεύουν. Κράτα μικρά χαρτονομίσματα (5, 10, 20 €) σε αδιάβροχο σημείο και όχι όλα στο ίδιο μέρος. Ενδεικτικά περίπου 200 € για ένα άτομο και 500 € για οικογένεια, προσάρμοσέ τα στις δικές σου ανάγκες.</p></div>
+  </div>
+ </section>
+
+ <!-- ΛΙΣΤΑ ΕΛΕΓΧΟΥ -->
+ <section class="sec" id="checklist" data-s>
+  <p class="kick">Λίστα ελέγχου</p>
+  <h2>Τσέκαρε τι έχεις ήδη</h2>
+  <p class="intro">Πάτα κάθε γραμμή όταν το έχεις έτοιμο. Οι ποσότητες είναι για το απόθεμα του σπιτιού για 10 ημέρες. Η πρόοδος φαίνεται και στον κύκλο στην κορυφή.</p>
+  <div class="ckhead">
+   <div style="flex:1;min-width:200px"><div style="display:flex;justify-content:space-between;font:500 13px var(--mono);color:var(--dim);margin-bottom:6px"><span id="ckCount">0 από 0</span><span id="ckPct">0%</span></div><div class="pbar"><i id="ckBar"></i></div></div>
+   <button class="btn ghost" id="ckClear" type="button">Καθάρισε τα τικ</button>
+  </div>
+  <div class="remember">
+   <label><input type="checkbox" id="rem"> <span><b>Να θυμάται τα τικ και όσα γράφω στα πεδία του σχεδίου σε αυτόν τον browser.</b><br>Είναι προαιρετικό και είναι κλειστό από μόνο του. Αν το ανοίξεις, τα στοιχεία μένουν μόνο σε αυτή τη συσκευή και δεν ανεβαίνουν πουθενά. Αν το κλείσεις, σβήνονται. Μην γράφεις αριθμούς καρτών ή κωδικούς.</span></label>
+  </div>
+  <div id="ckList"></div>
+ </section>
+
+ <!-- ΣΧΕΔΙΟ -->
+ <section class="sec" id="plan" data-s>
+  <p class="kick">Σχέδιο δράσης</p>
+  <h2>Οικογενειακό σχέδιο</h2>
+  <p class="intro">Το εγχειρίδιο δεν βοηθά χωρίς ψυχραιμία και συμφωνημένο σχέδιο. Διαβάστε το όλοι μαζί, με απλά λόγια για τα παιδιά, και κάντε μία πρόβα δύο φορές τον χρόνο.</p>
+  <div class="grid">
+   <div class="card"><h3><svg class="ic"><use href="#i-family"/></svg>Σημεία συνάντησης</h3><ol class="t"><li><b>Μέσα στο σπίτι:</b> ασφαλές δωμάτιο (blackout, κατάγιση).</li><li><b>Έξω από το κτίριο:</b> αυλή ή απέναντι πεζοδρόμιο (σεισμός, φωτιά).</li><li><b>Στη γειτονιά:</b> πλατεία ή πάρκο, αν δεν μπορείτε να γυρίσετε.</li><li><b>Εκτός πόλης:</b> σπίτι συγγενή (μεγάλη εκκένωση).</li></ol></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-check"/></svg>Ρόλοι</h3><ul class="t"><li>Νερό και τρόφιμα: έλεγχος αποθέματος.</li><li>Φαρμακείο και φάρμακα.</li><li>Παιδιά και κατοικίδια.</li><li>Κλείσιμο παροχών (ρεύμα, νερό, αέριο).</li><li>Σακίδιο και έγγραφα.</li></ul></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-phone"/></svg>Παιδιά</h3><ul class="t"><li>Μάθε τους να καλούν 112 και να λένε όνομα και διεύθυνση.</li><li>Κάρτα στην τσάντα με όνομα, τηλέφωνο γονέα και επαφή εκτός πόλης.</li><li>Εξήγησε τι μπορεί να συμβεί με ήρεμο τόνο και δώσε τους μικρές δουλειές (ο φακός, το ραδιόφωνο).</li><li>Κράτα ρουτίνα: ώρες φαγητού και ύπνου, παιχνίδια, βιβλία, τράπουλα.</li><li>Ρώτα το σχολείο για το σχέδιο εκκένωσης και ποιος επιτρέπεται να παραλάβει τα παιδιά.</li></ul></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-wind"/></svg>Ψυχραιμία</h3><ul class="t"><li>Ο φόβος είναι φυσιολογικός. Σταμάτα, πάρε 3 αργές αναπνοές και μετά κάνε το πρώτο βήμα του σχεδίου.</li><li>Ενημερώσου από αξιόπιστη πηγή 1–2 φορές την ημέρα. Η συνεχής παρακολούθηση ειδήσεων αυξάνει το άγχος.</li><li>Μην διαδίδεις φήμες. Έλεγχε πάντα τις οδηγίες της Πολιτικής Προστασίας.</li><li>Συμφωνήστε με τους γείτονες πώς θα βοηθάτε ο ένας τον άλλον, ιδίως ηλικιωμένους και άτομα με αναπηρία.</li></ul></div>
+  </div>
+  <h3>Συμπλήρωσε το δικό σου σχέδιο</h3>
+  <div class="fill">
+   <div><label for="f1">Σημείο 1: μέσα στο σπίτι</label><input id="f1" data-f></div>
+   <div><label for="f2">Σημείο 2: έξω από το κτίριο</label><input id="f2" data-f></div>
+   <div><label for="f3">Σημείο 3: στη γειτονιά</label><input id="f3" data-f></div>
+   <div><label for="f4">Σημείο 4: εκτός πόλης</label><input id="f4" data-f></div>
+   <div><label for="f5">Επαφή εκτός πόλης (όνομα, τηλέφωνο)</label><input id="f5" data-f></div>
+   <div><label for="f6">Γείτονας (όνομα, τηλέφωνο)</label><input id="f6" data-f></div>
+   <div><label for="f7">Γενικός διακόπτης ρεύματος</label><input id="f7" data-f placeholder="π.χ. στην είσοδο"></div>
+   <div><label for="f8">Βάνα νερού</label><input id="f8" data-f></div>
+   <div><label for="f9">Βάνα αερίου ή φιάλη</label><input id="f9" data-f></div>
+  </div>
+  <p style="color:var(--dim);font-size:13px">Τα πεδία θυμούνται όσα γράφεις μόνο αν έχεις τσεκάρει το «Να θυμάται» στη λίστα ελέγχου. Η εκτύπωση «Φύλλο επαφών» βγάζει και κενό φύλλο για να το γράψεις με το χέρι.</p>
+ </section>
+
+ <!-- ΑΠΕΙΛΕΣ -->
+ <section class="sec" id="threats" data-s>
+  <p class="kick">Ειδικές απειλές</p>
+  <h2>Τι κάνεις όταν συμβεί</h2>
+  <p class="intro">Άνοιξε την απειλή που σε αφορά περισσότερο. Μέσα σε κάθε μία: πριν, κατά τη διάρκεια, μετά.</p>
+
+  <details class="thr" id="t-quake">
+   <summary><svg class="ic"><use href="#i-quake"/></svg><span>Σεισμός<small>Η Ελλάδα είναι σεισμογενής χώρα. Οι πρώτες κινήσεις μετράνε.</small></span></summary>
+   <div class="body">
+    <figure class="fig">
+     <svg viewBox="0 0 720 200" role="img" aria-label="Γονάτισε, προστατεύσου, κράτα">
+      <g font-family="IBM Plex Sans, sans-serif" fill="#e7ecf3" text-anchor="middle">
+       <rect x="10" y="10" width="220" height="150" rx="12" fill="#0a0d10" stroke="#262c34"/>
+       <line x1="30" y1="140" x2="210" y2="140" stroke="#8a95a6" stroke-width="3"/>
+       <circle cx="120" cy="70" r="14" fill="none" stroke="#ff1e38" stroke-width="4"/><line x1="120" y1="84" x2="120" y2="118" stroke="#ff1e38" stroke-width="4"/><line x1="120" y1="94" x2="98" y2="110" stroke="#ff1e38" stroke-width="4"/><line x1="120" y1="94" x2="142" y2="110" stroke="#ff1e38" stroke-width="4"/><line x1="120" y1="118" x2="104" y2="140" stroke="#ff1e38" stroke-width="4"/><line x1="120" y1="118" x2="138" y2="140" stroke="#ff1e38" stroke-width="4"/>
+       <text x="120" y="184" font-size="16" font-weight="700">1. Γονάτισε</text>
+       <rect x="250" y="10" width="220" height="150" rx="12" fill="#0a0d10" stroke="#262c34"/>
+       <rect x="275" y="55" width="170" height="10" fill="#8a95a6"/><line x1="285" y1="65" x2="285" y2="140" stroke="#8a95a6" stroke-width="5"/><line x1="435" y1="65" x2="435" y2="140" stroke="#8a95a6" stroke-width="5"/>
+       <line x1="270" y1="140" x2="450" y2="140" stroke="#8a95a6" stroke-width="3"/>
+       <circle cx="345" cy="104" r="11" fill="none" stroke="#ff1e38" stroke-width="4"/><path d="M345 115 Q360 130 380 138 M330 138 Q338 128 345 115" fill="none" stroke="#ff1e38" stroke-width="4"/>
+       <text x="360" y="184" font-size="16" font-weight="700">2. Προστατεύσου</text>
+       <rect x="490" y="10" width="220" height="150" rx="12" fill="#0a0d10" stroke="#262c34"/>
+       <rect x="515" y="55" width="170" height="10" fill="#8a95a6"/><line x1="525" y1="65" x2="525" y2="140" stroke="#8a95a6" stroke-width="5"/><line x1="675" y1="65" x2="675" y2="140" stroke="#8a95a6" stroke-width="5"/>
+       <line x1="510" y1="140" x2="690" y2="140" stroke="#8a95a6" stroke-width="3"/>
+       <circle cx="600" cy="104" r="11" fill="none" stroke="#ff1e38" stroke-width="4"/><path d="M600 115 Q612 130 630 138 M588 138 Q594 128 600 115" fill="none" stroke="#ff1e38" stroke-width="4"/>
+       <path d="M525 80 Q560 90 590 96" fill="none" stroke="#ffb020" stroke-width="4"/><path d="M675 80 Q640 90 610 96" fill="none" stroke="#ffb020" stroke-width="4"/>
+       <text x="600" y="184" font-size="16" font-weight="700">3. Κράτα</text>
+      </g>
+     </svg>
+     <figcaption>Γονάτισε, προστατεύσου κάτω από σταθερό τραπέζι ή με τα χέρια στο κεφάλι και τον αυχένα, κράτα τη θέση σου μέχρι να σταματήσει.</figcaption>
+    </figure>
+    <div class="phases">
+     <div class="ph before"><h4>Πριν</h4><ul>
+      <li>Στερέωσε ψηλές βιβλιοθήκες, ντουλάπες και την τηλεόραση στον τοίχο. Βάλε τα βαριά αντικείμενα σε χαμηλά ράφια.</li>
+      <li>Μην κρεμάς βαριά πράγματα ή καθρέφτες πάνω από κρεβάτια και καναπέδες.</li>
+      <li>Βρες και μάθε να κλείνεις τον γενικό διακόπτη ρεύματος, τη βάνα νερού και τη βάνα αερίου.</li>
+      <li>Διάλεξε ασφαλές σημείο σε κάθε δωμάτιο: κάτω από σταθερό τραπέζι ή δίπλα σε εσωτερικό τοίχο, μακριά από παράθυρα και ράφια.</li>
+      <li>Βάλε παπούτσια και φακό δίπλα στο κρεβάτι.</li></ul></div>
+     <div class="ph during"><h4>Κατά τη διάρκεια</h4><ol>
+      <li>Γονάτισε στο πάτωμα.</li><li>Μπες κάτω από σταθερό τραπέζι ή προστάτεψε το κεφάλι και τον αυχένα με τα χέρια.</li><li>Κράτα τη θέση σου μέχρι να σταματήσει ο κραδασμός.</li></ol>
+      <ul><li>Μείνε μακριά από παράθυρα, καθρέφτες και ράφια. Το κάσωμα της πόρτας δεν είναι ασφαλέστερο.</li>
+      <li>Μην τρέχεις στις σκάλες και μην πάρεις ασανσέρ.</li>
+      <li>Έξω: απομακρύνσου από κτίρια, καλώδια και δέντρα, σε ανοιχτό χώρο.</li>
+      <li>Μέσα στο αυτοκίνητο: σταμάτα σε ανοιχτό χώρο μακριά από γέφυρες και κτίρια και μείνε μέσα.</li>
+      <li>Στην ακτή: αν ο σεισμός είναι δυνατός ή μακρύς, φύγε αμέσως προς ψηλό σημείο, χωρίς να περιμένεις προειδοποίηση (πιθανό τσουνάμι).</li></ul></div>
+     <div class="ph after"><h4>Μετά</h4><ol>
+      <li>Έλεγξε για τραυματισμούς και δώσε πρώτες βοήθειες. Φόρεσε παπούτσια για τα σπασμένα γυαλιά.</li>
+      <li>Περίμενε μετασεισμούς. Κάθε φορά ξαναπάρε θέση προστασίας.</li>
+      <li>Αν μυρίζεις γκάζι: μην ανάψεις φως ή αναπτήρα, άνοιξε παράθυρα, κλείσε τη βάνα και βγες έξω.</li>
+      <li>Αν δεις ζημιά στα καλώδια ή υγρασία, κλείσε τον γενικό διακόπτη ρεύματος.</li>
+      <li>Αν το κτίριο έχει μεγάλες ρωγμές ή σοβαρή ζημιά, βγες έξω και μην ξαναμπείς πριν από έλεγχο μηχανικού.</li>
+      <li>Στείλε SMS στην επαφή εκτός πόλης. Κάλεσε 112 μόνο για πραγματική ανάγκη και άκου ραδιόφωνο για οδηγίες.</li></ol></div>
+    </div>
+   </div>
+  </details>
+
+  <details class="thr" id="t-fire">
+   <summary><svg class="ic"><use href="#i-fire"/></svg><span>Πυρκαγιά<small>Δάσος και σπίτι. Στην Αττική, το καλοκαίρι, η εκκένωση νωρίς σώζει ζωές.</small></span></summary>
+   <div class="body">
+    <div class="phases">
+     <div class="ph before"><h4>Πριν (δάσος)</h4><ul>
+      <li>Δες τον ημερήσιο χάρτη κινδύνου πυρκαγιάς στο civilprotection.gov.gr. Σε ημέρες με πολύ υψηλό κίνδυνο μην ανάβεις φωτιά ή ψησταριά.</li>
+      <li>Καθάρισε τουλάχιστον 10 μέτρα γύρω από το σπίτι από ξερά χόρτα, φύλλα και κλαδιά και κλάδεψε τα δέντρα έως 3 μέτρα ύψος (οδηγία ΓΓΠΠ). Μην αφήνεις ξύλα, φιάλες και εύφλεκτα δίπλα στους τοίχους.</li>
+      <li>Έχε μάνικα που φτάνει γύρω από το σπίτι και δύο διαδρομές διαφυγής.</li>
+      <li>Κράτα έτοιμο το σακίδιο, μάσκες FFP2 και γεμάτο ρεζερβουάρ.</li></ul></div>
+     <div class="ph during"><h4>Όταν έρθει</h4><ol>
+      <li>Αν λάβεις μήνυμα 112 με εντολή εκκένωσης ή δεις φωτιά κοντά, φύγε αμέσως. Μην περιμένεις.</li>
+      <li>Πάρε σακίδιο, έγγραφα, φάρμακα και κατοικίδια. Κλείσε παράθυρα, πόρτες και τη βάνα αερίου.</li>
+      <li>Ακολούθησε τις διαδρομές που δείχνουν οι αρχές, προς κατοικημένες περιοχές ή προς τη θάλασσα. Μην πηγαίνεις προς τη φωτιά ή προς δασώδεις δρόμους. Η φωτιά ανεβαίνει πολύ πιο γρήγορα στις πλαγιές.</li>
+      <li>Η ΓΓΠΠ τονίζει: αν η φωτιά φτάσει ήδη στο σπίτι σου, μην φύγεις εκτός αν η διαφυγή είναι απολύτως ασφαλής. Το αυτοκίνητο είναι πιο επικίνδυνο από ένα σπίτι από άφλεκτα υλικά. Η απόφαση είναι να φύγεις νωρίς ή να μείνεις μέσα, όχι να τρέχεις την τελευταία στιγμή.</li>
+      <li>Αν δεν προλαβαίνεις να φύγεις: μείνε σε κτίριο από τσιμέντο ή πέτρα, κλείσε παράθυρα και πόρτες, βγάλε τα εύφλεκτα από γύρω, κάλυψε μύτη και στόμα με υγρό πανί ή μάσκα FFP2 και κάλεσε 112.</li>
+      <li>Αν εγκλωβιστείς με αυτοκίνητο: σταμάτα σε ανοιχτό σημείο χωρίς βλάστηση, κλείσε παράθυρα και αερισμό, ξάπλωσε χαμηλά, σκέπασε το σώμα με κουβέρτα και κάλεσε 112.</li></ol></div>
+     <div class="ph after"><h4>Φωτιά στο σπίτι</h4><ul>
+      <li>Έχε ανιχνευτές καπνού και πυροσβεστήρα ABC 6 kg. Η πυρίμαχη κουβέρτα στην κουζίνα είναι φθηνή και χρήσιμη.</li>
+      <li>Στον καπνό σύρσου χαμηλά. Αν η πόρτα είναι ζεστή, μην την ανοίξεις. Μην πάρεις ασανσέρ.</li>
+      <li>Βγες έξω, κάλεσε 199 και μην ξαναμπείς για πράγματα.</li>
+      <li>Πυροσβεστήρας: χρησιμοποίησέ τον μόνο σε μικρή φωτιά και με ελεύθερη έξοδο πίσω σου. Τράβηξε την περόνη, στόχευσε στη βάση της φλόγας, πίεσε τη λαβή, σάρωσε.</li>
+      <li>Φωτιά από λάδι: σκέπασε με καπάκι ή κουβέρτα. Ποτέ νερό.</li>
+      <li>Αν πιάσουν φωτιά τα ρούχα σου: σταμάτα, ξάπλωσε, κύλα.</li></ul></div>
+    </div>
+   </div>
+  </details>
+
+  <details class="thr" id="t-flood">
+   <summary><svg class="ic"><use href="#i-flood"/></svg><span>Πλημμύρα<small>Το κινούμενο νερό είναι ο μεγάλος κίνδυνος. Υπόγεια και υπόγειες διαβάσεις είναι οι πιο επικίνδυνες θέσεις.</small></span></summary>
+   <div class="body">
+    <figure class="fig">
+     <svg viewBox="0 0 640 190" role="img" aria-label="15 εκατοστά νερού ρίχνουν άνθρωπο, 30 εκατοστά παρασύρουν αυτοκίνητο">
+      <g font-family="IBM Plex Sans, sans-serif" fill="#e7ecf3">
+       <rect x="10" y="10" width="300" height="130" rx="12" fill="#0a0d10" stroke="#262c34"/>
+       <rect x="12" y="104" width="296" height="34" fill="#4aa3ff" opacity=".35"/>
+       <circle cx="160" cy="44" r="11" fill="none" stroke="#e7ecf3" stroke-width="4"/><line x1="160" y1="55" x2="160" y2="92" stroke="#e7ecf3" stroke-width="4"/><line x1="160" y1="64" x2="144" y2="80" stroke="#e7ecf3" stroke-width="4"/><line x1="160" y1="64" x2="176" y2="80" stroke="#e7ecf3" stroke-width="4"/><line x1="160" y1="92" x2="150" y2="124" stroke="#e7ecf3" stroke-width="4"/><line x1="160" y1="92" x2="172" y2="124" stroke="#e7ecf3" stroke-width="4"/>
+       <text x="160" y="168" text-anchor="middle" font-size="16" font-weight="700">15 cm: σε ρίχνει κάτω</text>
+       <rect x="330" y="10" width="300" height="130" rx="12" fill="#0a0d10" stroke="#262c34"/>
+       <rect x="332" y="96" width="296" height="42" fill="#4aa3ff" opacity=".35"/>
+       <path d="M370 100 L384 70 H480 L506 100 Z" fill="none" stroke="#e7ecf3" stroke-width="4"/><rect x="360" y="100" width="160" height="20" rx="5" fill="none" stroke="#e7ecf3" stroke-width="4"/><circle cx="395" cy="124" r="10" fill="#050708" stroke="#e7ecf3" stroke-width="4"/><circle cx="490" cy="124" r="10" fill="#050708" stroke="#e7ecf3" stroke-width="4"/>
+       <text x="480" y="168" text-anchor="middle" font-size="16" font-weight="700">30 cm: παρασύρει αυτοκίνητο</text>
+      </g>
+     </svg>
+     <figcaption>Μην περπατάς και μην οδηγείς μέσα σε νερό που τρέχει. Γύρνα πίσω.</figcaption>
+    </figure>
+    <div class="phases">
+     <div class="ph before"><h4>Πριν</h4><ul>
+      <li>Μάθε αν το σπίτι σου είναι κοντά σε ρέμα ή σε χαμηλό σημείο, ή αν έχεις υπόγειο.</li>
+      <li>Καθάρισε φρεάτια και υδρορροές. Κράτα έγγραφα και πολύτιμα σε ψηλό ράφι ή πάνω όροφο, μέσα σε αδιάβροχες θήκες.</li>
+      <li>Παρακολούθησε τα έκτακτα δελτία της ΕΜΥ και τα μηνύματα 112.</li></ul></div>
+     <div class="ph during"><h4>Όταν ανεβαίνει το νερό</h4><ol>
+      <li>Μείνε μακριά από ρέματα, υπόγεια και υπόγειες διαβάσεις.</li>
+      <li>Ανέβα σε ψηλότερο όροφο ή σε ψηλό σημείο. Ακολούθησε τις οδηγίες των αρχών.</li>
+      <li>Κλείσε το ρεύμα από τον γενικό διακόπτη μόνο αν βρίσκεται σε στεγνό σημείο. Αν στέκεσαι στο νερό, μην αγγίζεις ηλεκτρικά.</li>
+      <li>Μην περπατάς και μην οδηγείς σε νερό που τρέχει.</li>
+      <li>Αν το αυτοκίνητο παρασυρθεί: βγες από το παράθυρο, ανέβα στην οροφή και κάλεσε 112.</li></ol></div>
+     <div class="ph after"><h4>Μετά</h4><ul>
+      <li>Το νερό της πλημμύρας είναι μολυσμένο. Μην πίνεις νερό βρύσης μέχρι να το επιβεβαιώσουν οι αρχές και πέτα τρόφιμα που ήρθαν σε επαφή μαζί του.</li>
+      <li>Μην ανοίξεις το ρεύμα σε βρεγμένη εγκατάσταση χωρίς ηλεκτρολόγο.</li>
+      <li>Φωτογράφισε τις ζημιές για την ασφάλεια. Φόρεσε γάντια και μπότες για τον καθαρισμό και αέρισε καλά για να μη φτιάξει μούχλα.</li></ul></div>
+    </div>
+   </div>
+  </details>
+
+  <details class="thr" id="t-blackout">
+   <summary><svg class="ic"><use href="#i-bolt"/></svg><span>Παρατεταμένο blackout, καύσωνας και κρύο<small>Τα πιο πιθανά σενάρια για ένα διαμέρισμα στην Αθήνα.</small></span></summary>
+   <div class="body">
+    <figure class="fig">
+     <svg viewBox="0 0 640 130" role="img" aria-label="Πόσο κρατάει το φαγητό χωρίς ρεύμα">
+      <g font-family="IBM Plex Mono, monospace" font-size="13" fill="#e7ecf3">
+       <text x="10" y="30">Ψυγείο κλειστό</text><rect x="190" y="14" width="40" height="22" rx="4" fill="#ff1e38"/><text x="240" y="30" fill="#8a95a6">~4 ώρες</text>
+       <text x="10" y="70">Καταψύκτης μισογεμάτος</text><rect x="190" y="54" width="240" height="22" rx="4" fill="#ffb020"/><text x="440" y="70" fill="#8a95a6">~24 ώρες</text>
+       <text x="10" y="110">Καταψύκτης γεμάτος</text><rect x="190" y="94" width="440" height="22" rx="4" fill="#2ee6a6" style="width:min(440px,100%)"/><text x="400" y="110" fill="#050708" font-weight="700">~48 ώρες</text>
+      </g>
+     </svg>
+     <figcaption>Με την πόρτα κλειστή. Κάθε φορά που ανοίγεις, μειώνεται ο χρόνος.</figcaption>
+    </figure>
+    <div class="phases">
+     <div class="ph during"><h4>Blackout</h4><ol>
+      <li>Έλεγξε αν λείπει το ρεύμα μόνο από το σπίτι σου (ασφάλειες) ή από τη γειτονιά. Για βλάβες: ΔΕΔΔΗΕ 11500.</li>
+      <li>Βγάλε από την πρίζα ευαίσθητες συσκευές και άφησε ένα φως αναμμένο, για να καταλάβεις πότε γυρίζει το ρεύμα.</li>
+      <li>Κράτα ψυγείο και καταψύκτη κλειστά.</li>
+      <li>Μην πάρεις ασανσέρ. Αν κολλήσεις, πάτα το κουμπί έκτακτης ανάγκης, κάλεσε 112 και μείνε ήρεμος.</li>
+      <li>Στις πολυκατοικίες το νερό συχνά δεν ανεβαίνει χωρίς αντλίες. Μην αφήσεις το απόθεμα νερού για το τέλος.</li>
+      <li>Κάρτες και ΑΤΜ μπορεί να μην δουλεύουν: έχε μετρητά και τουλάχιστον μισό ρεζερβουάρ.</li>
+      <li>Αποφύγετε τα κεριά. Προτίμησε φακούς και φανάρια LED.</li>
+      <li>Γεννήτρια: μόνο σε ανοιχτό χώρο, μακριά από παράθυρα και πόρτες.</li></ol></div>
+     <div class="ph before"><h4><svg class="ic" style="width:1.1em;height:1.1em"><use href="#i-sun"/></svg> Καύσωνας</h4><p style="font-size:14px;color:var(--dim);margin:0 0 6px">Όταν η ΕΜΥ βγάζει έκτακτο δελτίο καύσωνα.</p><ul>
+      <li>Πιες νερό συχνά, ακόμη κι αν δεν διψάς. Μείνε στο πιο δροσερό δωμάτιο και απόφυγε την έξοδο 12:00–17:00.</li>
+      <li>Φόρα ανοιχτόχρωμα, ελαφριά ρούχα και καπέλο. Βρέξε πρόσωπο και αυχένα.</li>
+      <li>Έλεγξε ηλικιωμένους και μωρά. Ποτέ παιδιά ή ζώα μέσα σε παρκαρισμένο αυτοκίνητο.</li>
+      <li>Θερμοπληξία (πολύ υψηλός πυρετός, σύγχυση, ζάλη, λιποθυμία, ξηρό δέρμα): κάλεσε αμέσως 166, μετέφερε το άτομο σε σκιά και δρόσισέ το με νερό.</li></ul></div>
+     <div class="ph after"><h4><svg class="ic" style="width:1.1em;height:1.1em"><use href="#i-snow"/></svg> Κρύο</h4><ul>
+      <li>Φόρα στρώσεις ρούχων, μείνε σε ένα μόνο δωμάτιο, κλείσε πόρτες και κρέμασε κουβέρτες στα παράθυρα.</li>
+      <li>Πιες ζεστά ροφήματα (όχι αλκοόλ) και κινήσου.</li>
+      <li>Υποθερμία (ρίγος, σύγχυση, νύστα, παγωμένο δέρμα): στεγνά ρούχα, κουβέρτες, ζεστό ρόφημα και κάλεσε 166.</li>
+      <li>Ποτέ θέρμανση με γκάζι κουζίνας, ψησταριά ή σόμπα υγραερίου σε κλειστό χώρο.</li></ul></div>
+    </div>
+   </div>
+  </details>
+ </section>
+
+ <!-- ΣΑΚΙΔΙΟ -->
+ <section class="sec" id="gobag" data-s>
+  <p class="kick">Σακίδιο φυγής</p>
+  <h2>Go-Bag 72 ωρών</h2>
+  <p class="intro">Το σακίδιο φυγής καλύπτει 72 ώρες και πρέπει να είναι αρκετά ελαφρύ για να το κουβαλάς, έως 10–12 kg ο ενήλικας. Τα 30 λίτρα νερού των 10 ημερών ζυγίζουν 30 kg και μένουν στο σπίτι. Στο σακίδιο βάζεις 3 λίτρα και φίλτρο.</p>
+  <div class="grid">
+   <div class="card"><h3><svg class="ic"><use href="#i-bag"/></svg>Ανά ενήλικα</h3><ul class="t">
+    <li>Νερό 3 L, φίλτρο και 6–8 ταμπλέτες χλωρίου</li>
+    <li>3–4 MRE ή 6–8 μπάρες και ξηροί καρποί</li>
+    <li>Προσωπικά φάρμακα 3 ημερών και μικρό κιτ πρώτων βοηθειών</li>
+    <li>Εφεδρικό ζευγάρι κάλτσες και εσώρουχα, σκούφος, γάντια, αδιάβροχο πόντσο</li>
+    <li>Ισοθερμική κουβέρτα, ελαφρύς υπνόσακος αν χωράει</li>
+    <li>Φακός κεφαλής, εφεδρικές μπαταρίες, πολυεργαλείο, αναπτήρας</li>
+    <li>Power bank, καλώδιο, μικρό ραδιόφωνο, σφυρίχτρα, χάρτης Αττικής</li>
+    <li>Αντίγραφα εγγράφων (USB και χαρτί) και 50–100 € σε μικρά χαρτονομίσματα</li>
+    <li>Μαντηλάκια, σαπούνι, 3–4 σακούλες</li></ul></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-family"/></svg>Οικογένεια</h3><ul class="t">
+    <li>Κάθε ενήλικας κουβαλά το δικό του σακίδιο. Το φαρμακείο, το φίλτρο και τα έγγραφα μοιράζονται.</li>
+    <li>Κάθε παιδί: μικρό σακίδιο με ρούχα, 1 L νερό, σφυρίχτρα, ένα αγαπημένο παιχνίδι και κάρτα με στοιχεία επαφής. Μην το φορτώνεις παραπάνω από όσο αντέχει.</li>
+    <li>Μωρά: πάνες, μωρομάντηλα, γάλα και μπιμπερό για 3 ημέρες.</li></ul></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-alert"/></svg>Στο αυτοκίνητο</h3><p>Κράτα 6 L νερό, κουβέρτα, φακό, φορτιστή, μικρό κιτ πρώτων βοηθειών και ρεζερβουάρ πάνω από το μισό.</p></div>
+  </div>
+ </section>
+
+ <!-- ΣΥΝΤΗΡΗΣΗ -->
+ <section class="sec" id="keep" data-s>
+  <p class="kick">Συντήρηση</p>
+  <h2>Έλεγχος κάθε 6 μήνες</h2>
+  <p class="intro">Ένα κιτ που δεν ελέγχεται δεν είναι αξιόπιστο. Κάνε τον έλεγχο με την αλλαγή ώρας, ώστε να μη χρειάζεσαι ημερολόγιο.</p>
+  <div class="note ok"><b>Επόμενη αλλαγή ώρας:</b> <span id="nextDst">…</span>. Τότε κάνε τον έλεγχο.</div>
+  <ul class="t">
+   <li>Νερό: ανανέωσε το αποθηκευμένο νερό και έλεγξε τα δοχεία για διαρροές.</li>
+   <li>Τροφή: έλεγξε ημερομηνίες λήξης και αντικατάστησε όσα λήγουν σε λιγότερο από 6 μήνες.</li>
+   <li>Φάρμακα: έλεγξε λήξεις και ανανέωσε τα προσωπικά.</li>
+   <li>Μπαταρίες και power banks: δοκίμασε φακούς και ραδιόφωνο, ξαναφόρτισε τα power banks.</li>
+   <li>Ρουχισμός: άλλαξε τα ρούχα του σακιδίου ανάλογα με την εποχή και τα νούμερα των παιδιών.</li>
+   <li>Έγγραφα: ενημέρωσε αντίγραφα, USB και ποσό μετρητών.</li>
+   <li>Τηλέφωνα: επιβεβαίωσε αριθμούς και επαφή εκτός πόλης.</li>
+   <li>Άσκηση: κάντε μία πρόβα σεισμού ή εκκένωσης με όλη την οικογένεια.</li>
+   <li>Εξοπλισμός: δοκίμασε πυροσβεστήρα (πίεση), εστία camping και φίλτρο νερού.</li>
+  </ul>
+ </section>
+
+ <!-- ΕΠΙΣΗΜΑ -->
+ <section class="sec" id="official" data-s>
+  <p class="kick">Επίσημες πηγές</p>
+  <h2>Δημόσιες δομές και επίσημες οδηγίες</h2>
+  <p class="intro">Αυτός ο οδηγός συμπληρώνει και δεν αντικαθιστά τις οδηγίες της Γενικής Γραμματείας Πολιτικής Προστασίας (ΓΓΠΠ). Σε πραγματική κρίση ακολούθησε πρώτα αυτές. Τα κείμενα παρακάτω είναι σύντομη περίληψη από το civilprotection.gov.gr.</p>
+
+  <h3>Τι είναι το 112</h3>
+  <div class="card">
+   <p>Το 112 είναι ο ενιαίος Ευρωπαϊκός Αριθμός Έκτακτης Ανάγκης. Η κλήση είναι δωρεάν, στην Ελλάδα και σε όλη την Ε.Ε. Με μία κλήση ενημερώνονται ταυτόχρονα όλοι οι φορείς που πρέπει να παρέμβουν και μπορεί να εντοπιστεί η θέση σου, ώστε η βοήθεια να φτάσει πιο εύκολα.</p>
+   <p style="margin-top:8px">Το 112 στέλνει και <b>μαζικές ειδοποιήσεις</b> στα κινητά, όταν αναμένεται ή εξελίσσεται φυσική καταστροφή ή επικίνδυνη κατάσταση. Τα μηνύματα έχουν οδηγίες προστασίας. Διάβασέ τα και ακολούθησέ τα.</p>
+   <p style="margin-top:8px"><a href="https://civilprotection.gov.gr/112" target="_blank" rel="noopener">civilprotection.gov.gr/112</a></p>
+  </div>
+
+  <h3>Οι δημόσιες δομές που θα χρειαστείς</h3>
+  <div class="grid">
+   <div class="card"><h3><svg class="ic"><use href="#i-fire"/></svg>Πυροσβεστική · 199</h3><p>Πυρκαγιές, διασώσεις, επικίνδυνα υλικά.</p><p style="margin-top:6px"><a href="https://www.fireservice.gr/" target="_blank" rel="noopener">fireservice.gr</a></p></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-alert"/></svg>Ελληνική Αστυνομία · 100</h3><p>Δημόσια τάξη, ασφάλεια, κυκλοφορία.</p><p style="margin-top:6px"><a href="https://www.astynomia.gr/?lang=el" target="_blank" rel="noopener">astynomia.gr</a></p></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-flood"/></svg>Λιμενικό Σώμα · 108</h3><p>Κίνδυνος στη θάλασσα και στις ακτές, διάσωση στο νερό.</p><p style="margin-top:6px"><a href="https://www.hcg.gr/el/" target="_blank" rel="noopener">hcg.gr</a></p></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-med"/></svg>ΕΚΑΒ · 166</h3><p>Ασθενοφόρο και επείγουσα ιατρική βοήθεια.</p><p style="margin-top:6px"><a href="https://www.ekab.gr/" target="_blank" rel="noopener">ekab.gr</a></p></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-family"/></svg>Το Χαμόγελο του Παιδιού · 1056</h3><p>Γραμμή για παιδιά που κινδυνεύουν ή χάθηκαν και για όποιον ανησυχεί για ένα παιδί.</p><p style="margin-top:6px"><a href="https://www.hamogelo.gr/gr/el/" target="_blank" rel="noopener">hamogelo.gr</a></p></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-house"/></svg>Γενική Γραμματεία Πολιτικής Προστασίας</h3><p>Κέντρο επικοινωνίας: 213 1510 100 · info@civilprotection.gr. Για κρατική αρωγή μετά από καταστροφή: ΓΓΑΦΚΚΑ και Πλατφόρμα Πρώτης Αρωγής (213 162 1000).</p><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/epikoinonia" target="_blank" rel="noopener">Τηλεφωνικός κατάλογος</a></p></div>
+  </div>
+  <p style="color:var(--dim);font-size:13px">Οι αριθμοί 1056 και 213 1510 100 να επαληθεύονται στις σελίδες των φορέων πριν τυπωθούν. Οι σύνδεσμοι ανοίγουν εξωτερικές σελίδες μόνο όταν τους πατήσεις, και η ίδια η σελίδα δεν στέλνει τίποτα.</p>
+
+  <h3>Επίσημες οδηγίες ανά κίνδυνο (ΓΓΠΠ)</h3>
+  <div class="grid">
+   <div class="card"><h3>Γενικές οδηγίες</h3><ul class="t"><li>Ενημέρωση από ΕΜΥ και ΓΓΠΠ μέσω ραδιοφώνου και τηλεόρασης.</li><li>Τα τηλέφωνα έκτακτης ανάγκης σε εμφανές σημείο και τα παιδιά να τα ξέρουν.</li><li>Όλοι να ξέρουν να κλείνουν ρεύμα, αέριο, νερό και να χρησιμοποιούν πυροσβεστήρα.</li><li>Κουτί πρώτων βοηθειών, πυροσβεστήρας, φακός, μπαταρίες, φορητό ραδιόφωνο.</li><li>Ιδιαίτερη φροντίδα για παιδιά και ηλικιωμένους.</li></ul><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/odigies-prostasias/genikes-odigies" target="_blank" rel="noopener">Πλήρες κείμενο</a></p></div>
+   <div class="card"><h3>Σεισμοί</h3><ul class="t"><li>Μέσα στο σπίτι: σκύψε κάτω από ανθεκτικό έπιπλο και κράτα το. Μην τρέχεις έξω και μην πας στο μπαλκόνι.</li><li>Στο αυτοκίνητο: σταμάτα σε ανοιχτό χώρο, μακριά από σήραγγες και γέφυρες.</li><li>Μετά: μετασεισμοί, έλεγχος για τραυματίες, σκάλες και όχι ασανσέρ, μην μπαίνεις σε σπίτι με ζημιές ή διαρροή αερίου.</li><li>Τσουνάμι: αν η θάλασσα ανεβοκατεβαίνει απότομα, φύγε προς ψηλότερα και μην επιστρέψεις πριν το πουν οι αρχές.</li></ul><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/odigies-prostasias/seismoi" target="_blank" rel="noopener">Πλήρες κείμενο</a></p></div>
+   <div class="card"><h3>Δασικές πυρκαγιές</h3><ul class="t"><li>Καθάρισε τουλάχιστον 10 μέτρα γύρω από το σπίτι και κλάδεψε τα δέντρα έως 3 μέτρα ύψος.</li><li>Όταν δεις φωτιά κάλεσε 199 ή 112 και πες ακριβή τοποθεσία και κατεύθυνση.</li><li>Αν διαταχθεί οργανωμένη απομάκρυνση, ακολούθησε τις διαδρομές των αρχών.</li><li>Αν η φωτιά φτάσει στο σπίτι σου, μην φύγεις εκτός αν η διαφυγή είναι απολύτως ασφαλής. Το αυτοκίνητο είναι πολύ πιο επικίνδυνο από σπίτι από άφλεκτα υλικά.</li><li>Μετά: έλεγχος για αναζωπυρώσεις τουλάχιστον 48 ώρες.</li></ul><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/odigies-prostasias/dasikes-pyrkagies" target="_blank" rel="noopener">Πλήρες κείμενο</a></p></div>
+   <div class="card"><h3>Πλημμύρες</h3><ul class="t"><li>Καθάρισε φρεάτια και υδρορροές όταν ανακοινωθούν έντονες βροχές. Απόφυγε τα υπόγεια.</li><li>Μην διασχίζεις χείμαρρο, με τα πόδια ή με αυτοκίνητο. Αν το αυτοκίνητο ακινητοποιηθεί στο νερό, εγκατάλειψέ το.</li><li>Μην περνάς πλημμυρισμένες ιρλανδικές διαβάσεις, διάλεξε μεγαλύτερη αλλά ασφαλέστερη διαδρομή.</li><li>Μετά: γύρνα μόνο όταν το επιβεβαιώσουν οι αρχές, κλείσε ρεύμα και νερό, φόρα κλειστά παπούτσια.</li></ul><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/odigies-prostasias/plimmyres" target="_blank" rel="noopener">Πλήρες κείμενο</a></p></div>
+   <div class="card"><h3>Καύσωνας</h3><ul class="t"><li>Καύσωνας: τουλάχιστον 3 ημέρες πάνω από 37°C χωρίς σημαντική πτώση τη νύχτα.</li><li>Μείνε σε δροσερούς, σκιερούς χώρους, φόρα ελαφριά ανοιχτόχρωμα ρούχα και καπέλο.</li><li>Πιες συχνά νερό και απόφυγε το αλκοόλ.</li><li>Μην αφήνεις μόνους ηλικιωμένους. Η θερμοπληξία θέλει άμεση ιατρική βοήθεια.</li></ul><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/odigies-prostasias/kaysonas" target="_blank" rel="noopener">Πλήρες κείμενο</a></p></div>
+   <div class="card"><h3>Όλες οι οδηγίες</h3><p>Η ΓΓΠΠ έχει οδηγίες και για κατολισθήσεις, χιονοπτώσεις και παγετό, ηφαίστεια, βιομηχανικά ατυχήματα, ΧΒΡΠ περιστατικά, θυελλώδεις ανέμους και καταιγίδες.</p><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/odigies-prostasias" target="_blank" rel="noopener">civilprotection.gov.gr/odigies-prostasias</a></p></div>
+  </div>
+  <div class="note">Πηγή των περιλήψεων: Γενική Γραμματεία Πολιτικής Προστασίας, civilprotection.gov.gr (διαβάστηκαν στις 08.11). Οι οδηγίες των αρχών ενημερώνονται, οπότε έλεγξε τη σελίδα τους.</div>
+ </section>
+
+ <!-- ΕΚΤΥΠΩΣΕΙΣ -->
+ <section class="sec" id="print" data-s>
+  <p class="kick">Εκτυπώσεις</p>
+  <h2>Εκτύπωσε τα φύλλα</h2>
+  <p class="intro">Τα φύλλα βγαίνουν σε A4, ασπρόμαυρα, με το λογότυπο Veagle και το ferelis.gr. Το κάθε φύλλο έχει κενά κουτάκια για να τα τσεκάρεις με στυλό. Φύλαξε ένα αντίγραφο στο σακίδιο, ένα στην κουζίνα και ένα στο αυτοκίνητο.</p>
+  <div class="printrow">
+   <button class="btn" type="button" data-print="check1"><svg class="ic"><use href="#i-print"/></svg> Λίστα ελέγχου: 1 άτομο</button>
+   <button class="btn" type="button" data-print="check4"><svg class="ic"><use href="#i-print"/></svg> Λίστα ελέγχου: οικογένεια 4</button>
+   <button class="btn ghost" type="button" data-print="contacts"><svg class="ic"><use href="#i-print"/></svg> Φύλλο επαφών και κάρτα τσέπης</button>
+   <button class="btn ghost" type="button" data-print="all"><svg class="ic"><use href="#i-print"/></svg> Ολόκληρο το εγχειρίδιο</button>
+  </div>
+  <p style="color:var(--dim);font-size:13px">Αν το κουμπί δεν ανοίγει παράθυρο εκτύπωσης, πάτα Ctrl+P (Cmd+P σε Mac). Στο παράθυρο διάλεξε «Αποθήκευση ως PDF» αν θέλεις αρχείο.</p>
+ </section>
+
+</div>
+</main>
+
+<footer class="foot">
+ <div class="wrap">
+  <div>
+   <p class="discl">Οι οδηγίες είναι ενδεικτικές και γενικού χαρακτήρα. Δεν αντικαθιστούν τις οδηγίες των αρχών (Πολιτική Προστασία, 112), ούτε ιατρική ή νομική συμβουλή. Σε πραγματική κρίση ακολούθησε πρώτα τις επίσημες οδηγίες. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Η σελίδα δεν κάνει καμία σύνδεση στο internet και δεν στέλνει τίποτα πουθενά.</p>
+   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 08.11 · 17:30</p>
+  </div>
+  <img src="eagle-white.png" alt="" width="34" height="36" style="opacity:.7">
+ </div>
+</footer>
+
+<!-- ΦΥΛΛΑ ΕΚΤΥΠΩΣΗΣ (γεμίζουν από το JS) -->
+<div id="printSheets" aria-hidden="true">
+ <div class="sheet check1" id="sh1"></div>
+ <div class="sheet check4" id="sh4"></div>
+ <div class="sheet contacts" id="shc"></div>
+ <div class="pfoot"><span>Veagle Survival Book · ferelis.gr</span><span>Έκδοση 08.11 · 17:30</span></div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var VER='Έκδοση 08.11 · 17:30';
+
+/* ---------- δεδομένα λίστας ---------- */
+var CK=[
+ {id:'water',t:'Νερό',ic:'drop',items:[
+  ['w1','Νερό σε κλειστά μπουκάλια','30 L (ιδανικά 40)','120 L (ιδανικά 160)'],
+  ['w2','Φίλτρο νερού (Sawyer ή LifeStraw)','1','2'],
+  ['w3','Ταμπλέτες χλωρίου (ή απλή χλωρίνη χωρίς άρωμα)','1 κουτί','2 κουτιά'],
+  ['w4','Δοχεία νερού σε δύο σημεία του σπιτιού','2','2']]},
+ {id:'food',t:'Τροφή',ic:'food',items:[
+  ['f1','Κονσέρβες έτοιμες για φαγητό','15–20','60–80'],
+  ['f2','Ξηρά τροφή: παξιμάδια, μπάρες, ξηροί καρποί, αποξηραμένα φρούτα','2–3 kg','8–12 kg'],
+  ['f3','Ρύζι, ζυμαρικά ή βρώμη','1 kg','4 kg'],
+  ['f4','Λάδι, αλάτι, μέλι, καφές ή τσάι, ηλεκτρολύτες','μικρή ποσότητα','μικρή ποσότητα'],
+  ['f5','Ανοιχτήρι κονσέρβας χειρός','1','2'],
+  ['f6','Έτοιμα γεύματα MRE (προαιρετικά, μέχρι 2 την ημέρα)','έως 20','έως 80'],
+  ['f7','Παιδικά σνακ, γάλα σε σκόνη, βρεφικά είδη (αν χρειάζονται)','—','ανάλογα'],
+  ['f8','Τροφή και νερό για κατοικίδια (αν έχεις)','10 ημέρες','10 ημέρες']]},
+ {id:'med',t:'Φαρμακείο',ic:'med',items:[
+  ['m1','Προσωπικά φάρμακα για 15 ημέρες','1 σετ','1 σετ ανά μέλος'],
+  ['m2','Κιτ πρώτων βοηθειών','1 μικρό','1 μεγάλο και 1 στο αυτοκίνητο'],
+  ['m3','Παυσίπονο/αντιπυρετικό, αντιδιαρροϊκό, αντιισταμινικό, ηλεκτρολύτες','1 σετ','1 σετ'],
+  ['m4','Ψηφιακό θερμόμετρο, ψαλίδι, τσιμπιδάκι','1','1'],
+  ['m5','Ισοθερμικές κουβέρτες','2','4'],
+  ['m6','Μάσκες FFP2','5','20']]},
+ {id:'gear',t:'Φωτισμός, ενέργεια, επικοινωνία',ic:'light',items:[
+  ['g1','Φακός κεφαλής','1','4'],
+  ['g2','Φακός χειρός ή φανάρι LED','1','2 φανάρια'],
+  ['g3','Εφεδρικές μπαταρίες (2 σετ ανά συσκευή)','2 σετ','2 σετ'],
+  ['g4','Power bank','20.000 mAh','40.000 mAh και πάνω'],
+  ['g5','Ραδιόφωνο FM με μπαταρίες ή δυναμό','1','1'],
+  ['g6','Σφυρίχτρα','1','1 ανά μέλος'],
+  ['g7','Φωτιά: ferro rod, 2 αναπτήρες, αδιάβροχα σπίρτα','1 σετ','1 σετ'],
+  ['g8','Πολυεργαλείο','1','1–2'],
+  ['g9','Εστία camping και φιάλες αερίου','1 και 3','1 και 6'],
+  ['g10','Πυροσβεστήρας ABC 6 kg και πυρίμαχη κουβέρτα','1 και 1','1 και 1']]},
+ {id:'hyg',t:'Υγιεινή',ic:'soap',items:[
+  ['h1','Υγρά μαντηλάκια','2–3 πακέτα','8–10 πακέτα'],
+  ['h2','Αντισηπτικό τζελ χεριών','2','4'],
+  ['h3','Μεγάλες ανθεκτικές σακούλες','15–20','60 και πάνω'],
+  ['h4','Χαρτί υγείας, σαπούνι, οδοντόκρεμα, είδη περιόδου','για 10 ημέρες','για 10 ημέρες'],
+  ['h5','Άμμος γάτας, πριονίδι ή σόδα φαγητού για την τουαλέτα ανάγκης','1 σακί','1–2 σακιά']]},
+ {id:'clo',t:'Ρουχισμός και ύπνος',ic:'clothes',items:[
+  ['c1','Ζεστές κάλτσες (μάλλινες ή συνθετικές)','3 ζευγάρια','3 ζευγάρια ανά μέλος'],
+  ['c2','Σκούφος και γάντια','1 σετ','1 σετ ανά μέλος'],
+  ['c3','Υπνόσακος για τις χειμερινές θερμοκρασίες','1','1 ανά μέλος'],
+  ['c4','Αδιάβροχο ή αντιανεμικό μπουφάν','1','1 ανά μέλος'],
+  ['c5','Σταθερά παπούτσια και φακός δίπλα στο κρεβάτι','1','1 ανά μέλος']]},
+ {id:'doc',t:'Έγγραφα και μετρητά',ic:'doc',items:[
+  ['d1','Σκαναρισμένα έγγραφα σε USB και αντίγραφα σε αδιάβροχη θήκη','1 USB','φάκελος και 1 USB ανά ενήλικα'],
+  ['d2','Μικρά χαρτονομίσματα (5, 10, 20 €)','~200 €','~500 €'],
+  ['d3','Πρόσφατη φωτογραφία κάθε μέλους','1','4']]},
+ {id:'plan',t:'Σχέδιο',ic:'family',items:[
+  ['p1','Ορισμένα σημεία συνάντησης (4)','✓','✓'],
+  ['p2','Επαφή εκτός πόλης και τηλέφωνα γραμμένα σε χαρτί','✓','✓'],
+  ['p3','Ξέρω πού είναι ρεύμα, νερό, αέριο και πώς κλείνουν','✓','✓'],
+  ['p4','Είδα τις οδηγίες για σεισμό, φωτιά και πλημμύρα','✓','✓'],
+  ['p5','Έτοιμο σακίδιο φυγής 72 ωρών','1','1 ανά ενήλικα και μικρά για παιδιά'],
+  ['p6','Πρόβα με την οικογένεια (2 φορές τον χρόνο)','—','✓']]}
+];
+var KEY_C='vsb.check',KEY_F='vsb.fill',KEY_R='vsb.rem';
+function ls(){try{return window.localStorage}catch(e){return null}}
+function lget(k){var s=ls();if(!s)return null;try{return s.getItem(k)}catch(e){return null}}
+function lset(k,v){var s=ls();if(!s)return;try{s.setItem(k,v)}catch(e){}}
+function ldel(k){var s=ls();if(!s)return;try{s.removeItem(k)}catch(e){}}
+
+var checked={},remember=false;
+if(lget(KEY_R)==='1'){remember=true;try{checked=JSON.parse(lget(KEY_C)||'{}')||{}}catch(e){checked={}}}
+
+/* ---------- λίστα ---------- */
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function renderList(){
+ var h='';
+ CK.forEach(function(g){
+  h+='<div class="ckgrp" data-s><h3><svg class="ic"><use href="#i-'+g.ic+'"/></svg>'+esc(g.t)+'<em data-g="'+g.id+'"></em></h3>';
+  g.items.forEach(function(it){
+   h+='<label class="ck"><input type="checkbox" data-id="'+it[0]+'"'+(checked[it[0]]?' checked':'')+'><span class="tx">'+esc(it[1])+'<span class="qty"><span class="c1">1 άτομο: '+esc(it[2])+'</span><span class="c1 c4" style="display:none"></span><span class="c4"> '+'Οικογένεια: '+esc(it[3])+'</span></span></span></label>';
+  });
+  h+='</div>';
+ });
+ $('#ckList').innerHTML=h;
+ fixQty();
+}
+function fixQty(){ /* όταν δείχνει και τα δύο, βάζει διαχωριστικό */
+ $$('.qty').forEach(function(q){var a=q.querySelector('.c1'),b=q.querySelector('.c4:not(.c1)');if(b)b.textContent=(document.body.getAttribute('data-view')==='both'?' · ':'')+b.textContent.replace(/^\s*·?\s*/,'')});
+}
+function progress(){
+ var total=0,done=0;
+ CK.forEach(function(g){var d=0;g.items.forEach(function(it){total++;if(checked[it[0]]){done++;d++}});var e=$('[data-g="'+g.id+'"]');if(e)e.textContent=d+'/'+g.items.length});
+ var p=total?Math.round(done*100/total):0;
+ $('#ckCount').textContent=done+' από '+total;$('#ckPct').textContent=p+'%';$('#ckBar').style.width=p+'%';
+ var C=2*Math.PI*82;$('#ringArc').setAttribute('stroke-dasharray',(C*p/100).toFixed(1)+' '+C.toFixed(1));$('#ringTxt').textContent=p+'%';
+ $('#ringSub').textContent=p===0?'Τσέκαρε τη λίστα ελέγχου και δες πόσο έτοιμος είσαι.':p<100?'Έτοιμα '+done+' από '+total+' βήματα.':'Όλα έτοιμα. Θυμήσου τον έλεγχο κάθε 6 μήνες.';
+}
+function saveChecks(){if(remember)lset(KEY_C,JSON.stringify(checked))}
+document.addEventListener('change',function(e){
+ var t=e.target;
+ if(t.matches&&t.matches('input[data-id]')){if(t.checked)checked[t.getAttribute('data-id')]=1;else delete checked[t.getAttribute('data-id')];saveChecks();progress()}
+ else if(t.id==='rem'){
+  remember=t.checked;
+  if(remember){lset(KEY_R,'1');saveChecks();saveFill()}else{ldel(KEY_R);ldel(KEY_C);ldel(KEY_F)}
+ }
+});
+$('#ckClear').addEventListener('click',function(){checked={};$$('input[data-id]').forEach(function(i){i.checked=false});saveChecks();progress()});
+
+/* ---------- πεδία σχεδίου ---------- */
+function saveFill(){if(!remember)return;var o={};$$('input[data-f]').forEach(function(i){if(i.value)o[i.id]=i.value});lset(KEY_F,JSON.stringify(o))}
+document.addEventListener('input',function(e){if(e.target.matches&&e.target.matches('input[data-f]'))saveFill()});
+if(remember){$('#rem').checked=true;try{var fo=JSON.parse(lget(KEY_F)||'{}');Object.keys(fo).forEach(function(k){var i=document.getElementById(k);if(i)i.value=fo[k]})}catch(e){}}
+
+/* ---------- εναλλαγή προβολής ---------- */
+$$('.viewsw button').forEach(function(b){b.addEventListener('click',function(){
+ document.body.setAttribute('data-view',b.getAttribute('data-v'));
+ $$('.viewsw button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});fixQty();
+})});
+
+/* ---------- SOS ---------- */
+$('#sosBtn').addEventListener('click',function(){var p=$('#sosPanel');var o=p.classList.toggle('open');this.setAttribute('aria-expanded',o?'true':'false');this.textContent=o?'ΚΛΕΙΣΙΜΟ':'ΕΚΤΑΚΤΗ ΑΝΑΓΚΗ'});
+
+/* ---------- υπολογιστής ---------- */
+function num(id,d){var v=parseFloat($(id).value);return isFinite(v)&&v>=0?v:d}
+function calc(){
+ var a=num('#nA',0),c=num('#nC',0),d=Math.max(1,num('#nD',10)),l=parseFloat($('#nL').value)||3,dog=num('#nP',0);
+ var ppl=a+c,w=ppl*l*d+dog*0.05*d,w3=ppl*l*3;
+ var kc=(a*2250+c*1750)*d;
+ var nf=function(x){return Math.round(x).toLocaleString('el-GR')};
+ $('#oW').textContent=nf(w)+' L';
+ var b=Math.ceil(w/1.5);$('#oB').textContent=nf(b);$('#oB6').textContent=nf(Math.ceil(b/6));
+ $('#oW3').textContent=nf(w3)+' L';
+ $('#oK').textContent=nf(kc);$('#oM').textContent=nf(Math.ceil(kc/1250));
+ $('#oBag').textContent=nf(Math.ceil(ppl*1.5*d));
+ var max=60,show=Math.min(b,max),h='';
+ for(var i=0;i<show;i++)h+='<svg viewBox="0 0 14 30"><path d="M5 1h4v4l2 3v19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8l2-3Z" fill="#4aa3ff" opacity=".8"/></svg>';
+ if(b>max)h+='<em>+'+nf(b-max)+' ακόμη</em>';else if(b>0)h+='<em>'+nf(b)+' μπουκάλια 1,5 L</em>';
+ $('#bottles').innerHTML=h;
+}
+$$('#calc input,#calc select').forEach(function(i){i.addEventListener('input',calc);i.addEventListener('change',calc)});
+
+/* ---------- αναζήτηση ---------- */
+$('#q').addEventListener('input',function(){
+ var q=this.value.trim().toLowerCase(),any=false;
+ $$('[data-s]').forEach(function(s){
+  if(!q){s.classList.remove('hide');return}
+  var m=s.textContent.toLowerCase().indexOf(q)>=0;s.classList.toggle('hide',!m);if(m)any=true;
+ });
+ $('#empty').style.display=(q&&!any)?'block':'none';
+});
+
+/* ---------- αλλαγή ώρας ---------- */
+function lastSun(y,m){var d=new Date(y,m+1,0);d.setDate(d.getDate()-d.getDay());return d}
+function nextDst(){
+ var now=new Date(),y=now.getFullYear(),c=[lastSun(y,2),lastSun(y,9),lastSun(y+1,2)];
+ for(var i=0;i<c.length;i++){var e=new Date(c[i]);e.setHours(23,59,59);if(e>=now)return c[i]}
+ return c[2];
+}
+(function(){var d=nextDst();$('#nextDst').textContent=d.toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})})();
+
+/* ---------- φύλλα εκτύπωσης ---------- */
+function sheetHead(title,sub){
+ return '<div class="sh"><img src="eagle-black.png" alt=""><div><small>VEAGLE SURVIVAL BOOK</small><h1>'+esc(title)+'</h1></div></div>'+(sub?'<p style="margin:0 0 8px;font-size:10pt">'+esc(sub)+'</p>':'');
+}
+function checkSheet(fam){
+ var h=sheetHead(fam?'Λίστα ελέγχου: οικογένεια 4 ατόμων':'Λίστα ελέγχου: 1 άτομο','Απόθεμα σπιτιού για 10 ημέρες. Τσέκαρε με στυλό όταν το έχεις έτοιμο και γράψε την ημερομηνία ελέγχου.');
+ h+='<div class="meta"><span>Όνομα:</span><span>Ημερομηνία:</span><span>Επόμενος έλεγχος:</span></div>';
+ CK.forEach(function(g){
+  h+='<h2>'+esc(g.t)+'</h2><table>';
+  g.items.forEach(function(it){h+='<tr><td class="b"><i></i></td><td>'+esc(it[1])+'</td><td class="q">'+esc(fam?it[3]:it[2])+'</td><td class="d"></td></tr>'});
+  h+='</table>';
+ });
+ h+='<p style="font-size:9pt;margin-top:10px;color:#333">Νερό: ανανέωση κάθε 6 μήνες. Έλεγχος λήξεων τροφής και φαρμάκων με την αλλαγή ώρας (τέλη Μαρτίου και τέλη Οκτωβρίου).</p>';
+ return h;
+}
+function contactSheet(){
+ var f=function(id){var e=document.getElementById(id);return e&&e.value?esc(e.value):''};
+ var rows=[['Σημείο 1: μέσα στο σπίτι','f1'],['Σημείο 2: έξω από το κτίριο','f2'],['Σημείο 3: στη γειτονιά','f3'],['Σημείο 4: εκτός πόλης','f4'],['Επαφή εκτός πόλης','f5'],['Γείτονας','f6'],['Γενικός διακόπτης ρεύματος','f7'],['Βάνα νερού','f8'],['Βάνα αερίου ή φιάλη','f9']];
+ var h=sheetHead('Φύλλο επαφών και σχέδιο','Συμπληρώστε το όλοι μαζί και κρατήστε αντίγραφο στο σακίδιο και στην κουζίνα.');
+ h+='<h2>Σημεία και επαφές</h2><table>';
+ rows.forEach(function(r){h+='<tr><td style="width:36%">'+r[0]+'</td><td><div class="line">'+f(r[1])+'</div></td></tr>'});
+ h+='</table><h2>Μέλη οικογένειας</h2><table><tr><td><b>Όνομα</b></td><td><b>Τηλέφωνο</b></td><td><b>Ομάδα αίματος</b></td><td><b>Φάρμακα / αλλεργίες</b></td></tr>';
+ for(var i=0;i<6;i++)h+='<tr><td><div class="line"></div></td><td><div class="line"></div></td><td><div class="line"></div></td><td><div class="line"></div></td></tr>';
+ h+='</table><h2>Κάρτα τσέπης (κόψε και δίπλωσε)</h2><div class="cut"><b class="big">112</b> Έκτακτη ανάγκη &nbsp;·&nbsp; <b>166</b> ΕΚΑΒ &nbsp;·&nbsp; <b>199</b> Πυροσβεστική &nbsp;·&nbsp; <b>100</b> Αστυνομία &nbsp;·&nbsp; <b>108</b> Λιμενικό<div class="cutgrid"><div>Όνομα: ____________________</div><div>Τηλέφωνο: _______________</div><div>Ομάδα αίματος: ________</div><div>Επαφή εκτός πόλης: ____________________</div><div>Αλλεργίες / φάρμακα: ______________</div><div>Γιατρός: _______________</div></div></div>';
+ return h;
+}
+function buildSheets(){
+ $('#sh1').innerHTML=checkSheet(false);$('#sh4').innerHTML=checkSheet(true);$('#shc').innerHTML=contactSheet();
+}
+var opened=[];
+function doPrint(kind){
+ buildSheets();
+ if(kind==='all')document.body.removeAttribute('data-print');else document.body.setAttribute('data-print',kind);
+ opened=$$('details.thr').filter(function(d){return !d.open});opened.forEach(function(d){d.open=true});
+ try{window.print()}catch(e){}
+ setTimeout(cleanup,500);
+}
+function cleanup(){document.body.removeAttribute('data-print');opened.forEach(function(d){d.open=false});opened=[]}
+window.addEventListener('afterprint',cleanup);
+$$('[data-print]').forEach(function(b){if(b.tagName==='BUTTON')b.addEventListener('click',function(){doPrint(b.getAttribute('data-print'))})});
+window.addEventListener('beforeprint',function(){if(!document.body.hasAttribute('data-print')){$$('details.thr').forEach(function(d){d.open=true})}});
+
+/* ---------- εκκίνηση ---------- */
+renderList();progress();calc();
+/* άνοιγμα απειλής από #hash */
+if(location.hash&&/^#t-/.test(location.hash)){var el=document.querySelector(location.hash);if(el&&el.tagName==='DETAILS')el.open=true}
+})();
+</script>
+</body>
+</html>

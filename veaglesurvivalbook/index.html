@@ -67,6 +67,7 @@ h3{font-size:18px;margin:22px 0 8px}
 .intro{color:var(--dim);max-width:720px;margin:0 0 18px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.blogo{width:44px;height:44px;object-fit:contain;background:#fff;border-radius:10px;padding:3px;flex:none}
 .card h3{margin:0 0 6px;display:flex;align-items:center;gap:8px;font-size:16px}
 .card p,.card li{color:var(--dim);font-size:15px}
 .card p{margin:0}
@@ -207,6 +208,7 @@ footer.foot a{color:var(--dim)}
  details.thr>summary::after{content:""}
  table.t th{background:#eee;color:#000}table.t td{color:#000}
  .note{background:#f3f3f3;border-color:#000}
+ .disclaimer{break-inside:avoid;font-size:9.5pt}
  .ck input{border-color:#000;background:#fff}
  .ck input:checked::after{border-color:#000}.ck input:checked{background:#fff;border-color:#000}
  .ck input:checked ~ .tx{color:#000}
@@ -238,7 +240,7 @@ footer.foot a{color:var(--dim)}
  .sheet .cut b.big{font:700 20pt var(--disp)}
  .sheet .cutgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}
  .sheet .cutgrid div{font-size:10pt}
- .sheet .pfoot{position:fixed;left:0;right:0;bottom:0;font:8.5pt var(--mono);color:#333;border-top:1px solid #888;padding-top:4px;display:flex;justify-content:space-between}
+ .sheet .pfoot,.pfoot{position:fixed;left:0;right:0;bottom:0;font:8pt var(--mono);color:#333;border-top:1px solid #888;padding-top:4px;display:flex;justify-content:space-between}
  body:not([data-print]) .foot{border-top:1px solid #888}
  body:not([data-print]) .foot .wrap{display:block}
  details.thr .body{display:block}
@@ -335,6 +337,7 @@ footer.foot a{color:var(--dim)}
   </div>
  </div>
 
+<div class="note red disclaimer" id="disclaimer" role="note"><b>Σημαντική αποποίηση ευθύνης.</b> Το Veagle Survival Book είναι ιδιωτική, ανεπίσημη σελίδα γενικής ενημέρωσης. <b>Δεν ανήκει, δεν εκπροσωπεί και δεν συνδέεται</b> με την Πολιτική Προστασία, την Πυροσβεστική, την Αστυνομία, το Λιμενικό, το ΕΚΑΒ, το Χαμόγελο του Παιδιού ή οποιονδήποτε άλλο φορέα. Τα λογότυπα και τα ονόματά τους ανήκουν στους φορείς και εμφανίζονται μόνο για αναγνώριση. Οι οδηγίες είναι ενδεικτικές και <b>δεν αντικαθιστούν</b> τις επίσημες οδηγίες των αρχών, ούτε ιατρική, νομική ή τεχνική συμβουλή. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Οι τηλεφωνικοί αριθμοί και οι σύνδεσμοι μπορεί να αλλάξουν, οπότε επαλήθευσέ τους στις επίσημες σελίδες. Σε πραγματική έκτακτη ανάγκη κάλεσε <b>112</b> και ακολούθησε πρώτα τις οδηγίες των αρχών. Η χρήση γίνεται με δική σου ευθύνη και ο δημιουργός δεν φέρει ευθύνη για ζημιά ή απώλεια από τη χρήση του περιεχομένου.</div>
  <!-- ΒΑΣΙΚΑ -->
  <section class="sec" id="basics" data-s>
   <p class="kick">Βασικά</p>
@@ -796,14 +799,14 @@ footer.foot a{color:var(--dim)}
 
   <h3>Οι δημόσιες δομές που θα χρειαστείς</h3>
   <div class="grid">
-   <div class="card"><h3><svg class="ic"><use href="#i-fire"/></svg>Πυροσβεστική · 199</h3><p>Πυρκαγιές, διασώσεις, επικίνδυνα υλικά.</p><p style="margin-top:6px"><a href="https://www.fireservice.gr/" target="_blank" rel="noopener">fireservice.gr</a></p></div>
-   <div class="card"><h3><svg class="ic"><use href="#i-alert"/></svg>Ελληνική Αστυνομία · 100</h3><p>Δημόσια τάξη, ασφάλεια, κυκλοφορία.</p><p style="margin-top:6px"><a href="https://www.astynomia.gr/?lang=el" target="_blank" rel="noopener">astynomia.gr</a></p></div>
-   <div class="card"><h3><svg class="ic"><use href="#i-flood"/></svg>Λιμενικό Σώμα · 108</h3><p>Κίνδυνος στη θάλασσα και στις ακτές, διάσωση στο νερό.</p><p style="margin-top:6px"><a href="https://www.hcg.gr/el/" target="_blank" rel="noopener">hcg.gr</a></p></div>
-   <div class="card"><h3><svg class="ic"><use href="#i-med"/></svg>ΕΚΑΒ · 166</h3><p>Ασθενοφόρο και επείγουσα ιατρική βοήθεια.</p><p style="margin-top:6px"><a href="https://www.ekab.gr/" target="_blank" rel="noopener">ekab.gr</a></p></div>
-   <div class="card"><h3><svg class="ic"><use href="#i-family"/></svg>Το Χαμόγελο του Παιδιού · 1056</h3><p>Γραμμή για παιδιά που κινδυνεύουν ή χάθηκαν και για όποιον ανησυχεί για ένα παιδί.</p><p style="margin-top:6px"><a href="https://www.hamogelo.gr/gr/el/" target="_blank" rel="noopener">hamogelo.gr</a></p></div>
+   <div class="card"><h3><img class="blogo" src="logo-pyrosvestiki.png" alt="Λογότυπο: Πυροσβεστικό Σώμα" width="44" height="44">Πυροσβεστική · 199</h3><p>Πυρκαγιές, διασώσεις, επικίνδυνα υλικά.</p><p style="margin-top:6px"><a href="https://www.fireservice.gr/" target="_blank" rel="noopener">fireservice.gr</a></p></div>
+   <div class="card"><h3><img class="blogo" src="logo-astynomia.png" alt="Λογότυπο: Ελληνική Αστυνομία" width="44" height="44">Ελληνική Αστυνομία · 100</h3><p>Δημόσια τάξη, ασφάλεια, κυκλοφορία.</p><p style="margin-top:6px"><a href="https://www.astynomia.gr/?lang=el" target="_blank" rel="noopener">astynomia.gr</a></p></div>
+   <div class="card"><h3><img class="blogo" src="logo-limeniko.png" alt="Λογότυπο: Λιμενικό Σώμα" width="44" height="44">Λιμενικό Σώμα · 108</h3><p>Κίνδυνος στη θάλασσα και στις ακτές, διάσωση στο νερό.</p><p style="margin-top:6px"><a href="https://www.hcg.gr/el/" target="_blank" rel="noopener">hcg.gr</a></p></div>
+   <div class="card"><h3><img class="blogo" src="logo-ekab.png" alt="Λογότυπο: ΕΚΑΒ" width="44" height="44">ΕΚΑΒ · 166</h3><p>Ασθενοφόρο και επείγουσα ιατρική βοήθεια.</p><p style="margin-top:6px"><a href="https://www.ekab.gr/" target="_blank" rel="noopener">ekab.gr</a></p></div>
+   <div class="card"><h3><img class="blogo" src="logo-hamogelo.png" alt="Λογότυπο: Το Χαμόγελο του Παιδιού" width="44" height="44">Το Χαμόγελο του Παιδιού · 1056</h3><p>Γραμμή για παιδιά που κινδυνεύουν ή χάθηκαν και για όποιον ανησυχεί για ένα παιδί.</p><p style="margin-top:6px"><a href="https://www.hamogelo.gr/gr/el/" target="_blank" rel="noopener">hamogelo.gr</a></p></div>
    <div class="card"><h3><svg class="ic"><use href="#i-house"/></svg>Γενική Γραμματεία Πολιτικής Προστασίας</h3><p>Κέντρο επικοινωνίας: 213 1510 100 · info@civilprotection.gr. Για κρατική αρωγή μετά από καταστροφή: ΓΓΑΦΚΚΑ και Πλατφόρμα Πρώτης Αρωγής (213 162 1000).</p><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/epikoinonia" target="_blank" rel="noopener">Τηλεφωνικός κατάλογος</a></p></div>
   </div>
-  <p style="color:var(--dim);font-size:13px">Οι αριθμοί 1056 και 213 1510 100 να επαληθεύονται στις σελίδες των φορέων πριν τυπωθούν. Οι σύνδεσμοι ανοίγουν εξωτερικές σελίδες μόνο όταν τους πατήσεις, και η ίδια η σελίδα δεν στέλνει τίποτα.</p>
+  <p style="color:var(--dim);font-size:13px">Τα λογότυπα ανήκουν στους αντίστοιχους φορείς και μπαίνουν μόνο για αναγνώριση. Οι αριθμοί 1056 και 213 1510 100 να επαληθεύονται στις σελίδες των φορέων πριν τυπωθούν. Οι σύνδεσμοι ανοίγουν εξωτερικές σελίδες μόνο όταν τους πατήσεις, και η ίδια η σελίδα δεν στέλνει τίποτα.</p>
 
   <h3>Επίσημες οδηγίες ανά κίνδυνο (ΓΓΠΠ)</h3>
   <div class="grid">
@@ -814,6 +817,7 @@ footer.foot a{color:var(--dim)}
    <div class="card"><h3>Καύσωνας</h3><ul class="t"><li>Καύσωνας: τουλάχιστον 3 ημέρες πάνω από 37°C χωρίς σημαντική πτώση τη νύχτα.</li><li>Μείνε σε δροσερούς, σκιερούς χώρους, φόρα ελαφριά ανοιχτόχρωμα ρούχα και καπέλο.</li><li>Πιες συχνά νερό και απόφυγε το αλκοόλ.</li><li>Μην αφήνεις μόνους ηλικιωμένους. Η θερμοπληξία θέλει άμεση ιατρική βοήθεια.</li></ul><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/odigies-prostasias/kaysonas" target="_blank" rel="noopener">Πλήρες κείμενο</a></p></div>
    <div class="card"><h3>Όλες οι οδηγίες</h3><p>Η ΓΓΠΠ έχει οδηγίες και για κατολισθήσεις, χιονοπτώσεις και παγετό, ηφαίστεια, βιομηχανικά ατυχήματα, ΧΒΡΠ περιστατικά, θυελλώδεις ανέμους και καταιγίδες.</p><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/odigies-prostasias" target="_blank" rel="noopener">civilprotection.gov.gr/odigies-prostasias</a></p></div>
   </div>
+  <div class="note red"><b>Αποποίηση:</b> η σελίδα δεν είναι επίσημη και δεν συνδέεται με τους φορείς. Σε αντίθεση ή αμφιβολία ισχύει πάντα η επίσημη οδηγία της Πολιτικής Προστασίας και των αρχών.</div>
   <div class="note">Πηγή των περιλήψεων: Γενική Γραμματεία Πολιτικής Προστασίας, civilprotection.gov.gr (διαβάστηκαν στις 08.11). Οι οδηγίες των αρχών ενημερώνονται, οπότε έλεγξε τη σελίδα τους.</div>
  </section>
 
@@ -837,8 +841,8 @@ footer.foot a{color:var(--dim)}
 <footer class="foot">
  <div class="wrap">
   <div>
-   <p class="discl">Οι οδηγίες είναι ενδεικτικές και γενικού χαρακτήρα. Δεν αντικαθιστούν τις οδηγίες των αρχών (Πολιτική Προστασία, 112), ούτε ιατρική ή νομική συμβουλή. Σε πραγματική κρίση ακολούθησε πρώτα τις επίσημες οδηγίες. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Η σελίδα δεν κάνει καμία σύνδεση στο internet και δεν στέλνει τίποτα πουθενά.</p>
-   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 08.11 · 18:55</p>
+   <p class="discl"><b>Αποποίηση ευθύνης:</b> ανεπίσημη σελίδα, χωρίς σύνδεση με τους δημόσιους φορείς που αναφέρονται. Οι οδηγίες είναι ενδεικτικές και γενικού χαρακτήρα. Δεν αντικαθιστούν τις οδηγίες των αρχών (Πολιτική Προστασία, 112), ούτε ιατρική ή νομική συμβουλή. Σε πραγματική κρίση ακολούθησε πρώτα τις επίσημες οδηγίες. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Η σελίδα δεν κάνει καμία σύνδεση στο internet και δεν στέλνει τίποτα πουθενά.</p>
+   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 08.11 · 19:15</p>
   </div>
   <img src="eagle-white.png" alt="" width="34" height="36" style="opacity:.7">
  </div>
@@ -850,7 +854,7 @@ footer.foot a{color:var(--dim)}
  <div class="sheet check1" id="sh1"></div>
  <div class="sheet check4" id="sh4"></div>
  <div class="sheet contacts" id="shc"></div>
- <div class="pfoot"><span>Veagle Survival Book · ferelis.gr</span><span>Έκδοση 08.11 · 18:55</span></div>
+ <div class="pfoot"><span>Veagle Survival Book · ferelis.gr · Ανεπίσημος, ενδεικτικός οδηγός: δεν αντικαθιστά τις οδηγίες των αρχών (112).</span><span>Έκδοση 08.11 · 19:15</span></div>
 </div>
 
 <script>
@@ -858,7 +862,7 @@ footer.foot a{color:var(--dim)}
 'use strict';
 var $=function(s,r){return (r||document).querySelector(s)};
 var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
-var VER='Έκδοση 08.11 · 18:55';
+var VER='Έκδοση 08.11 · 19:15';
 
 /* ---------- δεδομένα λίστας ---------- */
 var CK=[
@@ -1016,6 +1020,7 @@ function nextDst(){
 (function(){var d=nextDst();$('#nextDst').textContent=d.toLocaleDateString('el-GR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})})();
 
 /* ---------- φύλλα εκτύπωσης ---------- */
+var DISC_P='Ανεπίσημος, ενδεικτικός οδηγός γενικής ενημέρωσης. Δεν συνδέεται με Πολιτική Προστασία, Πυροσβεστική, Αστυνομία, Λιμενικό, ΕΚΑΒ ή άλλον φορέα και δεν αντικαθιστά τις επίσημες οδηγίες, ούτε ιατρική ή νομική συμβουλή. Σε έκτακτη ανάγκη κάλεσε 112.';
 function sheetHead(title,sub){
  return '<div class="sh"><img src="eagle-black.png" alt=""><div><small>VEAGLE SURVIVAL BOOK</small><h1>'+esc(title)+'</h1></div></div>'+(sub?'<p style="margin:0 0 8px;font-size:10pt">'+esc(sub)+'</p>':'');
 }
@@ -1042,7 +1047,7 @@ function contactSheet(){
  return h;
 }
 function buildSheets(){
- $('#sh1').innerHTML=checkSheet(false);$('#sh4').innerHTML=checkSheet(true);$('#shc').innerHTML=contactSheet();
+ var dp='<p style="font-size:8.5pt;margin-top:12px;border-top:1px solid #000;padding-top:4px"><b>Αποποίηση:</b> '+DISC_P+'</p>';$('#sh1').innerHTML=checkSheet(false)+dp;$('#sh4').innerHTML=checkSheet(true)+dp;$('#shc').innerHTML=contactSheet()+dp;
 }
 var opened=[];
 function doPrint(kind){

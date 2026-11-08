@@ -117,7 +117,14 @@ body[data-view="1"] .c4,body[data-view="4"] .c1{display:none}
 .ckhead{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:10px}
 .pbar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;flex:1;min-width:160px}
 .pbar i{display:block;height:100%;width:0;background:var(--red);transition:width .25s}
-.ckgrp{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+#ckList{columns:3 300px;column-gap:14px}
+.ckgrp{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:0 0 14px;overflow:hidden;break-inside:avoid;-webkit-column-break-inside:avoid;display:inline-block;width:100%}
+.ckgrp .ck{padding:8px 12px;gap:10px}
+.ckgrp .ck .tx{font-size:14.5px;line-height:1.45}
+.ckgrp .qty{font-size:12px}
+.ckgrp .qty>span{display:block}
+.ckgrp h3{padding:10px 12px}
+@media (max-width:760px){#ckList{columns:1}}
 .ckgrp h3{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;font-size:16px}
 .ckgrp h3 em{margin-left:auto;font:500 12px var(--mono);color:var(--dim);font-style:normal}
 .ck{display:flex;gap:12px;align-items:flex-start;padding:10px 16px;border-bottom:1px solid var(--line);cursor:pointer}
@@ -824,7 +831,7 @@ footer.foot a{color:var(--dim)}
  <div class="wrap">
   <div>
    <p class="discl">Οι οδηγίες είναι ενδεικτικές και γενικού χαρακτήρα. Δεν αντικαθιστούν τις οδηγίες των αρχών (Πολιτική Προστασία, 112), ούτε ιατρική ή νομική συμβουλή. Σε πραγματική κρίση ακολούθησε πρώτα τις επίσημες οδηγίες. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Η σελίδα δεν κάνει καμία σύνδεση στο internet και δεν στέλνει τίποτα πουθενά.</p>
-   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 08.11 · 17:30</p>
+   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 08.11 · 18:40</p>
   </div>
   <img src="eagle-white.png" alt="" width="34" height="36" style="opacity:.7">
  </div>
@@ -835,7 +842,7 @@ footer.foot a{color:var(--dim)}
  <div class="sheet check1" id="sh1"></div>
  <div class="sheet check4" id="sh4"></div>
  <div class="sheet contacts" id="shc"></div>
- <div class="pfoot"><span>Veagle Survival Book · ferelis.gr</span><span>Έκδοση 08.11 · 17:30</span></div>
+ <div class="pfoot"><span>Veagle Survival Book · ferelis.gr</span><span>Έκδοση 08.11 · 18:40</span></div>
 </div>
 
 <script>
@@ -843,7 +850,7 @@ footer.foot a{color:var(--dim)}
 'use strict';
 var $=function(s,r){return (r||document).querySelector(s)};
 var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
-var VER='Έκδοση 08.11 · 17:30';
+var VER='Έκδοση 08.11 · 18:40';
 
 /* ---------- δεδομένα λίστας ---------- */
 var CK=[
@@ -927,7 +934,7 @@ function renderList(){
  fixQty();
 }
 function fixQty(){ /* όταν δείχνει και τα δύο, βάζει διαχωριστικό */
- $$('.qty').forEach(function(q){var a=q.querySelector('.c1'),b=q.querySelector('.c4:not(.c1)');if(b)b.textContent=(document.body.getAttribute('data-view')==='both'?' · ':'')+b.textContent.replace(/^\s*·?\s*/,'')});
+ $$('.qty').forEach(function(q){var a=q.querySelector('.c1'),b=q.querySelector('.c4:not(.c1)');if(b)b.textContent=b.textContent.replace(/^\s*·?\s*/,'')});
 }
 function progress(){
  var total=0,done=0;

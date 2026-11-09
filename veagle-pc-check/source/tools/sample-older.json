@@ -2,7 +2,7 @@
  "meta": {
   "mode": "full",
   "tool": "VEAGLE PC Check",
-  "version": "0.5.0",
+  "version": "2.0.0",
   "generated": "2026-10-10T16:35:00",
   "isAdmin": true,
   "psVersion": "5.1.26100.9549",
@@ -293,556 +293,986 @@
   "liveKernelReports": 0
  },
  "events": {
-  "days": 30,
+  "days": 60,
   "system": {
-   "total": 1379,
-   "errors": 700,
-   "warnings": 679,
+   "total": 2338,
+   "errors": 1190,
+   "warnings": 1154,
    "groups": [
     {
      "provider": "nvlddmkm",
      "id": 153,
      "level": "Error",
-     "count": 466,
+     "count": 793,
      "sample": "",
-     "lastSeen": "2026-10-03T16:35:00"
+     "lastSeen": "2026-10-03T16:35:00",
+     "count30": 475,
+     "count7": 158,
+     "count1": 39
     },
     {
      "provider": "Microsoft-Windows-DistributedCOM",
      "id": 10016,
      "level": "Warning",
-     "count": 447,
+     "count": 760,
      "sample": "The application-specific permission settings do not grant Local Activation permission for the COM Server application with CLSID",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 456,
+     "count7": 152,
+     "count1": 38
     },
     {
      "provider": "Microsoft-Windows-DistributedCOM",
      "id": 10010,
      "level": "Error",
-     "count": 163,
+     "count": 278,
      "sample": "The server did not register with DCOM within the required timeout.",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 166,
+     "count7": 55,
+     "count1": 13
     },
     {
      "provider": "Microsoft-Windows-BitLocker-Driver",
      "id": 24641,
      "level": "Error",
-     "count": 95,
+     "count": 162,
      "sample": "An unexpected error was encountered attempting to retrieve the BitLocker volume master key during restart.",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 97,
+     "count7": 32,
+     "count1": 8
     },
     {
      "provider": "e2fexpress",
      "id": 27,
      "level": "Warning",
-     "count": 45,
+     "count": 77,
      "sample": "Intel(R) Ethernet Controller (3) I225-V",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 46,
+     "count7": 15,
+     "count1": 3
     },
     {
      "provider": "Service Control Manager",
      "id": 7034,
      "level": "Error",
-     "count": 39,
+     "count": 67,
      "sample": "The MEmuSVC service terminated unexpectedly.  It has done this 1 time(s).",
-     "lastSeen": "2026-10-09T16:35:00"
+     "lastSeen": "2026-10-09T16:35:00",
+     "count30": 40,
+     "count7": 13,
+     "count1": 3
     },
     {
      "provider": "Microsoft-Windows-Hyper-V-Hypervisor",
      "id": 167,
      "level": "Warning",
-     "count": 39,
+     "count": 67,
      "sample": "The hypervisor did not enable mitigations for side channel vulnerabilities because HyperThreading is enabled.",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 40,
+     "count7": 13,
+     "count1": 3
     },
     {
      "provider": "Tcpip",
      "id": 4266,
      "level": "Warning",
-     "count": 17,
+     "count": 29,
      "sample": "A request to allocate an ephemeral port number from the global UDP port space has failed due to all such ports being in use.",
-     "lastSeen": "2026-10-11T16:35:00"
+     "lastSeen": "2026-10-11T16:35:00",
+     "count30": 17,
+     "count7": 5,
+     "count1": 1
     },
     {
      "provider": "winsrvext",
      "id": 100,
      "level": "Warning",
-     "count": 16,
+     "count": 28,
      "sample": "Process nvcontainer.exe is delaying system shutdown after 5172 milliseconds.",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 16,
+     "count7": 5,
+     "count1": 1
     },
     {
      "provider": "Microsoft-Windows-DistributedCOM",
      "id": 10005,
      "level": "Error",
-     "count": 12,
+     "count": 21,
      "sample": "DCOM got error \"87\" attempting to start the service GamingServices",
-     "lastSeen": "2026-10-27T16:35:00"
+     "lastSeen": "2026-10-27T16:35:00",
+     "count30": 12,
+     "count7": 4,
+     "count1": 1
     },
     {
      "provider": "VMnetDHCP",
      "id": 1,
      "level": "Warning",
-     "count": 9,
+     "count": 16,
      "sample": "dispatch: Timeout waiting for input data",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 9,
+     "count7": 3,
+     "count1": 0
     },
     {
      "provider": "Microsoft-Windows-FilterManager",
      "id": 3,
      "level": "Error",
-     "count": 8,
+     "count": 14,
      "sample": "Filter Manager failed to attach to volume. This volume will be unavailable for filtering until a reboot.",
-     "lastSeen": "2026-10-29T16:35:00"
+     "lastSeen": "2026-10-29T16:35:00",
+     "count30": 8,
+     "count7": 2,
+     "count1": 0
     },
     {
      "provider": "Service Control Manager",
      "id": 7024,
      "level": "Error",
-     "count": 6,
+     "count": 11,
      "sample": "The XboxService service terminated with a service-specific error.",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 6,
+     "count7": 2,
+     "count1": 0
     },
     {
      "provider": "Tcpip",
      "id": 4231,
      "level": "Warning",
-     "count": 4,
+     "count": 7,
      "sample": "A request to allocate an ephemeral port number from the global TCP port space has failed due to all such ports being in use.",
-     "lastSeen": "2026-10-11T16:35:00"
+     "lastSeen": "2026-10-11T16:35:00",
+     "count30": 4,
+     "count7": 1,
+     "count1": 0
     },
     {
      "provider": "Microsoft-Windows-WindowsUpdateClient",
      "id": 20,
      "level": "Error",
-     "count": 2,
+     "count": 4,
      "sample": "Installation Failure: Windows failed to install the following update with error 0x8024200B: LG Electronics Inc. - Extension",
-     "lastSeen": "2026-10-27T16:35:00"
+     "lastSeen": "2026-10-27T16:35:00",
+     "count30": 2,
+     "count7": 0,
+     "count1": 0
     },
     {
      "provider": "Volsnap",
      "id": 36,
      "level": "Error",
-     "count": 1,
+     "count": 2,
      "sample": "The shadow copies of volume C: were aborted because the shadow copy storage could not grow due to a user imposed limit.",
-     "lastSeen": "2026-10-06T16:35:00"
+     "lastSeen": "2026-10-06T16:35:00",
+     "count30": 1,
+     "count7": 0,
+     "count1": 0
     },
     {
      "provider": "disk",
      "id": 153,
      "level": "Warning",
-     "count": 1,
+     "count": 2,
      "sample": "The IO operation at logical block address was retried.",
-     "lastSeen": "2026-10-06T16:35:00"
+     "lastSeen": "2026-10-06T16:35:00",
+     "count30": 1,
+     "count7": 0,
+     "count1": 0
     }
    ],
    "perDay": [
     {
+     "date": "2026-09-02",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-03",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-04",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-05",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-06",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-07",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-08",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-09",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-10",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-11",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-12",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-13",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-14",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-15",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-16",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-17",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-18",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-19",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-20",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-21",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-22",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-23",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-24",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-25",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-26",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-27",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-28",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-29",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-30",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-10-01",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
      "date": "2026-10-02",
-     "errors": 4,
-     "warnings": 8
-    },
-    {
-     "date": "2026-10-03",
-     "errors": 14,
-     "warnings": 36
-    },
-    {
-     "date": "2026-10-04",
-     "errors": 471,
-     "warnings": 39
-    },
-    {
-     "date": "2026-10-05",
-     "errors": 3,
-     "warnings": 25
-    },
-    {
-     "date": "2026-10-06",
-     "errors": 3,
-     "warnings": 34
-    },
-    {
-     "date": "2026-10-07",
-     "errors": 2,
-     "warnings": 24
-    },
-    {
-     "date": "2026-10-08",
-     "errors": 1,
-     "warnings": 16
-    },
-    {
-     "date": "2026-10-09",
-     "errors": 5,
-     "warnings": 20
-    },
-    {
-     "date": "2026-10-10",
-     "errors": 10,
-     "warnings": 24
-    },
-    {
-     "date": "2026-10-11",
-     "errors": 4,
-     "warnings": 36
-    },
-    {
-     "date": "2026-10-12",
-     "errors": 2,
-     "warnings": 33
-    },
-    {
-     "date": "2026-10-13",
-     "errors": 2,
-     "warnings": 9
-    },
-    {
-     "date": "2026-10-14",
-     "errors": 0,
-     "warnings": 37
-    },
-    {
-     "date": "2026-10-15",
-     "errors": 3,
-     "warnings": 15
-    },
-    {
-     "date": "2026-10-16",
-     "errors": 6,
-     "warnings": 26
-    },
-    {
-     "date": "2026-10-17",
-     "errors": 12,
-     "warnings": 36
-    },
-    {
-     "date": "2026-10-18",
-     "errors": 3,
-     "warnings": 7
-    },
-    {
-     "date": "2026-10-19",
-     "errors": 5,
-     "warnings": 9
-    },
-    {
-     "date": "2026-10-20",
-     "errors": 6,
-     "warnings": 40
-    },
-    {
-     "date": "2026-10-21",
-     "errors": 4,
-     "warnings": 25
-    },
-    {
-     "date": "2026-10-22",
-     "errors": 2,
-     "warnings": 27
-    },
-    {
-     "date": "2026-10-23",
-     "errors": 4,
-     "warnings": 36
-    },
-    {
-     "date": "2026-10-24",
-     "errors": 22,
-     "warnings": 9
-    },
-    {
-     "date": "2026-10-25",
-     "errors": 6,
-     "warnings": 10
-    },
-    {
-     "date": "2026-10-26",
-     "errors": 2,
-     "warnings": 35
-    },
-    {
-     "date": "2026-10-27",
-     "errors": 5,
-     "warnings": 9
-    },
-    {
-     "date": "2026-10-28",
-     "errors": 0,
-     "warnings": 24
-    },
-    {
-     "date": "2026-10-29",
-     "errors": 5,
-     "warnings": 33
-    },
-    {
-     "date": "2026-10-30",
      "errors": 2,
      "warnings": 29
     },
     {
-     "date": "2026-10-31",
+     "date": "2026-10-03",
      "errors": 19,
      "warnings": 6
+    },
+    {
+     "date": "2026-10-04",
+     "errors": 469,
+     "warnings": 27
+    },
+    {
+     "date": "2026-10-05",
+     "errors": 1,
+     "warnings": 12
+    },
+    {
+     "date": "2026-10-06",
+     "errors": 3,
+     "warnings": 8
+    },
+    {
+     "date": "2026-10-07",
+     "errors": 1,
+     "warnings": 23
+    },
+    {
+     "date": "2026-10-08",
+     "errors": 1,
+     "warnings": 20
+    },
+    {
+     "date": "2026-10-09",
+     "errors": 3,
+     "warnings": 30
+    },
+    {
+     "date": "2026-10-10",
+     "errors": 23,
+     "warnings": 10
+    },
+    {
+     "date": "2026-10-11",
+     "errors": 1,
+     "warnings": 33
+    },
+    {
+     "date": "2026-10-12",
+     "errors": 3,
+     "warnings": 40
+    },
+    {
+     "date": "2026-10-13",
+     "errors": 2,
+     "warnings": 13
+    },
+    {
+     "date": "2026-10-14",
+     "errors": 6,
+     "warnings": 32
+    },
+    {
+     "date": "2026-10-15",
+     "errors": 6,
+     "warnings": 40
+    },
+    {
+     "date": "2026-10-16",
+     "errors": 2,
+     "warnings": 31
+    },
+    {
+     "date": "2026-10-17",
+     "errors": 19,
+     "warnings": 29
+    },
+    {
+     "date": "2026-10-18",
+     "errors": 1,
+     "warnings": 14
+    },
+    {
+     "date": "2026-10-19",
+     "errors": 0,
+     "warnings": 16
+    },
+    {
+     "date": "2026-10-20",
+     "errors": 1,
+     "warnings": 19
+    },
+    {
+     "date": "2026-10-21",
+     "errors": 5,
+     "warnings": 19
+    },
+    {
+     "date": "2026-10-22",
+     "errors": 0,
+     "warnings": 36
+    },
+    {
+     "date": "2026-10-23",
+     "errors": 6,
+     "warnings": 16
+    },
+    {
+     "date": "2026-10-24",
+     "errors": 16,
+     "warnings": 23
+    },
+    {
+     "date": "2026-10-25",
+     "errors": 0,
+     "warnings": 14
+    },
+    {
+     "date": "2026-10-26",
+     "errors": 3,
+     "warnings": 39
+    },
+    {
+     "date": "2026-10-27",
+     "errors": 2,
+     "warnings": 25
+    },
+    {
+     "date": "2026-10-28",
+     "errors": 1,
+     "warnings": 37
+    },
+    {
+     "date": "2026-10-29",
+     "errors": 4,
+     "warnings": 8
+    },
+    {
+     "date": "2026-10-30",
+     "errors": 3,
+     "warnings": 40
+    },
+    {
+     "date": "2026-10-31",
+     "errors": 20,
+     "warnings": 30
     }
-   ]
+   ],
+   "win": {
+    "d1": {
+     "total": 97,
+     "errors": 29,
+     "warnings": 28
+    },
+    "d7": {
+     "total": 389,
+     "errors": 116,
+     "warnings": 113
+    },
+    "d30": {
+     "total": 1402,
+     "errors": 420,
+     "warnings": 407
+    }
+   }
   },
   "application": {
-   "total": 871,
-   "errors": 520,
-   "warnings": 351,
+   "total": 1367,
+   "errors": 884,
+   "warnings": 596,
    "groups": [
     {
      "provider": "Microsoft-Windows-CAPI2",
      "id": 4176,
      "level": "Error",
-     "count": 443,
+     "count": 754,
      "sample": "PFX operation failed as AuthSafes count doesn't lie in expected range. Maximum permissible value: 200. Erroneous value: 202.",
-     "lastSeen": "2026-10-07T16:35:00"
+     "lastSeen": "2026-10-07T16:35:00",
+     "count30": 452,
+     "count7": 150,
+     "count1": 37
     },
     {
      "provider": "Microsoft-Windows-WMI",
      "id": 63,
      "level": "Warning",
-     "count": 117,
+     "count": 199,
      "sample": "A provider, IntelMEProv, has been registered in the WMI namespace to use the LocalSystem account.",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 119,
+     "count7": 39,
+     "count1": 9
     },
     {
      "provider": "Telemetry 3.0 x64",
      "id": 259,
      "level": "Error",
-     "count": 60,
+     "count": 103,
      "sample": "Policy not available",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 61,
+     "count7": 20,
+     "count1": 5
     },
     {
      "provider": "Application Error",
      "id": 1000,
      "level": "Error",
-     "count": 54,
+     "count": 92,
      "sample": "Faulting application name: MemuService.exe",
-     "lastSeen": "2026-10-09T16:35:00"
+     "lastSeen": "2026-10-09T16:35:00",
+     "count30": 55,
+     "count7": 18,
+     "count1": 4
     },
     {
      "provider": "Microsoft-Windows-Perflib",
      "id": 2003,
      "level": "Warning",
-     "count": 42,
+     "count": 72,
      "sample": "The configuration information of the performance library perfts.dll does not match the trusted information.",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 43,
+     "count7": 14,
+     "count1": 3
     },
     {
      "provider": "Microsoft-Windows-Search",
      "id": 10024,
      "level": "Warning",
-     "count": 40,
+     "count": 69,
      "sample": "The filter host process did not respond and is being forcibly terminated.",
-     "lastSeen": "2026-10-28T16:35:00"
+     "lastSeen": "2026-10-28T16:35:00",
+     "count30": 41,
+     "count7": 13,
+     "count1": 3
     },
     {
      "provider": ".NET Runtime",
      "id": 1022,
      "level": "Error",
-     "count": 36,
+     "count": 62,
      "sample": "There was a failure initializing profiling API attach infrastructure.",
-     "lastSeen": "2026-10-09T16:35:00"
+     "lastSeen": "2026-10-09T16:35:00",
+     "count30": 37,
+     "count7": 12,
+     "count1": 3
     },
     {
      "provider": "VSS",
      "id": 13,
      "level": "Error",
-     "count": 7,
+     "count": 12,
      "sample": "The COM Server CEventSystem cannot be started. A system shutdown is in progress.",
-     "lastSeen": "2026-10-22T16:35:00"
+     "lastSeen": "2026-10-22T16:35:00",
+     "count30": 7,
+     "count7": 2,
+     "count1": 0
     },
     {
      "provider": "Application Hang",
      "id": 1002,
      "level": "Error",
-     "count": 2,
+     "count": 4,
      "sample": "The program dllhost.exe stopped interacting with Windows and was closed.",
-     "lastSeen": "2026-10-09T16:35:00"
+     "lastSeen": "2026-10-09T16:35:00",
+     "count30": 2,
+     "count7": 0,
+     "count1": 0
     }
    ],
    "perDay": [
     {
+     "date": "2026-09-02",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-03",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-04",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-05",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-06",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-07",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-08",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-09",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-10",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-11",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-12",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-13",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-14",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-15",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-16",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-17",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-18",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-19",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-20",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-21",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-22",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-23",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-24",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-25",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-26",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-27",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-28",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-29",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-09-30",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
+     "date": "2026-10-01",
+     "errors": 0,
+     "warnings": 0
+    },
+    {
      "date": "2026-10-02",
      "errors": 3,
-     "warnings": 27
+     "warnings": 30
     },
     {
      "date": "2026-10-03",
-     "errors": 13,
-     "warnings": 12
+     "errors": 11,
+     "warnings": 35
     },
     {
      "date": "2026-10-04",
-     "errors": 3,
-     "warnings": 8
+     "errors": 5,
+     "warnings": 30
     },
     {
      "date": "2026-10-05",
-     "errors": 1,
-     "warnings": 23
+     "errors": 0,
+     "warnings": 17
     },
     {
      "date": "2026-10-06",
-     "errors": 444,
-     "warnings": 20
+     "errors": 443,
+     "warnings": 18
     },
     {
      "date": "2026-10-07",
      "errors": 3,
-     "warnings": 30
-    },
-    {
-     "date": "2026-10-08",
-     "errors": 6,
-     "warnings": 36
-    },
-    {
-     "date": "2026-10-09",
-     "errors": 0,
      "warnings": 15
     },
     {
+     "date": "2026-10-08",
+     "errors": 0,
+     "warnings": 26
+    },
+    {
+     "date": "2026-10-09",
+     "errors": 4,
+     "warnings": 8
+    },
+    {
      "date": "2026-10-10",
-     "errors": 22,
-     "warnings": 30
+     "errors": 11,
+     "warnings": 5
     },
     {
      "date": "2026-10-11",
      "errors": 4,
-     "warnings": 22
+     "warnings": 14
     },
     {
      "date": "2026-10-12",
-     "errors": 1,
-     "warnings": 32
+     "errors": 4,
+     "warnings": 11
     },
     {
      "date": "2026-10-13",
-     "errors": 6,
-     "warnings": 40
+     "errors": 2,
+     "warnings": 6
     },
     {
      "date": "2026-10-14",
-     "errors": 2,
-     "warnings": 31
+     "errors": 0,
+     "warnings": 18
     },
     {
      "date": "2026-10-15",
-     "errors": 2,
+     "errors": 4,
      "warnings": 29
     },
     {
      "date": "2026-10-16",
      "errors": 1,
-     "warnings": 14
+     "warnings": 21
     },
     {
      "date": "2026-10-17",
-     "errors": 10,
-     "warnings": 16
+     "errors": 19,
+     "warnings": 28
     },
     {
      "date": "2026-10-18",
-     "errors": 1,
-     "warnings": 19
+     "errors": 3,
+     "warnings": 12
     },
     {
      "date": "2026-10-19",
-     "errors": 5,
-     "warnings": 19
-    },
-    {
-     "date": "2026-10-20",
      "errors": 0,
      "warnings": 36
     },
     {
+     "date": "2026-10-20",
+     "errors": 3,
+     "warnings": 35
+    },
+    {
      "date": "2026-10-21",
-     "errors": 6,
-     "warnings": 16
+     "errors": 3,
+     "warnings": 24
     },
     {
      "date": "2026-10-22",
-     "errors": 2,
-     "warnings": 23
-    },
-    {
-     "date": "2026-10-23",
      "errors": 0,
      "warnings": 14
     },
     {
+     "date": "2026-10-23",
+     "errors": 0,
+     "warnings": 26
+    },
+    {
      "date": "2026-10-24",
-     "errors": 21,
-     "warnings": 39
+     "errors": 16,
+     "warnings": 35
     },
     {
      "date": "2026-10-25",
-     "errors": 2,
-     "warnings": 25
+     "errors": 6,
+     "warnings": 15
     },
     {
      "date": "2026-10-26",
-     "errors": 1,
-     "warnings": 37
+     "errors": 4,
+     "warnings": 6
     },
     {
      "date": "2026-10-27",
-     "errors": 4,
-     "warnings": 8
+     "errors": 1,
+     "warnings": 38
     },
     {
      "date": "2026-10-28",
-     "errors": 3,
-     "warnings": 40
+     "errors": 2,
+     "warnings": 14
     },
     {
      "date": "2026-10-29",
-     "errors": 3,
-     "warnings": 30
+     "errors": 5,
+     "warnings": 39
     },
     {
      "date": "2026-10-30",
-     "errors": 3,
-     "warnings": 30
+     "errors": 0,
+     "warnings": 38
     },
     {
      "date": "2026-10-31",
-     "errors": 11,
-     "warnings": 35
+     "errors": 17,
+     "warnings": 10
     }
-   ]
+   ],
+   "win": {
+    "d1": {
+     "total": 56,
+     "errors": 21,
+     "warnings": 14
+    },
+    "d7": {
+     "total": 227,
+     "errors": 86,
+     "warnings": 58
+    },
+    "d30": {
+     "total": 820,
+     "errors": 312,
+     "warnings": 210
+    }
+   }
   },
   "appCrashes": [
    {
     "app": "MemuService.exe",
-    "count": 39
+    "count": 67,
+    "count30": 40,
+    "count7": 13,
+    "count1": 3
    },
    {
     "app": "OnScreen Control.exe",
-    "count": 3
+    "count": 6,
+    "count30": 3,
+    "count7": 1,
+    "count1": 0
    },
    {
     "app": "nordvpn-service.exe",
-    "count": 2
+    "count": 4,
+    "count30": 2,
+    "count7": 0,
+    "count1": 0
    },
    {
     "app": "vmware-vmx.exe",
-    "count": 2
+    "count": 4,
+    "count30": 2,
+    "count7": 0,
+    "count1": 0
    },
    {
     "app": "GalaxyClient.exe",
-    "count": 2
+    "count": 4,
+    "count30": 2,
+    "count7": 0,
+    "count1": 0
    }
   ],
-  "appHangs": 2
+  "appHangs": 2,
+  "appHangs1": 0,
+  "appHangs7": 0,
+  "appHangs30": 1
  },
  "boot": {
   "history": [
@@ -913,224 +1343,261 @@
    {
     "name": "@BIOS",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 120
+    "publisher": "Valve",
+    "sizeMB": 20,
+    "installDate": "20260301"
    },
    {
     "name": "ACDSee Free",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 20
+    "sizeMB": 0,
+    "installDate": "20221120"
    },
    {
     "name": "Adobe Acrobat (64-bit)",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 540
+    "sizeMB": 120,
+    "installDate": "20221120"
    },
    {
     "name": "AnyDesk",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 0
+    "sizeMB": 1800,
+    "installDate": "20240305"
    },
    {
     "name": "Bitdefender Total Security",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 0
+    "sizeMB": 0,
+    "installDate": "20260301"
    },
    {
     "name": "Brave",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Adobe Inc.",
+    "sizeMB": 0,
+    "installDate": "20240305"
    },
    {
     "name": "Discord",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 120
+    "sizeMB": 1800,
+    "installDate": "20260301"
    },
    {
     "name": "EA app",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 0
+    "sizeMB": 1800,
+    "installDate": "20230214"
    },
    {
     "name": "Epic Games Launcher",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 20
+    "publisher": "Microsoft Corporation",
+    "sizeMB": 5200,
+    "installDate": "20221120"
    },
    {
     "name": "FileZilla",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 0
+    "sizeMB": 1800,
+    "installDate": "20221120"
    },
    {
     "name": "GitHub Desktop",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Adobe Inc.",
+    "sizeMB": 0,
+    "installDate": "20240305"
    },
    {
     "name": "GOG GALAXY",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 540
+    "sizeMB": 1800,
+    "installDate": "20240305"
    },
    {
     "name": "Google Chrome",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 540
+    "publisher": "Valve",
+    "sizeMB": 540,
+    "installDate": "20240305"
    },
    {
     "name": "HandBrake 1.9.2",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Google LLC",
+    "sizeMB": 0,
+    "installDate": "20221120"
    },
    {
     "name": "HWiNFO 64",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 20
+    "publisher": "Valve",
+    "sizeMB": 1800,
+    "installDate": "20240305"
    },
    {
     "name": "Intel(R) Extreme Tuning Utility",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 0
+    "sizeMB": 1800,
+    "installDate": "20221120"
    },
    {
     "name": "MEmu",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 540
+    "publisher": "Microsoft Corporation",
+    "sizeMB": 120,
+    "installDate": "20230214"
    },
    {
     "name": "Microsoft Edge",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Google LLC",
+    "sizeMB": 5200,
+    "installDate": "20230214"
    },
    {
     "name": "Microsoft Office Professional Plus 2021",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Google LLC",
+    "sizeMB": 0,
+    "installDate": "20221120"
    },
    {
     "name": "Microsoft OneDrive",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 20
+    "publisher": "Microsoft Corporation",
+    "sizeMB": 540,
+    "installDate": "20221120"
    },
    {
     "name": "NordVPN",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Adobe Inc.",
+    "sizeMB": 120,
+    "installDate": "20260301"
    },
    {
     "name": "Notepad++ (64-bit x64)",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 540
+    "publisher": "Google LLC",
+    "sizeMB": 540,
+    "installDate": "20250111"
    },
    {
     "name": "NVIDIA App",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Valve",
+    "sizeMB": 20,
+    "installDate": "20240305"
    },
    {
     "name": "NVIDIA Graphics Driver",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 20
+    "publisher": "Microsoft Corporation",
+    "sizeMB": 0,
+    "installDate": "20221120"
    },
    {
     "name": "OpenVPN",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Valve",
+    "sizeMB": 1800,
+    "installDate": "20260301"
    },
    {
     "name": "PowerShell 7-x64",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 20
+    "publisher": "Valve",
+    "sizeMB": 5200,
+    "installDate": "20260301"
    },
    {
     "name": "PowerToys (Preview)",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 120
+    "publisher": "Valve",
+    "sizeMB": 1800,
+    "installDate": "20230214"
    },
    {
     "name": "RustDesk",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 540
+    "sizeMB": 1800,
+    "installDate": "20260301"
    },
    {
     "name": "Steam",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 20
+    "publisher": "Microsoft Corporation",
+    "sizeMB": 120,
+    "installDate": "20240305"
    },
    {
     "name": "SteelSeries GG",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Adobe Inc.",
+    "sizeMB": 540,
+    "installDate": "20230214"
    },
    {
     "name": "Ubisoft Connect",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 120
+    "sizeMB": 1800,
+    "installDate": "20221120"
    },
    {
     "name": "VLC media player",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 20
+    "publisher": "Valve",
+    "sizeMB": 120,
+    "installDate": "20250111"
    },
    {
     "name": "VMware Workstation",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Google LLC",
+    "sizeMB": 540,
+    "installDate": "20221120"
    },
    {
     "name": "Viber",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 20
+    "publisher": "Adobe Inc.",
+    "sizeMB": 0,
+    "installDate": "20230214"
    },
    {
     "name": "WinDirStat",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 120
+    "publisher": "Valve",
+    "sizeMB": 540,
+    "installDate": "20230214"
    },
    {
     "name": "WinRAR 7.10 (64-bit)",
     "version": "1.0",
     "publisher": "",
-    "sizeMB": 0
+    "sizeMB": 5200,
+    "installDate": "20250111"
    },
    {
     "name": "Wondershare Filmora 16",
     "version": "1.0",
-    "publisher": "",
-    "sizeMB": 0
+    "publisher": "Google LLC",
+    "sizeMB": 5200,
+    "installDate": "20260301"
    }
   ],
   "wingetAvailable": true,
@@ -2436,14 +2903,947 @@
     "k": "crash",
     "x": "chrome.exe"
    }
-  ]
+  ],
+  "more": {
+   "accounts": [
+    {
+     "name": "demo",
+     "enabled": true,
+     "noPassword": false,
+     "neverExpires": true,
+     "lastLogonDays": 0,
+     "isGuest": false,
+     "isBuiltinAdmin": false,
+     "isAdmin": true
+    },
+    {
+     "name": "Administrator",
+     "enabled": false,
+     "noPassword": false,
+     "neverExpires": true,
+     "lastLogonDays": null,
+     "isGuest": false,
+     "isBuiltinAdmin": true,
+     "isAdmin": true
+    },
+    {
+     "name": "Guest",
+     "enabled": false,
+     "noPassword": true,
+     "neverExpires": true,
+     "lastLogonDays": null,
+     "isGuest": true,
+     "isBuiltinAdmin": false,
+     "isAdmin": false
+    },
+    {
+     "name": "family",
+     "enabled": true,
+     "noPassword": false,
+     "neverExpires": false,
+     "lastLogonDays": 3,
+     "isGuest": false,
+     "isBuiltinAdmin": false,
+     "isAdmin": false
+    }
+   ],
+   "signatures": {
+    "checked": 22,
+    "flagged": [
+     {
+      "name": "SyncHelper",
+      "file": "synchelper.exe",
+      "folder": "C:\\Program Files\\Sync",
+      "status": "NotSigned",
+      "signer": "",
+      "oddFolder": false
+     }
+    ]
+   },
+   "wifiSaved": [
+    {
+     "name": "Home-5G",
+     "auth": "WPA2PSK",
+     "enc": "AES"
+    }
+   ],
+   "browserExt": [
+    {
+     "browser": "Chrome",
+     "id": "a",
+     "name": "uBlock Origin",
+     "version": "1.60",
+     "risky": [
+      "webRequest",
+      "webRequestBlocking"
+     ],
+     "allUrls": true
+    },
+    {
+     "browser": "Chrome",
+     "id": "b",
+     "name": "Super Coupon Finder",
+     "version": "3.1",
+     "risky": [
+      "cookies",
+      "history",
+      "tabs",
+      "webRequest"
+     ],
+     "allUrls": true
+    },
+    {
+     "browser": "Edge",
+     "id": "c",
+     "name": "Dark Reader",
+     "version": "4.9",
+     "risky": [],
+     "allUrls": true
+    },
+    {
+     "browser": "Firefox",
+     "id": "d",
+     "name": "Password Manager",
+     "version": "2.0",
+     "risky": [
+      "nativeMessaging"
+     ],
+     "allUrls": false
+    }
+   ],
+   "lock": {
+    "screensaverOn": false,
+    "screensaverSecure": false,
+    "screensaverSec": null,
+    "inactivityLimitSec": null,
+    "lockOnWake": {
+     "ac": true,
+     "dc": true
+    }
+   },
+   "bitlockerKeys": [
+    {
+     "letter": "C:",
+     "hasRecoveryKey": true
+    }
+   ],
+   "thermal": {
+    "tempC": 52,
+    "throttleEvents30d": 0,
+    "clockMHz": 2400,
+    "maxClockMHz": 4200
+   },
+   "inventory": {
+    "serial": "DEMO-0000-SN",
+    "maker": "Demo Maker",
+    "model": "Demo Model",
+    "biosDate": "2025-06-10T00:00:00",
+    "osInstall": "2025-01-12T10:00:00"
+   },
+   "office": {
+    "installed": true,
+    "subscription": false,
+    "releaseIds": "ProPlus2019Retail",
+    "version": "16.0.17928",
+    "channel": "",
+    "licences": [
+     {
+      "name": "Office 19, Office19ProPlus2019R_Retail edition",
+      "status": 1
+     }
+    ]
+   },
+   "certs": [
+    {
+     "store": "user",
+     "name": "Work VPN client",
+     "days": 9,
+     "hasKey": true
+    },
+    {
+     "store": "computer",
+     "name": "Old test cert",
+     "days": -40,
+     "hasKey": true
+    }
+   ],
+   "wu": {
+    "lastSuccessDays": 6,
+    "failed30": [
+     "Feature update to Windows 11, version 25H2 - Error 0x80070002"
+    ],
+    "serviceDisabled": false,
+    "paused": false,
+    "policyOff": false,
+    "restartPending": true
+   },
+   "oneDrive": {
+    "installed": true,
+    "signedIn": true,
+    "running": true
+   },
+   "slowStart": [
+    {
+     "kind": "app",
+     "name": "Adobe Updater",
+     "n": 6,
+     "avgSec": 9.4
+    },
+    {
+     "kind": "service",
+     "name": "SearchIndexer",
+     "n": 4,
+     "avgSec": 6.2
+    },
+    {
+     "kind": "driver",
+     "name": "nvlddmkm",
+     "n": 3,
+     "avgSec": 4.1
+    },
+    {
+     "kind": "app",
+     "name": "Teams",
+     "n": 5,
+     "avgSec": 3.3
+    }
+   ],
+   "dnsSpeed": [
+    {
+     "label": "This PC",
+     "ip": "192.168.1.1",
+     "ms": 74
+    },
+    {
+     "label": "Cloudflare",
+     "ip": "1.1.1.1",
+     "ms": 14
+    },
+    {
+     "label": "Google",
+     "ip": "8.8.8.8",
+     "ms": 19
+    },
+    {
+     "label": "Quad9",
+     "ip": "9.9.9.9",
+     "ms": 22
+    }
+   ],
+   "connections": [
+    {
+     "process": "chrome",
+     "n": 34,
+     "remotes": [
+      "142.250.1.1:443"
+     ]
+    },
+    {
+     "process": "Teams",
+     "n": 9,
+     "remotes": [
+      "52.1.1.1:443"
+     ]
+    },
+    {
+     "process": "OneDrive",
+     "n": 4,
+     "remotes": [
+      "13.1.1.1:443"
+     ]
+    },
+    {
+     "process": "svchost",
+     "n": 6,
+     "remotes": [
+      "20.1.1.1:443"
+     ]
+    },
+    {
+     "process": "unknown_tool",
+     "n": 2,
+     "remotes": [
+      "185.1.1.1:8080"
+     ]
+    }
+   ]
+  },
+  "more2": {
+   "monitors": [
+    {
+     "maker": "DEL",
+     "model": "DELL U2723QE",
+     "serial": "DEMO-MON-1",
+     "year": 2023,
+     "inches": 27
+    },
+    {
+     "maker": "GSM",
+     "model": "LG ULTRAGEAR",
+     "serial": "DEMO-MON-2",
+     "year": 2021,
+     "inches": 32
+    }
+   ],
+   "printers": [
+    {
+     "name": "HP LaserJet Pro M404",
+     "driver": "HP Universal Printing PCL 6",
+     "port": "IP_192.168.1.40",
+     "isDefault": true,
+     "network": true,
+     "shared": false,
+     "offline": false
+    },
+    {
+     "name": "Brother DCP-L2510D",
+     "driver": "Brother DCP-L2510D",
+     "port": "USB001",
+     "isDefault": false,
+     "network": false,
+     "shared": false,
+     "offline": false
+    }
+   ],
+   "peripherals": [
+    {
+     "class": "Keyboard",
+     "name": "Logitech K380",
+     "status": "OK"
+    },
+    {
+     "class": "Mouse",
+     "name": "Logitech MX Master 3",
+     "status": "OK"
+    },
+    {
+     "class": "Camera",
+     "name": "Logitech C920",
+     "status": "OK"
+    },
+    {
+     "class": "Audio",
+     "name": "Speakers (Realtek Audio)",
+     "status": "OK"
+    },
+    {
+     "class": "USB drive",
+     "name": "SanDisk Ultra USB 3.0",
+     "status": "OK"
+    }
+   ],
+   "management": {
+    "domainJoined": false,
+    "domain": "",
+    "workgroup": "WORKGROUP",
+    "entraJoined": false,
+    "workplaceJoined": false,
+    "tenant": "",
+    "intune": false
+   },
+   "windowsLicence": {
+    "name": "Windows(R), Professional edition",
+    "channel": "OEM_DM",
+    "partialKey": "ABCDE",
+    "status": 1,
+    "keyInBios": true
+   },
+   "mappedDrives": [],
+   "vpn": [],
+   "neighbours": [
+    {
+     "ip": "192.168.1.1",
+     "mac": "AA-BB-CC-00-11-22",
+     "state": "Reachable"
+    },
+    {
+     "ip": "192.168.1.40",
+     "mac": "3C-2A-F4-12-34-56",
+     "state": "Stale"
+    },
+    {
+     "ip": "192.168.1.52",
+     "mac": "B8-27-EB-98-76-54",
+     "state": "Stale"
+    }
+   ],
+   "board": {
+    "assetTag": "ASSET-0042",
+    "chassisSerial": "DEMO-CH-1"
+   },
+   "lastUser": {
+    "user": "DEMO-PC\\demo",
+    "display": "Demo User"
+   },
+   "browsers": [
+    {
+     "name": "Chrome",
+     "version": "141.0.7390.54",
+     "fileDays": 9
+    },
+    {
+     "name": "Edge",
+     "version": "141.0.3537.57",
+     "fileDays": 12
+    },
+    {
+     "name": "Firefox",
+     "version": "128.0",
+     "fileDays": 14
+    }
+   ],
+   "defaultBrowser": "ChromeHTML",
+   "perf": {
+    "cpu": [
+     26,
+     10,
+     23,
+     16,
+     9,
+     8,
+     12,
+     26,
+     23,
+     19
+    ],
+    "disk": [
+     13,
+     27,
+     3,
+     11,
+     18,
+     28,
+     9,
+     26,
+     16,
+     20
+    ],
+    "queue": [
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.1
+    ],
+    "netKBs": [
+     281,
+     354,
+     53,
+     103,
+     293,
+     288,
+     363,
+     378,
+     140,
+     344
+    ],
+    "mem": [
+     58,
+     56,
+     57,
+     52,
+     58,
+     55,
+     54,
+     52,
+     54,
+     58
+    ]
+   },
+   "gpuSmi": [
+    {
+     "name": "NVIDIA GeForce RTX 3070",
+     "tempC": 46,
+     "memUsedMB": 1530,
+     "memTotalMB": 8192,
+     "powerW": 64.5,
+     "fanPct": 55,
+     "loadPct": 12
+    }
+   ],
+   "usbHistory": [
+    {
+     "name": "SanDisk Ultra USB Device"
+    },
+    {
+     "name": "Kingston DataTraveler 3.0"
+    },
+    {
+     "name": "Samsung Portable SSD T7"
+    }
+   ],
+   "persistence": {
+    "items": [
+     {
+      "where": "HKCU\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "name": "Discord",
+      "command": "C:\\Users\\demo\\AppData\\Local\\Discord\\Update.exe",
+      "signature": "Valid",
+      "signer": "Discord Inc."
+     },
+     {
+      "where": "HKLM\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "name": "QuickTool",
+      "command": "C:\\Users\\demo\\AppData\\Local\\Temp\\quicktool.exe",
+      "signature": "NotSigned",
+      "signer": ""
+     }
+    ],
+    "unusual": []
+   },
+   "hardening": {
+    "pwLen": 12,
+    "pwComplex": 1,
+    "lockout": 0,
+    "smartscreen": true,
+    "lsaPpl": false,
+    "wdigestOff": true,
+    "llmnrOff": false,
+    "netbiosOff": false,
+    "smbSign": false,
+    "psLogging": false,
+    "vbs": true,
+    "credGuard": false,
+    "asrRules": 0,
+    "cfa": false,
+    "cloudProt": true,
+    "puaProt": true,
+    "netProt": false,
+    "autorunOff": false,
+    "remoteAssistOff": true,
+    "ntlmV2": true,
+    "anonRestricted": false,
+    "spoolerOff": false,
+    "spoolerHasPrinters": true,
+    "remoteRegOff": true
+   },
+   "privacy": {
+    "telemetry": 1,
+    "adId": 1,
+    "location": "Allow",
+    "microphone": "Allow",
+    "camera": "Deny",
+    "activityHistory": null,
+    "copilotOff": null,
+    "tailored": 1,
+    "clipboardHistory": 1,
+    "bingSearch": 1,
+    "recall": "DisabledWithPayloadRemoved"
+   },
+   "caches": [
+    {
+     "name": "Chrome cache",
+     "mb": 1840,
+     "partial": false
+    },
+    {
+     "name": "Windows shader cache",
+     "mb": 720,
+     "partial": false
+    },
+    {
+     "name": "NVIDIA shader cache",
+     "mb": 380,
+     "partial": false
+    },
+    {
+     "name": "Delivery Optimization",
+     "mb": 1260,
+     "partial": false
+    },
+    {
+     "name": "Windows error reports",
+     "mb": 240,
+     "partial": false
+    }
+   ],
+   "recentRuns": [
+    {
+     "exe": "chrome.exe",
+     "days": 0
+    },
+    {
+     "exe": "discord.exe",
+     "days": 0
+    },
+    {
+     "exe": "steam.exe",
+     "days": 1
+    },
+    {
+     "exe": "code.exe",
+     "days": 2
+    },
+    {
+     "exe": "explorer.exe",
+     "days": 0
+    },
+    {
+     "exe": "winword.exe",
+     "days": 6
+    },
+    {
+     "exe": "excel.exe",
+     "days": 9
+    },
+    {
+     "exe": "app0.exe",
+     "days": 0
+    },
+    {
+     "exe": "app1.exe",
+     "days": 1
+    },
+    {
+     "exe": "app2.exe",
+     "days": 2
+    },
+    {
+     "exe": "app3.exe",
+     "days": 3
+    },
+    {
+     "exe": "app4.exe",
+     "days": 4
+    },
+    {
+     "exe": "app5.exe",
+     "days": 5
+    },
+    {
+     "exe": "app6.exe",
+     "days": 6
+    },
+    {
+     "exe": "app7.exe",
+     "days": 7
+    },
+    {
+     "exe": "app8.exe",
+     "days": 8
+    },
+    {
+     "exe": "app9.exe",
+     "days": 9
+    },
+    {
+     "exe": "app10.exe",
+     "days": 10
+    },
+    {
+     "exe": "app11.exe",
+     "days": 11
+    },
+    {
+     "exe": "app12.exe",
+     "days": 12
+    },
+    {
+     "exe": "app13.exe",
+     "days": 13
+    },
+    {
+     "exe": "app14.exe",
+     "days": 14
+    },
+    {
+     "exe": "app15.exe",
+     "days": 15
+    },
+    {
+     "exe": "app16.exe",
+     "days": 16
+    },
+    {
+     "exe": "app17.exe",
+     "days": 17
+    },
+    {
+     "exe": "app18.exe",
+     "days": 18
+    },
+    {
+     "exe": "app19.exe",
+     "days": 19
+    },
+    {
+     "exe": "app20.exe",
+     "days": 20
+    },
+    {
+     "exe": "app21.exe",
+     "days": 21
+    },
+    {
+     "exe": "app22.exe",
+     "days": 22
+    },
+    {
+     "exe": "app23.exe",
+     "days": 23
+    },
+    {
+     "exe": "app24.exe",
+     "days": 24
+    },
+    {
+     "exe": "app25.exe",
+     "days": 25
+    },
+    {
+     "exe": "app26.exe",
+     "days": 26
+    },
+    {
+     "exe": "app27.exe",
+     "days": 27
+    },
+    {
+     "exe": "app28.exe",
+     "days": 28
+    },
+    {
+     "exe": "app29.exe",
+     "days": 29
+    }
+   ]
+  },
+  "more3": {
+   "win11": {
+    "uefi": true,
+    "secureBootOn": true,
+    "tpmPresent": true,
+    "tpmVersion": "2.0",
+    "ramGB": 31.9,
+    "cores": 8,
+    "ghz": 3.6,
+    "is64": true,
+    "sysDiskGB": 931,
+    "gpt": true,
+    "cpuName": "11th Gen Intel Core i7-11700K"
+   },
+   "taskDetail": [
+    {
+     "name": "GoogleUpdateTaskMachineCore",
+     "path": "C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe",
+     "runAs": "SYSTEM",
+     "highest": false,
+     "trigger": "Logon, Time",
+     "unusual": ""
+    }
+   ],
+   "svcDetail": [
+    {
+     "name": "Spooler2",
+     "display": "Demo Helper",
+     "state": "Running",
+     "runAs": "LocalSystem",
+     "path": "C:\\Program Files\\Demo\\helper.exe",
+     "installed": "2026-01-04T16:35:00",
+     "unusual": "",
+     "unquoted": false
+    }
+   ],
+   "memDiag": {
+    "time": "2026-09-21T16:35:00",
+    "errors": false,
+    "eventId": 1201
+   },
+   "sfcLast": {
+    "lastRun": "2026-10-19T16:35:00",
+    "cannotRepair": 0,
+    "repaired": 0
+   },
+   "printQueue": [],
+   "dotnet": [
+    "8.0.5",
+    "6.0.30"
+   ],
+   "gpo": []
+  },
+  "forensics": {
+   "admin": true,
+   "logons": {
+    "readable": true,
+    "oldest": "2026-10-06T16:35:00",
+    "failed30": 3,
+    "failedBurst": 2,
+    "failedRemote": 0,
+    "failedTop": [],
+    "failedUsers": [],
+    "lastFailed": "2026-10-22T16:35:00",
+    "success30": 210,
+    "remote": [],
+    "remoteExt": 0,
+    "rdpType10": 0,
+    "night": 0,
+    "auditLikelyOff": false,
+    "rdp": [],
+    "rdpCount": 0
+   },
+   "logsCleared": [],
+   "accountChanges": [],
+   "servicesNew": [],
+   "timeChanges": [],
+   "prefetch": {
+    "readable": true,
+    "enabled": 3,
+    "count": 180,
+    "oldest": "2026-09-01T16:35:00",
+    "recent": [
+     {
+      "name": "CHROME.EXE",
+      "t": "2026-10-31T15:35:00"
+     },
+     {
+      "name": "CODE.EXE",
+      "t": "2026-10-31T13:35:00"
+     },
+     {
+      "name": "SETUP.EXE",
+      "t": "2026-10-29T16:35:00"
+     }
+    ],
+    "hits": []
+   },
+   "bam": [
+    {
+     "t": "2026-10-31T15:35:00",
+     "path": "<vol>\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+     "userDir": false
+    },
+    {
+     "t": "2026-10-28T16:35:00",
+     "path": "<vol>\\Users\\demo\\Downloads\\ShareX-setup.exe",
+     "userDir": true
+    }
+   ],
+   "shimcache": {
+    "readable": true,
+    "total": 640,
+    "sus": []
+   },
+   "downloads": [
+    {
+     "name": "ShareX-setup.exe",
+     "folder": "Downloads",
+     "t": "2026-10-28T16:35:00",
+     "sizeKB": 9120,
+     "zone": 3,
+     "host": "github.com",
+     "sig": "Valid",
+     "signer": "ShareX Team"
+    }
+   ],
+   "defender": {
+    "available": true,
+    "exclHidden": false,
+    "exclPaths": [],
+    "exclProcs": [],
+    "exclExts": [],
+    "realtime": true,
+    "tamper": true,
+    "offEvents": [],
+    "exclEvents": [],
+    "detections": []
+   },
+   "firewall": {
+    "inboundAllow": 34,
+    "userPath": [],
+    "portOnly": [],
+    "added": [],
+    "shares": [
+     {
+      "name": "Photos",
+      "path": "D:\\Photos",
+      "everyone": false
+     }
+    ]
+   },
+   "accessBackdoor": [],
+   "startupFolders": [],
+   "powershell": {
+    "scriptBlockPolicy": null,
+    "transcriptPolicy": null,
+    "opLogEnabled": true,
+    "blocks": 420,
+    "suspicious": 0,
+    "lastSuspicious": null,
+    "patterns": [],
+    "histUsers": 1,
+    "histLines": 140,
+    "histTop": [
+     {
+      "cmd": "cd",
+      "count": 30
+     },
+     {
+      "cmd": "git",
+      "count": 22
+     }
+    ],
+    "histFlags": []
+   },
+   "network": {
+    "networks": [
+     {
+      "name": "HomeNet",
+      "count": 40,
+      "last": "2026-10-31T16:35:00",
+      "category": "1"
+     }
+    ],
+    "wifi": [
+     {
+      "ssid": "HomeNet",
+      "count": 12,
+      "last": "2026-10-31T16:35:00",
+      "auth": "WPA2-Personal",
+      "cipher": "CCMP"
+     }
+    ],
+    "vpn": []
+   },
+   "listeners": [
+    {
+     "pid": 4,
+     "name": "System",
+     "path": "",
+     "scope": "all",
+     "ports": [
+      445
+     ],
+     "portCount": 1,
+     "sig": "",
+     "signer": ""
+    },
+    {
+     "pid": 900,
+     "name": "svchost.exe",
+     "path": "C:\\Windows\\System32\\svchost.exe",
+     "scope": "all",
+     "ports": [
+      135,
+      49664
+     ],
+     "portCount": 2,
+     "sig": "Valid",
+     "signer": "Microsoft Windows"
+    }
+   ]
+  }
  },
  "trend": [
   {
    "t": "2026-09-12T16:35:00",
    "v": "0.4.1",
    "mode": "full",
-   "freeC": 183.0,
+   "freeC": 150.0,
    "bootS": 44.0,
    "sysErr": 300,
    "appErr": 40,
@@ -2452,13 +3852,15 @@
    "startup": 14,
    "outdated": 3,
    "reliability": 9.0,
-   "dumps": 0
+   "dumps": 0,
+   "ssdWear": 22.0,
+   "batWear": 12.0
   },
   {
    "t": "2026-09-19T16:35:00",
    "v": "0.4.1",
    "mode": "full",
-   "freeC": 173.5,
+   "freeC": 140.5,
    "bootS": 49.2,
    "sysErr": 390,
    "appErr": 52,
@@ -2467,13 +3869,15 @@
    "startup": 15,
    "outdated": 4,
    "reliability": 8.4,
-   "dumps": 0
+   "dumps": 0,
+   "ssdWear": 23.6,
+   "batWear": 14.2
   },
   {
    "t": "2026-09-26T16:35:00",
    "v": "0.4.1",
    "mode": "full",
-   "freeC": 167.0,
+   "freeC": 131.0,
    "bootS": 54.4,
    "sysErr": 480,
    "appErr": 64,
@@ -2482,13 +3886,15 @@
    "startup": 16,
    "outdated": 5,
    "reliability": 7.8,
-   "dumps": 0
+   "dumps": 0,
+   "ssdWear": 25.2,
+   "batWear": 16.4
   },
   {
    "t": "2026-10-03T16:35:00",
    "v": "0.4.1",
    "mode": "full",
-   "freeC": 163.5,
+   "freeC": 121.5,
    "bootS": 59.6,
    "sysErr": 570,
    "appErr": 76,
@@ -2497,13 +3903,15 @@
    "startup": 17,
    "outdated": 6,
    "reliability": 7.2,
-   "dumps": 1
+   "dumps": 1,
+   "ssdWear": 26.8,
+   "batWear": 18.6
   },
   {
    "t": "2026-10-10T16:35:00",
    "v": "0.4.1",
    "mode": "full",
-   "freeC": 154.0,
+   "freeC": 112.0,
    "bootS": 64.8,
    "sysErr": 660,
    "appErr": 88,
@@ -2512,13 +3920,15 @@
    "startup": 18,
    "outdated": 7,
    "reliability": 6.6,
-   "dumps": 1
+   "dumps": 1,
+   "ssdWear": 28.4,
+   "batWear": 20.8
   },
   {
    "t": "2026-10-17T16:35:00",
    "v": "0.4.1",
    "mode": "full",
-   "freeC": 147.5,
+   "freeC": 102.5,
    "bootS": 70.0,
    "sysErr": 750,
    "appErr": 100,
@@ -2527,13 +3937,15 @@
    "startup": 19,
    "outdated": 8,
    "reliability": 6.0,
-   "dumps": 1
+   "dumps": 1,
+   "ssdWear": 30.0,
+   "batWear": 23.0
   },
   {
    "t": "2026-10-24T16:35:00",
    "v": "0.4.1",
    "mode": "full",
-   "freeC": 144.0,
+   "freeC": 93.0,
    "bootS": 75.2,
    "sysErr": 840,
    "appErr": 112,
@@ -2542,13 +3954,15 @@
    "startup": 20,
    "outdated": 9,
    "reliability": 5.4,
-   "dumps": 2
+   "dumps": 2,
+   "ssdWear": 31.6,
+   "batWear": 25.200000000000003
   },
   {
    "t": "2026-10-31T16:35:00",
    "v": "0.4.1",
    "mode": "full",
-   "freeC": 134.5,
+   "freeC": 83.5,
    "bootS": 80.4,
    "sysErr": 930,
    "appErr": 124,
@@ -2557,7 +3971,9 @@
    "startup": 21,
    "outdated": 10,
    "reliability": 4.8,
-   "dumps": 2
+   "dumps": 2,
+   "ssdWear": 33.2,
+   "batWear": 27.400000000000002
   }
  ]
 }

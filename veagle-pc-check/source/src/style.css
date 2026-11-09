@@ -543,3 +543,32 @@ body.view-simple .finding .metachips,body.view-simple .finding .ev,body.view-sim
   body.printclient #clientDoc :where(p, li, td, th, dt, dd, h1, h2, h3, b, span, small, div, br):not(.cd-stamp):not(.cd-score):not(.cd-score *) { color: #111 !important; background: transparent !important; text-shadow: none !important; }
   body.printclient #clientDoc .cd-line span, body.printclient #clientDoc small { color: #52525b !important; }
 }
+
+/* ---------- 1.3.0: menu on the left (rail + areas list); "Menu" button switches back to the old top menu ---------- */
+nav button .ni { display: none; }
+.sidetop, #ctxPanel { display: none; }
+body.nav-side { padding-left: 84px; }
+body.nav-side.ctx-on { padding-left: 352px; }
+body.nav-side .topbar { position: fixed; left: 0; top: 0; bottom: 0; width: 84px; z-index: 30; overflow-x: hidden; overflow-y: auto; border-bottom: 0; border-right: 1px solid var(--line); box-shadow: none; background: var(--panel); backdrop-filter: none; }
+body.nav-side .topbar .in { display: flex; flex-direction: column; flex-wrap: nowrap; align-items: center; gap: 4px; padding: 14px 0; max-width: none; margin: 0; }
+body.nav-side .brand { flex-direction: column; margin: 0 0 10px; }
+body.nav-side .brand > div { display: none; }
+body.nav-side nav { flex-direction: column; flex-wrap: nowrap; align-items: center; width: 100%; gap: 2px; }
+body.nav-side nav button { position: relative; width: 72px; min-height: 56px; padding: 4px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: 10px; letter-spacing: 0; line-height: 1.15; text-align: center; border-radius: 0; font-family: inherit; }
+body.nav-side nav button .ni { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+body.nav-side nav button .rl { display: block; max-width: 70px; overflow-wrap: anywhere; }
+body.nav-side nav button[aria-selected="true"]::before { content: ""; position: absolute; left: -6px; top: 10px; bottom: 10px; width: 3px; background: var(--red); }
+body.nav-side nav button .n { position: absolute; top: 3px; right: 6px; margin: 0; background: #C81E1F; color: #fff; font-size: 9px; padding: 0 5px; line-height: 1.5; }
+body.nav-side nav button .n:empty { display: none; }
+body.nav-side .sidetop { display: flex; position: static; justify-content: flex-end; padding: 8px 24px; background: var(--panel); border-bottom: 1px solid var(--line); }
+body.nav-side .topright { margin-left: 0; justify-content: flex-end; }
+body.nav-side.ctx-on #ctxPanel { display: block; position: fixed; left: 84px; top: 0; bottom: 0; width: 268px; z-index: 25; padding: 20px 0; overflow-y: auto; background: var(--panel); border-right: 1px solid var(--line); }
+#ctxPanel h2 { margin: 0 20px 4px; font-family: var(--head); font-size: 16px; letter-spacing: .06em; font-weight: 700; }
+#ctxPanel small { display: block; margin: 0 20px 14px; color: var(--dim); font-size: 11px; }
+#ctxPanel .area { display: flex; width: 100%; align-items: center; gap: 10px; min-height: 44px; padding: 0 20px; background: transparent; color: var(--muted); border: 0; border-left: 3px solid transparent; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+#ctxPanel .area:hover { background: var(--panel2); color: var(--text); }
+#ctxPanel .area.on { background: var(--panel2); color: var(--text); border-left-color: var(--red); }
+#ctxPanel .dot { width: 9px; height: 9px; flex: none; display: block; }
+#ctxPanel .area .c { margin-left: auto; font-size: 11px; color: var(--dim); }
+body.nav-side #boot { left: 0; }
+@media print { body.nav-side, body.nav-side.ctx-on { padding-left: 0; } #ctxPanel, .sidetop { display: none !important; } }

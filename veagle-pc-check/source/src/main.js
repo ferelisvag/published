@@ -10,6 +10,7 @@
     $$('#nav button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === tab ? 'true' : 'false'); });
     $$('.tabpane').forEach(function (p) { p.classList.toggle('on', p.id === 'tab-' + tab); });
     if (!silent) { try { history.replaceState(null, '', '#' + tab); } catch (e) { } window.scrollTo(0, 0); }
+    if (typeof SIDE !== 'undefined') SIDE.sync();
   }
   function refreshScore() {
     var open = $$('#findList .finding.open').map(function (x) { return x.getAttribute('data-id'); }), y = window.scrollY;
@@ -86,7 +87,7 @@
       sel.addEventListener('change', function () { try { localStorage.setItem('veagle.pccheck.period', sel.value); } catch (e) { } location.reload(); });
       chip.firstChild.nodeValue = V.I('Period ', 'Περίοδος ');
     })();
-    wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init(); THEMES.init();
+    wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init(); THEMES.init(); SIDE.init();
     var h = location.hash.replace('#', '');
     if (/^(summary|dashboard|findings|insights|inventory|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true);
     var dm = g(D, 'meta.isAdmin', true) === false; if (dm) { var chip = document.createElement('span'); chip.className = 'chip warn'; chip.textContent = 'not run as admin: partial'; $('.topright').insertBefore(chip, $('#btnPrint')); }

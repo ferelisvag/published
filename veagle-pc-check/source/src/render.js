@@ -463,6 +463,7 @@ var UI = (function (V) {
     if (typeof PRO !== 'undefined') { PRO.summary(); PRO.decorate(); }
     if (typeof THEMES !== 'undefined') THEMES.decorate();
     if (typeof VIZ2 !== 'undefined') VIZ2.render();
+    if (typeof SIDE !== 'undefined') SIDE.sync();
     countUp();
     VIZ.animateRings(document);
   }

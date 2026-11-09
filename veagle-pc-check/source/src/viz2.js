@@ -22,6 +22,7 @@ var VIZ2 = (function (V, UI) {
     $$('#nav button').forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-tab') === 'findings' ? 'true' : 'false'); });
     $$('.tabpane').forEach(function (p) { p.classList.toggle('on', p.id === 'tab-findings'); });
     try { history.replaceState(null, '', '#findings'); } catch (e) { } window.scrollTo(0, 0);
+    if (typeof SIDE !== 'undefined') SIDE.sync();
     UI.renderAll();
   }
   function spark(vals, col, w, h) {
@@ -124,5 +125,5 @@ var VIZ2 = (function (V, UI) {
   document.addEventListener('change', function (e) { if (e.target && e.target.id === 'findSort') { UI.state.sort = e.target.value; UI.drawFindings(); } });
   document.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('pmn')) { e.preventDefault(); goArea(e.target.getAttribute('data-area')); } });
   function render() { summary(); pcMap(); findingsBar(); }
-  return { render: render };
+  return { render: render, areaName: areaName, worst: worst };
 })(V, UI);

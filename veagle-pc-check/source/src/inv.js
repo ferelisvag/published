@@ -168,6 +168,48 @@ var INV = (function (V, AI) {
       h += sect(I('Installed programs by size', 'Εγκατεστημένα προγράμματα ανά μέγεθος'), apps.length + I(' programs, the biggest 40', ' προγράμματα, τα 40 μεγαλύτερα'));
       h += '<div class="win"><div class="body">' + tbl([I('Program', 'Πρόγραμμα'), I('Publisher', 'Εκδότης'), I('Version', 'Έκδοση'), I('Installed', 'Εγκαταστάθηκε'), I('Size', 'Μέγεθος'), I('Hint', 'Ένδειξη')], rows.map(function (a) { return [a.name, a.publisher, a.version, day(a.installDate), num(a.sizeMB) ? V.fmtGB(a.sizeMB / 1024) : '', un[a.name] ? I('maybe unused', 'ίσως αχρησιμοποίητο') : '']; }), function (i) { return un[rows[i].name]; }) + '</div></div>';
     }
+    /* traces (1.3.0): sign-ins, programs that ran, downloads, listening ports, Defender, networks */
+    var FXD = (D && D.extras && D.extras.forensics) || null;
+    if (FXD) {
+      var LG = FXD.logons || {}, DF = FXD.defender || {}, FWD = FXD.firewall || {}, PSD = FXD.powershell || {}, NW = FXD.network || {};
+      function when(iso) { return iso ? V.fmtDT(iso) : ''; }
+      h += sect(I('Traces: who did what and when', 'Ίχνη: ποιος έκανε τι και πότε'), I('read from the Windows logs; nothing was changed. Clues, not proof.', 'διαβασμένα από τα logs των Windows· δεν άλλαξε τίποτα. Ενδείξεις, όχι αποδείξεις.'));
+      h += '<div class="grid">';
+      h += '<div class="s4">' + card(I('Sign-ins, last 30 days', 'Συνδέσεις, τελευταίες 30 ημέρες'), LG.readable ? I('Security log read', 'διαβάστηκε το Security log') : I('needs administrator', 'θέλει διαχειριστή'),
+        LG.readable ? kv([[I('Successful', 'Επιτυχείς'), LG.success30], [I('Failed', 'Αποτυχημένες'), LG.failed30], [I('Most failures in one hour', 'Περισσότερες αποτυχίες σε μία ώρα'), LG.failedBurst],
+          [I('From outside addresses', 'Από εξωτερικές διευθύνσεις'), LG.remoteExt], [I('Remote desktop', 'Απομακρυσμένη επιφάνεια'), num(LG.rdpType10) + num(LG.rdpCount)], [I('Night sign-ins (0-5 am)', 'Νυχτερινές συνδέσεις (0-5 π.μ.)'), LG.night],
+          [I('Log goes back to', 'Το log φτάνει ως'), when(LG.oldest)]]) + (LG.auditLikelyOff ? '<div class="verdict bad">' + esc(I('Sign-in auditing looks off.', 'Η καταγραφή συνδέσεων φαίνεται κλειστή.')) + '</div>' : '')
+          : '<div class="sub">' + esc(I('Run the check as administrator to read the sign-in log.', 'Τρέξε τον έλεγχο ως διαχειριστής για να διαβαστεί το log συνδέσεων.')) + '</div>') + '</div>';
+      h += '<div class="s4">' + card(I('Microsoft Defender', 'Microsoft Defender'), DF.available ? I('history', 'ιστορικό') : I('not available', 'δεν είναι διαθέσιμο'),
+        DF.available ? kv([[I('Real-time protection', 'Προστασία πραγματικού χρόνου'), DF.realtime == null ? '' : yn(DF.realtime)], [I('Tamper protection', 'Προστασία από παραβίαση'), DF.tamper == null ? '' : yn(DF.tamper)],
+          [I('Excluded places', 'Εξαιρέσεις'), arr(DF.exclPaths).length + arr(DF.exclProcs).length + arr(DF.exclExts).length + (DF.exclHidden ? I(' (hidden: not administrator)', ' (κρυμμένες: όχι διαχειριστής)') : '')],
+          [I('Switched off (60 days)', 'Απενεργοποιήσεις (60 ημέρες)'), arr(DF.offEvents).length], [I('Threats found (90 days)', 'Απειλές (90 ημέρες)'), arr(DF.detections).length]]) : '<div class="sub">' + esc(I('Defender is not the active antivirus or could not be read.', 'Το Defender δεν είναι το ενεργό antivirus ή δεν διαβάστηκε.')) + '</div>') + '</div>';
+      h += '<div class="s4">' + card(I('PowerShell and firewall', 'PowerShell και τείχος προστασίας'), '',
+        kv([[I('PowerShell diary on', 'Ημερολόγιο PowerShell ανοιχτό'), PSD.opLogEnabled == null ? '' : yn(PSD.opLogEnabled)], [I('Script blocks checked', 'Scripts που ελέγχθηκαν'), PSD.blocks], [I('Suspicious patterns', 'Ύποπτα μοτίβα'), arr(PSD.patterns).concat(arr(PSD.histFlags)).reduce(function (a, x) { return a + num(x.count); }, 0)],
+          [I('Inbound allow rules', 'Κανόνες εισερχομένων'), FWD.inboundAllow], [I('Rules to user folders', 'Κανόνες σε φακέλους χρήστη'), arr(FWD.userPath).length], [I('Folders shared with everyone', 'Φάκελοι κοινόχρηστοι σε όλους'), arr(FWD.shares).filter(function (x) { return x.everyone; }).length]])) + '</div>';
+      h += '</div>';
+      var bamL = arr(FXD.bam).slice(0, 30);
+      if (bamL.length) {
+        h += '<div class="win" style="margin-top:14px"><header><span>' + esc(I('Programs that ran lately (from Windows BAM)', 'Προγράμματα που έτρεξαν πρόσφατα (από το BAM των Windows)')) + '</span><span class="st">' + esc(I('newest first', 'πιο πρόσφατα πρώτα')) + '</span></header><div class="body">' + LOCK() +
+          tbl([I('When', 'Πότε'), I('Program', 'Πρόγραμμα'), I('Where', 'Πού')], bamL.map(function (x) { return [when(x.t), String(x.path).replace(/^.*[\\\/]/, ''), String(x.path)]; }), function (i) { return bamL[i].userDir; }) + '</div></div>';
+      }
+      var dlL = arr(FXD.downloads).slice(0, 30);
+      if (dlL.length) {
+        h += '<div class="win" style="margin-top:14px"><header><span>' + esc(I('Programs and scripts downloaded in the last 90 days', 'Προγράμματα και scripts που κατέβηκαν τις τελευταίες 90 ημέρες')) + '</span><span class="st">' + dlL.length + '</span></header><div class="body">' + LOCK() +
+          tbl([I('When', 'Πότε'), I('File', 'Αρχείο'), I('Folder', 'Φάκελος'), I('From', 'Από'), I('Signature', 'Υπογραφή')], dlL.map(function (x) { return [when(x.t), x.name, x.folder, x.host || (x.zone === 3 ? I('internet', 'διαδίκτυο') : I('local', 'τοπικά')), (x.sig || '') + (x.signer ? ' - ' + x.signer : '')]; }), function (i) { return /(NotSigned|HashMismatch|NotTrusted)/.test(dlL[i].sig || '') && (dlL[i].zone === 3 || dlL[i].host); }) + '</div></div>';
+      }
+      var lsL = arr(FXD.listeners).filter(function (x) { return x.scope !== 'local'; }).slice(0, 40);
+      if (lsL.length) {
+        h += '<div class="win" style="margin-top:14px"><header><span>' + esc(I('Programs waiting for connections from the network', 'Προγράμματα που περιμένουν συνδέσεις από το δίκτυο')) + '</span><span class="st">' + lsL.length + '</span></header><div class="body">' +
+          tbl([I('Program', 'Πρόγραμμα'), I('Open to', 'Ανοιχτό σε'), I('Ports', 'Θύρες'), I('Signature', 'Υπογραφή')], lsL.map(function (x) { return [x.name || ('pid ' + x.pid), x.scope === 'all' ? I('whole network', 'όλο το δίκτυο') : I('local network', 'τοπικό δίκτυο'), arr(x.ports).join(', ') + (x.portCount > arr(x.ports).length ? ' ...' : ''), (x.sig || '') + (x.signer ? ' - ' + x.signer : '')]; }),
+            function (i) { return lsL[i].sig && lsL[i].sig !== 'Valid'; }) + '</div></div>';
+      }
+      var nets = arr(NW.networks);
+      if (nets.length) {
+        h += '<div class="win" style="margin-top:14px"><header><span>' + esc(I('Networks this PC joined (60 days)', 'Δίκτυα που συνδέθηκε ο υπολογιστής (60 ημέρες)')) + '</span><span class="st">' + nets.length + '</span></header><div class="body">' + LOCK() +
+          tbl([I('Network', 'Δίκτυο'), I('Times', 'Φορές'), I('Last', 'Τελευταία'), I('Type', 'Τύπος')], nets.map(function (x) { return [x.name, x.count, when(x.last), String(x.category) === '0' ? I('public', 'δημόσιο') : (String(x.category) === '2' ? I('domain', 'domain') : I('private', 'ιδιωτικό'))]; })) + '</div></div>';
+      }
+    }
     h += '</div>';
     el.insertAdjacentHTML('beforeend', h);
   }

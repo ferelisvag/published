@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '1.2.0'
+$script:Version = '2.0.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -33,7 +33,7 @@ function Flush-StepErrors {
             if ($cnt -gt 0) {
                 # "does not exist / not found" is normal (a setting nobody set, a file Windows does not have): not counted.
                 # Only real failures (access denied, not allowed, operation failed...) are kept.
-                $benign = 'Cannot find path|does not exist|No matching .* objects|No MSFT_|Cannot find a process|Cannot find drive|Cannot find an object|Property .* cannot be found|was not found|No events were found|0x800106ba|Requested registry access is not allowed|Could not find a part of the path|Could not find file|Could not find a file'
+                $benign = 'Cannot find path|does not exist|No matching .* objects|No MSFT_|Cannot find a process|Cannot find drive|Cannot find an object|Property .* cannot be found|was not found|No events were found|0x800106ba|Requested registry access is not allowed|There is not an event log|unauthorized operation|Must be an administrator|Could not find a part of the path|Could not find file|Could not find a file|alternate data stream'
                 $real = 0
                 $msgs = New-Object System.Collections.ArrayList
                 $take = [math]::Min($cnt, 300)
@@ -253,7 +253,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 19
+$TOTAL = 20
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -1772,6 +1772,482 @@ try {
 $extras | Add-Member -NotePropertyName more3 -NotePropertyValue ([pscustomobject]@{
     win11 = $w11; taskDetail = $taskDetail; svcDetail = $svcDetail; memDiag = $memDiag; sfcLast = $sfcLast; printQueue = $printQueue; dotnet = $dotnet; gpo = $gpoNames
 }) -Force
+
+# ---------------------------------------------------------------- 20. forensic traces: who signed in, what was cleared or added, what ran, what was downloaded (read-only)
+Step 20 $TOTAL 'Traces: sign-ins, cleared logs, new accounts, programs that ran, downloads, Defender, firewall'
+
+function Fx-Ev($filter, [int]$max) { try { return @(Get-WinEvent -FilterHashtable $filter -MaxEvents $max -ErrorAction Stop) } catch { return @() } }
+function Fx-Leaf([string]$p) { try { return [IO.Path]::GetFileName(($p.Trim('"'))) } catch { return $p } }
+function Fx-IsPublic([string]$ip) {
+    if (-not $ip -or $ip -eq '-' -or $ip -eq '::1' -or $ip -eq '127.0.0.1' -or $ip -eq '::') { return $false }
+    if ($ip -match '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|169\.254\.|127\.|fe80:|fc|fd|::ffff:(10\.|192\.168\.|127\.))') { return $false }
+    return $true
+}
+$fxUserDir = '(?i)\\(Temp|Tmp)\\|\\Users\\Public\\|\\Downloads\\|\\AppData\\|\\ProgramData\\|\\\$Recycle\.Bin\\|\\Windows\\Temp\\'
+$fxTl = New-Object System.Collections.ArrayList
+function Fx-Tl($when, [string]$kind, [string]$x) {
+    try { [void]$fxTl.Add([pscustomobject]@{ t = Iso $when; k = $kind; x = $x }) } catch { }
+}
+$fxFull = -not $Quick
+$fx = [ordered]@{}
+$fx['admin'] = [bool]$isAdmin
+$fxS30 = (Get-Date).AddDays(-30)
+$fxS60 = (Get-Date).AddDays(-60)
+$fxS90 = (Get-Date).AddDays(-90)
+
+# ---- 1 and 5. sign-ins (Security log; needs administrator rights)
+$lg = [ordered]@{ readable = $false; oldest = $null; failed30 = 0; failedBurst = 0; failedRemote = 0; failedTop = @(); failedUsers = @(); lastFailed = $null; success30 = 0; remote = @(); remoteExt = 0; rdpType10 = 0; night = 0; auditLikelyOff = $false; rdp = @(); rdpCount = 0 }
+try {
+    $o = @(Get-WinEvent -LogName Security -MaxEvents 1 -Oldest -ErrorAction Stop)
+    if ($o.Count -gt 0) { $lg.readable = $true; $lg.oldest = Iso $o[0].TimeCreated }
+} catch { }
+if ($lg.readable) {
+    try {
+        $evF = Fx-Ev @{ LogName = 'Security'; Id = 4625; StartTime = $fxS30 } 3000
+        $lg.failed30 = $evF.Count
+        if ($evF.Count -gt 0) {
+            $lg.lastFailed = Iso $evF[0].TimeCreated
+            $times = @($evF | ForEach-Object { $_.TimeCreated } | Sort-Object)
+            $best = 0; $j = 0
+            for ($i = 0; $i -lt $times.Count; $i++) {
+                while ($times[$i] -gt $times[$j].AddHours(1)) { $j++ }
+                if (($i - $j + 1) -gt $best) { $best = $i - $j + 1 }
+            }
+            $lg.failedBurst = $best
+            $byIp = @{}; $byUs = @{}; $perHour = @{}; $rem = 0
+            foreach ($e in $evF) {
+                $ip = Ev-Prop $e 19; $us = Ev-Prop $e 5
+                if ($ip -and $ip -ne '-' -and $ip -ne '::1' -and $ip -ne '127.0.0.1') { $rem++; if ($byIp.ContainsKey($ip)) { $byIp[$ip]++ } else { $byIp[$ip] = 1 } }
+                if ($us) { if ($byUs.ContainsKey($us)) { $byUs[$us]++ } else { $byUs[$us] = 1 } }
+                $hk = $e.TimeCreated.ToString('yyyy-MM-ddTHH:00:00')
+                if ($perHour.ContainsKey($hk)) { $perHour[$hk]++ } else { $perHour[$hk] = 1 }
+            }
+            $lg.failedRemote = $rem
+            $lg.failedTop = @($byIp.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 5 | ForEach-Object { [pscustomobject]@{ ip = [string]$_.Key; count = [int]$_.Value; pub = (Fx-IsPublic ([string]$_.Key)) } })
+            $lg.failedUsers = @($byUs.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 5 | ForEach-Object { [pscustomobject]@{ user = [string]$_.Key; count = [int]$_.Value } })
+            foreach ($hk in $perHour.Keys) { if ($perHour[$hk] -ge 5) { Fx-Tl ([datetime]$hk) 'logfail' ([string]$perHour[$hk] + ' failed sign-ins') } }
+        }
+    } catch { }
+    try {
+        $evS = Fx-Ev @{ LogName = 'Security'; Id = 4624; StartTime = $fxS30 } 6000
+        $lg.success30 = $evS.Count
+        $remote = New-Object System.Collections.ArrayList
+        foreach ($e in $evS) {
+            $lt = Ev-Prop $e 8
+            if ($lt -ne '3' -and $lt -ne '10') { continue }
+            $ip = Ev-Prop $e 18; $us = Ev-Prop $e 5
+            if ($us -match '^(ANONYMOUS LOGON|\$|.*\$)$') { continue }
+            $pub = Fx-IsPublic $ip
+            if ($lt -eq '10') { $lg.rdpType10++ }
+            if ($pub) { $lg.remoteExt++ }
+            if ($pub -or $lt -eq '10') {
+                $h = $e.TimeCreated.Hour
+                if ($h -ge 0 -and $h -lt 5) { $lg.night++ }
+                if ($remote.Count -lt 15) { [void]$remote.Add([pscustomobject]@{ t = Iso $e.TimeCreated; user = $us; type = [int]$lt; ip = $ip; pub = $pub }) }
+                if ($pub -or $lt -eq '10') { Fx-Tl $e.TimeCreated 'rlogon' $(if ($lt -eq '10') { 'remote desktop' } else { 'network, outside address' }) }
+            }
+        }
+        $lg.remote = @($remote)
+        $ev7 = Fx-Ev @{ LogName = 'Security'; Id = 4624; StartTime = (Get-Date).AddDays(-7) } 5
+        if ($ev7.Count -eq 0) { $lg.auditLikelyOff = $true }
+    } catch { }
+}
+try {
+    $evR = Fx-Ev @{ LogName = 'Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational'; Id = 1149; StartTime = $fxS30 } 200
+    $lg.rdpCount = $evR.Count
+    $lg.rdp = @($evR | Select-Object -First 10 | ForEach-Object { $ip = Ev-Prop $_ 2; [pscustomobject]@{ t = Iso $_.TimeCreated; user = (Ev-Prop $_ 0); ip = $ip; pub = (Fx-IsPublic $ip) } })
+} catch { }
+$fx['logons'] = [pscustomobject]$lg
+
+# ---- 2. event logs that were cleared
+$clr = @()
+foreach ($c in (Fx-Ev @{ LogName = 'Security'; Id = 1102 } 5)) { $clr += [pscustomobject]@{ t = Iso $c.TimeCreated; log = 'Security' }; Fx-Tl $c.TimeCreated 'logclear' 'Security log' }
+foreach ($c in (Fx-Ev @{ LogName = 'System'; Id = 104; ProviderName = 'Microsoft-Windows-Eventlog' } 5)) { $clr += [pscustomobject]@{ t = Iso $c.TimeCreated; log = 'Other log' }; Fx-Tl $c.TimeCreated 'logclear' 'event log' }
+$fx['logsCleared'] = @($clr)
+
+# ---- 3. new accounts and changes to groups (Security log)
+$acc = @()
+if ($lg.readable) {
+    try {
+        foreach ($e in (Fx-Ev @{ LogName = 'Security'; Id = 4720; StartTime = $fxS90 } 40)) { $acc += [pscustomobject]@{ t = Iso $e.TimeCreated; kind = 'created'; name = (Ev-Prop $e 0); group = ''; admin = $false }; Fx-Tl $e.TimeCreated 'acct' 'new account' }
+        foreach ($e in (Fx-Ev @{ LogName = 'Security'; Id = 4726; StartTime = $fxS90 } 40)) { $acc += [pscustomobject]@{ t = Iso $e.TimeCreated; kind = 'deleted'; name = (Ev-Prop $e 0); group = ''; admin = $false } }
+        foreach ($e in (Fx-Ev @{ LogName = 'Security'; Id = 4732; StartTime = $fxS90 } 60)) {
+            $sidG = Ev-Prop $e 4; $mn = Ev-Prop $e 0; $msid = Ev-Prop $e 1
+            if ((-not $mn -or $mn -eq '-') -and $msid) { try { $mn = ([Security.Principal.SecurityIdentifier]$msid).Translate([Security.Principal.NTAccount]).Value } catch { $mn = $msid } }
+            $isAdm = ($sidG -eq 'S-1-5-32-544')
+            $acc += [pscustomobject]@{ t = Iso $e.TimeCreated; kind = 'groupadd'; name = $mn; group = (Ev-Prop $e 2); admin = $isAdm }
+            if ($isAdm) { Fx-Tl $e.TimeCreated 'acct' 'added to Administrators' }
+        }
+    } catch { }
+}
+$fx['accountChanges'] = @($acc | Select-Object -First 40)
+
+# ---- 4. services that were installed (System log 7045), with their path
+$svn = @()
+foreach ($e in (Fx-Ev @{ LogName = 'System'; Id = 7045; StartTime = $fxS60 } 60)) {
+    $pth = Ev-Prop $e 1; if ($pth.Length -gt 220) { $pth = $pth.Substring(0, 220) }
+    $svn += [pscustomobject]@{ t = Iso $e.TimeCreated; name = (Ev-Prop $e 0); path = $pth; start = (Ev-Prop $e 3); account = (Ev-Prop $e 4) }
+}
+$fx['servicesNew'] = @($svn | Select-Object -First 40)
+
+# ---- 5. system time changes (System log, Kernel-General 1)
+$tc = @()
+foreach ($e in (Fx-Ev @{ LogName = 'System'; ProviderName = 'Microsoft-Windows-Kernel-General'; Id = 1; StartTime = $fxS60 } 100)) {
+    try {
+        $nv = [datetime]$e.Properties[0].Value; $ov = [datetime]$e.Properties[1].Value
+        $d = [math]::Abs(($nv - $ov).TotalSeconds)
+        if ($d -ge 120) { $tc += [pscustomobject]@{ t = Iso $e.TimeCreated; seconds = [int][math]::Min($d, 2000000000) }; Fx-Tl $e.TimeCreated 'timechg' ([string][int][math]::Round($d / 60) + ' min') }
+    } catch { }
+}
+$fx['timeChanges'] = @($tc | Select-Object -First 15)
+
+# ---- 6. programs that ran: Prefetch (file names only), full scan only
+$pfo = [ordered]@{ readable = $false; enabled = $null; count = 0; oldest = $null; recent = @(); hits = @() }
+try { $pfo.enabled = [int](Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters' -Name EnablePrefetcher -ErrorAction Stop).EnablePrefetcher } catch { }
+if ($fxFull) {
+    try {
+        $pf = @(Get-ChildItem -LiteralPath (Join-Path $env:windir 'Prefetch') -Filter '*.pf' -ErrorAction Stop | Sort-Object LastWriteTime -Descending)
+        $pfo.readable = $true; $pfo.count = $pf.Count
+        if ($pf.Count -gt 0) { $pfo.oldest = Iso $pf[$pf.Count - 1].LastWriteTime }
+        $kw = '(?i)MIMIKATZ|PSEXEC|PSEXESVC|PROCDUMP|LAZAGNE|RUBEUS|SHARPHOUND|BLOODHOUND|NMAP|ADVANCED_IP_SCANNER|HASHCAT|HYDRA|NGROK|CHISEL|PLINK|NETCAT|^NC(64)?\.EXE|^WCE\.EXE|PWDUMP|FGDUMP|GSECDUMP|CAIN\.EXE|XMRIG|MINERD|NICEHASH|CRYPTOMINER|SPYNET'
+        $rec = @(); $hit = @()
+        foreach ($f in $pf) {
+            $nm = $f.Name -replace '-[0-9A-Fa-f]{8}\.pf$', ''
+            if ($rec.Count -lt 60) { $rec += [pscustomobject]@{ name = $nm; t = Iso $f.LastWriteTime } }
+            if ($nm -match $kw -and $hit.Count -lt 15) { $hit += [pscustomobject]@{ name = $nm; t = Iso $f.LastWriteTime } }
+        }
+        $pfo.recent = $rec; $pfo.hits = $hit
+    } catch { }
+}
+$fx['prefetch'] = [pscustomobject]$pfo
+
+# ---- 6. last run time per program: BAM (Background Activity Moderator), names and paths only
+$bam = @()
+try {
+    $bamRoot = 'HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings'
+    if (-not (Test-Path $bamRoot)) { $bamRoot = 'HKLM:\SYSTEM\CurrentControlSet\Services\bam\UserSettings' }
+    $all = New-Object System.Collections.ArrayList
+    foreach ($sk in @(Get-ChildItem -Path $bamRoot -ErrorAction Stop)) {
+        foreach ($n in $sk.GetValueNames()) {
+            if ($n -notmatch '^(\\Device\\|[A-Za-z]:\\)') { continue }
+            $b = $sk.GetValue($n)
+            if ($b -is [byte[]] -and $b.Length -ge 8) {
+                try { $ft = [BitConverter]::ToInt64($b, 0); if ($ft -gt 0) { [void]$all.Add([pscustomobject]@{ t = [DateTime]::FromFileTimeUtc($ft).ToLocalTime(); p = ($n -replace '^\\Device\\HarddiskVolume\d+', '<vol>') }) } } catch { }
+            }
+        }
+    }
+    $srt = @($all | Sort-Object t -Descending)
+    $sus = @($srt | Where-Object { $_.p -match $fxUserDir } | Select-Object -First 40)
+    $oth = @($srt | Where-Object { $_.p -notmatch $fxUserDir } | Select-Object -First 30)
+    foreach ($r in ($sus + $oth)) { $bam += [pscustomobject]@{ t = Iso $r.t; path = $r.p; userDir = ($r.p -match $fxUserDir) } }
+} catch { }
+$fx['bam'] = @($bam)
+
+# ---- 7. ShimCache (AppCompatCache): files Windows has seen, full scan only
+$shim = [ordered]@{ readable = $false; total = 0; sus = @() }
+if ($fxFull) {
+    try {
+        $b = [byte[]](Get-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache' -Name AppCompatCache -ErrorAction Stop).AppCompatCache
+        $shim.readable = $true
+        $pos = [int][BitConverter]::ToUInt32($b, 0)
+        if ($pos -lt 16 -or $pos -gt 128) { $pos = 52 }
+        $tot = 0; $susL = New-Object System.Collections.ArrayList
+        while (($pos + 24) -lt $b.Length -and $tot -lt 1200) {
+            if ($b[$pos] -ne 0x31 -or $b[$pos + 1] -ne 0x30 -or $b[$pos + 2] -ne 0x74 -or $b[$pos + 3] -ne 0x73) { break }
+            $ds = [int][BitConverter]::ToUInt32($b, $pos + 8)
+            $pl = [int][BitConverter]::ToUInt16($b, $pos + 12)
+            if ($pl -le 0 -or ($pos + 14 + $pl + 8) -gt $b.Length) { break }
+            $pth = [Text.Encoding]::Unicode.GetString($b, $pos + 14, $pl)
+            $tot++
+            if ($pth -match $fxUserDir -and $pth -match '(?i)\.(exe|dll|scr|bat|cmd|ps1|vbs|js|msi|com|cpl|jar)$') {
+                $mt = $null; try { $ft = [BitConverter]::ToInt64($b, $pos + 14 + $pl); if ($ft -gt 0) { $mt = Iso ([DateTime]::FromFileTimeUtc($ft).ToLocalTime()) } } catch { }
+                if ($susL.Count -lt 40) { [void]$susL.Add([pscustomobject]@{ path = $pth; modified = $mt }) }
+            }
+            $pos += 12 + $ds
+        }
+        $shim.total = $tot; $shim.sus = @($susL)
+    } catch { }
+}
+$fx['shimcache'] = [pscustomobject]$shim
+
+# ---- 8. downloaded programs and scripts (with the web address they came from), full scan only
+$dl = @()
+if ($fxFull) {
+    try {
+        $extRe = '(?i)\.(exe|msi|bat|cmd|ps1|vbs|vbe|js|jse|wsf|scr|jar|iso|img|lnk|dll|hta|cpl|msix|appx)$'
+        $cand = New-Object System.Collections.ArrayList
+        foreach ($u in @(Get-ChildItem -LiteralPath (Join-Path $env:SystemDrive 'Users') -Directory -ErrorAction Stop)) {
+            if ($u.Name -match '^(Public|Default|Default User|All Users)$') { continue }
+            foreach ($fo in @(@('Downloads', 'Downloads'), @('Desktop', 'Desktop'), @('AppData\Local\Temp', 'Temp'))) {
+                $dp = Join-Path $u.FullName $fo[0]
+                if (-not (Test-Path -LiteralPath $dp)) { continue }
+                foreach ($f in @(Get-ChildItem -LiteralPath $dp -File -Force -ErrorAction SilentlyContinue | Where-Object { $_.Name -match $extRe -and $_.LastWriteTime -gt $fxS90 })) { [void]$cand.Add([pscustomobject]@{ f = $f; folder = $fo[1] }) }
+            }
+        }
+        $sel = @($cand | Sort-Object { $_.f.LastWriteTime } -Descending | Select-Object -First 70)
+        $sigN = 0
+        foreach ($c in $sel) {
+            $f = $c.f; $zone = $null; $host1 = ''
+            try {
+                $zs = @(Get-Content -LiteralPath $f.FullName -Stream Zone.Identifier -ErrorAction Stop)
+                foreach ($ln in $zs) {
+                    if ($ln -match '^ZoneId=(\d)') { $zone = [int]$Matches[1] }
+                    elseif ($ln -match '^HostUrl=(.+)$' -and -not $host1) { $u1 = $Matches[1].Trim(); if ($u1 -match '^[a-z]+://([^/:?#]+)') { $host1 = $Matches[1] } elseif ($u1 -eq 'about:internet') { $host1 = '' } }
+                }
+            } catch { }
+            $sg = ''; $signer = ''
+            if ($sigN -lt 50 -and $f.Name -match '(?i)\.(exe|msi|dll|scr|ps1|cpl|msix|appx)$') {
+                $sigN++
+                try { $sa = Get-AuthenticodeSignature -LiteralPath $f.FullName -ErrorAction Stop; $sg = [string]$sa.Status; if ($sa.SignerCertificate) { $signer = ([string]$sa.SignerCertificate.Subject) -replace '^.*?CN=([^,]+).*$', '$1' } } catch { }
+            }
+            $dl += [pscustomobject]@{ name = $f.Name; folder = $c.folder; t = Iso $f.LastWriteTime; sizeKB = [int]($f.Length / 1KB); zone = $zone; host = $host1; sig = $sg; signer = $signer }
+        }
+    } catch { }
+}
+$fx['downloads'] = @($dl)
+
+# ---- 9 and 10. Microsoft Defender: exclusions, protection switched off, what it caught
+$df = [ordered]@{ available = $false; exclHidden = $false; exclPaths = @(); exclProcs = @(); exclExts = @(); realtime = $null; tamper = $null; offEvents = @(); exclEvents = @(); detections = @() }
+try {
+    $mp = Get-MpPreference -ErrorAction Stop
+    $df.available = $true
+    $hid = $false
+    function Fx-List($v) { $o = @(); foreach ($x in @($v)) { $s = [string]$x; if ($s -match 'N/A: Must be an administrator') { $script:fxHid = $true } elseif ($s) { $o += $s } }; return @($o | Select-Object -First 40) }
+    $script:fxHid = $false
+    $df.exclPaths = Fx-List $mp.ExclusionPath
+    $df.exclProcs = Fx-List $mp.ExclusionProcess
+    $df.exclExts = Fx-List $mp.ExclusionExtension
+    $df.exclHidden = $script:fxHid
+    $df.realtime = -not [bool]$mp.DisableRealtimeMonitoring
+} catch { }
+try { $ms = Get-MpComputerStatus -ErrorAction Stop; $df.tamper = [bool]$ms.IsTamperProtected; if ($null -eq $df.realtime) { $df.realtime = [bool]$ms.RealTimeProtectionEnabled } } catch { }
+try {
+    $defLog = 'Microsoft-Windows-Windows Defender/Operational'
+    foreach ($e in (Fx-Ev @{ LogName = $defLog; Id = 5001, 5010, 5012; StartTime = $fxS60 } 40)) { $df.offEvents += [pscustomobject]@{ t = Iso $e.TimeCreated; id = [int]$e.Id }; Fx-Tl $e.TimeCreated 'defoff' $(if ($e.Id -eq 5001) { 'real-time protection off' } else { 'scanning off' }) }
+    foreach ($e in (Fx-Ev @{ LogName = $defLog; Id = 5007; StartTime = $fxS60 } 200)) {
+        $m = [string]$e.Message
+        if ($m -match '(?i)Exclusions\\(Paths|Processes|Extensions)') {
+            $what = (FirstLine $m 400); if ($what.Length -gt 160) { $what = $what.Substring(0, 160) }
+            if ($df.exclEvents.Count -lt 15) { $df.exclEvents += [pscustomobject]@{ t = Iso $e.TimeCreated; what = $what } }
+            Fx-Tl $e.TimeCreated 'defoff' 'exclusion changed'
+        }
+    }
+} catch { }
+try {
+    $thr = @{}; foreach ($t in @(Get-MpThreat -ErrorAction Stop)) { $thr[[string]$t.ThreatID] = $t }
+    foreach ($d in @(Get-MpThreatDetection -ErrorAction Stop | Sort-Object InitialDetectionTime -Descending | Select-Object -First 30)) {
+        if ($d.InitialDetectionTime -lt $fxS90) { continue }
+        $tn = ''; $sv = $null; $k = [string]$d.ThreatID; if ($thr.ContainsKey($k)) { $tn = [string]$thr[$k].ThreatName; $sv = [int]$thr[$k].SeverityID }
+        $res = ''; try { $res = [string]@($d.Resources)[0]; if ($res.Length -gt 150) { $res = $res.Substring(0, 150) } } catch { }
+        $df.detections += [pscustomobject]@{ t = Iso $d.InitialDetectionTime; threat = $tn; severity = $sv; process = (Fx-Leaf ([string]$d.ProcessName)); resource = $res; ok = [bool]$d.ActionSuccess }
+    }
+} catch { }
+$fx['defender'] = [pscustomobject]$df
+
+# ---- 11. firewall: inbound allow rules that point to user folders, rules by port only, rules added lately, open shares
+$fw = [ordered]@{ inboundAllow = 0; userPath = @(); portOnly = @(); added = @(); shares = @() }
+try {
+    $fk = Get-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy\FirewallRules' -ErrorAction Stop
+    foreach ($n in $fk.GetValueNames()) {
+        $v = [string]$fk.GetValue($n)
+        if ($v -notmatch '\|Active=TRUE\|' -or $v -notmatch '\|Dir=In\|' -or $v -notmatch '\|Action=Allow\|') { continue }
+        $fw.inboundAllow++
+        $app = ''; if ($v -match '\|App=([^|]+)\|') { $app = $Matches[1] }
+        $nm = ''; if ($v -match '\|Name=([^|]+)\|') { $nm = $Matches[1] }
+        $lp = ''; if ($v -match '\|LPort=([^|]+)\|') { $lp = $Matches[1] }
+        $svc = ''; if ($v -match '\|Svc=([^|]+)\|') { $svc = $Matches[1] }
+        $pr = ''; if ($v -match '\|Protocol=(\d+)\|') { $pr = $Matches[1] }
+        if ($nm.Length -gt 70) { $nm = $nm.Substring(0, 70) }
+        if ($app -and $app -match $fxUserDir -and $fw.userPath.Count -lt 25) { $fw.userPath += [pscustomobject]@{ name = $nm; app = $app; port = $lp } }
+        elseif (-not $app -and -not $svc -and $lp -and $nm -notmatch '^@|^Core Networking|^Delivery Optimization|^mDNS|^Microsoft|^AllJoyn|^Cast to Device|^Wi-Fi Direct|^DIAL|^Windows' -and $fw.portOnly.Count -lt 15) { $fw.portOnly += [pscustomobject]@{ name = $nm; port = $lp; proto = $pr } }
+    }
+} catch { }
+try {
+    foreach ($e in (Fx-Ev @{ LogName = 'Microsoft-Windows-Windows Firewall With Advanced Security/Firewall'; Id = 2004; StartTime = $fxS60 } 60)) {
+        $app = ''; foreach ($p in $e.Properties) { $s = [string]$p.Value; if ($s -match '^[A-Za-z]:\\') { $app = $s; break } }
+        if ($fw.added.Count -lt 25) { $fw.added += [pscustomobject]@{ t = Iso $e.TimeCreated; name = (Ev-Prop $e 1); app = $app } }
+    }
+} catch { }
+try {
+    foreach ($s in @(Get-SmbShare -Special $false -ErrorAction Stop)) {
+        $evAll = $false
+        try { foreach ($a in @(Get-SmbShareAccess -Name $s.Name -ErrorAction Stop)) { if ([string]$a.AccountName -match '(?i)^(Everyone|ANONYMOUS LOGON|.*\\Guests?)$' -and [string]$a.AccessControlType -eq 'Allow') { $evAll = $true } } } catch { }
+        $fw.shares += [pscustomobject]@{ name = [string]$s.Name; path = [string]$s.Path; everyone = $evAll }
+    }
+} catch { }
+$fx['firewall'] = [pscustomobject]$fw
+
+# ---- 12. classic backdoors: replaced accessibility programs, startup folders
+$acx = @()
+try {
+    $ifeo = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options'
+    $cmdH = ''; $psH = ''
+    try { $cmdH = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $env:windir 'System32\cmd.exe') -ErrorAction Stop).Hash } catch { }
+    try { $psH = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $env:windir 'System32\WindowsPowerShell\v1.0\powershell.exe') -ErrorAction Stop).Hash } catch { }
+    foreach ($n in 'sethc.exe', 'utilman.exe', 'osk.exe', 'narrator.exe', 'magnify.exe', 'displayswitch.exe') {
+        $dbg = ''; try { $dbg = [string](Get-ItemProperty -Path ($ifeo + '\' + $n) -Name Debugger -ErrorAction Stop).Debugger } catch { }
+        $fp = Join-Path $env:windir ('System32\' + $n)
+        $sg = ''; $same = ''
+        if (Test-Path -LiteralPath $fp) {
+            try { $sg = [string](Get-AuthenticodeSignature -LiteralPath $fp -ErrorAction Stop).Status } catch { }
+            try { $h = (Get-FileHash -Algorithm SHA256 -LiteralPath $fp -ErrorAction Stop).Hash; if ($cmdH -and $h -eq $cmdH) { $same = 'cmd.exe' } elseif ($psH -and $h -eq $psH) { $same = 'powershell.exe' } } catch { }
+        }
+        if ($dbg -or $same -or ($sg -and $sg -ne 'Valid')) { $acx += [pscustomobject]@{ name = $n; debugger = $dbg; sameAs = $same; sig = $sg } }
+    }
+} catch { }
+$fx['accessBackdoor'] = @($acx)
+
+$stf = @()
+try {
+    $sfDirs = @()
+    $sfDirs += , @((Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs\Startup'), 'all users')
+    foreach ($u in @(Get-ChildItem -LiteralPath (Join-Path $env:SystemDrive 'Users') -Directory -ErrorAction SilentlyContinue)) {
+        if ($u.Name -match '^(Public|Default|Default User|All Users)$') { continue }
+        $sfDirs += , @((Join-Path $u.FullName 'AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup'), 'user')
+    }
+    $wsh = $null; try { $wsh = New-Object -ComObject WScript.Shell } catch { }
+    foreach ($sd in $sfDirs) {
+        if (-not (Test-Path -LiteralPath $sd[0])) { continue }
+        foreach ($f in @(Get-ChildItem -LiteralPath $sd[0] -File -Force -ErrorAction SilentlyContinue | Where-Object { $_.Name -ne 'desktop.ini' })) {
+            $tg = ''
+            if ($f.Extension -eq '.lnk' -and $wsh) { try { $tg = [string]$wsh.CreateShortcut($f.FullName).TargetPath } catch { } }
+            $sg = ''; $cp = $(if ($tg) { $tg } else { $f.FullName })
+            if ($fxFull -and $cp -match '(?i)\.(exe|dll|scr|ps1)$' -and (Test-Path -LiteralPath $cp)) { try { $sg = [string](Get-AuthenticodeSignature -LiteralPath $cp -ErrorAction Stop).Status } catch { } }
+            if ($stf.Count -lt 30) { $stf += [pscustomobject]@{ name = $f.Name; scope = $sd[1]; t = Iso $f.LastWriteTime; target = $tg; sig = $sg } }
+        }
+    }
+} catch { }
+$fx['startupFolders'] = @($stf)
+
+# ---- 13. PowerShell: logging settings, signs of suspicious scripts (counts only), command names from the history
+$ps = [ordered]@{ scriptBlockPolicy = $null; transcriptPolicy = $null; opLogEnabled = $null; blocks = 0; suspicious = 0; lastSuspicious = $null; patterns = @(); histUsers = 0; histLines = 0; histTop = @(); histFlags = @() }
+try { $ps.scriptBlockPolicy = [int](Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging' -Name EnableScriptBlockLogging -ErrorAction Stop).EnableScriptBlockLogging } catch { }
+try { $ps.transcriptPolicy = [int](Get-ItemProperty 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\PowerShell\Transcription' -Name EnableTranscripting -ErrorAction Stop).EnableTranscripting } catch { }
+try { $ps.opLogEnabled = [bool](Get-WinEvent -ListLog 'Microsoft-Windows-PowerShell/Operational' -ErrorAction Stop).IsEnabled } catch { }
+$psPat = [ordered]@{
+    'encoded command' = '(?i)\s-e(nc|ncodedcommand)?\s+[A-Za-z0-9+/=]{20,}|FromBase64String'
+    'download and run' = '(?i)DownloadString|DownloadFile|Net\.WebClient|Invoke-WebRequest.*\.(exe|ps1|dll)|\biwr\b.*\.(exe|ps1)|Start-BitsTransfer'
+    'hidden window' = '(?i)-w(indowstyle)?\s+hidden|-nop\b'
+    'amsi or defender tamper' = '(?i)AmsiUtils|amsiInitFailed|Set-MpPreference\s.*-Disable|Add-MpPreference\s.*-Exclusion'
+    'memory injection' = '(?i)VirtualAlloc|WriteProcessMemory|CreateRemoteThread'
+    'credential theft' = '(?i)mimikatz|sekurlsa|lsass|Invoke-Kerberoast|comsvcs\.dll.*MiniDump'
+    'clear logs' = '(?i)wevtutil\s+cl|Clear-EventLog|Remove-EventLog'
+    'delete backups' = '(?i)vssadmin\s+delete|shadowcopy\s+delete|wbadmin\s+delete|bcdedit.*recoveryenabled'
+    'add user' = '(?i)net\s+user\s+\S+\s+\S+\s+/add|New-LocalUser|net\s+localgroup\s+administrators.*/add|Add-LocalGroupMember'
+}
+if ($fxFull) {
+    try {
+        $hit = @{}; $tot = 0; $sus = 0; $last = $null
+        foreach ($e in (Fx-Ev @{ LogName = 'Microsoft-Windows-PowerShell/Operational'; Id = 4104; StartTime = $fxS30 } 1500)) {
+            $tot++
+            $m = [string]$e.Message
+            if ($m -match 'VEAGLE PC Check|Step \$n \$total|\$psPat|Flush-StepErrors|Fx-Ev|AmsiUtils\|amsiInitFailed|Set-MpPreference\\s\.\*-Disable|\|sekurlsa\||VirtualAlloc\|WriteProcessMemory|vssadmin\\s\+delete|wevtutil\\s\+cl\|Clear-EventLog') { continue }
+            $any = $false
+            foreach ($k in $psPat.Keys) { if ($m -match $psPat[$k]) { $any = $true; if ($hit.ContainsKey($k)) { $hit[$k]++ } else { $hit[$k] = 1 } } }
+            if ($any) { $sus++; if (-not $last -or $e.TimeCreated -gt $last) { $last = $e.TimeCreated } }
+        }
+        $ps.blocks = $tot; $ps.suspicious = $sus; $ps.lastSuspicious = Iso $last
+        $ps.patterns = @($hit.GetEnumerator() | Sort-Object Value -Descending | ForEach-Object { [pscustomobject]@{ name = [string]$_.Key; count = [int]$_.Value } })
+    } catch { }
+    try {
+        $cmdCount = @{}; $flags = @{}; $hu = 0; $hl = 0
+        foreach ($u in @(Get-ChildItem -LiteralPath (Join-Path $env:SystemDrive 'Users') -Directory -ErrorAction Stop)) {
+            $hf = Join-Path $u.FullName 'AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt'
+            if (-not (Test-Path -LiteralPath $hf)) { continue }
+            $hu++
+            foreach ($ln in @(Get-Content -LiteralPath $hf -Tail 500 -ErrorAction SilentlyContinue)) {
+                $l = ([string]$ln).Trim(); if (-not $l) { continue }
+                $hl++
+                $w = ($l -split '\s+')[0].ToLower(); if ($w.Length -gt 30) { $w = $w.Substring(0, 30) }
+                if ($w -match '^[a-z0-9._-]+$') { if ($cmdCount.ContainsKey($w)) { $cmdCount[$w]++ } else { $cmdCount[$w] = 1 } }
+                foreach ($k in $psPat.Keys) { if ($l -match $psPat[$k]) { if ($flags.ContainsKey($k)) { $flags[$k]++ } else { $flags[$k] = 1 } } }
+            }
+        }
+        $ps.histUsers = $hu; $ps.histLines = $hl
+        $ps.histTop = @($cmdCount.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 12 | ForEach-Object { [pscustomobject]@{ cmd = [string]$_.Key; count = [int]$_.Value } })
+        $ps.histFlags = @($flags.GetEnumerator() | Sort-Object Value -Descending | ForEach-Object { [pscustomobject]@{ name = [string]$_.Key; count = [int]$_.Value } })
+    } catch { }
+}
+$fx['powershell'] = [pscustomobject]$ps
+
+# ---- 14. networks this PC connected to, Wi-Fi security used, VPN connections
+$net = [ordered]@{ networks = @(); wifi = @(); vpn = @() }
+try {
+    $nm = @{}
+    foreach ($e in (Fx-Ev @{ LogName = 'Microsoft-Windows-NetworkProfile/Operational'; Id = 10000; StartTime = $fxS60 } 300)) {
+        try {
+            $x = [xml]$e.ToXml(); $dd = @{}; foreach ($d in $x.Event.EventData.Data) { $dd[[string]$d.Name] = [string]$d.'#text' }
+            $n = $dd['Name']; if (-not $n) { continue }
+            if (-not $nm.ContainsKey($n)) { $nm[$n] = [pscustomobject]@{ name = $n; count = 0; last = (Iso $e.TimeCreated); category = $dd['Category'] } }
+            $nm[$n].count++
+        } catch { }
+    }
+    $net.networks = @($nm.Values | Sort-Object count -Descending | Select-Object -First 20)
+} catch { }
+try {
+    $wm = @{}
+    foreach ($e in (Fx-Ev @{ LogName = 'Microsoft-Windows-WLAN-AutoConfig/Operational'; Id = 8001; StartTime = $fxS60 } 200)) {
+        try {
+            $x = [xml]$e.ToXml(); $dd = @{}; foreach ($d in $x.Event.EventData.Data) { $dd[[string]$d.Name] = [string]$d.'#text' }
+            $s = $dd['SSID']; if (-not $s) { $s = $dd['ProfileName'] }; if (-not $s) { continue }
+            if (-not $wm.ContainsKey($s)) { $wm[$s] = [pscustomobject]@{ ssid = $s; count = 0; last = (Iso $e.TimeCreated); auth = $dd['AuthenticationAlgorithm']; cipher = $dd['CipherAlgorithm'] } }
+            $wm[$s].count++
+        } catch { }
+    }
+    $net.wifi = @($wm.Values | Sort-Object count -Descending | Select-Object -First 20)
+} catch { }
+try {
+    foreach ($e in (Fx-Ev @{ LogName = 'Application'; ProviderName = 'RasClient'; Id = 20225; StartTime = $fxS60 } 40)) {
+        $nmv = ''; $mm = [regex]::Match([string]$e.Message, '(?i)\bto the\s+(.+?)\s+(Remote Access|port|VPN)'); if ($mm.Success) { $nmv = $mm.Groups[1].Value }
+        if ($net.vpn.Count -lt 20) { $net.vpn += [pscustomobject]@{ t = Iso $e.TimeCreated; name = $nmv } }
+    }
+} catch { }
+$fx['network'] = [pscustomobject]$net
+
+# ---- 15. listening network ports -> program -> who signed it
+$lst = @()
+try {
+    $cn = @(Get-NetTCPConnection -State Listen -ErrorAction Stop)
+    $pm = @{}
+    try { foreach ($p in @(Get-CimInstance Win32_Process -ErrorAction Stop)) { $pm[[int]$p.ProcessId] = $p } } catch { }
+    $grp = @{}
+    foreach ($c in $cn) {
+        $procId = [int]$c.OwningProcess
+        $la = [string]$c.LocalAddress
+        $scope = 'local'
+        if ($la -eq '0.0.0.0' -or $la -eq '::') { $scope = 'all' } elseif ($la -ne '127.0.0.1' -and $la -ne '::1') { $scope = 'lan' }
+        if (-not $grp.ContainsKey($procId)) { $grp[$procId] = [pscustomobject]@{ pid = $procId; ports = (New-Object System.Collections.ArrayList); scope = 'local' } }
+        $g = $grp[$procId]
+        if (-not $g.ports.Contains([int]$c.LocalPort)) { [void]$g.ports.Add([int]$c.LocalPort) }
+        if ($scope -eq 'all' -or ($scope -eq 'lan' -and $g.scope -eq 'local')) { $g.scope = $scope }
+    }
+    $sigCache = @{}; $sigN = 0
+    foreach ($g in @($grp.Values | Sort-Object { if ($_.scope -eq 'all') { 0 } elseif ($_.scope -eq 'lan') { 1 } else { 2 } }, pid | Select-Object -First 60)) {
+        $pn = ''; $path = ''
+        if ($pm.ContainsKey($g.pid)) { $pn = [string]$pm[$g.pid].Name; $path = [string]$pm[$g.pid].ExecutablePath }
+        $sg = ''; $signer = ''
+        if ($path -and $g.scope -ne 'local' -and $fxFull) {
+            if ($sigCache.ContainsKey($path)) { $sg = $sigCache[$path][0]; $signer = $sigCache[$path][1] }
+            elseif ($sigN -lt 40) {
+                $sigN++
+                try { $sa = Get-AuthenticodeSignature -LiteralPath $path -ErrorAction Stop; $sg = [string]$sa.Status; if ($sa.SignerCertificate) { $signer = ([string]$sa.SignerCertificate.Subject) -replace '^.*?CN=([^,]+).*$', '$1' } } catch { }
+                $sigCache[$path] = @($sg, $signer)
+            }
+        }
+        $pl = @($g.ports | Sort-Object | Select-Object -First 12)
+        $lst += [pscustomobject]@{ pid = $g.pid; name = $pn; path = $path; scope = $g.scope; ports = $pl; portCount = $g.ports.Count; sig = $sg; signer = $signer }
+    }
+} catch { }
+$fx['listeners'] = @($lst)
+
+# ---- finish: add the security events to the timeline of the report
+try {
+    if ($fxTl.Count -gt 0) {
+        $timeline = @(@($timeline) + @($fxTl) | Sort-Object t -Descending | Select-Object -First 1800 | Sort-Object t)
+        $extras | Add-Member -NotePropertyName timeline -NotePropertyValue $timeline -Force
+    }
+} catch { }
+$extras | Add-Member -NotePropertyName forensics -NotePropertyValue ([pscustomobject]$fx) -Force
 
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }

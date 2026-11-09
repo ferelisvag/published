@@ -30,6 +30,36 @@ var SHARE = (function (V, AI) {
         m3.gpo = (m3.gpo || []).map(function (x, i) { return '<POLICY ' + (i + 1) + '>'; });
         (m3.printQueue || []).forEach(function (x, i) { x.printer = '<PRINTER ' + (i + 1) + '>'; });
       }
+      var fx = clean.extras && clean.extras.forensics;
+      if (fx) {
+        var lgn = fx.logons || {};
+        (lgn.failedTop || []).forEach(function (x, i) { x.ip = '<ADDRESS ' + (i + 1) + '>'; });
+        (lgn.failedUsers || []).forEach(function (x, i) { x.user = '<ACCOUNT ' + (i + 1) + '>'; });
+        (lgn.remote || []).forEach(function (x, i) { x.ip = '<ADDRESS>'; x.user = '<ACCOUNT>'; });
+        (lgn.rdp || []).forEach(function (x, i) { x.ip = '<ADDRESS>'; x.user = '<ACCOUNT>'; });
+        (fx.accountChanges || []).forEach(function (x, i) { x.name = '<ACCOUNT ' + (i + 1) + '>'; x.by = ''; });
+        (fx.servicesNew || []).forEach(function (x) { x.path = x.path ? '<PATH>' : ''; x.account = /^(localsystem|nt |local service|network service)/i.test(String(x.account || '')) ? x.account : '<ACCOUNT>'; });
+        (fx.bam || []).forEach(function (x) { x.path = String(x.path || '').replace(/\\Users\\[^\\]+\\/i, '\\Users\\<user>\\'); });
+        ((fx.shimcache || {}).sus || []).forEach(function (x) { x.path = String(x.path || '').replace(/\\Users\\[^\\]+\\/i, '\\Users\\<user>\\'); });
+        (fx.downloads || []).forEach(function (x, i) { x.name = '<FILE ' + (i + 1) + '>' + (/\.[A-Za-z0-9]{2,5}$/.exec(x.name) || [''])[0]; x.host = x.host ? '<SITE>' : ''; x.signer = x.signer ? '<SIGNER>' : ''; });
+        var dfx = fx.defender || {};
+        dfx.exclPaths = (dfx.exclPaths || []).map(function (x, i) { return '<PATH ' + (i + 1) + '>'; });
+        dfx.exclProcs = (dfx.exclProcs || []).map(function (x, i) { return '<PROGRAM ' + (i + 1) + '>'; });
+        (dfx.exclEvents || []).forEach(function (x) { x.what = ''; });
+        (dfx.detections || []).forEach(function (x) { x.resource = x.resource ? '<PATH>' : ''; });
+        var fwx = fx.firewall || {};
+        (fwx.userPath || []).forEach(function (x, i) { x.app = '<PATH>'; x.name = '<RULE ' + (i + 1) + '>'; });
+        (fwx.portOnly || []).forEach(function (x, i) { x.name = '<RULE ' + (i + 1) + '>'; });
+        (fwx.added || []).forEach(function (x, i) { x.app = x.app ? '<PATH>' : ''; x.name = '<RULE ' + (i + 1) + '>'; });
+        (fwx.shares || []).forEach(function (x, i) { x.name = '<SHARE ' + (i + 1) + '>'; x.path = '<PATH>'; });
+        (fx.startupFolders || []).forEach(function (x, i) { x.name = '<ITEM ' + (i + 1) + '>'; x.target = x.target ? '<PATH>' : ''; });
+        (fx.listeners || []).forEach(function (x) { x.path = x.path ? String(x.path).replace(/\\Users\\[^\\]+\\/i, '\\Users\\<user>\\') : ''; x.signer = x.signer ? '<SIGNER>' : ''; });
+        var psx = fx.powershell || {}; psx.histTop = [];
+        var nwx = fx.network || {};
+        (nwx.networks || []).forEach(function (x, i) { x.name = '<NETWORK ' + (i + 1) + '>'; });
+        (nwx.wifi || []).forEach(function (x, i) { x.ssid = '<WIFI ' + (i + 1) + '>'; });
+        (nwx.vpn || []).forEach(function (x, i) { x.name = '<VPN ' + (i + 1) + '>'; });
+      }
       var m2 = clean.extras && clean.extras.more2;
       if (m2) {
         m2.neighbours = []; m2.usbHistory = []; m2.recentRuns = [];

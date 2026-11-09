@@ -172,6 +172,45 @@ def _more3(heavy):
         memDiag=dict(time=iso(now - datetime.timedelta(days=3)), errors=True, eventId=1202), sfcLast=dict(lastRun=iso(now - datetime.timedelta(days=2)), cannotRepair=3, repaired=1),
         printQueue=[dict(printer='Demo LaserJet', jobs=4, stuck=3)], dotnet=['3.1.32', '8.0.5'], gpo=['Default Domain Policy'])
 
+
+# --- v1.3 extras ("forensics")
+def _forensics(heavy):
+    d = lambda days, h=0: iso(now - datetime.timedelta(days=days, hours=h))
+    base = dict(admin=True,
+      logons=dict(readable=True, oldest=d(25), failed30=3, failedBurst=2, failedRemote=0, failedTop=[], failedUsers=[], lastFailed=d(9), success30=210, remote=[], remoteExt=0, rdpType10=0, night=0, auditLikelyOff=False, rdp=[], rdpCount=0),
+      logsCleared=[], accountChanges=[], servicesNew=[], timeChanges=[],
+      prefetch=dict(readable=True, enabled=3, count=180, oldest=d(60), recent=[dict(name='CHROME.EXE', t=d(0, 1)), dict(name='CODE.EXE', t=d(0, 3)), dict(name='SETUP.EXE', t=d(2))], hits=[]),
+      bam=[dict(t=d(0, 1), path='<vol>\\Program Files\\Google\\Chrome\\Application\\chrome.exe', userDir=False), dict(t=d(3), path='<vol>\\Users\\demo\\Downloads\\ShareX-setup.exe', userDir=True)],
+      shimcache=dict(readable=True, total=640, sus=[]),
+      downloads=[dict(name='ShareX-setup.exe', folder='Downloads', t=d(3), sizeKB=9120, zone=3, host='github.com', sig='Valid', signer='ShareX Team')],
+      defender=dict(available=True, exclHidden=False, exclPaths=[], exclProcs=[], exclExts=[], realtime=True, tamper=True, offEvents=[], exclEvents=[], detections=[]),
+      firewall=dict(inboundAllow=34, userPath=[], portOnly=[], added=[], shares=[dict(name='Photos', path='D:\\Photos', everyone=False)]),
+      accessBackdoor=[], startupFolders=[],
+      powershell=dict(scriptBlockPolicy=None, transcriptPolicy=None, opLogEnabled=True, blocks=420, suspicious=0, lastSuspicious=None, patterns=[], histUsers=1, histLines=140, histTop=[dict(cmd='cd', count=30), dict(cmd='git', count=22)], histFlags=[]),
+      network=dict(networks=[dict(name='HomeNet', count=40, last=d(0), category='1')], wifi=[dict(ssid='HomeNet', count=12, last=d(0), auth='WPA2-Personal', cipher='CCMP')], vpn=[]),
+      listeners=[dict(pid=4, name='System', path='', scope='all', ports=[445], portCount=1, sig='', signer=''), dict(pid=900, name='svchost.exe', path='C:\\Windows\\System32\\svchost.exe', scope='all', ports=[135, 49664], portCount=2, sig='Valid', signer='Microsoft Windows')])
+    if not heavy:
+        return base
+    base['logons'] = dict(readable=True, oldest=d(28), failed30=312, failedBurst=88, failedRemote=300, failedTop=[dict(ip='185.220.101.7', count=240, pub=True), dict(ip='192.168.1.50', count=40, pub=False)], failedUsers=[dict(user='administrator', count=200), dict(user='admin', count=60)], lastFailed=d(0, 2), success30=95,
+      remote=[dict(t=d(4, 3), user='demo', type=10, ip='203.0.113.9', pub=True), dict(t=d(2, 20), user='demo', type=3, ip='198.51.100.4', pub=True)], remoteExt=2, rdpType10=1, night=2, auditLikelyOff=False, rdp=[dict(t=d(4, 3), user='demo', ip='203.0.113.9', pub=True)], rdpCount=1)
+    base['logsCleared'] = [dict(t=d(11), log='Security')]
+    base['accountChanges'] = [dict(t=d(12), kind='created', name='support$', group='', admin=False), dict(t=d(12), kind='groupadd', name='support$', group='Administrators', admin=True)]
+    base['servicesNew'] = [dict(t=d(5), name='WinUpdSvc', path='C:\\Users\\Public\\upd\\svc.exe', start='2', account='LocalSystem')]
+    base['timeChanges'] = [dict(t=d(8), seconds=7200)]
+    base['prefetch']['hits'] = [dict(name='PSEXEC.EXE', t=d(6)), dict(name='XMRIG.EXE', t=d(7))]
+    base['bam'] = [dict(t=d(1), path='<vol>\\Users\\Public\\upd\\svc.exe', userDir=True), dict(t=d(3), path='<vol>\\ProgramData\\cache\\helper.exe', userDir=True)] + base['bam']
+    base['shimcache']['sus'] = [dict(path='C:\\Windows\\Temp\\a8f3.exe', modified=d(9))]
+    base['downloads'] += [dict(name='free-tool.exe', folder='Downloads', t=d(6), sizeKB=2200, zone=3, host='files.example.net', sig='NotSigned', signer=''), dict(name='crack.exe', folder='Downloads', t=d(7), sizeKB=840, zone=3, host='dl.example.org', sig='NotSigned', signer='')]
+    base['prefetch']['recent'].append(dict(name='FREE-TOOL.EXE', t=d(6)))
+    base['defender'].update(exclPaths=['C:\\Users\\demo\\Downloads', 'C:\\Windows\\Temp'], exclExts=['exe'], exclEvents=[dict(t=d(10), what='Exclusions\\Paths changed')], offEvents=[dict(t=d(10), id=5001)], detections=[dict(t=d(3), threat='Trojan:Win32/Wacatac.B!ml', severity=5, process='free-tool.exe', resource='file:_C:\\Users\\demo\\Downloads\\free-tool.exe', ok=False)])
+    base['firewall'].update(userPath=[dict(name='helper', app='C:\\Users\\demo\\AppData\\Roaming\\helper\\helper.exe', port='')], portOnly=[dict(name='Test port', port='8080', proto='6'), dict(name='Old server', port='5000', proto='6')], shares=[dict(name='Scans', path='C:\\Scans', everyone=True)])
+    base['accessBackdoor'] = [dict(name='sethc.exe', debugger='', sameAs='cmd.exe', sig='NotSigned')]
+    base['startupFolders'] = [dict(name='helper.lnk', scope='user', t=d(5), target='C:\\Users\\demo\\AppData\\Roaming\\helper\\helper.exe', sig='NotSigned')]
+    base['powershell'].update(opLogEnabled=False, suspicious=3, lastSuspicious=d(4), patterns=[dict(name='download and run', count=2), dict(name='hidden window', count=1)], histFlags=[dict(name='clear logs', count=1)])
+    base['network']['wifi'].append(dict(ssid='Airport Free WiFi', count=2, last=d(15), auth='Open', cipher='None'))
+    base['listeners'].append(dict(pid=5120, name='helper.exe', path='C:\\Users\\demo\\AppData\\Roaming\\helper\\helper.exe', scope='all', ports=[4444], portCount=1, sig='NotSigned', signer=''))
+    return base
+
 # --- v0.7 extras ("more2")
 def _more2(heavy):
     rnd2 = random.Random(5 if heavy else 6)
@@ -216,7 +255,7 @@ def _addwin(d):
     ev['days'] = 60; ev['appHangs1'] = ev.get('appHangs', 0) // 20; ev['appHangs7'] = ev.get('appHangs', 0) // 5; ev['appHangs30'] = ev.get('appHangs', 0) * 6 // 10
 
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '1.2.0'
+data['meta']['version'] = '2.0.0'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -238,6 +277,7 @@ for _i, _t in enumerate(SAMPLE_TREND):
 data['extras']['more'] = _more(False)
 data['extras']['more2'] = _more2(False)
 data['extras']['more3'] = _more3(False)
+data['extras']['forensics'] = _forensics(False)
 data['trend'] = SAMPLE_TREND
 _addwin(data)
 for v in data['network']['adapters']:
@@ -261,7 +301,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '1.2.0'
+w['meta']['version'] = '2.0.0'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),
@@ -276,6 +316,7 @@ for v in w['network']['adapters']:
 w['extras']['more'] = _more(True)
 w['extras']['more2'] = _more2(True)
 w['extras']['more3'] = _more3(True)
+w['extras']['forensics'] = _forensics(True)
 _addwin(w)
 (out / 'sample-win10-laptop.json').write_text(json.dumps(w, indent=1), encoding='utf-8')
 

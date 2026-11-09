@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v1.2.0
+VEAGLE PC CHECK  v2.0.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -50,6 +50,13 @@ READING THE REPORT
 - You never have to fix everything. Start with the red HIGH ones, one at a time.
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
+
+NEW IN 2.0.0
+- New look: the menu is now a vertical bar on the left, and on the Findings page a list of areas opens next to it. The "Menu" button at the top switches back to the old menu on top. On a phone and when printing the old menu is used automatically.
+- "Traces": 21 new checks that look at what happened on this PC: failed and remote sign-ins, cleared Windows logs, new accounts, new services, programs that ran (Prefetch, BAM, ShimCache), downloads without a valid signature, Defender exclusions and detections, firewall rules, open network shares, hidden replacements of accessibility programs, start-up folders, suspicious PowerShell use, open Wi-Fi networks and risky listening ports. Everything is only read; nothing is changed. The Security log needs Administrator rights.
+- New "Traces" section on the Insights page and a "Security traces" lane in the timeline.
+- Private data from these checks (IP addresses, account names, file names, Wi-Fi names) is hidden in the Share-safe copy.
+- The scan has 20 steps now.
 
 NEW IN 1.2.0
 - Windows 11 readiness with the exact reasons (TPM, Secure Boot, UEFI, memory, drive size). The processor list of Microsoft cannot be checked offline.

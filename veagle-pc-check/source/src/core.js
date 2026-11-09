@@ -235,7 +235,8 @@ function Engine(RAW) {
     'bak-size': [2, 'Easy', 'Safe'], 'bak-onedrive': [5, 'Easy', 'Safe'], 'net-dnsfast': [10, 'Medium', 'Safe'], 'net-conn': [5, 'Easy', 'Safe'], 'pred-disk': [15, 'Easy', 'Safe'], 'pred-ssd': [10, 'Ask a pro', 'Back up first'], 'pred-bat': [5, 'Easy', 'Safe'],
     'sto-diskhealth': [20, 'Ask a pro', 'Back up first'], 'perf-gpuheat': [20, 'Medium', 'Safe'], 'hw-age': [2, 'Easy', 'Safe'], 'perf-bottleneck': [10, 'Easy', 'Safe'], 'sec-persist': [20, 'Ask a pro', 'Safe'], 'sec-hardening': [30, 'Medium', 'Safe'], 'sec-privacy': [15, 'Easy', 'Safe'], 'sto-caches': [5, 'Easy', 'Safe'], 'soft-unused': [15, 'Easy', 'Back up first'], 'sec-browser-old': [3, 'Easy', 'Safe'],
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe'],
-    'win-ready-11': [10, 'Medium', 'Safe'], 'cfg-tasks-unusual': [15, 'Medium', 'Safe'], 'sec-svc-path': [15, 'Medium', 'Safe'], 'sec-svc-unquoted': [2, 'Ask a pro', 'Safe'], 'stab-memdiag': [60, 'Medium', 'Back up first'], 'stab-sfc': [40, 'Medium', 'Safe'], 'prn-stuck': [5, 'Easy', 'Safe'], 'soft-runtime-eol': [10, 'Medium', 'Safe']
+    'win-ready-11': [10, 'Medium', 'Safe'], 'cfg-tasks-unusual': [15, 'Medium', 'Safe'], 'sec-svc-path': [15, 'Medium', 'Safe'], 'sec-svc-unquoted': [2, 'Ask a pro', 'Safe'], 'stab-memdiag': [60, 'Medium', 'Back up first'], 'stab-sfc': [40, 'Medium', 'Safe'], 'prn-stuck': [5, 'Easy', 'Safe'], 'soft-runtime-eol': [10, 'Medium', 'Safe'],
+    'for-logon-brute': [20, 'Medium', 'Safe'], 'for-logon-remote': [20, 'Ask a pro', 'Safe'], 'for-audit-off': [5, 'Medium', 'Safe'], 'for-log-cleared': [15, 'Ask a pro', 'Safe'], 'for-acct-new': [10, 'Medium', 'Safe'], 'for-svc-new': [15, 'Medium', 'Safe'], 'for-time-changed': [5, 'Easy', 'Safe'], 'for-run-tools': [20, 'Ask a pro', 'Safe'], 'for-run-odd': [15, 'Medium', 'Safe'], 'for-downloads': [10, 'Easy', 'Safe'], 'for-def-excl': [10, 'Medium', 'Safe'], 'for-def-off': [5, 'Easy', 'Safe'], 'for-def-caught': [10, 'Easy', 'Safe'], 'for-fw-rules': [15, 'Medium', 'Safe'], 'for-shares-open': [10, 'Medium', 'Safe'], 'for-access-backdoor': [40, 'Ask a pro', 'Back up first'], 'for-startup-folder': [5, 'Easy', 'Safe'], 'for-ps-suspicious': [20, 'Ask a pro', 'Safe'], 'for-ps-logging': [5, 'Medium', 'Safe'], 'for-wifi-open': [5, 'Easy', 'Safe'], 'for-listen-risky': [15, 'Ask a pro', 'Safe']
   };
   var PROFILES = {
     home: { label: 'Home PC', note: 'Balanced advice for a normal home computer.' },
@@ -1743,6 +1744,216 @@ function Engine(RAW) {
         'Runtimes (.NET, Java) are helper software that some programs need. These versions are too old to get security fixes. Removing them is safe only if no program needs them.',
         [S('Open Settings, Apps, Installed apps. Find each one named under "What we found".'), S('First check if a program you use still needs it (the program maker says so, or the program stops working without it). If nothing needs it, click the three dots and Uninstall.'), S('If a program does need it, ask its maker for a newer version that uses a supported runtime.')],
         out.concat(soon).join('\n'));
+    });
+    /* ---- 1.3.0: forensic traces (who signed in, what was cleared or added, what ran, what was downloaded). Everything here only reads. ---- */
+    var FX = EX.forensics || {};
+    function dAgo(iso) { var t = new Date(iso).getTime(); return isFinite(t) ? Math.floor((NOW6 - t) / 86400000) : 9999; }
+    function oddPath(p) {
+      p = String(p || '');
+      if (/\\Users\\Public\\/i.test(p)) return 'the shared Public folder';
+      if (/\\Windows\\Temp\\/i.test(p)) return 'the Windows temporary folder';
+      if (/\\\$Recycle\.Bin\\/i.test(p)) return 'the Recycle Bin';
+      if (/\\ProgramData\\(?!Microsoft\\|Package Cache\\|chocolatey\\|NVIDIA|Packages\\|Microsoft)[^\\]+\\[^\\]+\.(exe|scr|bat|cmd|ps1|vbs|js)$/i.test(p)) return 'a ProgramData folder';
+      if (/\\AppData\\Roaming\\[^\\]+\.(exe|scr|bat|cmd|ps1|vbs)$/i.test(p)) return 'the AppData Roaming folder';
+      if (/\\AppData\\Local\\Temp\\[^\\]+\.(exe|scr|bat|cmd|vbs)$/i.test(p) && !/(setup|install|update|unins|uninst|patch|helper|nsis|~|\.tmp)/i.test(p)) return 'the Temp folder';
+      return '';
+    }
+    function leafOf(p) { return String(p || '').replace(/^.*[\\\/]/, '').toLowerCase(); }
+    function ago(iso) { var d = dAgo(iso); return d === 0 ? 'today' : d + ' day' + (d === 1 ? '' : 's') + ' ago'; }
+    var FXRAN = {};
+    arr(g(FX, 'prefetch.recent', [])).forEach(function (x) { FXRAN[String(x.name).toLowerCase()] = 1; });
+    arr(FX.bam).forEach(function (x) { FXRAN[leafOf(x.path)] = 1; });
+
+    R(function () {
+      var L = FX.logons; if (!L || !L.readable) return null;
+      var f = num(L.failed30), burst = num(L.failedBurst);
+      if (f < 20 && burst < 10) return null;
+      var pub = arr(L.failedTop).filter(function (x) { return x.pub; });
+      var sev = (pub.length && (f >= 50 || burst >= 20)) ? 'high' : ((f >= 50 || burst >= 20) ? 'medium' : 'low');
+      return F('for-logon-brute', 'Security', sev, f + ' failed sign-in attempts in the last 30 days',
+        'Windows wrote down every wrong password. A few are normal (a typo, an old phone). Dozens in a short time, or from addresses outside your home, usually mean somebody or some program is trying passwords one after another to get in.',
+        [S('First think: did you, someone at home or an old device (phone, printer, mapped drive) keep trying an old password? If yes, this is harmless noise and updating that password stops it.'),
+         S('Check that remote access is off if you do not use it. Press the Windows key, type "remote desktop settings", open it and switch "Remote Desktop" off.'),
+         S('Make sure the router does not forward any port to this PC (ask whoever set up your internet) and that every account has a strong password.'),
+         S('If the attempts keep coming from outside addresses, change the passwords and run a full antivirus scan. Ask a helper if unsure.')],
+        'Most in one hour: ' + burst + '\nLast attempt: ' + (L.lastFailed ? fmtDT(L.lastFailed) : '?') + '\nFrom the network: ' + num(L.failedRemote) + ' attempts\n' +
+        arr(L.failedTop).map(function (x) { return 'Address ' + x.ip + ': ' + x.count + ' attempts' + (x.pub ? ' (outside address)' : ''); }).join('\n') + (L.failedUsers && L.failedUsers.length ? '\nAccounts tried: ' + L.failedUsers.map(function (x) { return x.user + ' (' + x.count + ')'; }).join(', ') : ''));
+    });
+    R(function () {
+      var L = FX.logons; if (!L) return null;
+      var ext = num(L.remoteExt), rdp = num(L.rdpType10) + num(L.rdpCount);
+      if (!ext && !rdp) return null;
+      var sev = ext ? ((num(L.night) > 0 || rdp) ? 'high' : 'medium') : 'low';
+      var list = arr(L.remote).map(function (x) { return fmtDT(x.t) + ' - ' + (x.type === 10 ? 'remote desktop' : 'network') + ' - account ' + x.user + ' - from ' + x.ip + (x.pub ? ' (outside address)' : ''); })
+        .concat(arr(L.rdp).map(function (x) { return fmtDT(x.t) + ' - remote desktop login by ' + x.user + ' - from ' + x.ip + (x.pub ? ' (outside address)' : ''); }));
+      return F('for-logon-remote', 'Security', sev, ext ? ext + ' sign-ins came from outside addresses (the internet)' : rdp + ' remote desktop sign-ins were found',
+        ext ? 'Somebody (or something) signed in to this PC from an address that is not inside your home or office network. If that was you using remote access from outside, fine. If not, it means this PC is reachable from the internet and somebody got in, which is serious.'
+          : 'Remote Desktop lets somebody use this PC from another computer. The sign-ins below came from the local network. If you or your IT helper did them, nothing is wrong. If you never use remote desktop, switch it off.',
+        [S('Read the list under "What we found". Do you recognise the times and the addresses?'), S('If you do not use remote access, switch it off: press the Windows key, type "remote desktop settings", open it and switch Remote Desktop off.'), S('If you do not recognise them, change all passwords from a different device, disconnect this PC from the internet and ask a professional. Do not delete anything: the logs are the evidence.')],
+        list.slice(0, 15).join('\n') + (num(L.night) ? '\nSign-ins between midnight and 5 am: ' + L.night : ''));
+    });
+    R(function () {
+      var L = FX.logons; if (!L || !L.readable || !L.auditLikelyOff) return null;
+      return F('for-audit-off', 'Security', 'low', 'Windows is not recording sign-ins (auditing looks switched off)',
+        'Windows can keep a diary of who signs in and who fails. On this PC the diary has no sign-in entries at all in the last week, so nobody could tell later if somebody broke in. Switching it on is free and changes nothing else.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter. It makes Windows write down successful and failed sign-ins. It changes one setting. You can switch it back any time.', 'auditpol /set /subcategory:"{0CCE9215-69AE-11D9-BED3-505054503030}" /success:enable /failure:enable'), S('Run the check again in a few weeks: the sign-in findings can then work.')],
+        'Sign-in events in the last 7 days: none. Security log readable since ' + (L.oldest ? fmtDT(L.oldest) : '?'));
+    });
+    R(function () {
+      var c = arr(FX.logsCleared).filter(function (x) { return dAgo(x.t) <= 180; }); if (!c.length) return null;
+      var sec = c.some(function (x) { return x.log === 'Security' && dAgo(x.t) <= 90; });
+      return F('for-log-cleared', 'Security', sec ? 'high' : 'medium', 'The Windows event log was cleared ' + c.length + (c.length === 1 ? ' time' : ' times'),
+        'Windows keeps a diary of what happens (the event logs). Normal users never erase it. IT people sometimes do, to start fresh. Attackers often do it to hide what they did. So an erased log is a warning sign, not proof.',
+        [S('Do you or your IT helper remember clearing the logs on the dates below? If yes, this is fine.'), S('If not, treat it seriously: change your passwords from another device, run a full antivirus scan and look at the other "Traces" findings in this report.'), S('Do not clear the logs again and do not reinstall yet: what is left may help someone find out what happened. Ask a professional.')],
+        c.map(function (x) { return fmtDT(x.t) + ' - ' + x.log + ' log (' + ago(x.t) + ')'; }).join('\n'));
+    });
+    R(function () {
+      var a = arr(FX.accountChanges).filter(function (x) { return dAgo(x.t) <= 90 && (x.kind === 'created' || x.kind === 'groupadd' || x.kind === 'deleted'); }); if (!a.length) return null;
+      var adm = a.some(function (x) { return x.admin; });
+      return F('for-acct-new', 'Security', adm ? 'high' : 'medium', a.length + ' account change' + (a.length === 1 ? '' : 's') + ' in the last 90 days' + (adm ? ' (including the Administrators group)' : ''),
+        'Windows noted that user accounts were created, deleted or added to a group. Somebody who breaks in often creates a new account so they can come back. If you, your IT helper or an installer did it on purpose, it is fine.',
+        [S('Press the Windows key, type "Computer Management" and open it. Click Local Users and Groups, then Users. Do you know every account in the list?'), S('Open Groups, then Administrators. Only people you trust should be there.'), S('If you find an account you do not know, do not delete it yet. Disable it (double-click, tick "Account is disabled") and ask a helper.')],
+        a.map(function (x) { return fmtDT(x.t) + ' - ' + (x.kind === 'created' ? 'new account ' + x.name : x.kind === 'deleted' ? 'account deleted: ' + x.name : x.name + ' added to ' + x.group + (x.admin ? ' (administrators)' : '')); }).join('\n'));
+    });
+    R(function () {
+      var s = arr(FX.servicesNew).filter(function (x) { var p = String(x.path || '').replace(/"/g, ''); return dAgo(x.t) <= 60 && !/^(HWiNFO|CPU-?Z|LibreHardware|OpenHardware|WinRing0)/i.test(String(x.name || '')) && (oddPath(p) || /(powershell|cmd\.exe|-enc|\\Temp\\|mshta|wscript)/i.test(p)); }); if (!s.length) return null;
+      return F('for-svc-new', 'Security', 'medium', s.length + ' service' + (s.length === 1 ? ' was' : 's were') + ' installed lately and ' + (s.length === 1 ? 'starts' : 'start') + ' from an unusual place',
+        'A service is a program Windows starts by itself. Installers add them all the time, but they normally live in "Program Files". These were added in the last 60 days and run from a temporary, shared or script location, which is how some unwanted programs make sure they start again after a restart.',
+        [S('Press the Windows key, type "Services" and open it. Find each name under "What we found".'), S('Double-click one and read "Path to executable". Do you know the program?'), S('If you do, leave it. If not, search the file name on the internet first, then ask a helper before stopping it, and run a full antivirus scan.')],
+        s.map(function (x) { return fmtDT(x.t) + ' - ' + x.name + ' - ' + x.path + ' (as ' + x.account + ')'; }).join('\n'));
+    });
+    R(function () {
+      var t = arr(FX.timeChanges).filter(function (x) { return num(x.seconds) >= 600; }); if (!t.length) return null;
+      var big = t.some(function (x) { return num(x.seconds) >= 86400; });
+      function dur(s) { s = num(s); return s >= 86400 ? Math.round(s / 86400) + ' day(s)' : s >= 3600 ? Math.round(s / 360) / 10 + ' hour(s)' : Math.round(s / 60) + ' minute(s)'; }
+      return F('for-time-changed', 'Security', big ? 'medium' : 'low', t.length + ' big clock change' + (t.length === 1 ? '' : 's') + ' in the last 60 days',
+        'The PC clock was moved by more than ten minutes. A dead clock battery or a travel time zone can do this. Moving the clock is also a trick used to confuse the logs or to make expired certificates work, so it is worth a look.',
+        [S('Check that the date and time are right now: Settings, Time and language, Date and time. Switch on "Set time automatically".'), S('If the clock keeps going wrong after a restart, the small battery on the motherboard may be dead. A shop can replace it for a few euros.'), S('If you did not change the time and the PC has no clock problem, look at the other "Traces" findings.')],
+        t.map(function (x) { return fmtDT(x.t) + ' - clock moved by about ' + dur(x.seconds); }).join('\n'));
+    });
+    R(function () {
+      var h = arr(g(FX, 'prefetch.hits', [])); if (!h.length) return null;
+      return F('for-run-tools', 'Security', 'high', h.length + ' program' + (h.length === 1 ? '' : 's') + ' with the name of a hacking, password-stealing or mining tool ran on this PC',
+        'Windows keeps a small note for every program that ran. Some names on that list belong to tools used by attackers to steal passwords, move through a network or mine cryptocurrency. IT professionals and security testers use some of them on purpose, so a name alone is not proof.',
+        [S('Do you or your IT helper use these tools on purpose? If yes, nothing is wrong.'), S('If not, disconnect the PC from the network, change your passwords from another device and run a full scan with Microsoft Defender Offline (Windows Security, Virus and threat protection, Scan options).'), S('Ask a professional before deleting anything: the files are evidence.')],
+        h.map(function (x) { return x.name + ' - last ran ' + fmtDT(x.t); }).join('\n'));
+    });
+    R(function () {
+      var seen = [];
+      arr(FX.bam).forEach(function (x) { var w = oddPath(x.path); if (w && dAgo(x.t) <= 30) seen.push({ t: x.t, p: x.path, w: w, ran: true }); });
+      arr(g(FX, 'shimcache.sus', [])).forEach(function (x) { var w = oddPath(x.path); if (w && dAgo(x.modified) <= 60 && !seen.some(function (y) { return y.p.toLowerCase() === String(x.path).toLowerCase(); })) seen.push({ t: x.modified, p: x.path, w: w, ran: false }); });
+      if (!seen.length) return null;
+      var ran = seen.filter(function (x) { return x.ran; });
+      if (!ran.length && seen.length < 3) return null;
+      return F('for-run-odd', 'Security', ran.length ? 'medium' : 'low', (ran.length || seen.length) + ' program' + ((ran.length || seen.length) === 1 ? '' : 's') + (ran.length ? ' ran from an unusual folder lately' : ' were seen in an unusual folder lately'),
+        'Normal programs live in "Program Files" or in your own app folder. Unwanted ones often run from the shared Public folder, a temporary folder, the Recycle Bin or a folder in ProgramData. A few legitimate tools do it too, so look at each name.',
+        [S('Read each path under "What we found". Do you know the program?'), S('If you do, leave it. If you do not, search the file name on the internet. Do not run it again.'), S('If it looks unwanted, run a full antivirus scan and ask a helper before deleting.')],
+        seen.slice(0, 14).map(function (x) { return fmtDT(x.t) + ' - ' + (x.ran ? 'ran' : 'seen') + ' - ' + x.p + ' (' + x.w + ')'; }).join('\n'));
+    });
+    R(function () {
+      var d = arr(FX.downloads).filter(function (x) { return (x.zone === 3 || x.host) && /(NotSigned|HashMismatch|NotTrusted|UnknownError)/.test(String(x.sig || '')) && /\.(exe|msi|dll|scr|ps1|cpl|msix|appx)$/i.test(x.name); }); if (!d.length) return null;
+      var ran = d.filter(function (x) { return FXRAN[String(x.name).toLowerCase()]; });
+      return F('for-downloads', 'Security', ran.length ? 'medium' : 'low', d.length + ' program' + (d.length === 1 ? '' : 's') + ' downloaded from the internet without a valid signature' + (ran.length ? ', and ' + ran.length + ' of them ran' : ''),
+        'Honest software makers digitally sign their programs, so Windows can tell who made them. A program without a signature is not always bad (small tools, old installers), but it is the usual shape of unwanted software. This list is based on files in Downloads, Desktop and Temp from the last 90 days.',
+        [S('Look at each name under "What we found". Did you download it on purpose, from the maker\'s own site?'), S('If not, do not run it. If it already ran, run a full antivirus scan.'), S('You can delete files you do not need: open the folder named below, right-click the file and choose Delete.')],
+        d.slice(0, 15).map(function (x) { return fmtDT(x.t) + ' - ' + x.name + ' (' + x.folder + ', ' + (x.host ? 'from ' + x.host : 'from the internet') + ', ' + x.sig + ')' + (FXRAN[String(x.name).toLowerCase()] ? ' - RAN' : ''); }).join('\n'));
+    });
+    R(function () {
+      var D1 = FX.defender; if (!D1 || !D1.available) return null;
+      var paths = arr(D1.exclPaths), procs = arr(D1.exclProcs), exts = arr(D1.exclExts);
+      var total = paths.length + procs.length + exts.length; if (!total) return null;
+      var root = paths.some(function (p) { return /^[A-Za-z]:\\?$/.test(String(p).trim()) || /^[A-Za-z]:\\Users\\?$/i.test(String(p).trim()); });
+      var risky = paths.some(function (p) { return /\\(Temp|Tmp|Downloads|AppData|ProgramData|Users\\Public)\\?/i.test(p); }) || exts.some(function (e) { return /^\.?(exe|dll|ps1|bat|cmd|scr|vbs|js)$/i.test(String(e).trim()); }) || procs.some(function (p) { return /(powershell|cmd|wscript|cscript|mshta|rundll32)/i.test(p); });
+      return F('for-def-excl', 'Security', root ? 'high' : (risky ? 'medium' : 'low'), 'Microsoft Defender is told to skip ' + total + ' place' + (total === 1 ? '' : 's'),
+        'An exclusion makes the antivirus ignore a folder, a program or a file type. Honest programs sometimes ask for one (games, developer tools). Attackers also add exclusions so their program is never scanned. A whole drive, your user folder, Downloads, Temp or a file type like .exe is a big hole.',
+        [S('Open Windows Security, then Virus and threat protection, then Manage settings. Scroll down to Exclusions and click "Add or remove exclusions".'), S('For each entry ask: do I know why it is there? A game folder or a tool you installed on purpose is fine.'), S('Remove the ones you do not know with the small arrow and Remove. If you are unsure, ask a helper first.')],
+        (paths.length ? 'Folders and files:\n' + paths.slice(0, 15).join('\n') : '') + (procs.length ? '\nPrograms:\n' + procs.slice(0, 10).join('\n') : '') + (exts.length ? '\nFile types: ' + exts.join(', ') : '') + (arr(D1.exclEvents).length ? '\n\nChanged on: ' + D1.exclEvents.map(function (x) { return fmtDT(x.t); }).join(', ') : ''));
+    });
+    R(function () {
+      var D1 = FX.defender; if (!D1) return null;
+      var off = arr(D1.offEvents).filter(function (x) { return dAgo(x.t) <= 60; }); if (!off.length) return null;
+      return F('for-def-off', 'Security', 'medium', 'Microsoft Defender protection was switched off ' + off.length + (off.length === 1 ? ' time' : ' times') + ' in the last 60 days',
+        'Windows wrote down that real-time protection or scanning was turned off. Some installers and some games ask you to do that for a moment. Malware does it automatically to avoid being found.',
+        [S('Open Windows Security and check that "Real-time protection" is on now (Virus and threat protection, Manage settings).'), S('Do you remember turning it off or installing something that asked for it? If yes, make sure it is back on.'), S('If you do not remember, run a full scan and look at the other "Traces" findings.')],
+        off.map(function (x) { return fmtDT(x.t) + ' - ' + (x.id === 5001 ? 'real-time protection turned off' : 'scanning turned off'); }).join('\n'));
+    });
+    R(function () {
+      var D1 = FX.defender; if (!D1) return null;
+      var d = arr(D1.detections).filter(function (x) { return dAgo(x.t) <= 90; }); if (!d.length) return null;
+      var bad = d.filter(function (x) { return x.ok === false; });
+      return F('for-def-caught', 'Security', bad.length ? 'high' : (d.length > 3 ? 'medium' : 'low'), 'Microsoft Defender detected ' + d.length + ' threat' + (d.length === 1 ? '' : 's') + ' in the last 90 days' + (bad.length ? ' (' + bad.length + ' not fully removed)' : ''),
+        bad.length ? 'Defender found unwanted software and could not finish removing at least one of them. That needs attention now.' : 'Defender found and handled unwanted files. That is the antivirus doing its job. The list shows what, when and which program was involved, so you can see if it keeps coming back.',
+        [S('Open Windows Security, then Virus and threat protection, then Protection history. Open each item and read what Defender did.'), S('If something says "Action needed", click it and choose the action Defender offers (Remove or Quarantine).'), S('If the same threat returns again and again, run a full scan and Microsoft Defender Offline, and think about how it gets in (a download, a USB stick, an old program).')],
+        d.slice(0, 12).map(function (x) { return fmtDT(x.t) + ' - ' + (x.threat || 'threat') + (x.process ? ' via ' + x.process : '') + (x.resource ? ' - ' + x.resource : '') + (x.ok === false ? ' - NOT removed' : ''); }).join('\n'));
+    });
+    R(function () {
+      var W = FX.firewall; if (!W) return null;
+      var up = arr(W.userPath), po = arr(W.portOnly);
+      if (up.length) return F('for-fw-rules', 'Security', 'medium', up.length + ' firewall rule' + (up.length === 1 ? ' lets' : 's let') + ' programs in user folders accept connections from outside',
+        'The firewall decides who may knock on your PC from the network. These rules let a program inside a user, temporary or ProgramData folder receive connections. Some games and chat apps add such rules themselves. Unwanted software adds them to open a door.',
+        [S('Press the Windows key, type "Windows Defender Firewall with Advanced Security" and open it. Click "Inbound Rules".'), S('Find each rule named under "What we found". Do you know the program?'), S('If you do not, right-click the rule and choose Disable (not Delete) and see if anything stops working. Ask a helper if unsure.')],
+        up.map(function (x) { return x.name + ' - ' + x.app + (x.port ? ' (port ' + x.port + ')' : ''); }).join('\n') + (arr(W.added).length ? '\n\nRules added lately: ' + arr(W.added).slice(0, 8).map(function (x) { return fmtDT(x.t) + ' ' + x.name; }).join('; ') : ''));
+      if (po.length >= 2) return F('for-fw-rules', 'Security', 'low', po.length + ' firewall rules open ports without naming a program',
+        'A rule that opens a port for everything on the PC, not for one program, is wider than needed. Some tools (remote support, servers, games) create them. Check they are still wanted.',
+        [S('Press the Windows key, type "Windows Defender Firewall with Advanced Security" and open it. Click "Inbound Rules".'), S('Find the rules named under "What we found". Do you still use that program or service?'), S('If not, right-click the rule and choose Disable.')],
+        po.map(function (x) { return x.name + ' - port ' + x.port + (x.proto === '6' ? ' (TCP)' : x.proto === '17' ? ' (UDP)' : ''); }).join('\n'));
+      return null;
+    });
+    R(function () {
+      var s = arr(g(FX, 'firewall.shares', [])).filter(function (x) { return x.everyone; }); if (!s.length) return null;
+      return F('for-shares-open', 'Security', 'medium', s.length + ' shared folder' + (s.length === 1 ? ' is' : 's are') + ' open to everyone',
+        'A shared folder lets other computers on the network open your files. "Everyone" means anybody who can reach this PC, even without a password in some networks. That is only wise for harmless public files.',
+        [S('Press the Windows key, type "Computer Management" and open it. Click Shared Folders, then Shares.'), S('Right-click each share named under "What we found", choose Properties, then the Share Permissions tab. Remove "Everyone" and add only the people who need access.'), S('If nobody needs the share, right-click it and choose "Stop Sharing".')],
+        s.map(function (x) { return x.name + ' - ' + x.path; }).join('\n'));
+    });
+    R(function () {
+      var a = arr(FX.accessBackdoor).filter(function (x) { return x.debugger || x.sameAs || (x.sig && x.sig !== 'Valid'); }); if (!a.length) return null;
+      var hard = a.some(function (x) { return x.debugger || x.sameAs; });
+      return F('for-access-backdoor', 'Security', hard ? 'high' : 'medium', a.length + ' Windows accessibility program' + (a.length === 1 ? ' looks' : 's look') + ' changed',
+        'The Sticky Keys, Utility Manager and On-Screen Keyboard programs can be started from the Windows sign-in screen without a password. A classic attacker trick is to swap one of them for a command window, which gives full control to anybody who can reach the keyboard or a remote desktop. These files are not as Windows ships them.',
+        [S('Do not ignore this. Disconnect the PC from the network.'), S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this to repair the system files from the Windows image. It takes 10 to 30 minutes and needs internet.', 'DISM /Online /Cleanup-Image /RestoreHealth\nsfc /scannow'), S('Change your passwords from another device and ask a professional to check the PC.')],
+        a.map(function (x) { return x.name + ' - ' + (x.debugger ? 'redirected to ' + x.debugger : '') + (x.sameAs ? ' is the same file as ' + x.sameAs : '') + (x.sig && x.sig !== 'Valid' ? ' signature: ' + x.sig : ''); }).join('\n'));
+    });
+    R(function () {
+      var s = arr(FX.startupFolders).filter(function (x) { return dAgo(x.t) <= 60 || (x.sig && x.sig !== 'Valid') || oddPath(x.target); }); if (!s.length) return null;
+      return F('for-startup-folder', 'Security', s.some(function (x) { return (x.sig && x.sig !== 'Valid') || oddPath(x.target); }) ? 'medium' : 'low', s.length + ' item' + (s.length === 1 ? '' : 's') + ' in a Startup folder will start with Windows',
+        'Anything in a Startup folder starts by itself every time somebody signs in. Programs you installed add themselves here. Unwanted software does too, because it is simple and needs no special rights.',
+        [S('Press the Windows key and R together, type shell:startup and press Enter (for your account). For all accounts type shell:common startup.'), S('Look at each file named under "What we found". Do you know the program?'), S('If not, move the file to your Desktop instead of deleting it, restart, and see if everything still works. Ask a helper if unsure.')],
+        s.map(function (x) { return x.name + ' (' + x.scope + ', ' + fmtDT(x.t) + ')' + (x.target ? ' -> ' + x.target : '') + (x.sig && x.sig !== 'Valid' ? ' [' + x.sig + ']' : ''); }).join('\n'));
+    });
+    R(function () {
+      var P = FX.powershell; if (!P) return null;
+      var HOT = { 'clear logs': 1, 'delete backups': 1, 'add user': 1, 'credential theft': 1, 'amsi or defender tamper': 1, 'memory injection': 1 };
+      var all = arr(P.patterns).map(function (x) { return { name: x.name, count: x.count, src: 'script log' }; }).concat(arr(P.histFlags).map(function (x) { return { name: x.name, count: x.count, src: 'command history' }; }));
+      if (!all.length) return null;
+      var hot = all.some(function (x) { return HOT[x.name]; });
+      var n = all.reduce(function (a, x) { return a + num(x.count); }, 0);
+      return F('for-ps-suspicious', 'Security', hot ? 'medium' : 'low', 'PowerShell ran ' + n + ' command' + (n === 1 ? '' : 's') + ' that look suspicious (counted only, nothing copied)',
+        'PowerShell is the Windows command tool. IT people use it all day, so some patterns appear in honest scripts too. These ones are also what attackers use: hidden windows, downloads from the internet, encoded text, switching off antivirus, erasing logs or backups. The report counts the patterns and never keeps the commands.',
+        [S('Did you or your IT helper run scripts like these on purpose? Then this is expected.'), S('If you never open PowerShell, this is unusual: run a full antivirus scan and look at the other "Traces" findings.'), S('Ask a professional to read the PowerShell log (Event Viewer, Applications and Services Logs, Microsoft, Windows, PowerShell, Operational).')],
+        all.map(function (x) { return x.name + ': ' + x.count + ' (' + x.src + ')'; }).join('\n') + (P.lastSuspicious ? '\nLast in the script log: ' + fmtDT(P.lastSuspicious) : ''));
+    });
+    R(function () {
+      var P = FX.powershell; if (!P || P.opLogEnabled !== false) return null;
+      return F('for-ps-logging', 'Security', 'info', 'PowerShell activity is not recorded on this PC',
+        'PowerShell has a diary that records what scripts ran. It is switched off here, so nobody could tell later if a harmful script ran. Switching it on is free, changes nothing else, and is recommended on work PCs.',
+        [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste these lines. They switch on the PowerShell diary. You can switch it off again the same way with /e:false.', 'wevtutil sl Microsoft-Windows-PowerShell/Operational /e:true'), S('Optional: to also record the content of scripts, ask your IT helper to set the "Turn on PowerShell Script Block Logging" policy.')],
+        'Log "Microsoft-Windows-PowerShell/Operational" is disabled');
+    });
+    R(function () {
+      var w = arr(g(FX, 'network.wifi', [])).filter(function (x) { return /^open$/i.test(String(x.auth || '')) && (!x.cipher || /^none$/i.test(String(x.cipher))) && dAgo(x.last) <= 60; }); if (!w.length) return null;
+      return F('for-wifi-open', 'Security', 'low', w.length + ' Wi-Fi network' + (w.length === 1 ? '' : 's') + ' without a password ' + (w.length === 1 ? 'was' : 'were') + ' used in the last 60 days',
+        'On a Wi-Fi network without a password everything you send can be read by others near you, unless the site itself is protected (the padlock). Hotels, cafes and airports often work like this. A VPN or your phone hotspot is safer.',
+        [S('Avoid banking, shopping and work logins on such networks. Look for the padlock in the browser address bar.'), S('Tell Windows to forget the network: Settings, Network and internet, Wi-Fi, Manage known networks, choose it and click Forget.'), S('For work, use a VPN or the hotspot of your phone.')],
+        w.map(function (x) { return x.ssid + ' - connected ' + x.count + ' time(s), last ' + fmtDT(x.last); }).join('\n'));
+    });
+    R(function () {
+      var l = arr(FX.listeners).filter(function (x) { return (x.scope === 'all' || x.scope === 'lan') && x.name !== 'System' && x.path && ((x.sig && x.sig !== 'Valid') || oddPath(x.path)); }); if (!l.length) return null;
+      var worst = l.some(function (x) { return oddPath(x.path) && x.sig && x.sig !== 'Valid'; });
+      return F('for-listen-risky', 'Security', worst ? 'high' : 'medium', l.length + ' program' + (l.length === 1 ? ' waits' : 's wait') + ' for connections from the network and ' + (l.length === 1 ? 'is unsigned or runs' : 'are unsigned or run') + ' from an unusual place',
+        'Some programs open a door (a port) and wait for other computers to connect. Servers and games do that on purpose. A program that waits for connections, has no valid signature and sits in a user or temporary folder is a typical backdoor, so it deserves a look.',
+        [S('Read each line under "What we found": program, folder and port. Do you know it?'), S('If it is something you installed (a game server, a developer tool), leave it. If you do not know it, search the file name on the internet before you do anything.'), S('If it looks unwanted, disconnect the PC from the network, run a full antivirus scan and ask a helper.')],
+        l.map(function (x) { return x.name + ' (' + x.path + ') - ' + (x.scope === 'all' ? 'open to the whole network' : 'open to the local network') + ', port' + (arr(x.ports).length > 1 ? 's ' : ' ') + arr(x.ports).join(', ') + (x.sig ? ' - signature: ' + x.sig : ''); }).join('\n'));
     });
     /* basic security checklist in five groups (used by Insights and the client report) */
     function basicList() {

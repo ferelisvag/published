@@ -80,7 +80,7 @@ window.ML = (function () {
     var acc = o.acc || '#29e3ff'; document.documentElement.style.setProperty('--acc', acc);
     var h = document.createElement('header'); h.className = 'vtop';
     h.innerHTML = '<div><div class="vttl"></div><div class="vsub"></div></div><label class="vfind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input type="text" autocomplete="off" spellcheck="false" aria-label="Αναζήτηση"></label><div class="slot"></div><div class="vclk"><span class="t"></span><small class="d"></small></div>';
-    var ft = document.createElement('div'); ft.className = 'app-foot'; ft.style.cssText = 'position:fixed;left:14px;bottom:8px;font:11px monospace;color:#7c8697;z-index:3;pointer-events:none'; ft.textContent = 'Veagle OS · ferelis.gr · Έκδοση 8.11 · 14:51'; document.body.appendChild(ft);
+    var ft = document.createElement('div'); ft.className = 'app-foot'; ft.style.cssText = 'position:fixed;left:14px;bottom:8px;font:11px monospace;color:#7c8697;z-index:3;pointer-events:none'; ft.textContent = 'Veagle OS · ferelis.gr · Έκδοση 9.11 · 23:58'; document.body.appendChild(ft);
     h.querySelector('.vttl').textContent = o.title; h.querySelector('.vsub').textContent = o.sub || 'Show me the problem.';
     var inp = h.querySelector('input'); inp.placeholder = (o.find || 'Αναζήτηση') + '…  ( / )';
     h.querySelector('.slot').appendChild(modeBar(o.id));

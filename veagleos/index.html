@@ -111,6 +111,37 @@ html[data-theme="aegean"]{
   --ar:76,201,240; --fr:180,215,255; --br:4,16,31; --termbg:rgba(2,10,20,.75);
   --ic1:#0d2a4a; --ic2:#08203a; --icmix:#ffffff; --fold:#071a30;
 }
+html[data-theme="hud"]{
+  --bg:#02070d; --bg2:#06121c; --line:#0c2a3a; --line2:#12506b;
+  --text:#d6f6ff; --dim:#6aa3b8; --accent:#19e3ff; --glow:rgba(25,227,255,.3); --onacc:#001018;
+  --glass:rgba(4,16,26,.72); --ok:#35ffb0;
+  --ar:25,227,255; --fr:120,230,255; --br:2,7,13; --termbg:rgba(0,10,18,.8);
+  --ic1:#082233; --ic2:#05161f; --icmix:#19e3ff; --fold:#061824;
+  --disp:'Space Grotesk',system-ui,sans-serif; --body:'IBM Plex Sans',system-ui,sans-serif;
+}
+/* Holo HUD: ολογραφικό περιβάλλον sci-fi. Μόνο εμφάνιση, ισχύει όταν διαλέξεις το θέμα. */
+html[data-theme="hud"] body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(rgba(25,227,255,.05) 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,rgba(25,227,255,.05) 1px,transparent 1px) 0 0/48px 48px,radial-gradient(ellipse at 50% 46%,rgba(25,227,255,.12),transparent 62%)}
+html[data-theme="hud"] body::after{content:"";position:fixed;inset:0;z-index:60;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);opacity:.45;animation:hudscan 9s linear infinite}
+@keyframes hudscan{from{background-position:0 0}to{background-position:0 60px}}
+html[data-theme="hud"] .bar{box-shadow:0 1px 14px var(--glow);border-bottom-color:rgba(var(--ar),.45)}
+html[data-theme="hud"] .start,html[data-theme="hud"] .wtitle b{text-shadow:0 0 10px var(--glow);letter-spacing:.14em;text-transform:uppercase}
+html[data-theme="hud"] .win,html[data-theme="hud"] .card,html[data-theme="hud"] .dock,html[data-theme="hud"] .launcher,html[data-theme="hud"] .search{border-radius:3px}
+html[data-theme="hud"] .win{border-color:rgba(var(--ar),.38)}
+html[data-theme="hud"] .win.on{box-shadow:0 26px 70px rgba(0,0,0,.7),0 0 0 1px rgba(var(--ar),.25),0 0 46px var(--glow),inset 0 0 40px rgba(var(--ar),.05)}
+html[data-theme="hud"] .win::before,html[data-theme="hud"] .win::after{content:"";position:absolute;width:18px;height:18px;pointer-events:none;border:2px solid var(--accent);z-index:3;filter:drop-shadow(0 0 4px var(--accent))}
+html[data-theme="hud"] .win::before{top:0;left:0;border-right:0;border-bottom:0}
+html[data-theme="hud"] .win::after{bottom:0;right:0;border-left:0;border-top:0}
+html[data-theme="hud"] .wbar{background:linear-gradient(90deg,rgba(var(--ar),.16),rgba(var(--ar),.02) 70%);border-bottom-color:rgba(var(--ar),.4)}
+html[data-theme="hud"] .card{border-top:2px solid rgba(var(--ar),.75);background:linear-gradient(180deg,rgba(var(--ar),.07),var(--glass) 40%)}
+html[data-theme="hud"] .dock{border-color:rgba(var(--ar),.4);box-shadow:0 0 28px var(--glow),inset 0 0 18px rgba(var(--ar),.06)}
+#hudfx{position:fixed;left:50%;top:50%;width:min(80vmin,780px);height:min(80vmin,780px);transform:translate(-50%,-50%);z-index:0;pointer-events:none;opacity:.55}
+#hudfx .r{transform-origin:300px 300px}
+#hudfx .r1{animation:hudspin 70s linear infinite}#hudfx .r2{animation:hudspin 46s linear infinite reverse}#hudfx .r3{animation:hudspin 26s linear infinite}#hudfx .r4{animation:hudspin 14s linear infinite reverse}
+#hudfx .core{transform-origin:300px 300px;animation:hudpulse 3.2s ease-in-out infinite}
+@keyframes hudspin{to{transform:rotate(360deg)}}
+@keyframes hudpulse{50%{transform:scale(1.08);opacity:.7}}
+@media (prefers-reduced-motion:reduce){html[data-theme="hud"] body::after,#hudfx .r,#hudfx .core{animation:none}}
+@media (max-width:720px){#hudfx{opacity:.3}}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--text);font:14px/1.5 var(--body);-webkit-font-smoothing:antialiased;user-select:none}
@@ -403,7 +434,7 @@ body.fx-flip .os{transform:rotate(180deg);transition:transform 1s}
       <div class="card"><h2>Σημειώσεις</h2><textarea class="notes" id="notes" placeholder="Γράψε κάτι για να μην το ξεχάσεις" aria-label="Σημειώσεις"></textarea></div>
     </aside>
     <div class="wsname" id="wsname"></div>
-    <div class="app-foot">Veagle OS · <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a> · Έκδοση 8.11 · 14:51</div>
+    <div class="app-foot">Veagle OS · <a href="https://ferelis.gr" target="_blank" rel="noopener">ferelis.gr</a> · Έκδοση 9.11 · 23:58</div>
 
     <div class="dock" id="dock" role="toolbar" aria-label="Dock"></div>
   </main>

@@ -108,7 +108,7 @@ Repo `ferelisvag/published` (public), δημοσιεύεται με GitHub Pages
 
 ## veagle-eye/ — Veagle Eye (δημόσιο πρόγραμμα παρακολούθησης υπολογιστή, Windows)
 - `index.html` = σελίδα παρουσίασης EL/EN (γράφεται στο χέρι, χωρίς build). `shots/` screenshots, `source/` ο πλήρης κώδικας (Python + `static/` + `geo/`, MIT). Το `.exe` ζει στο `download/VeagleEye.exe` (ένα αρχείο, αντικαθίσταται σε κάθε έκδοση). Το φτιάχνει το GitHub Actions του private repo `ferelisvag/random` (branch `veagleeye-build`, artifact `VeagleEye-windows`). Δεν κατεβαίνει από συνεδρία Claude Code: το ανεβάζει ο Βαγγέλης.
-- Κάθε αλλαγή στον κώδικα: ίδια αλλαγή και στο `source/` εδώ. Αρχή: ακούει μόνο 127.0.0.1, με κωδικό, χωρίς καμία κλήση στο internet.
+- Κάθε αλλαγή στον κώδικα: ίδια αλλαγή και στο `source/` εδώ. **Θέμα HUD (Jarvis):** κουμπί «HUD» στην πάνω μπάρα (`#theme`, `setTheme` στο `app.js`, CSS στο τέλος του `style.css`), ο χρήστης το διαλέγει και μένει στο localStorage `veagleeye.theme`· τα χρώματα των γραφημάτων διαβάζονται ξανά με `readColors()`. Το .exe πρέπει να ξαναχτιστεί για να το πάρει. Αρχή: ακούει μόνο 127.0.0.1, με κωδικό, χωρίς καμία κλήση στο internet.
 
 ## veaglesurvivalbook/ — Veagle Survival Book (εγχειρίδιο επιβίωσης 10 ημερών, 1 άτομο ή οικογένεια 4)
 - Ένα `index.html` με inline CSS/JS, χωρίς build, χωρίς εξωτερικά αιτήματα (γραμματοσειρές από `../veagleos/fonts/`). Ενότητες: Βασικά (κανόνας των τριών, νερό με υπολογιστή `calc()`, τροφή, φαρμακείο, εξοπλισμός, υγιεινή, ρουχισμός, έγγραφα), λίστα ελέγχου (`CK`), οικογενειακό σχέδιο, απειλές (`details.thr`: σεισμός, φωτιά, πλημμύρα, blackout/καύσωνας/κρύο), go-bag, συντήρηση με επόμενη αλλαγή ώρας, «Επίσημες πηγές» (112, δημόσιες δομές, περιλήψεις ΓΓΠΠ από civilprotection.gov.gr με συνδέσμους).

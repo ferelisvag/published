@@ -207,3 +207,33 @@ details .in p{margin:.4rem 0}
   #host{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- Θέμα HUD (τύπου Jarvis), μόνο όταν το επιλέξει ο χρήστης ---------- */
+html[data-theme="hud"]{
+  --bg:#02070d; --bg2:#06121c; --line:#0c2a3a; --line2:#12506b;
+  --text:#d6f6ff; --dim:#6aa3b8; --accent:#19e3ff; --accent2:#7df0ff; --ok:#35ffb0; --warn:#ffb020;
+  --glass:rgba(4,16,26,.72); --ar:25,227,255; --fr:120,230,255; --br:2,7,13; --ic1:#082233; --ic2:#05161f;
+}
+html[data-theme="hud"] #netbg{opacity:.5}
+html[data-theme="hud"] body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(rgba(25,227,255,.05) 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,rgba(25,227,255,.05) 1px,transparent 1px) 0 0/48px 48px,radial-gradient(ellipse at 50% 46%,rgba(25,227,255,.12),transparent 62%)}
+html[data-theme="hud"] body::after{content:"";position:fixed;inset:0;z-index:60;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);opacity:.4;animation:hudscan 9s linear infinite}
+@keyframes hudscan{from{background-position:0 0}to{background-position:0 60px}}
+html[data-theme="hud"] .bar{box-shadow:0 1px 14px rgba(var(--ar),.3);border-bottom-color:rgba(var(--ar),.45)}
+html[data-theme="hud"] .start{text-shadow:0 0 10px rgba(var(--ar),.5);text-transform:uppercase}
+html[data-theme="hud"] .card,html[data-theme="hud"] .tw{border-radius:3px;border-color:rgba(var(--ar),.3);border-top:2px solid rgba(var(--ar),.75);background:linear-gradient(180deg,rgba(var(--ar),.07),var(--glass) 40%);position:relative;box-shadow:inset 0 0 26px rgba(var(--ar),.05)}
+html[data-theme="hud"] .card::before,html[data-theme="hud"] .card::after{content:"";position:absolute;width:12px;height:12px;pointer-events:none;border:2px solid var(--accent);filter:drop-shadow(0 0 3px var(--accent))}
+html[data-theme="hud"] .card::before{bottom:-1px;left:-1px;border-right:0;border-top:0}
+html[data-theme="hud"] .card::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+html[data-theme="hud"] .card h3{color:var(--accent2);text-shadow:0 0 8px rgba(var(--ar),.4)}
+html[data-theme="hud"] th{background:#061824}
+html[data-theme="hud"] td{border-bottom-color:#0c2a3a}
+html[data-theme="hud"] .ring .rp{filter:drop-shadow(0 0 5px rgba(var(--ar),.7))}
+html[data-theme="hud"] .coresbar div i,html[data-theme="hud"] .mini i{box-shadow:0 0 8px rgba(var(--ar),.6)}
+html[data-theme="hud"] #theme{border-color:var(--accent);color:var(--accent2);box-shadow:0 0 10px rgba(var(--ar),.35)}
+#hudfx{position:fixed;left:50%;top:50%;width:min(80vmin,780px);height:min(80vmin,780px);transform:translate(-50%,-50%);z-index:0;pointer-events:none;opacity:.5}
+#hudfx .r{transform-origin:300px 300px}
+#hudfx .r1{animation:hudspin 70s linear infinite}#hudfx .r2{animation:hudspin 46s linear infinite reverse}#hudfx .r3{animation:hudspin 26s linear infinite}#hudfx .r4{animation:hudspin 14s linear infinite reverse}
+#hudfx .core{transform-origin:300px 300px;animation:hudpulse 3.2s ease-in-out infinite}
+@keyframes hudspin{to{transform:rotate(360deg)}}
+@keyframes hudpulse{50%{transform:scale(1.08);opacity:.7}}
+@media (prefers-reduced-motion:reduce){html[data-theme="hud"] body::after,#hudfx .r,#hudfx .core{animation:none}}

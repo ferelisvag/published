@@ -34,9 +34,23 @@
   function readColors() {
     const cs = getComputedStyle(document.documentElement), g = (n, f) => (cs.getPropertyValue(n).trim() || f);
     C.acc = g("--accent", "#ff1e38"); C.acc2 = g("--accent2", "#ff6b78"); C.ok = g("--ok", "#2ee6a6"); C.warn = g("--warn", "#ffb703");
+    C.ar = g("--ar", "255,30,56");
     C.text = g("--text", "#eef1f5"); C.dim = g("--dim", "#8b95a3"); C.line2 = g("--line2", "#222a33");
   }
+  /* Θέμα HUD (Jarvis): αλλάζει ΜΟΝΟ όταν πατήσεις το κουμπί, και το θυμάται μόνο ως προτίμηση εμφάνισης. */
+  const HUDSVG = '<svg id="hudfx" viewBox="0 0 600 600" aria-hidden="true" focusable="false" fill="none" stroke="#19e3ff"><g class="r r1"><circle cx="300" cy="300" r="286" stroke-width="1" stroke-dasharray="2 6" opacity=".7"/><circle cx="300" cy="300" r="276" stroke-width="10" stroke-dasharray="1 11.2" opacity=".5"/></g><g class="r r2"><circle cx="300" cy="300" r="238" stroke-width="2" stroke-dasharray="120 40 18 40" opacity=".8"/><circle cx="300" cy="300" r="226" stroke="#ffb020" stroke-width="3" stroke-dasharray="60 520" opacity=".85"/></g><g class="r r3"><circle cx="300" cy="300" r="190" stroke-width="1.5" stroke-dasharray="4 10" opacity=".8"/><path d="M300 98v26M300 476v26M98 300h26M476 300h26" stroke-width="2.5" opacity=".9"/></g><g class="r r4"><circle cx="300" cy="300" r="150" stroke-width="5" stroke-dasharray="90 30" opacity=".55"/><circle cx="300" cy="300" r="132" stroke-width="1" opacity=".7"/></g><g class="core"><circle cx="300" cy="300" r="86" stroke-width="2" opacity=".9"/><path d="M300 236l55 96h-110z" stroke-width="2.5" opacity=".9"/><circle cx="300" cy="300" r="20" fill="#19e3ff" fill-opacity=".25" stroke-width="2"/></g></svg>';
+  function setTheme(id, save) {
+    const hud = id === "hud", root = document.documentElement, fx = document.getElementById("hudfx");
+    if (hud) root.setAttribute("data-theme", "hud"); else root.removeAttribute("data-theme");
+    if (hud && !fx) document.body.insertAdjacentHTML("afterbegin", HUDSVG); else if (!hud && fx) fx.remove();
+    const b = document.getElementById("theme"); if (b) b.setAttribute("aria-pressed", hud ? "true" : "false");
+    const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = hud ? "#02070d" : "#050708";
+    if (save) { try { localStorage.setItem("veagleeye.theme", hud ? "hud" : "classic"); } catch (_) {} }
+    readColors();
+  }
   readColors();
+  try { if (localStorage.getItem("veagleeye.theme") === "hud") setTheme("hud", false); } catch (_) {}
+  document.getElementById("theme").addEventListener("click", () => setTheme(document.documentElement.getAttribute("data-theme") === "hud" ? "classic" : "hud", true));
 
   /* ---------- canvas ---------- */
   function fit(cv) {
@@ -329,8 +343,8 @@
         const { c, w, h } = f; c.clearRect(0, 0, w, h); const L = Math.min(w, h) * 0.2;
         pts.forEach((p) => { p.x += p.vx * 16; p.y += p.vy * 16; if (p.x < 0 || p.x > 1) p.vx *= -1; if (p.y < 0 || p.y > 1) p.vy *= -1; });
         for (let i = 0; i < pts.length; i++) {
-          const a = pts[i]; c.fillStyle = "rgba(255,30,56,.35)"; c.fillRect(a.x * w - 1, a.y * h - 1, 2, 2);
-          for (let j = i + 1; j < pts.length; j++) { const b = pts[j], dd = Math.hypot((a.x - b.x) * w, (a.y - b.y) * h); if (dd < L) { c.strokeStyle = "rgba(255,30,56," + (0.12 * (1 - dd / L)).toFixed(3) + ")"; c.beginPath(); c.moveTo(a.x * w, a.y * h); c.lineTo(b.x * w, b.y * h); c.stroke(); } }
+          const a = pts[i]; c.fillStyle = "rgba(" + C.ar + ",.35)"; c.fillRect(a.x * w - 1, a.y * h - 1, 2, 2);
+          for (let j = i + 1; j < pts.length; j++) { const b = pts[j], dd = Math.hypot((a.x - b.x) * w, (a.y - b.y) * h); if (dd < L) { c.strokeStyle = "rgba(" + C.ar + "," + (0.12 * (1 - dd / L)).toFixed(3) + ")"; c.beginPath(); c.moveTo(a.x * w, a.y * h); c.lineTo(b.x * w, b.y * h); c.stroke(); } }
         }
       }
       setTimeout(() => requestAnimationFrame(tick), 33);

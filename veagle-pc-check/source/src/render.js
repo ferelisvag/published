@@ -464,6 +464,7 @@ var UI = (function (V) {
     if (typeof THEMES !== 'undefined') THEMES.decorate();
     if (typeof VIZ2 !== 'undefined') VIZ2.render();
     if (typeof SIDE !== 'undefined') SIDE.sync();
+    if (typeof HELP !== 'undefined') HELP.render();
     countUp();
     VIZ.animateRings(document);
   }

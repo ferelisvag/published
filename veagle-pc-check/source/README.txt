@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.0.0
+VEAGLE PC CHECK  v2.1.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -51,6 +51,18 @@ READING THE REPORT
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
 
+NEW IN 2.1.0
+- The "AI help" tab is now "Help & AI". It has two parts: "Help from a person (IT)" and "Help from an AI" (the same as before).
+- Send the report to your IT helper: fill a short form (what happens, since when, what you tried), tick the box, and the app makes one .zip file with the report and your answers. You attach it to an e-mail or a message. Nothing is sent by the app.
+- If the person who gave you this tool filled in the file support.json (next to the .bat files), the e-mail address is already there.
+- "What is wrong?": pick what bothers you (slow, hot, freezes, no internet...) and see only the findings that can be related.
+- "Since when?": pick the date the problem started and see what changed on the PC in the 7 days before.
+- "Can my helper connect?": checks if Quick Assist or another remote-help program is available, with step-by-step instructions.
+- Devices: sound, microphone, camera, Bluetooth and printers, and which ones Windows reports as faulty.
+- Who used the camera, microphone or location: the programs Windows remembers, and a finding for programs from unusual folders.
+- The PDF for a customer shows the contact details from support.json.
+- The scan has 21 steps now. Everything is still read-only.
+
 NEW IN 2.0.0
 - New look: the menu is now a vertical bar on the left, and on the Findings page a list of areas opens next to it. The "Menu" button at the top switches back to the old menu on top. On a phone and when printing the old menu is used automatically.
 - "Traces": 21 new checks that look at what happened on this PC: failed and remote sign-ins, cleared Windows logs, new accounts, new services, programs that ran (Prefetch, BAM, ShimCache), downloads without a valid signature, Defender exclusions and detections, firewall rules, open network shares, hidden replacements of accessibility programs, start-up folders, suspicious PowerShell use, open Wi-Fi networks and risky listening ports. Everything is only read; nothing is changed. The Security log needs Administrator rights.
@@ -99,7 +111,7 @@ Hardware / Software / Events   all the details, for people who want them.
 Compare     compare with an older scan to see your progress.
 Tools       beginner guide, summary for a helper, safe fix script (you tick what goes in), Excel/CSV export,
             many PCs in one table, an optional scheduled check (you decide), quick network repairs, system repair steps, an internet speed test link, Windows secrets, explained words.
-AI help     ask an AI (Claude first) to explain things to you. Personal data is removed.
+Help & AI     ask an AI (Claude first) to explain things to you. Personal data is removed.
 PC type     top right: Home, Work or Gaming. It changes which problems count more.
 Since last scan   the report remembers your previous scan and shows what got better or worse.
 Share-safe copy   saves the report without your name, PC name, IP and e-mail, so you can send it.
@@ -124,7 +136,7 @@ Delete the folder any time you like.
 
 GETTING HELP FROM AN AI
 -----------------------
-Open the "AI help" tab. The app prepares a text with your scan. Your user name, PC name,
+Open the "Help & AI" tab. The app prepares a text with your scan. Your user name, PC name,
 IP addresses and e-mail addresses are removed first, and you can read exactly what will be
 copied. Click "Copy and open Claude", then press Ctrl + V in the Claude window and send.
 Read the text before you paste it: program names and file paths can still say something about you.

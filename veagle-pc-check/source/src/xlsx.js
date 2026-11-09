@@ -56,5 +56,5 @@ var XLSX = (function (V) {
     var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
   }
-  return { build: build, download: download };
+  return { build: build, download: download, zip: zip };
 })(V);

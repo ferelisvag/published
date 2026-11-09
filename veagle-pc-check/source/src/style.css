@@ -572,3 +572,38 @@ body.nav-side.ctx-on #ctxPanel { display: block; position: fixed; left: 84px; to
 #ctxPanel .area .c { margin-left: auto; font-size: 11px; color: var(--dim); }
 body.nav-side #boot { left: 0; }
 @media print { body.nav-side, body.nav-side.ctx-on { padding-left: 0; } #ctxPanel, .sidetop { display: none !important; } }
+
+/* ---------- 2.1.0: Help & AI tab ---------- */
+.hgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 1100px) { .hgrid { grid-template-columns: 1fr; } }
+.hseg { margin-bottom: 14px; }
+details.hbox { margin-bottom: 14px; }
+details.hbox > summary { cursor: pointer; list-style: none; padding: 10px 14px; border-bottom: 1px solid var(--line); font-family: var(--head); font-weight: 700; letter-spacing: .04em; }
+details.hbox > summary::-webkit-details-marker { display: none; }
+details.hbox > summary::before { content: "+"; display: inline-block; width: 18px; color: var(--red); }
+details.hbox[open] > summary::before { content: "-"; }
+details.hbox:not([open]) > summary { border-bottom: 0; }
+.hrow { display: flex; align-items: flex-start; gap: 10px; padding: 5px 0; font-size: 13px; }
+.hdot { width: 9px; height: 9px; margin-top: 5px; flex: none; display: block; }
+.hwhen { color: var(--dim); font-size: 12px; min-width: 112px; }
+.hlist { margin: 8px 0; max-height: 320px; overflow: auto; }
+.hverdict { padding: 10px 12px; margin: 8px 0; border-left: 3px solid #9ca3af; background: var(--panel2); font-size: 13px; }
+.hverdict.ok { border-left-color: #3ddc84; }
+.hverdict.no { border-left-color: #f5a623; }
+.hrad { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; font-size: 13px; cursor: pointer; }
+.hrad input { margin-top: 3px; }
+.hsteps { margin: 10px 0 6px 18px; font-size: 13px; }
+.hdet { margin: 10px 0; font-size: 13px; }
+.hdet summary { cursor: pointer; color: var(--muted); }
+.hdet ol { margin: 8px 0 0 18px; }
+#tab-ai select, #tab-ai input[type="date"] { background: var(--panel2); color: var(--text); border: 1px solid var(--line); padding: 8px; font: inherit; }
+
+/* ---------- 2.1.0: client PDF always portrait A4 ---------- */
+@page { size: A4 portrait; margin: 12mm 10mm; }
+@media print {
+  body.printclient, body.printclient.nav-side, body.printclient.nav-side.ctx-on { padding: 0 !important; margin: 0 !important; width: auto !important; }
+  body.printclient #clientDoc { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+  #clientDoc .cd-cover { min-height: 255mm; }
+  #clientDoc h2, #clientDoc .cd-ol li, #clientDoc .cd-tb tr { break-inside: avoid; page-break-inside: avoid; }
+  #clientDoc h2 { break-after: avoid; page-break-after: avoid; }
+}

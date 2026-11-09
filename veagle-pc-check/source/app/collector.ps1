@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.0.0'
+$script:Version = '2.1.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -253,7 +253,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 20
+$TOTAL = 21
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -2249,6 +2249,104 @@ try {
 } catch { }
 $extras | Add-Member -NotePropertyName forensics -NotePropertyValue ([pscustomobject]$fx) -Force
 
+# ---------------------------------------------------------------- step 21
+Step 21 $TOTAL 'Help: remote help readiness, sound/camera/Bluetooth devices, camera and microphone use'
+$hp = [ordered]@{}
+# ---- remote help readiness (reads settings only, nothing is switched on)
+$rmt = [ordered]@{}
+try {
+    $qa = $false
+    if (Test-Path (Join-Path $env:windir 'System32\quickassist.exe')) { $qa = $true }
+    if (-not $qa) { try { if (Get-AppxPackage -Name 'MicrosoftCorporationII.QuickAssist' -ErrorAction SilentlyContinue) { $qa = $true } } catch { } }
+    $rmt['quickAssist'] = $qa
+} catch { $rmt['quickAssist'] = $false }
+try {
+    $cv = Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -ErrorAction SilentlyContinue
+    $rmt['edition'] = [string]$cv.EditionID
+    $rmt['rdpHostCapable'] = ([string]$cv.EditionID -notmatch '^Core')
+} catch { }
+try {
+    $ts = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -ErrorAction SilentlyContinue
+    $rmt['rdpEnabled'] = ($ts.fDenyTSConnections -eq 0)
+    $wst = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -ErrorAction SilentlyContinue
+    $rmt['rdpNla'] = ($wst.UserAuthentication -eq 1)
+} catch { }
+try {
+    $fr = @(Get-NetFirewallRule -Name 'RemoteDesktop-UserMode-In-TCP' -ErrorAction SilentlyContinue | Where-Object { [string]$_.Enabled -eq 'True' })
+    $rmt['rdpFirewall'] = ($fr.Count -gt 0)
+} catch { }
+try {
+    $ra = Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' -ErrorAction SilentlyContinue
+    $rmt['remoteAssistance'] = ($ra.fAllowToGetHelp -eq 1)
+} catch { }
+try { $rmt['winrmRunning'] = ((Get-Service -Name WinRM -ErrorAction SilentlyContinue).Status -eq 'Running') } catch { }
+try {
+    $tools = @()
+    foreach ($a in @($apps)) {
+        $nm = [string]$a.name
+        if ($nm -match 'AnyDesk|TeamViewer|RustDesk|Chrome Remote Desktop|UltraViewer|Splashtop|Parsec|RealVNC|TightVNC|UltraVNC|ScreenConnect|Zoho Assist|Supremo|LogMeIn|Remote Utilities') { $tools += $nm }
+    }
+    $rmt['tools'] = @($tools | Select-Object -Unique)
+} catch { }
+try {
+    $wl = @(Get-NetAdapter -Physical -ErrorAction SilentlyContinue | Where-Object { $_.Status -eq 'Up' })
+    $rmt['wifiUp'] = [bool]($wl | Where-Object { [string]$_.PhysicalMediaType -match '802\.11' })
+    $rmt['wiredUp'] = [bool]($wl | Where-Object { [string]$_.PhysicalMediaType -match '802\.3' })
+} catch { }
+$rmt['isAdmin'] = [bool]$isAdmin
+$hp['remote'] = [pscustomobject]$rmt
+
+# ---- sound, camera, Bluetooth and devices that report an error
+$dv = [ordered]@{}
+try {
+    $dv['audio'] = @(Get-CimInstance Win32_SoundDevice -ErrorAction SilentlyContinue | ForEach-Object {
+        [pscustomobject]@{ name = [string]$_.Name; maker = [string]$_.Manufacturer; status = [string]$_.Status; code = [int]$_.ConfigManagerErrorCode } })
+} catch { $dv['audio'] = @() }
+try {
+    $pn = @(Get-CimInstance Win32_PnPEntity -ErrorAction SilentlyContinue)
+    $dv['cameras'] = @($pn | Where-Object { $_.PNPClass -eq 'Camera' -or ($_.PNPClass -eq 'Image' -and [string]$_.Name -notmatch 'scanner') } | Select-Object -First 12 | ForEach-Object {
+        [pscustomobject]@{ name = [string]$_.Name; status = [string]$_.Status; code = [int]$_.ConfigManagerErrorCode } })
+    $ep = @($pn | Where-Object { $_.PNPClass -eq 'AudioEndpoint' -and [string]$_.PNPDeviceID -like 'SWD\MMDEVAPI\*' })
+    $dv['speakers'] = @($ep | Where-Object { [string]$_.PNPDeviceID -like '*{0.0.0.00000000}*' } | Select-Object -First 12 | ForEach-Object { [pscustomobject]@{ name = [string]$_.Name; status = [string]$_.Status; code = [int]$_.ConfigManagerErrorCode } })
+    $dv['mics'] = @($ep | Where-Object { [string]$_.PNPDeviceID -like '*{0.0.1.00000000}*' } | Select-Object -First 12 | ForEach-Object { [pscustomobject]@{ name = [string]$_.Name; status = [string]$_.Status; code = [int]$_.ConfigManagerErrorCode } })
+    $dv['bluetooth'] = @($pn | Where-Object { $_.PNPClass -eq 'Bluetooth' -and [string]$_.Name -notmatch 'Enumerator|RFCOMM|Protocol|Transport|Service' } | Select-Object -First 15 | ForEach-Object {
+        [pscustomobject]@{ name = [string]$_.Name; status = [string]$_.Status; code = [int]$_.ConfigManagerErrorCode } })
+    $dv['problems'] = @($pn | Where-Object { $_.ConfigManagerErrorCode -ne 0 -and [string]$_.PNPClass -ne '' } | Select-Object -First 30 | ForEach-Object {
+        [pscustomobject]@{ name = [string]$_.Name; cls = [string]$_.PNPClass; code = [int]$_.ConfigManagerErrorCode } })
+} catch { }
+$hp['devices'] = [pscustomobject]$dv
+
+# ---- which programs used the camera, microphone or location (Windows keeps this list itself)
+$pu = [ordered]@{}
+foreach ($cap in @('webcam', 'microphone', 'location')) {
+    $items = @()
+    $glob = ''
+    try {
+        $base = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\' + $cap
+        $glob = [string](Get-ItemProperty -Path $base -Name Value -ErrorAction SilentlyContinue).Value
+        $keys = @(Get-ChildItem -Path $base -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -ne 'NonPackaged' })
+        $np = @(Get-ChildItem -Path (Join-Path $base 'NonPackaged') -ErrorAction SilentlyContinue)
+        foreach ($k in (@($keys) + @($np))) {
+            try {
+                $p = Get-ItemProperty -Path $k.PSPath -ErrorAction SilentlyContinue
+                $st = [int64]$p.LastUsedTimeStart
+                $sp = [int64]$p.LastUsedTimeStop
+                if ($st -le 0) { continue }
+                $nm = [string]$k.PSChildName
+                $npk = ($k.PSParentPath -like '*NonPackaged')
+                if ($npk) { $nm = $nm -replace '#', '\' }
+                $lastT = [DateTime]::FromFileTimeUtc([math]::Max($st, $sp))
+                $items += [pscustomobject]@{ app = $nm; classic = [bool]$npk; allow = [string]$p.Value; last = (Iso $lastT.ToLocalTime()); inUse = ($sp -le 0 -or $sp -lt $st) }
+            } catch { }
+        }
+    } catch { }
+    $items = @($items | Sort-Object last -Descending | Select-Object -First 15)
+    $pu[$cap] = [pscustomobject]@{ global = $glob; items = $items }
+}
+$pu['user'] = [string]$env:USERNAME
+$hp['sensors'] = [pscustomobject]$pu
+$extras | Add-Member -NotePropertyName help -NotePropertyValue ([pscustomobject]$hp) -Force
+
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }
 
@@ -2259,6 +2357,17 @@ if ($msinfoProc) {
 }
 
 Flush-StepErrors
+
+# Optional support.json next to the launcher: who should receive the report (set by the person who gave you this tool)
+$support = $null
+try {
+    $sj = Join-Path $root 'support.json'
+    if (Test-Path $sj) {
+        $sx = Get-Content -Raw -Encoding UTF8 -Path $sj | ConvertFrom-Json
+        $lim = { param($v, $n) $t = [string]$v; if ($t.Length -gt $n) { $t.Substring(0, $n) } else { $t } }
+        $support = [pscustomobject]@{ name = (& $lim $sx.name 80); email = (& $lim $sx.email 120); phone = (& $lim $sx.phone 40); site = (& $lim $sx.site 120); note = (& $lim $sx.note 300) }
+    }
+} catch { }
 
 $meta = [ordered]@{
     tool       = 'VEAGLE PC Check'
@@ -2274,6 +2383,7 @@ $meta = [ordered]@{
     durationSec = [int]$swTotal.Elapsed.TotalSeconds
     warnings   = @($script:Warnings)
     stepIssues = @($script:StepIssues)
+    support    = $support
 }
 
 $data = [ordered]@{

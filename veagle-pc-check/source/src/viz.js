@@ -131,7 +131,7 @@ var VIZ = (function (V) {
     return h;
   }
 
-  return { applyPrefs: applyPrefs, toggle: toggle, set: set, chkOn: chkOn, chkSet: chkSet, chkStats: chkStats, findingDone: findingDone, ring: ring, animateRings: animateRings, timelineHtml: timelineHtml, trendHtml: trendHtml, win11Html: win11Html };
+  return { applyPrefs: applyPrefs, toggle: toggle, set: set, chkOn: chkOn, chkSet: chkSet, chkStats: chkStats, findingDone: findingDone, ring: ring, animateRings: animateRings, KN: KN, timelineHtml: timelineHtml, trendHtml: trendHtml, win11Html: win11Html };
 })(V);
 
 /* ---------- what the user has done or accepted changes the score (an estimate until the next scan) ---------- */

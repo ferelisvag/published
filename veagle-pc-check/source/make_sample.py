@@ -174,6 +174,29 @@ def _more3(heavy):
 
 
 # --- v1.3 extras ("forensics")
+def _help(heavy):
+    iso = lambda d, h=12: (now - datetime.timedelta(days=d)).strftime('%Y-%m-%dT') + '%02d:10:00' % h
+    return {
+        'remote': {'quickAssist': True, 'edition': 'Professional', 'rdpHostCapable': True, 'rdpEnabled': bool(heavy), 'rdpNla': not heavy, 'rdpFirewall': bool(heavy),
+                   'remoteAssistance': False, 'winrmRunning': False, 'tools': ['AnyDesk'] if not heavy else [], 'wifiUp': True, 'wiredUp': not heavy, 'isAdmin': True},
+        'devices': {
+            'audio': [{'name': 'Realtek High Definition Audio', 'maker': 'Realtek', 'status': 'OK', 'code': 0}],
+            'cameras': [{'name': 'Integrated Webcam', 'status': 'OK', 'code': 0}] if not heavy else [{'name': 'Integrated Webcam', 'status': 'Error', 'code': 10}],
+            'speakers': [{'name': 'Speakers (Realtek Audio)', 'status': 'OK', 'code': 0}],
+            'mics': [{'name': 'Microphone Array (Realtek Audio)', 'status': 'OK', 'code': 0}],
+            'bluetooth': [{'name': 'Intel Wireless Bluetooth', 'status': 'OK', 'code': 0}],
+            'problems': [{'name': 'Integrated Webcam', 'cls': 'Camera', 'code': 10}] if heavy else []},
+        'sensors': {
+            'user': 'demo',
+            'webcam': {'global': 'Allow', 'items': [
+                {'app': 'Microsoft.WindowsCamera_8wekyb3d8bbwe', 'classic': False, 'allow': 'Allow', 'last': iso(2, 9), 'inUse': False},
+                {'app': 'C:\\Program Files\\Zoom\\bin\\Zoom.exe', 'classic': True, 'allow': 'Allow', 'last': iso(1, 18), 'inUse': False}] + (
+                [{'app': 'C:\\Users\\demo\\AppData\\Local\\Temp\\a8f3\\capture_helper.exe', 'classic': True, 'allow': 'Allow', 'last': iso(0, 11), 'inUse': True}] if heavy else [])},
+            'microphone': {'global': 'Allow', 'items': [{'app': 'Microsoft.WindowsSoundRecorder_8wekyb3d8bbwe', 'classic': False, 'allow': 'Allow', 'last': iso(5, 16), 'inUse': False},
+                {'app': 'C:\\Users\\demo\\AppData\\Local\\Discord\\app-1.0.9\\Discord.exe', 'classic': True, 'allow': 'Allow', 'last': iso(0, 10), 'inUse': False}]},
+            'location': {'global': 'Allow', 'items': [{'app': 'Microsoft.BingWeather_8wekyb3d8bbwe', 'classic': False, 'allow': 'Allow', 'last': iso(3, 8), 'inUse': False}]}}}
+
+
 def _forensics(heavy):
     d = lambda days, h=0: iso(now - datetime.timedelta(days=days, hours=h))
     base = dict(admin=True,
@@ -255,7 +278,7 @@ def _addwin(d):
     ev['days'] = 60; ev['appHangs1'] = ev.get('appHangs', 0) // 20; ev['appHangs7'] = ev.get('appHangs', 0) // 5; ev['appHangs30'] = ev.get('appHangs', 0) * 6 // 10
 
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '2.0.0'
+data['meta']['version'] = '2.1.0'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -278,6 +301,8 @@ data['extras']['more'] = _more(False)
 data['extras']['more2'] = _more2(False)
 data['extras']['more3'] = _more3(False)
 data['extras']['forensics'] = _forensics(False)
+data['extras']['help'] = _help(False)
+data['meta']['support'] = {'name': 'Vagelis (demo)', 'email': 'helper@example.com', 'phone': '', 'site': 'ferelis.gr', 'note': ''}
 data['trend'] = SAMPLE_TREND
 _addwin(data)
 for v in data['network']['adapters']:
@@ -301,7 +326,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '2.0.0'
+w['meta']['version'] = '2.1.0'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),
@@ -317,6 +342,7 @@ w['extras']['more'] = _more(True)
 w['extras']['more2'] = _more2(True)
 w['extras']['more3'] = _more3(True)
 w['extras']['forensics'] = _forensics(True)
+w['extras']['help'] = _help(True)
 _addwin(w)
 (out / 'sample-win10-laptop.json').write_text(json.dumps(w, indent=1), encoding='utf-8')
 

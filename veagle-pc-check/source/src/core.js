@@ -236,7 +236,7 @@ function Engine(RAW) {
     'sto-diskhealth': [20, 'Ask a pro', 'Back up first'], 'perf-gpuheat': [20, 'Medium', 'Safe'], 'hw-age': [2, 'Easy', 'Safe'], 'perf-bottleneck': [10, 'Easy', 'Safe'], 'sec-persist': [20, 'Ask a pro', 'Safe'], 'sec-hardening': [30, 'Medium', 'Safe'], 'sec-privacy': [15, 'Easy', 'Safe'], 'sto-caches': [5, 'Easy', 'Safe'], 'soft-unused': [15, 'Easy', 'Back up first'], 'sec-browser-old': [3, 'Easy', 'Safe'],
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe'],
     'win-ready-11': [10, 'Medium', 'Safe'], 'cfg-tasks-unusual': [15, 'Medium', 'Safe'], 'sec-svc-path': [15, 'Medium', 'Safe'], 'sec-svc-unquoted': [2, 'Ask a pro', 'Safe'], 'stab-memdiag': [60, 'Medium', 'Back up first'], 'stab-sfc': [40, 'Medium', 'Safe'], 'prn-stuck': [5, 'Easy', 'Safe'], 'soft-runtime-eol': [10, 'Medium', 'Safe'],
-    'for-logon-brute': [20, 'Medium', 'Safe'], 'for-logon-remote': [20, 'Ask a pro', 'Safe'], 'for-audit-off': [5, 'Medium', 'Safe'], 'for-log-cleared': [15, 'Ask a pro', 'Safe'], 'for-acct-new': [10, 'Medium', 'Safe'], 'for-svc-new': [15, 'Medium', 'Safe'], 'for-time-changed': [5, 'Easy', 'Safe'], 'for-run-tools': [20, 'Ask a pro', 'Safe'], 'for-run-odd': [15, 'Medium', 'Safe'], 'for-downloads': [10, 'Easy', 'Safe'], 'for-def-excl': [10, 'Medium', 'Safe'], 'for-def-off': [5, 'Easy', 'Safe'], 'for-def-caught': [10, 'Easy', 'Safe'], 'for-fw-rules': [15, 'Medium', 'Safe'], 'for-shares-open': [10, 'Medium', 'Safe'], 'for-access-backdoor': [40, 'Ask a pro', 'Back up first'], 'for-startup-folder': [5, 'Easy', 'Safe'], 'for-ps-suspicious': [20, 'Ask a pro', 'Safe'], 'for-ps-logging': [5, 'Medium', 'Safe'], 'for-wifi-open': [5, 'Easy', 'Safe'], 'for-listen-risky': [15, 'Ask a pro', 'Safe']
+    'for-logon-brute': [20, 'Medium', 'Safe'], 'for-logon-remote': [20, 'Ask a pro', 'Safe'], 'for-audit-off': [5, 'Medium', 'Safe'], 'for-log-cleared': [15, 'Ask a pro', 'Safe'], 'for-acct-new': [10, 'Medium', 'Safe'], 'for-svc-new': [15, 'Medium', 'Safe'], 'for-time-changed': [5, 'Easy', 'Safe'], 'for-run-tools': [20, 'Ask a pro', 'Safe'], 'for-run-odd': [15, 'Medium', 'Safe'], 'for-downloads': [10, 'Easy', 'Safe'], 'for-def-excl': [10, 'Medium', 'Safe'], 'for-def-off': [5, 'Easy', 'Safe'], 'for-def-caught': [10, 'Easy', 'Safe'], 'for-fw-rules': [15, 'Medium', 'Safe'], 'for-shares-open': [10, 'Medium', 'Safe'], 'for-access-backdoor': [40, 'Ask a pro', 'Back up first'], 'for-startup-folder': [5, 'Easy', 'Safe'], 'for-ps-suspicious': [20, 'Ask a pro', 'Safe'], 'for-ps-logging': [5, 'Medium', 'Safe'], 'for-wifi-open': [5, 'Easy', 'Safe'], 'for-listen-risky': [15, 'Ask a pro', 'Safe'], 'use-sensors': [10, 'Easy', 'Safe'], 'dev-peripheral-problem': [15, 'Medium', 'Safe']
   };
   var PROFILES = {
     home: { label: 'Home PC', note: 'Balanced advice for a normal home computer.' },
@@ -288,7 +288,7 @@ function Engine(RAW) {
         [S('Think about whether these were intentional (power cut, forced power-off). If yes, you can ignore this.'),
          S('Check CPU and GPU temperatures under load with HWiNFO or Task Manager.'),
          S('Run the Windows memory test. The PC restarts and checks RAM.', 'mdsched.exe'),
-         S('If it keeps happening, use the AI help tab and tell the assistant when it happens (idle, gaming, at startup).')],
+         S('If it keeps happening, use the Help & AI tab and tell the assistant when it happens (idle, gaming, at startup).')],
         evSample('system', /Kernel-Power|EventLog/, [41, 6008]));
     });
     R(function () {
@@ -301,7 +301,7 @@ function Engine(RAW) {
         [S('Update the graphics driver and the chipset driver from the manufacturer.'),
          S('Repair system files.', 'sfc /scannow'),
          S('Test the memory.', 'mdsched.exe'),
-         S('Dump files are in C:\\Windows\\Minidump. Share the scan with an AI assistant (AI help tab) and mention the blue screen text.')],
+         S('Dump files are in C:\\Windows\\Minidump. Share the scan with an AI assistant (Help & AI tab) and mention the blue screen text.')],
         evSample('system', /WER-SystemErrorReporting/, [1001]) + (dumps ? ' | dump files found: ' + dumps : ''));
     });
     R(function () {
@@ -791,7 +791,7 @@ function Engine(RAW) {
         'Every blue screen has a code. The code is a clue to what went wrong. Here is what yours say in plain words.',
         [S('Read the list under "Evidence" below. The part after the code is the likely cause.'),
          S('Start with the first fix of the matching finding above (drivers first, then memory test).'),
-         S('If the same code keeps coming back, copy it into the AI help tab and ask.')],
+         S('If the same code keeps coming back, copy it into the Help & AI tab and ask.')],
         plain.join('\n'));
     });
     R(function () {
@@ -897,7 +897,7 @@ function Engine(RAW) {
       var u = arr(SEC.unsignedDrivers); if (!u.length) return null;
       return F('sec-unsigned', 'Security', 'medium', u.length + ' driver' + (u.length > 1 ? 's' : '') + ' without a digital signature',
         'A driver is a small program that runs with full power over the hardware. A signature proves it came from a real company and was not changed. Unsigned drivers are a risk and can cause blue screens.',
-        [S('See the names under "Evidence".'), S('Go to the website of the maker, download the newest driver from there and install it over the old one.'), S('If you do not recognise the device, ask an AI in the AI help tab before you remove anything.')],
+        [S('See the names under "Evidence".'), S('Go to the website of the maker, download the newest driver from there and install it over the old one.'), S('If you do not recognise the device, ask an AI in the Help & AI tab before you remove anything.')],
         u.map(function (x) { return x.device + (x.provider ? ' (' + x.provider + ')' : ''); }).join('\n'));
     });
 
@@ -964,7 +964,7 @@ function Engine(RAW) {
       var h = arr(NT.hostsEntries); if (!h.length) return null;
       return F('net-hosts', 'Network', 'low', 'The "hosts" file has custom entries (' + h.length + ')',
         'The hosts file overrides website addresses on this PC. Developers and ad blockers use it on purpose. Malware also uses it to send you to fake websites.',
-        [S('Read the lines under "Evidence". Do you recognise them?'), S('If a famous website (bank, Google, Microsoft) is in the list, that is suspicious: run a full antivirus scan and ask an AI in the AI help tab.')], h.join('\n'));
+        [S('Read the lines under "Evidence". Do you recognise them?'), S('If a famous website (bank, Google, Microsoft) is in the list, that is suspicious: run a full antivirus scan and ask an AI in the Help & AI tab.')], h.join('\n'));
     });
 
     R(function () {
@@ -1128,7 +1128,7 @@ function Engine(RAW) {
         isWU ? [S('Do not panic. This does not prove the update is to blame, but it is the first thing to check.'), S('Create a restore point first: press the Windows key, type "Create a restore point", click Create.'),
                S('Open Settings, Windows Update, Update history, scroll down and click "Uninstall updates". Find the update from that day and click Uninstall. Restart and see if the problem is gone.'), S('If it is gone, pause updates for a week (Settings, Windows Update, Pause) and ask someone before you update again.')]
              : [S('This does not prove the program is to blame, but it is the first thing to check.'), S('Open Settings, Apps, Installed apps. Find the program installed around that time, click the three dots and choose Uninstall. Restart and see if the problem is gone.'),
-               S('If you need the program, install the newest version from the maker\'s website, or tell the AI help tab what you see.')],
+               S('If you need the program, install the newest version from the maker\'s website, or tell the Help & AI tab what you see.')],
         'First ' + NICE[best.kind] + ': ' + when(best.first) + '\nThe change: ' + trigName(best.trig) + ' on ' + when(best.trig.t) + '\nBefore the change: ' + best.before + ' events. After: ' + best.after + ' events.');
     });
 
@@ -1142,7 +1142,7 @@ function Engine(RAW) {
         [S('Do not use Sleep for now: Settings, System, Power, set "Screen and sleep" to Never for the sleep options. See if the crashes stop.'),
          S('Update the graphics, network and chipset drivers from the website of the PC or motherboard maker (not from a "driver updater" program).'),
          S('Turn off Fast Startup: Control Panel, Power Options, "Choose what the power buttons do", untick "Turn on fast startup".'),
-         S('If it still happens, copy the dates shown below into the AI help tab and ask.')],
+         S('If it still happens, copy the dates shown below into the Help & AI tab and ask.')],
         hit.slice(-6).map(function (c) { return when(c.t) + ' ' + (c.k === 'bsod' ? 'blue screen' : 'unexpected shutdown'); }).join('\n'));
     });
 
@@ -1264,7 +1264,7 @@ function Engine(RAW) {
       var f = arr(s.flagged), odd = f.filter(function (x) { return x.oddFolder; });
       return F('sec-signed', 'Security', odd.length ? 'medium' : 'low', f.length + ' of ' + s.checked + ' start-up programs have no valid digital signature',
         'A digital signature proves a program comes from a real company and was not changed. Many harmless small tools are unsigned, but malware almost always is. The ones that run from a "Temp" or "Downloads" folder deserve a closer look.',
-        [S('See the list under "Evidence". Do you recognise each program?'), S('If you do not, search its file name on the internet or ask an AI in the AI help tab before you do anything.'), S('To stop one starting with Windows: press Ctrl+Shift+Esc, open the Startup apps tab, right-click it and choose Disable.')],
+        [S('See the list under "Evidence". Do you recognise each program?'), S('If you do not, search its file name on the internet or ask an AI in the Help & AI tab before you do anything.'), S('To stop one starting with Windows: press Ctrl+Shift+Esc, open the Startup apps tab, right-click it and choose Disable.')],
         nameList(f, function (x) { return x.name + ' (' + x.file + ') - ' + (x.status === 'NotSigned' ? 'not signed' : x.status) + (x.signer ? ' by ' + x.signer : '') + (x.oddFolder ? ' - runs from: ' + x.folder : ''); }));
     });
     R(function () {
@@ -1380,7 +1380,7 @@ function Engine(RAW) {
       var r = [];
       if (arr(w.failed30).length) r.push(F('upd-fail', 'Updates', 'medium', arr(w.failed30).length + ' Windows update' + (arr(w.failed30).length > 1 ? 's' : '') + ' failed in the last 30 days',
         'A failed update means the PC is still missing fixes. It often retries and fails again until you help it.',
-        [S('Press the Windows key, type "Troubleshoot settings", open it, then "Other troubleshooters" and run the one called "Windows Update".'), S('Restart the PC and run Windows Update again.'), S('If it fails again, copy the update name from "Evidence" and search it on the internet or ask an AI in the AI help tab.')], arr(w.failed30).join('\n')));
+        [S('Press the Windows key, type "Troubleshoot settings", open it, then "Other troubleshooters" and run the one called "Windows Update".'), S('Restart the PC and run Windows Update again.'), S('If it fails again, copy the update name from "Evidence" and search it on the internet or ask an AI in the Help & AI tab.')], arr(w.failed30).join('\n')));
       if (w.serviceDisabled || w.policyOff || w.paused) r.push(F('upd-off', 'Updates', w.serviceDisabled || w.policyOff ? 'medium' : 'low', w.paused ? 'Windows updates are paused' : 'Windows updates are switched off',
         w.paused ? 'Somebody pressed "Pause updates". Until the pause ends, the PC gets no fixes.' : 'A setting or policy stops Windows from updating itself. That leaves the PC without security fixes.',
         [S('Press the Windows key, type "Windows Update" and open it.'), S('Click "Resume updates" (or "Check for updates"). If the button is missing because of a work policy, ask your IT team.')],
@@ -1409,7 +1409,7 @@ function Engine(RAW) {
       if (!s.length) return null;
       return F('perf-slowstart', 'Performance', 'low', s.length + ' program' + (s.length > 1 ? 's' : '') + ' or driver' + (s.length > 1 ? 's' : '') + ' slow down the start-up of Windows',
         'Windows measures what delays every start-up and writes it down. These items were named by Windows itself, most often and slowest first. Fewer slow items means the PC is ready sooner.',
-        [S('Look at the list under "Evidence". For a program: press Ctrl+Shift+Esc, open the Startup apps tab, right-click it and choose Disable.'), S('For a driver or service, do not turn it off. Instead update it or ask an AI in the AI help tab.')],
+        [S('Look at the list under "Evidence". For a program: press Ctrl+Shift+Esc, open the Startup apps tab, right-click it and choose Disable.'), S('For a driver or service, do not turn it off. Instead update it or ask an AI in the Help & AI tab.')],
         nameList(s, function (x) { return x.name + ' (' + x.kind + ') - about ' + x.avgSec + ' s, seen ' + x.n + ' time' + (x.n > 1 ? 's' : ''); }));
     });
     R(function () {
@@ -1426,7 +1426,7 @@ function Engine(RAW) {
       var tot = 0; c.forEach(function (x) { tot += x.n; });
       return F('net-conn', 'Network', 'info', c.length + ' programs are talking to the internet right now',
         'This is a snapshot of which programs have an open connection to the internet at the moment of the scan (addresses of your own home network are left out). It is normal for a browser, Windows and your cloud apps to be here. Look for names you do not know.',
-        [S('Read the list under "Evidence". Browsers, svchost, OneDrive, Teams and similar are normal.'), S('If you see a name you do not know, search it on the internet or ask an AI in the AI help tab before you decide anything.')],
+        [S('Read the list under "Evidence". Browsers, svchost, OneDrive, Teams and similar are normal.'), S('If you see a name you do not know, search it on the internet or ask an AI in the Help & AI tab before you decide anything.')],
         nameList(c, function (x) { return x.process + ' (' + x.n + ' connection' + (x.n > 1 ? 's' : '') + ') ' + arr(x.remotes).join(', '); }, 15));
     });
 
@@ -1537,7 +1537,7 @@ function Engine(RAW) {
       var why = { processor: 'The processor was busy most of the time. Something is using it heavily. See "Who used the processor" in the Insights tab.', drive: 'The drive was almost always busy. A slow disk (especially an old hard disk) makes everything wait.', memory: 'Memory was almost full. When it is full Windows uses the drive as extra memory, which is much slower.' };
       return F('perf-bottleneck', 'Performance', 'low', 'During a 10-second check the ' + lim[0] + ' was the limit (' + Math.round(lim[1]) + ' % busy)',
         why[lim[0]] + ' This is one 10-second snapshot, so repeat the scan when the PC feels slow to see if it is always the same part.',
-        [S('Open Task Manager (Ctrl+Shift+Esc) and sort by the ' + (lim[0] === 'processor' ? 'CPU' : (lim[0] === 'drive' ? 'Disk' : 'Memory')) + ' column to see which program is responsible.'), S('Close it or ask an AI in the AI help tab what that program is.')], 'Average processor ' + Math.round(c) + ' %, drive ' + Math.round(d) + ' %, memory ' + Math.round(m) + ' %');
+        [S('Open Task Manager (Ctrl+Shift+Esc) and sort by the ' + (lim[0] === 'processor' ? 'CPU' : (lim[0] === 'drive' ? 'Disk' : 'Memory')) + ' column to see which program is responsible.'), S('Close it or ask an AI in the Help & AI tab what that program is.')], 'Average processor ' + Math.round(c) + ' %, drive ' + Math.round(d) + ' %, memory ' + Math.round(m) + ' %');
     });
     R(function () {
       var P = X2.persistence; if (!P) return null;
@@ -1546,7 +1546,7 @@ function Engine(RAW) {
       var KN = { 'winlogon-shell': 'Windows start-up shell was changed', 'winlogon-userinit': 'Windows sign-in program was changed', 'ifeo-debugger': 'A program is replaced by a "debugger"', 'appinit-dlls': 'Extra DLL files load into every program', 'bootexecute': 'Extra program runs before Windows loads', 'wmi-consumer': 'A hidden WMI start-up trigger exists' };
       return F('sec-persist', 'Security', un.length ? 'medium' : 'low', (un.length ? un.length + ' unusual start-up setting' + (un.length > 1 ? 's' : '') : '') + (un.length && us.length ? ' and ' : '') + (us.length ? us.length + ' unsigned program' + (us.length > 1 ? 's' : '') + ' that starts with Windows' : ''),
         'Besides the normal Startup list, Windows has many hidden places where a program can make itself start. Some are used by real tools (debuggers, antivirus), but they are also favourite hiding places for unwanted software, so each one deserves a look.',
-        [S('Read the lines under "Evidence". Do you recognise each one?'), S('If you do not, search the name on the internet or ask an AI in the AI help tab before you do anything. Do not delete things you do not understand.')],
+        [S('Read the lines under "Evidence". Do you recognise each one?'), S('If you do not, search the name on the internet or ask an AI in the Help & AI tab before you do anything. Do not delete things you do not understand.')],
         un.map(function (x) { return (KN[x.kind] || x.kind) + ': ' + x.detail; }).concat(us.map(function (x) { return 'Not signed: ' + x.name + ' (' + x.where + ')'; })).slice(0, 14).join('\n'));
     });
     /* hardening checks */
@@ -1592,7 +1592,7 @@ function Engine(RAW) {
       if (wsum < 3) return null;
       return F('sec-hardening', 'Security', hs.score < 50 ? 'medium' : 'low', fails.length + ' of ' + known.length + ' everyday security settings are not switched on (hardening score ' + hs.score + '/100)',
         'Windows has many protection switches that are off by default because they can get in the way. Each one that is on makes an attack harder. The Insights tab lists all of them with a plain explanation and how to switch them on. Some are only worth it in an office. Do not switch things on that you do not understand.',
-        [S('Open the Insights tab and read the "Extra security settings" box.'), S('Start with the ones marked "Easy". For the rest, ask your IT person or an AI in the AI help tab.')],
+        [S('Open the Insights tab and read the "Extra security settings" box.'), S('Start with the ones marked "Easy". For the rest, ask your IT person or an AI in the Help & AI tab.')],
         fails.slice(0, 12).map(function (x) { return x.en; }).join('\n'));
     });
     /* privacy */
@@ -1946,6 +1946,29 @@ function Engine(RAW) {
         'On a Wi-Fi network without a password everything you send can be read by others near you, unless the site itself is protected (the padlock). Hotels, cafes and airports often work like this. A VPN or your phone hotspot is safer.',
         [S('Avoid banking, shopping and work logins on such networks. Look for the padlock in the browser address bar.'), S('Tell Windows to forget the network: Settings, Network and internet, Wi-Fi, Manage known networks, choose it and click Forget.'), S('For work, use a VPN or the hotspot of your phone.')],
         w.map(function (x) { return x.ssid + ' - connected ' + x.count + ' time(s), last ' + fmtDT(x.last); }).join('\n'));
+    });
+    /* ---- 2.1.0: camera, microphone and location use, and devices that report a problem (reads what Windows keeps) ---- */
+    var HX = EX.help || {};
+    R(function () {
+      var sn = HX.sensors || {}, hits = [], names = { webcam: 'camera', microphone: 'microphone', location: 'location' };
+      ['webcam', 'microphone', 'location'].forEach(function (c) {
+        arr((sn[c] || {}).items).forEach(function (x) { if (x.classic && dAgo(x.last) <= 14 && oddPath(x.app.replace(/^([A-Za-z]):/, '$1:'))) hits.push(names[c] + ': ' + x.app + ' - ' + fmtDT(x.last)); });
+      });
+      if (!hits.length) return null;
+      return F('use-sensors', 'Security', 'low', hits.length + ' program' + (hits.length === 1 ? '' : 's') + ' from an unusual folder used your camera, microphone or location lately',
+        'Windows remembers which programs used your camera, microphone or location. These ones live in a folder where normal programs rarely are (Temp, AppData or a shared folder). That can be harmless (a portable tool you downloaded) but you should recognise them.',
+        [S('Read the list under "Evidence". Do you know each program?'), S('If you do not, open Settings, Privacy & security, then Camera, Microphone or Location, and switch off the program.'), S('If you are unsure, send the report to your IT helper (Help & AI tab).')],
+        hits.join('\n'));
+    });
+    R(function () {
+      var dv = HX.devices || {}, bad = [];
+      ['audio', 'speakers', 'mics', 'cameras', 'bluetooth'].forEach(function (k) { arr(dv[k]).forEach(function (x) { if (num(x.code) !== 0) bad.push(x.name + ' - code ' + x.code); }); });
+      arr(dv.problems).forEach(function (x) { if (/^(Camera|Image|MEDIA|AudioEndpoint|Bluetooth|PrintQueue|Printer|Monitor|HIDClass|Mouse|Keyboard|USB)$/i.test(x.cls)) { var l = x.name + ' (' + x.cls + ') - code ' + x.code; if (bad.indexOf(l) < 0 && !bad.some(function (b) { return b.indexOf(x.name) === 0; })) bad.push(l); } });
+      if (!bad.length) return null;
+      return F('dev-peripheral-problem', 'Stability', bad.length > 2 ? 'medium' : 'low', bad.length + ' device' + (bad.length === 1 ? '' : 's') + ' (sound, camera, Bluetooth or another) report' + (bad.length === 1 ? 's' : '') + ' a problem',
+        'Windows marks a device with a yellow triangle when its driver (the small program that lets Windows talk to it) is missing, stopped or switched off. The device then does not work, or works badly.',
+        [S('Right-click the Start button and open Device Manager.'), S('Look for a device with a yellow triangle (the names are under "Evidence"). Right-click it and choose "Update driver", then "Search automatically for drivers".'), S('If it says "Disabled" (code 22), right-click and choose "Enable device".'), S('If it does not help: unplug the device (or restart the PC), and if it still fails download the driver from the website of the PC or device maker.')],
+        bad.join('\n'));
     });
     R(function () {
       var l = arr(FX.listeners).filter(function (x) { return (x.scope === 'all' || x.scope === 'lan') && x.name !== 'System' && x.path && ((x.sig && x.sig !== 'Valid') || oddPath(x.path)); }); if (!l.length) return null;

@@ -279,12 +279,13 @@ var PRO = (function (V, AI) {
   function clientDoc() {
     var s = V.score, c = V.counts, top = nonInfo().slice(0, 6), pl = planHtml(), ba = beforeAfter();
     var col = s.score >= 85 ? '#1a9d58' : (s.score >= 65 ? '#c98a12' : '#c1181a');
-    var logo = ($('.brand img') || {}).src || '';
+    var logo = ($('.brand img') || {}).src || '', SP = g(D, 'meta.support', null) || {};
     var h = '<div class="cd-cover"><img src="' + logo + '" alt="" class="cd-logo"><h1>' + esc(I('PC health report', 'Αναφορά υγείας υπολογιστή')) + '</h1>' +
       (P.cust ? '<div class="cd-line"><span>' + esc(I('Prepared for', 'Για')) + '</span><b>' + esc(P.cust) + '</b></div>' : '') +
       '<div class="cd-line"><span>' + esc(I('Computer', 'Υπολογιστής')) + '</span><b>' + esc(g(D, 'meta.computer', '')) + ' &middot; ' + esc(((X.inventory || {}).maker || g(D, 'system.manufacturer', '')) + ' ' + ((X.inventory || {}).model || g(D, 'system.model', ''))) + '</b></div>' +
       '<div class="cd-line"><span>' + esc(I('Scan date', 'Ημερομηνία σάρωσης')) + '</span><b>' + esc(dt(g(D, 'meta.generated', ''))) + '</b></div>' +
-      (P.tech ? '<div class="cd-line"><span>' + esc(I('Prepared by', 'Συντάχθηκε από')) + '</span><b>' + esc(P.tech) + '</b></div>' : '') +
+      ((P.tech || SP.name) ? '<div class="cd-line"><span>' + esc(I('Prepared by', 'Συντάχθηκε από')) + '</span><b>' + esc(P.tech || SP.name) + '</b></div>' : '') +
+      ((SP.email || SP.phone || SP.site) ? '<div class="cd-line"><span>' + esc(I('Contact', 'Επικοινωνία')) + '</span><b>' + esc([SP.email, SP.phone, SP.site].filter(Boolean).join(' \u00b7 ')) + '</b></div>' : '') +
       (P.stamp ? '<div class="cd-stamp">' + esc(P.stamp) + '</div>' : '') + (P.img ? '<img class="cd-img" src="' + P.img + '" alt="">' : '') +
       '<div class="cd-score" style="border-color:' + col + ';color:' + col + '"><b>' + s.score + '</b><span>/100</span><small>' + esc(s.label) + '</small></div></div>';
     h += '<div class="cd-page"><h2>' + esc(I('In plain words', 'Με απλά λόγια')) + '</h2><p>' + esc(I(c.high + ' serious, ' + c.medium + ' medium and ' + c.low + ' small findings were found.', 'Βρέθηκαν ' + c.high + ' σοβαρά, ' + c.medium + ' μέτρια και ' + c.low + ' μικρά ευρήματα.')) + '</p>';

@@ -2,7 +2,7 @@
  "meta": {
   "mode": "full",
   "tool": "VEAGLE PC Check",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "generated": "2026-10-10T16:35:00",
   "isAdmin": true,
   "psVersion": "5.1.26100.9549",
@@ -12,7 +12,14 @@
   "durationSec": 214,
   "warnings": [
    "winget: first run may be slow"
-  ]
+  ],
+  "support": {
+   "name": "Vagelis (demo)",
+   "email": "helper@example.com",
+   "phone": "",
+   "site": "ferelis.gr",
+   "note": ""
+  }
  },
  "system": {
   "manufacturer": "Gigabyte Technology Co., Ltd.",
@@ -3836,6 +3843,116 @@
      "signer": "Microsoft Windows"
     }
    ]
+  },
+  "help": {
+   "remote": {
+    "quickAssist": true,
+    "edition": "Professional",
+    "rdpHostCapable": true,
+    "rdpEnabled": false,
+    "rdpNla": true,
+    "rdpFirewall": false,
+    "remoteAssistance": false,
+    "winrmRunning": false,
+    "tools": [
+     "AnyDesk"
+    ],
+    "wifiUp": true,
+    "wiredUp": true,
+    "isAdmin": true
+   },
+   "devices": {
+    "audio": [
+     {
+      "name": "Realtek High Definition Audio",
+      "maker": "Realtek",
+      "status": "OK",
+      "code": 0
+     }
+    ],
+    "cameras": [
+     {
+      "name": "Integrated Webcam",
+      "status": "OK",
+      "code": 0
+     }
+    ],
+    "speakers": [
+     {
+      "name": "Speakers (Realtek Audio)",
+      "status": "OK",
+      "code": 0
+     }
+    ],
+    "mics": [
+     {
+      "name": "Microphone Array (Realtek Audio)",
+      "status": "OK",
+      "code": 0
+     }
+    ],
+    "bluetooth": [
+     {
+      "name": "Intel Wireless Bluetooth",
+      "status": "OK",
+      "code": 0
+     }
+    ],
+    "problems": []
+   },
+   "sensors": {
+    "user": "demo",
+    "webcam": {
+     "global": "Allow",
+     "items": [
+      {
+       "app": "Microsoft.WindowsCamera_8wekyb3d8bbwe",
+       "classic": false,
+       "allow": "Allow",
+       "last": "2026-10-29T09:10:00",
+       "inUse": false
+      },
+      {
+       "app": "C:\\Program Files\\Zoom\\bin\\Zoom.exe",
+       "classic": true,
+       "allow": "Allow",
+       "last": "2026-10-30T18:10:00",
+       "inUse": false
+      }
+     ]
+    },
+    "microphone": {
+     "global": "Allow",
+     "items": [
+      {
+       "app": "Microsoft.WindowsSoundRecorder_8wekyb3d8bbwe",
+       "classic": false,
+       "allow": "Allow",
+       "last": "2026-10-26T16:10:00",
+       "inUse": false
+      },
+      {
+       "app": "C:\\Users\\demo\\AppData\\Local\\Discord\\app-1.0.9\\Discord.exe",
+       "classic": true,
+       "allow": "Allow",
+       "last": "2026-10-31T10:10:00",
+       "inUse": false
+      }
+     ]
+    },
+    "location": {
+     "global": "Allow",
+     "items": [
+      {
+       "app": "Microsoft.BingWeather_8wekyb3d8bbwe",
+       "classic": false,
+       "allow": "Allow",
+       "last": "2026-10-28T08:10:00",
+       "inUse": false
+      }
+     ]
+    }
+   }
   }
  },
  "trend": [

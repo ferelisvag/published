@@ -81,6 +81,13 @@ var SHARE = (function (V, AI) {
     return { html: html, tally: R.tally };
   }
 
+  function buildFull() {
+    var json = JSON.stringify(V.RAW).replace(/<\//g, '<\\/');
+    var html = '<!doctype html>\n<html lang="en">\n<head>' + PAGE.head + '</head>\n<body>' + PAGE.body +
+      '\n<script>window.__PCDATA__ = ' + json + ';<' + '/script>\n<script>' + PAGE.code + '<' + '/script>\n</body>\n</html>\n';
+    return { html: html };
+  }
+
   function download() {
     var r = build();
     var blob = new Blob([r.html], { type: 'text/html;charset=utf-8' });
@@ -91,5 +98,5 @@ var SHARE = (function (V, AI) {
     var keys = Object.keys(r.tally);
     AI.toast('Saved veagle-pc-check-share-safe.html. ' + (keys.length ? 'Removed: ' + keys.map(function (k) { return k + ' x' + r.tally[k]; }).join(', ') + '.' : 'Nothing needed removing.') + ' Still glance through it before you send it.');
   }
-  return { build: build, download: download };
+  return { build: build, buildFull: buildFull, download: download };
 })(V, AI);

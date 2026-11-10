@@ -320,17 +320,25 @@ var OUTLINE='''+json.dumps(outline,separators=(',',':'))+''';
   function fail(m){$('err').textContent=GT(m);$('bar').style.display='none';$('stage').textContent=''}
   function process(file){
     $('err').textContent='';
-    file.slice(0,300).text().then(function(h){
+    if(file.size===0)return fail('Το αρχείο είναι άδειο (0 KB). Μάλλον η λήψη δεν ολοκληρώθηκε. Εξάγαγε το αρχείο ξανά από το κινητό και φόρτωσέ το πάλι.');
+    file.slice(0,600).arrayBuffer().then(function(b){
+      var u=new Uint8Array(b),enc=(u[0]===255&&u[1]===254)?'utf-16le':(u[0]===254&&u[1]===255)?'utf-16be':'utf-8';
+      var h=new TextDecoder(enc).decode(b);
       if(h.slice(0,2)==='PK')return fail('Αυτό είναι αρχείο ZIP. Άνοιξε (αποσυμπίεσε) το ZIP και διάλεξε το αρχείο που τελειώνει σε .json από μέσα.');
-      var t=h.replace(/^\\uFEFF/,'').trim().charAt(0);
-      if(t!=='{'&&t!=='[')return fail(GT('Αυτό το αρχείο (')+file.name+GT(') δεν μοιάζει με Timeline.json. Χρειάζεται το αρχείο .json που βγάζει το κινητό από το «Εξαγωγή δεδομένων Χρονολογίου» (Βήμα 1).'));
+      h=h.replace(/^[\\s\\u0000\\uFEFF]+/,'');
+      var t=h.charAt(0);
+      if(t!=='{'&&t!=='['){
+        var pv=h.slice(0,40).split('').map(function(c){return c.charCodeAt(0)<32?' ':c}).join('');
+        var kb=Math.max(1,Math.round(file.size/1024));
+        return fail(GT('Αυτό το αρχείο (')+file.name+GT(') δεν μοιάζει με Timeline.json. Χρειάζεται το αρχείο .json που βγάζει το κινητό από το «Εξαγωγή δεδομένων Χρονολογίου» (Βήμα 1).')+' '+GT('Μέγεθος:')+' '+kb+' KB. '+GT('Αρχίζει με:')+' «'+pv+'»'+(t==='<'?' '+GT('Αυτό μοιάζει με ιστοσελίδα, όχι με αρχείο δεδομένων. Κατέβασε το αρχείο ξανά (από τις Λήψεις του κινητού) και μην το ανοίξεις πρώτα σε άλλη εφαρμογή.'):''));
+      }
       run(file);
     }).catch(function(){fail('Δεν μπόρεσα να διαβάσω το αρχείο. Δοκίμασε να το διαλέξεις ξανά.')});
   }
   function run(file,demo){
     setP(.01,'Ξεκινάω…');
     var remember=!demo&&$('rem').checked;
-    var wsrc=$('proc-src').textContent+'\\nfunction unpack(b64){var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"))).text().then(function(t){var c=JSON.parse(t),n=c.rows.length,la=new Float32Array(n),lo=new Float32Array(n),ad=new Uint16Array(n),cc=new Uint16Array(n),nm=new Array(n);for(var i=0;i<n;i++){var p=c.rows[i].split("|");la[i]=+p[0];lo[i]=+p[1];nm[i]=p[2];ad[i]=+p[3];cc[i]=+p[4]}return{n:nm,la:la,lo:lo,ad:ad,cc:cc,admins:c.admins,ccs:c.ccs}})}\\nonmessage=function(e){var m=e.data;m.file.text().then(function(t){return unpack(m.cities).then(function(c){return processTimeline(t,c,m.outline,function(p,s){postMessage({p:p,m:s})})})}).then(function(o){postMessage({done:o})}).catch(function(x){postMessage({err:x&&x.message||String(x)})})};';
+    var wsrc=$('proc-src').textContent+'\\nfunction unpack(b64){var bin=atob(b64),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"))).text().then(function(t){var c=JSON.parse(t),n=c.rows.length,la=new Float32Array(n),lo=new Float32Array(n),ad=new Uint16Array(n),cc=new Uint16Array(n),nm=new Array(n);for(var i=0;i<n;i++){var p=c.rows[i].split("|");la[i]=+p[0];lo[i]=+p[1];nm[i]=p[2];ad[i]=+p[3];cc[i]=+p[4]}return{n:nm,la:la,lo:lo,ad:ad,cc:cc,admins:c.admins,ccs:c.ccs}})}\\nonmessage=function(e){var m=e.data;m.file.arrayBuffer().then(function(b){var u=new Uint8Array(b),enc=(u[0]===255&&u[1]===254)?"utf-16le":(u[0]===254&&u[1]===255)?"utf-16be":"utf-8";return new TextDecoder(enc).decode(b)}).then(function(t){return unpack(m.cities).then(function(c){return processTimeline(t,c,m.outline,function(p,s){postMessage({p:p,m:s})})})}).then(function(o){postMessage({done:o})}).catch(function(x){postMessage({err:x&&x.message||String(x)})})};';
     var w;try{w=new Worker(URL.createObjectURL(new Blob([wsrc],{type:'text/javascript'})))}catch(e){return fail('Αυτός ο browser δεν μπορεί να κάνει την επεξεργασία. Δοκίμασε Chrome, Edge ή Firefox.')}
     w.onmessage=function(e){var d=e.data;if(d.p!=null)setP(d.p,d.m);else if(d.err){w.terminate();fail(/JSON|Unexpected|position/.test(d.err)?'Το αρχείο δεν είναι ολόκληρο ή δεν είναι σωστό JSON. Δοκίμασε να το εξαγάγεις ξανά από το κινητό.':/memory|allocation/i.test(d.err)?'Το αρχείο είναι πολύ μεγάλο για αυτή τη συσκευή. Δοκίμασε σε υπολογιστή με Chrome ή Edge.':d.err)}else if(d.done){w.terminate();setP(1,'Έτοιμο!');var fin=function(sv){start(d.done,sv,demo)};if(demo)fin(false);else if(remember)put(d.done).then(function(){fin(true)},function(){fin(false)});else del().then(function(){fin(false)})}};
     w.onerror=function(e){fail(GT('Κάτι πήγε στραβά στην επεξεργασία (')+(e.message||GT('άγνωστο σφάλμα'))+GT('). Αν το αρχείο είναι πολύ μεγάλο, δοκίμασε σε υπολογιστή.'))};

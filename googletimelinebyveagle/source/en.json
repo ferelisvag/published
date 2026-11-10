@@ -266,6 +266,10 @@
 "άγνωστο σφάλμα": "unknown error",
 "Αυτό το αρχείο (": "This file (",
 ") δεν μοιάζει με Timeline.json. Χρειάζεται το αρχείο .json που βγάζει το κινητό από το «Εξαγωγή δεδομένων Χρονολογίου» (Βήμα 1).": ") does not look like Timeline.json. You need the .json file the phone produces from “Export Timeline data” (Step 1).",
+"Το αρχείο είναι άδειο (0 KB). Μάλλον η λήψη δεν ολοκληρώθηκε. Εξάγαγε το αρχείο ξανά από το κινητό και φόρτωσέ το πάλι.": "The file is empty (0 KB). The download probably did not finish. Export the file again from the phone and load it again.",
+"Μέγεθος:": "Size:",
+"Αρχίζει με:": "It starts with:",
+"Αυτό μοιάζει με ιστοσελίδα, όχι με αρχείο δεδομένων. Κατέβασε το αρχείο ξανά (από τις Λήψεις του κινητού) και μην το ανοίξεις πρώτα σε άλλη εφαρμογή.": "This looks like a web page, not a data file. Download the file again (from the phone’s Downloads) and do not open it in another app first.",
 "Δημιουργήθηκε με Google Timeline by Veagle · ferelis.gr": "Created with Google Timeline by Veagle · ferelis.gr",
 "Να διαγραφούν τα αποθηκευμένα δεδομένα από αυτόν τον browser;\n\nΤο αρχικό σου αρχείο Timeline.json δεν πειράζεται.": "Delete the saved data from this browser?\n\nYour original Timeline.json file is not touched."
 }

@@ -11,10 +11,7 @@ var THEMES = (function (V) {
     { id: 'bento', en: 'Bento', el: 'Bento', light: false, big: false },
     { id: 'cyber', en: 'Cyber', el: 'Cyber', light: false, big: false },
     { id: 'iqon', en: 'IQON', el: 'IQON', light: false, big: false },
-    { id: 'sharp', en: 'SharpScanner', el: 'SharpScanner', light: false, big: false },
-    { id: 'suite', en: 'RepairSuite', el: 'RepairSuite', light: true, big: false },
-    { id: 'rain', en: 'Widgets (Rainmeter style)', el: 'Widgets (στυλ Rainmeter)', light: false, big: false },
-    { id: 'nexus', en: 'NEXUS', el: 'NEXUS', light: false, big: false }
+    { id: 'compass', en: 'Compass', el: 'Compass', light: true, big: false }
   ];
   var cur = 'classic', stored = false;
   try { var sv = localStorage.getItem(KEY); if (sv && LIST.some(function (t) { return t.id === sv; })) { cur = sv; stored = true; } } catch (e) { }
@@ -68,7 +65,7 @@ var THEMES = (function (V) {
   }
 
 
-  /* ---------- the five newer looks: IQON, SharpScanner, RepairSuite, Widgets, NEXUS (black / red / white; state is always also written in words) ---------- */
+  /* ---------- the newer looks: IQON and Compass (state is always also written in words) ---------- */
   function stWord(sc) { return sc >= 85 ? I('OK', 'ΟΚ') : (sc >= 60 ? I('Check', 'Έλεγξε') : I('Fix', 'Διόρθωσε')); }
   function stCls(sc) { return sc >= 85 ? 'ok' : (sc >= 60 ? 'mid' : 'bad'); }
   function areaBtn(a, cls, inner) { return '<button type="button" class="' + cls + ' ' + stCls(a.score) + '" data-tharea="' + esc(a.name) + '" aria-label="' + esc(areaName(a.name) + ' ' + a.score + ', ' + stWord(a.score)) + '">' + inner + '</button>'; }
@@ -88,34 +85,82 @@ var THEMES = (function (V) {
     return '<div class="iq-wrap"><div class="iq-main"><div class="iq-gauge">' + ring(V.score.score, 86, 14, 'iq-ring') + '<div class="iq-num"><b>' + V.score.score + '</b><small>' + esc(I('HEALTH', 'ΥΓΕΙΑ')) + '</small></div></div><div class="iq-txt"><h2>' + esc(headline()) + '</h2>' + cntRow() + note() + '</div></div>' +
       '<div class="iq-tiles">' + A.map(function (a) { return areaBtn(a, 'iq-tile', '<span class="iq-ic" aria-hidden="true">' + esc(areaName(a.name).charAt(0)) + '</span><span class="iq-n">' + esc(areaName(a.name)) + '</span><b>' + a.score + '</b><em>' + esc(stWord(a.score)) + '</em>'); }).join('') + '</div>' + prioBox(I('Do this first', 'Κάνε πρώτα αυτό')) + '</div>';
   }
-  function sharp() {
-    var A = V.score.areas;
-    return '<div class="sh-wrap"><div class="sh-top"><div class="sh-score"><small>' + esc(I('SCAN RESULT', 'ΑΠΟΤΕΛΕΣΜΑ ΣΑΡΩΣΗΣ')) + '</small><b>' + V.score.score + '<i>/100</i></b></div><div class="sh-txt"><h2>' + esc(headline()) + '</h2>' + cntRow() + note() + '</div></div>' +
-      '<div class="sh-bars">' + A.map(function (a) { return areaBtn(a, 'sh-row', '<span class="sh-n">' + esc(areaName(a.name)) + '</span><span class="sh-bar"><i style="width:' + Math.max(2, a.score) + '%"></i></span><b>' + a.score + '</b><em>' + esc(stWord(a.score)) + '</em>'); }).join('') + '</div>' + prioBox(I('PRIORITY', 'ΠΡΟΤΕΡΑΙΟΤΗΤΑ')) + '</div>';
-  }
-  function suite() {
-    var A = V.score.areas, c = counts();
-    return '<div class="su-wrap"><div class="su-head"><div><h2>' + esc(headline()) + '</h2>' + note() + '</div><div class="su-big"><b>' + V.score.score + '</b><small>/100</small></div></div>' +
-      '<div class="su-grid">' + A.map(function (a) { return areaBtn(a, 'su-card', '<span class="su-st">' + esc(stWord(a.score)) + '</span><span class="su-n">' + esc(areaName(a.name)) + '</span><b>' + a.score + '</b><span class="su-go">' + esc(I('Show findings', 'Δες τα ευρήματα')) + ' &rarr;</span>'); }).join('') + '</div>' +
-      '<div class="su-foot">' + prioBox(I('Recommended first step', 'Προτεινόμενο πρώτο βήμα')) + '<div class="su-sum">' + esc(I(c.high + ' high · ' + c.medium + ' medium · ' + c.low + ' low', c.high + ' υψηλής · ' + c.medium + ' μέτρια · ' + c.low + ' χαμηλής')) + '</div></div></div>';
-  }
-  function rain() {
-    var A = V.score.areas, st = VIZ.chkStats(), now = new Date();
-    return '<div class="rn-wrap"><div class="rn-w rn-score"><small>' + esc(I('HEALTH', 'ΥΓΕΙΑ')) + '</small><b>' + V.score.score + '</b><span>' + esc(headline()) + '</span></div>' +
-      '<div class="rn-w rn-areas"><small>' + esc(I('AREAS', 'ΤΟΜΕΙΣ')) + '</small>' + A.map(function (a) { return areaBtn(a, 'rn-row', '<span>' + esc(areaName(a.name)) + '</span><i style="--w:' + Math.max(2, a.score) + '%"></i><b>' + a.score + '</b><em>' + esc(stWord(a.score)) + '</em>'); }).join('') + '</div>' +
-      '<div class="rn-w rn-cnt"><small>' + esc(I('FINDINGS', 'ΕΥΡΗΜΑΤΑ')) + '</small>' + cntRow() + '<small>' + esc(I('STEPS DONE', 'ΒΗΜΑΤΑ ΠΟΥ ΕΓΙΝΑΝ')) + '</small><b class="rn-st">' + st.done + '/' + st.total + '</b></div>' +
-      '<div class="rn-w rn-pr">' + prioBox(I('NEXT', 'ΕΠΟΜΕΝΟ')) + note() + '</div></div>';
-  }
-  function nexus() {
-    var A = V.score.areas, n = A.length, nodes = '', lines = '';
-    A.forEach(function (a, i) {
-      var ang = (i * 360 / n - 90) * Math.PI / 180, x = 50 + 40 * Math.cos(ang), y = 50 + 40 * Math.sin(ang);
-      lines += '<line x1="50" y1="50" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '"/>';
-      nodes += '<div class="nx-nd-w" style="left:' + x.toFixed(1) + '%;top:' + y.toFixed(1) + '%">' + areaBtn(a, 'nx-nd', '<span class="nx-nn">' + esc(areaName(a.name)) + '</span><b>' + a.score + '</b><em>' + esc(stWord(a.score)) + '</em>') + '</div>';
+  /* ---------- Compass: a decision map, a time budget and a calm-days calendar. A different kind of report top: it answers "what should I do with the time I have?" ---------- */
+  var cmBudget = 30;
+  function cmItems() {
+    return V.openList().filter(function (f) { return f.sev !== 'info'; }).map(function (f) {
+      var m = (V.META[f.id] || [10])[0] || 10, w = { high: 3, medium: 2, low: 1 }[f.sev] || 1;
+      return { f: f, min: m, w: w, d: w / Math.max(m, 1) };
     });
-    return '<div class="nx-wrap"><div class="nx-map"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + lines + '<circle cx="50" cy="50" r="40" class="orb"/><circle cx="50" cy="50" r="22" class="orb2"/></svg>' + nodes +
-      '<div class="nx-core"><b>' + V.score.score + '</b><small>NEXUS</small></div></div><div class="nx-side"><h2>' + esc(headline()) + '</h2>' + cntRow() + prioBox(I('PRIORITY', 'ΠΡΟΤΕΡΑΙΟΤΗΤΑ')) + note() + '</div></div>';
   }
+  function cmPlan(budget) {
+    var its = cmItems().sort(function (a, b) { return b.w - a.w || a.min - b.min; }), used = 0, sel = {}, list = [];
+    its.forEach(function (it) { if (used + it.min <= budget) { used += it.min; sel[it.f.id] = 1; list.push(it); } });
+    return { all: its, sel: sel, list: list, used: used };
+  }
+  function sevWord(s) { return s === 'high' ? I('High', 'Υψηλή') : (s === 'medium' ? I('Medium', 'Μέτρια') : I('Low', 'Χαμηλή')); }
+  function cmMapSvg(P) {
+    var W = 720, H = 330, L = 78, R = 34, T = 18, B = 40, maxM = 120;
+    P.all.forEach(function (it) { if (it.min > maxM) maxM = it.min; });
+    var a = Math.log(2), b = Math.log(maxM);
+    function X(m) { return L + (Math.log(Math.max(2, m)) - a) / (b - a) * (W - L - R); }
+    var bandY = { 3: T + 40, 2: T + 120, 1: T + 200 }, s = '<svg class="cm-svg" viewBox="0 0 ' + W + ' ' + H + '" role="group" aria-label="' + esc(I('Decision map: each circle is one finding. Left means quick to fix, higher means more important.', 'Χάρτης αποφάσεων: κάθε κύκλος είναι ένα εύρημα. Αριστερά σημαίνει γρήγορο, πιο ψηλά σημαίνει πιο σημαντικό.')) + '">';
+    var bx = X(cmBudget);
+    s += '<rect x="' + L + '" y="' + T + '" width="' + Math.max(0, bx - L).toFixed(1) + '" height="' + (H - T - B) + '" class="cm-budgetzone"/>';
+    [[3, I('HIGH', 'ΥΨΗΛΗ')], [2, I('MEDIUM', 'ΜΕΤΡΙΑ')], [1, I('LOW', 'ΧΑΜΗΛΗ')]].forEach(function (r) {
+      s += '<line x1="' + L + '" y1="' + (bandY[r[0]] + 36) + '" x2="' + (W - R) + '" y2="' + (bandY[r[0]] + 36) + '" class="cm-grid"/><text x="' + (L - 10) + '" y="' + (bandY[r[0]] + 4) + '" text-anchor="end" class="cm-ax">' + esc(r[1]) + '</text>';
+    });
+    [5, 15, 30, 60, 120].forEach(function (m) { if (m <= maxM) s += '<line x1="' + X(m).toFixed(1) + '" y1="' + T + '" x2="' + X(m).toFixed(1) + '" y2="' + (H - B) + '" class="cm-grid v"/><text x="' + X(m).toFixed(1) + '" y="' + (H - B + 16) + '" text-anchor="middle" class="cm-ax">' + m + ' ' + esc(I('min', 'λ')) + '</text>'; });
+    s += '<line x1="' + bx.toFixed(1) + '" y1="' + (T - 4) + '" x2="' + bx.toFixed(1) + '" y2="' + (H - B) + '" class="cm-now"/><text x="' + bx.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle" class="cm-nowt">' + esc(I('your time: ' + cmBudget + ' min', 'ο χρόνος σου: ' + cmBudget + ' λ')) + '</text>';
+    s += '<text x="' + (L + 6) + '" y="' + (T + 12) + '" class="cm-q">' + esc(I('QUICK AND IMPORTANT: START HERE', 'ΓΡΗΓΟΡΑ ΚΑΙ ΣΗΜΑΝΤΙΚΑ: ΞΕΚΙΝΑ ΑΠΟ ΕΔΩ')) + '</text><text x="' + (W - R) + '" y="' + (T + 12) + '" text-anchor="end" class="cm-q">' + esc(I('IMPORTANT BUT LONG: PLAN IT', 'ΣΗΜΑΝΤΙΚΑ ΑΛΛΑ ΜΑΚΡΙΑ: ΠΡΟΓΡΑΜΜΑΤΙΣΕ')) + '</text>';
+    var tot = {}, slot = {};
+    P.all.forEach(function (it) { var k = it.w + ':' + it.min; tot[k] = (tot[k] || 0) + 1; });
+    P.all.forEach(function (it) {
+      var k = it.w + ':' + it.min, idx = slot[k] = (slot[k] === undefined ? 0 : slot[k] + 1), n = tot[k], per = Math.min(n, 6), rows = Math.ceil(n / 6);
+      var cx = X(it.min) + ((idx % 6) - (per - 1) / 2) * 15, cy = bandY[it.w] + Math.floor(idx / 6) * 15 - (rows - 1) * 7.5, r = 6 + Math.min(4, (it.f.steps || []).length > 4 ? 4 : 0);
+      var tt = V.tf(it.f).title + ' · ' + sevWord(it.f.sev) + ' · ' + it.min + ' ' + I('min', 'λεπτά') + (P.sel[it.f.id] ? ' · ' + I('in your plan', 'στο πλάνο σου') : '');
+      s += '<g class="cm-b' + (P.sel[it.f.id] ? ' in' : '') + '" data-open="' + esc(it.f.id) + '" tabindex="0" role="button" aria-label="' + esc(tt) + '"><title>' + esc(tt) + '</title><circle cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="' + r + '"/></g>';
+    });
+    return s + '</svg>';
+  }
+  function cmPlanHtml(P) {
+    if (!P.all.length) return '<p class="cm-none">' + esc(I('Nothing to fix. Enjoy your PC.', 'Δεν υπάρχει κάτι να διορθώσεις. Απόλαυσε τον υπολογιστή σου.')) + '</p>';
+    var tot = P.all.reduce(function (n, it) { return n + it.min; }, 0), hi = P.list.filter(function (it) { return it.f.sev === 'high'; }).length;
+    var h = '<p class="cm-sum"><b>' + P.list.length + '</b> ' + esc(I(P.list.length === 1 ? 'thing fits' : 'things fit', P.list.length === 1 ? 'βήμα χωράει' : 'βήματα χωράνε')) + ' ' + esc(I('in your time', 'στον χρόνο σου')) + ' (' + P.used + ' ' + esc(I('min', 'λ')) + (hi ? ', ' + hi + ' ' + esc(I('of them High', 'από αυτά Υψηλής σημασίας')) : '') + '). ' + esc(I('Everything together would take about ' + tot + ' min.', 'Όλα μαζί θα έκαναν περίπου ' + tot + ' λεπτά.')) + '</p>';
+    if (!P.list.length) h += '<p class="cm-none">' + esc(I('Nothing fits in this time. Move the slider to the right.', 'Τίποτα δεν χωράει σε αυτόν τον χρόνο. Μετακίνησε το ρυθμιστικό δεξιά.')) + '</p>';
+    var acc = 0;
+    h += '<ol class="cm-list">' + P.list.map(function (it) {
+      acc += it.min; var t = V.tf(it.f);
+      return '<li><span class="cm-t">' + acc + ' ' + esc(I('min', 'λ')) + '</span><span class="cm-n"><b>' + esc(t.title) + '</b><em>' + esc(sevWord(it.f.sev)) + ' · ' + it.min + ' ' + esc(I('min', 'λ')) + '</em></span><button class="btn sm" type="button" data-open="' + esc(it.f.id) + '">' + esc(I('Open', 'Άνοιγμα')) + '</button></li>';
+    }).join('') + '</ol>';
+    return h;
+  }
+  function cmCalm() {
+    var EX = g(D, 'extras.timeline', null);
+    if (!EX || !EX.length) return '<p class="cm-none">' + esc(I('No daily history in this scan.', 'Δεν υπάρχει ημερήσιο ιστορικό σε αυτή τη σάρωση.')) + '</p>';
+    var days = V.days || 30, end = new Date(g(D, 'meta.generated', Date.now())).getTime(), bad = { crash: 1, hang: 1, unclean: 1, bsod: 1, disk: 1, whea: 1, gpu: 1 }, cnt = [], i;
+    for (i = 0; i < days; i++) cnt.push(0);
+    EX.forEach(function (e) { var t = new Date(e.t).getTime(); if (!isFinite(t) || !bad[e.k]) return; var d = Math.floor((end - t) / 86400000); if (d >= 0 && d < days) cnt[d]++; });
+    var calm = cnt.filter(function (c) { return c === 0; }).length, h = '<p class="cm-sum"><b>' + calm + '</b> ' + esc(I('of the last ' + days + ' days were calm (no crash, freeze or error).', 'από τις τελευταίες ' + days + ' ημέρες ήταν ήρεμες (χωρίς κρασάρισμα, πάγωμα ή σφάλμα).')) + '</p><div class="cm-days" role="list">';
+    for (i = days - 1; i >= 0; i--) {
+      var c = cnt[i], dt = new Date(end - i * 86400000), lbl = dt.toLocaleDateString(V.lang === 'el' ? 'el-GR' : 'en-GB', { day: 'numeric', month: 'short' }) + ': ' + (c ? c + ' ' + I(c === 1 ? 'problem' : 'problems', c === 1 ? 'πρόβλημα' : 'προβλήματα') : I('calm', 'ήρεμη'));
+      h += '<span class="cm-d l' + (c === 0 ? 0 : (c < 3 ? 1 : (c < 10 ? 2 : 3))) + '" role="listitem" title="' + esc(lbl) + '" aria-label="' + esc(lbl) + '">' + (c ? (c > 99 ? '99+' : c) : '') + '</span>';
+    }
+    return h + '</div><p class="cm-key">' + esc(I('Left = oldest day, right = the day of the scan. A number is how many problems happened that day.', 'Αριστερά = η παλιότερη ημέρα, δεξιά = η ημέρα της σάρωσης. Ο αριθμός δείχνει πόσα προβλήματα έγιναν εκείνη την ημέρα.')) + '</p>';
+  }
+  function compass() {
+    var P = cmPlan(cmBudget);
+    return '<div class="cm-wrap"><div class="cm-top"><div class="cm-score"><b>' + V.score.score + '</b><small>/100</small></div><div class="cm-head"><div class="thh">' + esc(I('YOUR PC TODAY', 'Ο ΥΠΟΛΟΓΙΣΤΗΣ ΣΟΥ ΣΗΜΕΡΑ')) + '</div><h2>' + esc(headline()) + '</h2>' + note() + '</div></div>' +
+      '<section class="cm-sec"><div class="thh">' + esc(I('1 · HOW MUCH TIME DO YOU HAVE?', '1 · ΠΟΣΟ ΧΡΟΝΟ ΕΧΕΙΣ;')) + '</div><label class="cm-lab" for="cmMin">' + esc(I('I have', 'Έχω')) + ' <b id="cmMinV">' + cmBudget + '</b> ' + esc(I('minutes', 'λεπτά')) + '</label><input id="cmMin" type="range" min="5" max="120" step="5" value="' + cmBudget + '"><div id="cmPlan">' + cmPlanHtml(P) + '</div></section>' +
+      '<section class="cm-sec"><div class="thh">' + esc(I('2 · THE MAP OF YOUR PROBLEMS (click a circle)', '2 · Ο ΧΑΡΤΗΣ ΤΩΝ ΠΡΟΒΛΗΜΑΤΩΝ ΣΟΥ (πάτα έναν κύκλο)')) + '</div><div id="cmMap">' + cmMapSvg(P) + '</div><p class="cm-key"><span class="cm-dot in"></span>' + esc(I('= in your plan', '= στο πλάνο σου')) + ' &nbsp; <span class="cm-dot"></span>' + esc(I('= later', '= αργότερα')) + '. ' + esc(I('Bigger circle = more steps. Time is the estimate for the whole finding.', 'Μεγαλύτερος κύκλος = περισσότερα βήματα. Ο χρόνος είναι η εκτίμηση για όλο το εύρημα.')) + '</p></section>' +
+      '<section class="cm-sec"><div class="thh">' + esc(I('3 · HOW CALM WERE THE LAST DAYS?', '3 · ΠΟΣΟ ΗΡΕΜΕΣ ΗΤΑΝ ΟΙ ΤΕΛΕΥΤΑΙΕΣ ΜΕΡΕΣ;')) + '</div>' + cmCalm() + '</section></div>';
+  }
+  document.addEventListener('input', function (e) {
+    if (!e.target || e.target.id !== 'cmMin') return;
+    cmBudget = parseInt(e.target.value, 10) || 30;
+    var P = cmPlan(cmBudget), v = document.getElementById('cmMinV'), p = document.getElementById('cmPlan'), m = document.getElementById('cmMap');
+    if (v) v.textContent = cmBudget; if (p) p.innerHTML = cmPlanHtml(P); if (m) m.innerHTML = cmMapSvg(P);
+  });
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('[data-tharea]'); if (!b) return;
     if (typeof VIZ2 !== 'undefined' && VIZ2.goArea) VIZ2.goArea(b.getAttribute('data-tharea'));
@@ -216,7 +261,7 @@ var THEMES = (function (V) {
     pane.classList.toggle('thfull', !!guide.full);
     var h = '';
     if (cur === 'cockpit') h = cockpit(); else if (cur === 'guide') h = guideHtml(); else if (cur === 'cyber') h = cyberHtml();
-    else if (cur === 'iqon') h = iqon(); else if (cur === 'sharp') h = sharp(); else if (cur === 'suite') h = suite(); else if (cur === 'rain') h = rain(); else if (cur === 'nexus') h = nexus();
+    else if (cur === 'iqon') h = iqon(); else if (cur === 'compass') h = compass();
     if (!h) return;
     var d = document.createElement('div'); d.id = 'thHero'; d.className = 'thhero th-' + cur; d.innerHTML = h;
     pane.insertBefore(d, pane.firstChild);

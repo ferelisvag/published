@@ -9,7 +9,12 @@ var THEMES = (function (V) {
     { id: 'guide', en: 'Step by step', el: 'Βήμα-βήμα', light: true, big: true },
     { id: 'cockpit', en: 'Cockpit', el: 'Cockpit', light: false, big: false },
     { id: 'bento', en: 'Bento', el: 'Bento', light: false, big: false },
-    { id: 'cyber', en: 'Cyber', el: 'Cyber', light: false, big: false }
+    { id: 'cyber', en: 'Cyber', el: 'Cyber', light: false, big: false },
+    { id: 'iqon', en: 'IQON', el: 'IQON', light: false, big: false },
+    { id: 'sharp', en: 'SharpScanner', el: 'SharpScanner', light: false, big: false },
+    { id: 'suite', en: 'RepairSuite', el: 'RepairSuite', light: true, big: false },
+    { id: 'rain', en: 'Widgets (Rainmeter style)', el: 'Widgets (στυλ Rainmeter)', light: false, big: false },
+    { id: 'nexus', en: 'NEXUS', el: 'NEXUS', light: false, big: false }
   ];
   var cur = 'classic', stored = false;
   try { var sv = localStorage.getItem(KEY); if (sv && LIST.some(function (t) { return t.id === sv; })) { cur = sv; stored = true; } } catch (e) { }
@@ -61,6 +66,60 @@ var THEMES = (function (V) {
       '</div></div>' +
       '<div class="cp-kpis"><div><small>' + esc(I('OPEN FINDINGS', 'ΑΝΟΙΧΤΑ ΕΥΡΗΜΑΤΑ')) + '</small><b>' + V.openList().length + '</b></div><div><small>' + esc(I('STEPS DONE', 'ΒΗΜΑΤΑ ΠΟΥ ΕΓΙΝΑΝ')) + '</small><b>' + st.done + '/' + st.total + '</b></div><div><small>' + esc(I('ACCEPTED', 'ΑΠΟΔΕΚΤΑ')) + '</small><b>' + V.acceptedCount() + '</b></div><div><small>' + esc(I('PERIOD (DAYS)', 'ΠΕΡΙΟΔΟΣ (ΗΜΕΡΕΣ)')) + '</small><b>' + V.days + '</b></div></div>';
   }
+
+
+  /* ---------- the five newer looks: IQON, SharpScanner, RepairSuite, Widgets, NEXUS (black / red / white; state is always also written in words) ---------- */
+  function stWord(sc) { return sc >= 85 ? I('OK', 'ΟΚ') : (sc >= 60 ? I('Check', 'Έλεγξε') : I('Fix', 'Διόρθωσε')); }
+  function stCls(sc) { return sc >= 85 ? 'ok' : (sc >= 60 ? 'mid' : 'bad'); }
+  function areaBtn(a, cls, inner) { return '<button type="button" class="' + cls + ' ' + stCls(a.score) + '" data-tharea="' + esc(a.name) + '" aria-label="' + esc(areaName(a.name) + ' ' + a.score + ', ' + stWord(a.score)) + '">' + inner + '</button>'; }
+  function ring(score, r, w, cls) {
+    var C = 2 * Math.PI * r, d = (Math.max(0, Math.min(100, score)) / 100 * C).toFixed(1);
+    return '<svg class="' + cls + '" viewBox="0 0 ' + (2 * (r + w)) + ' ' + (2 * (r + w)) + '" aria-hidden="true"><circle cx="' + (r + w) + '" cy="' + (r + w) + '" r="' + r + '" class="rt" fill="none" stroke-width="' + w + '"/><circle cx="' + (r + w) + '" cy="' + (r + w) + '" r="' + r + '" class="rv" fill="none" stroke-width="' + w + '" stroke-linecap="round" stroke-dasharray="' + d + ' ' + C.toFixed(1) + '" transform="rotate(-90 ' + (r + w) + ' ' + (r + w) + ')"/></svg>';
+  }
+  function prioBox(cap) {
+    var p = prio(); if (!p) return '<div class="nx-prio"><b>' + esc(I('Nothing to do right now.', 'Δεν υπάρχει κάτι να κάνεις τώρα.')) + '</b></div>';
+    var ex = V.tf(p);
+    return '<div class="nx-prio"><div class="thh">' + esc(cap) + '</div><b>' + esc(ex.title) + '</b><p>' + esc(meta(p)) + '</p><button class="btn sm" type="button" data-open="' + esc(p.id) + '">' + esc(I('Open', 'Άνοιγμα')) + '</button></div>';
+  }
+  function note() { return '<p class="nx-note">' + esc(I('Estimate from this scan. It changes when you tick steps or accept a finding. Nothing is changed on your PC.', 'Εκτίμηση από αυτή τη σάρωση. Αλλάζει όταν τσεκάρεις βήματα ή αποδέχεσαι ένα εύρημα. Τίποτα δεν αλλάζει στον υπολογιστή σου.')) + '</p>'; }
+  function cntRow() { var c = counts(); return '<div class="nx-cnt"><span><b>' + c.high + '</b>' + esc(I('High', 'Υψηλή')) + '</span><span><b>' + c.medium + '</b>' + esc(I('Medium', 'Μέτρια')) + '</span><span><b>' + c.low + '</b>' + esc(I('Low', 'Χαμηλή')) + '</span></div>'; }
+  function iqon() {
+    var A = V.score.areas;
+    return '<div class="iq-wrap"><div class="iq-main"><div class="iq-gauge">' + ring(V.score.score, 86, 14, 'iq-ring') + '<div class="iq-num"><b>' + V.score.score + '</b><small>' + esc(I('HEALTH', 'ΥΓΕΙΑ')) + '</small></div></div><div class="iq-txt"><h2>' + esc(headline()) + '</h2>' + cntRow() + note() + '</div></div>' +
+      '<div class="iq-tiles">' + A.map(function (a) { return areaBtn(a, 'iq-tile', '<span class="iq-ic" aria-hidden="true">' + esc(areaName(a.name).charAt(0)) + '</span><span class="iq-n">' + esc(areaName(a.name)) + '</span><b>' + a.score + '</b><em>' + esc(stWord(a.score)) + '</em>'); }).join('') + '</div>' + prioBox(I('Do this first', 'Κάνε πρώτα αυτό')) + '</div>';
+  }
+  function sharp() {
+    var A = V.score.areas;
+    return '<div class="sh-wrap"><div class="sh-top"><div class="sh-score"><small>' + esc(I('SCAN RESULT', 'ΑΠΟΤΕΛΕΣΜΑ ΣΑΡΩΣΗΣ')) + '</small><b>' + V.score.score + '<i>/100</i></b></div><div class="sh-txt"><h2>' + esc(headline()) + '</h2>' + cntRow() + note() + '</div></div>' +
+      '<div class="sh-bars">' + A.map(function (a) { return areaBtn(a, 'sh-row', '<span class="sh-n">' + esc(areaName(a.name)) + '</span><span class="sh-bar"><i style="width:' + Math.max(2, a.score) + '%"></i></span><b>' + a.score + '</b><em>' + esc(stWord(a.score)) + '</em>'); }).join('') + '</div>' + prioBox(I('PRIORITY', 'ΠΡΟΤΕΡΑΙΟΤΗΤΑ')) + '</div>';
+  }
+  function suite() {
+    var A = V.score.areas, c = counts();
+    return '<div class="su-wrap"><div class="su-head"><div><h2>' + esc(headline()) + '</h2>' + note() + '</div><div class="su-big"><b>' + V.score.score + '</b><small>/100</small></div></div>' +
+      '<div class="su-grid">' + A.map(function (a) { return areaBtn(a, 'su-card', '<span class="su-st">' + esc(stWord(a.score)) + '</span><span class="su-n">' + esc(areaName(a.name)) + '</span><b>' + a.score + '</b><span class="su-go">' + esc(I('Show findings', 'Δες τα ευρήματα')) + ' &rarr;</span>'); }).join('') + '</div>' +
+      '<div class="su-foot">' + prioBox(I('Recommended first step', 'Προτεινόμενο πρώτο βήμα')) + '<div class="su-sum">' + esc(I(c.high + ' high · ' + c.medium + ' medium · ' + c.low + ' low', c.high + ' υψηλής · ' + c.medium + ' μέτρια · ' + c.low + ' χαμηλής')) + '</div></div></div>';
+  }
+  function rain() {
+    var A = V.score.areas, st = VIZ.chkStats(), now = new Date();
+    return '<div class="rn-wrap"><div class="rn-w rn-score"><small>' + esc(I('HEALTH', 'ΥΓΕΙΑ')) + '</small><b>' + V.score.score + '</b><span>' + esc(headline()) + '</span></div>' +
+      '<div class="rn-w rn-areas"><small>' + esc(I('AREAS', 'ΤΟΜΕΙΣ')) + '</small>' + A.map(function (a) { return areaBtn(a, 'rn-row', '<span>' + esc(areaName(a.name)) + '</span><i style="--w:' + Math.max(2, a.score) + '%"></i><b>' + a.score + '</b><em>' + esc(stWord(a.score)) + '</em>'); }).join('') + '</div>' +
+      '<div class="rn-w rn-cnt"><small>' + esc(I('FINDINGS', 'ΕΥΡΗΜΑΤΑ')) + '</small>' + cntRow() + '<small>' + esc(I('STEPS DONE', 'ΒΗΜΑΤΑ ΠΟΥ ΕΓΙΝΑΝ')) + '</small><b class="rn-st">' + st.done + '/' + st.total + '</b></div>' +
+      '<div class="rn-w rn-pr">' + prioBox(I('NEXT', 'ΕΠΟΜΕΝΟ')) + note() + '</div></div>';
+  }
+  function nexus() {
+    var A = V.score.areas, n = A.length, nodes = '', lines = '';
+    A.forEach(function (a, i) {
+      var ang = (i * 360 / n - 90) * Math.PI / 180, x = 50 + 40 * Math.cos(ang), y = 50 + 40 * Math.sin(ang);
+      lines += '<line x1="50" y1="50" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '"/>';
+      nodes += '<div class="nx-nd-w" style="left:' + x.toFixed(1) + '%;top:' + y.toFixed(1) + '%">' + areaBtn(a, 'nx-nd', '<span class="nx-nn">' + esc(areaName(a.name)) + '</span><b>' + a.score + '</b><em>' + esc(stWord(a.score)) + '</em>') + '</div>';
+    });
+    return '<div class="nx-wrap"><div class="nx-map"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + lines + '<circle cx="50" cy="50" r="40" class="orb"/><circle cx="50" cy="50" r="22" class="orb2"/></svg>' + nodes +
+      '<div class="nx-core"><b>' + V.score.score + '</b><small>NEXUS</small></div></div><div class="nx-side"><h2>' + esc(headline()) + '</h2>' + cntRow() + prioBox(I('PRIORITY', 'ΠΡΟΤΕΡΑΙΟΤΗΤΑ')) + note() + '</div></div>';
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-tharea]'); if (!b) return;
+    if (typeof VIZ2 !== 'undefined' && VIZ2.goArea) VIZ2.goArea(b.getAttribute('data-tharea'));
+  });
 
   /* ---------- Step by step ---------- */
   function guideHtml() {
@@ -157,6 +216,7 @@ var THEMES = (function (V) {
     pane.classList.toggle('thfull', !!guide.full);
     var h = '';
     if (cur === 'cockpit') h = cockpit(); else if (cur === 'guide') h = guideHtml(); else if (cur === 'cyber') h = cyberHtml();
+    else if (cur === 'iqon') h = iqon(); else if (cur === 'sharp') h = sharp(); else if (cur === 'suite') h = suite(); else if (cur === 'rain') h = rain(); else if (cur === 'nexus') h = nexus();
     if (!h) return;
     var d = document.createElement('div'); d.id = 'thHero'; d.className = 'thhero th-' + cur; d.innerHTML = h;
     pane.insertBefore(d, pane.firstChild);

@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.2.0
+VEAGLE PC CHECK  v2.3.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -50,6 +50,10 @@ READING THE REPORT
 - You never have to fix everything. Start with the red HIGH ones, one at a time.
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
+
+NEW IN 2.3.0
+- Five new report looks to try, all in black, red and white: IQON, SharpScanner, RepairSuite, Widgets (Rainmeter style) and NEXUS. Choose one in the "Theme" box at the top of the report. The six earlier looks are still there.
+- Only the look changes. The scan, the findings and the score are the same, and the scan stays read-only.
 
 NEW IN 2.2.0
 - The Insights page shows the recent Windows Update history: the last 10 operations with date, update name, result and error code. Failed or cancelled ones are in red.

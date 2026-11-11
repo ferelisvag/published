@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.5.1
+VEAGLE PC CHECK  v2.5.2
 =======================
 VEAGLE - ferelis.gr
 
@@ -50,6 +50,9 @@ READING THE REPORT
 - You never have to fix everything. Start with the red HIGH ones, one at a time.
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
+
+NEW IN 2.5.2
+- The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top; your choice is remembered.
 
 NEW IN 2.5.0
 - The report has a new box, "What this scan checked". It lists the deeper checks that were done and the ones that could not be done (quick scan, or not run as administrator). A check that was not done is never shown as "all good".

@@ -5892,17 +5892,17 @@ var THEMES = (function (V) {
   var esc = V.esc, g = V.g, D = V.D, I = function (en, el) { return V.I(en, el); };
   var KEY = 'veagle.pccheck.theme';
   var LIST = [
-    { id: 'classic', en: 'Classic (Veagle OS)', el: 'Classic (Veagle OS)', light: false, big: false },
+    { id: 'fable', en: 'Veagle OS', el: 'Veagle OS', light: false, big: false },
+    { id: 'classic', en: 'Classic', el: 'Classic', light: false, big: false },
     { id: 'clean', en: 'Clean', el: 'Καθαρό', light: true, big: false },
     { id: 'guide', en: 'Step by step', el: 'Βήμα-βήμα', light: true, big: true },
     { id: 'cockpit', en: 'Cockpit', el: 'Cockpit', light: false, big: false },
     { id: 'bento', en: 'Bento', el: 'Bento', light: false, big: false },
     { id: 'cyber', en: 'Cyber', el: 'Cyber', light: false, big: false },
     { id: 'iqon', en: 'IQON', el: 'IQON', light: false, big: false },
-    { id: 'compass', en: 'Compass', el: 'Compass', light: true, big: false },
-    { id: 'fable', en: 'Fable52', el: 'Fable52', light: false, big: false }
+    { id: 'compass', en: 'Compass', el: 'Compass', light: true, big: false }
   ];
-  var cur = 'classic', stored = false;
+  var cur = 'fable', stored = false; /* Veagle OS (id 'fable') is the look a new user sees first */
   try { var sv = localStorage.getItem(KEY); if (sv && LIST.some(function (t) { return t.id === sv; })) { cur = sv; stored = true; } } catch (e) { }
   var guide = { step: 0, full: false };
   var AREA_EL = { Stability: 'Σταθερότητα', Storage: 'Αποθήκευση', Security: 'Ασφάλεια', Network: 'Δίκτυο', Backup: 'Backup', Performance: 'Απόδοση', Updates: 'Ενημερώσεις', Software: 'Λογισμικό' };
@@ -6055,7 +6055,7 @@ var THEMES = (function (V) {
     if (typeof VIZ2 !== 'undefined' && VIZ2.goArea) VIZ2.goArea(b.getAttribute('data-tharea'));
   });
 
-  /* ---------- Fable52: the story of your PC. A living Summary: a "rose" of the 8 areas that grows from the centre, numbers that count up,
+  /* ---------- Veagle OS (id 'fable', first called Fable52): the story of your PC. A living Summary: a "rose" of the 8 areas that grows from the centre, numbers that count up,
      a heartbeat line of the last days, sparks orbiting the score. Motion can be paused; reduced-motion is respected. Display only. ---------- */
   var fb = null, fbPlayed = false, fbBootWait = false, FBKEY = 'veagle.pccheck.fable.still', fbStill = false;
   try { fbStill = localStorage.getItem(FBKEY) === '1'; } catch (e) { }
@@ -6119,7 +6119,7 @@ var THEMES = (function (V) {
   function fable() {
     var c = counts(), st = VIZ.chkStats();
     return '<div class="fb-wrap"><div class="fb-hero"><div class="fb-rose"><canvas id="fbCv" aria-hidden="true"></canvas>' + fbRose() + '</div>' +
-      '<div class="fb-side"><div class="fb-eye fb-rv" style="--i:0">FABLE52 <i></i> ' + esc(I('THE STORY OF YOUR PC', 'Η ΙΣΤΟΡΙΑ ΤΟΥ ΥΠΟΛΟΓΙΣΤΗ ΣΟΥ')) + '</div><h2 class="fb-rv' + (headline().length > 34 ? ' lg' : '') + '" style="--i:1">' + esc(headline()) + '</h2><p class="fb-story">' + fbStory() + '</p>' +
+      '<div class="fb-side"><div class="fb-eye fb-rv" style="--i:0">VEAGLE OS <i></i> ' + esc(I('THE STORY OF YOUR PC', 'Η ΙΣΤΟΡΙΑ ΤΟΥ ΥΠΟΛΟΓΙΣΤΗ ΣΟΥ')) + '</div><h2 class="fb-rv' + (headline().length > 34 ? ' lg' : '') + '" style="--i:1">' + esc(headline()) + '</h2><p class="fb-story">' + fbStory() + '</p>' +
       '<div class="fb-nums fb-rv" style="--i:5"><div class="h"><b data-count="' + c.high + '">' + c.high + '</b><span>' + esc(I('High', 'Υψηλή')) + '</span></div><div><b data-count="' + c.medium + '">' + c.medium + '</b><span>' + esc(I('Medium', 'Μέτρια')) + '</span></div><div><b data-count="' + c.low + '">' + c.low + '</b><span>' + esc(I('Low', 'Χαμηλή')) + '</span></div><div><b>' + st.done + '<small>/' + st.total + '</small></b><span>' + esc(I('Steps done', 'Βήματα που έγιναν')) + '</span></div></div>' +
       note() + '<button class="btn sm fb-still" type="button" data-fbstill aria-pressed="' + (fbStill ? 'true' : 'false') + '">' + esc(fbStill ? I('Play motion', 'Ενεργοποίηση κίνησης') : I('Pause motion', 'Παύση κίνησης')) + '</button></div></div>' +
       fbPulse() + (fbSteps() ? '<div class="thh fb-h3">' + esc(I('YOUR NEXT THREE MOVES', 'ΟΙ ΤΡΕΙΣ ΕΠΟΜΕΝΕΣ ΚΙΝΗΣΕΙΣ ΣΟΥ')) + '</div>' + fbSteps() : '') + '</div>';

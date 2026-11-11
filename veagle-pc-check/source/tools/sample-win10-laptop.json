@@ -2,7 +2,7 @@
  "meta": {
   "mode": "quick",
   "tool": "VEAGLE PC Check",
-  "version": "2.5.3",
+  "version": "2.5.4",
   "generated": "2026-10-31T16:35:00",
   "isAdmin": true,
   "psVersion": "5.1.26100.9549",
@@ -1408,13 +1408,6 @@
    }
   ],
   "appHangs": 2,
-  "capped": {
-   "max": 30000,
-   "system": true,
-   "application": false,
-   "systemDays": 41,
-   "applicationDays": null
-  },
   "appHangs1": 0,
   "appHangs7": 0,
   "appHangs30": 1

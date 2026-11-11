@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.5.3
+VEAGLE PC CHECK  v2.5.4
 =======================
 VEAGLE - ferelis.gr
 
@@ -57,7 +57,7 @@ NEW IN 2.5.2
 NEW IN 2.5.0
 - The report has a new box, "What this scan checked". It lists the deeper checks that were done and the ones that could not be done (quick scan, or not run as administrator). A check that was not done is never shown as "all good".
 - Every question to the Windows information service (WMI) now gives up after 90 seconds, so one stuck answer cannot hang the scan.
-- On a PC with a huge number of warnings, only the newest 30,000 per log are read. The report tells you when this happened.
+- (Changed in 2.5.4) The scan reads every warning and error of the period again, with no upper limit. On a PC with very many warnings this step can take longer.
 - Three new read-only checks: a drive that Windows marked as "needs a check", how many days the Windows logs remember, and whether the Secure Boot certificates were renewed.
 - The scan has 22 steps now. Everything is still read-only.
 

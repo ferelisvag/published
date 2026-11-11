@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.5.3'
+$script:Version = '2.5.4'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
@@ -638,16 +638,12 @@ $updates = [ordered]@{ hotfixes = $hotfixes; lastPatchDaysAgo = $lastPatchDays }
 $crashDumps = [pscustomobject]@{ dumps = [int]$dumpCount; liveKernelReports = [int]$liveKernel }
 
 # ---------------------------------------------------------------- 7. events
-Step 7 $TOTAL 'Event Viewer, last 30 days (System and Application)'
+Step 7 $TOTAL 'Event Viewer, last 60 days (System and Application)'
 $days = 60
 $since = (Get-Date).AddDays(-$days)
-# Upper limit: a very noisy PC can hold hundreds of thousands of warnings. The newest ones are read first, so a cut only drops the oldest.
-$evMax = 30000
-$sysEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'System'; Level = 1, 2, 3; StartTime = $since } -MaxEvents $evMax -ErrorAction SilentlyContinue)
-$appEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Level = 1, 2, 3; StartTime = $since } -MaxEvents $evMax -ErrorAction SilentlyContinue)
-$evCap = [ordered]@{ max = $evMax; system = ($sysEv.Count -ge $evMax); application = ($appEv.Count -ge $evMax); systemDays = $null; applicationDays = $null }
-try { if ($evCap.system) { $evCap.systemDays = [int][math]::Floor(((Get-Date) - $sysEv[$sysEv.Count - 1].TimeCreated).TotalDays) } } catch { }
-try { if ($evCap.application) { $evCap.applicationDays = [int][math]::Floor(((Get-Date) - $appEv[$appEv.Count - 1].TimeCreated).TotalDays) } } catch { }
+# Every warning and error of the period is read, with no upper limit (asked by the owner: completeness matters more than speed).
+$sysEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'System'; Level = 1, 2, 3; StartTime = $since } -ErrorAction SilentlyContinue)
+$appEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Level = 1, 2, 3; StartTime = $since } -ErrorAction SilentlyContinue)
 
 foreach ($pair in @(@('System', $sysEv), @('Application', $appEv))) {
     try {
@@ -693,7 +689,6 @@ $events = [ordered]@{
     appHangs1   = $hang1
     appHangs7   = $hang7
     appHangs30  = $hang30
-    capped      = [pscustomobject]$evCap
 }
 
 # ---------------------------------------------------------------- 8. boot

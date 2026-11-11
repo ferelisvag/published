@@ -292,7 +292,6 @@ def _reliab(d, heavy):
     d['meta']['stepTimes'] = [dict(step=i + 1, label=_STEPS[i], sec=secs[i] * (1.8 if heavy else 1), errors=0) for i in range(22)]
     adm = ('bitlocker', 'restore', 'winre', 'secpol', 'traces') if heavy else ()
     d['meta']['coverage'] = [dict(key=k, status=('admin' if k in adm else ('na' if heavy and k == 'outdated' else 'ok'))) for k in _COVK]
-    d['events']['capped'] = dict(max=30000, system=bool(heavy), application=False, systemDays=(41 if heavy else None), applicationDays=None)
     d['extras']['more4'] = dict(
         dirty=[dict(letter='C:', dirty=bool(heavy))],
         logs=[dict(name='System', maxMB=20.0, sizeMB=20.0, mode='Circular', records=41200, oldestDays=(41 if heavy else 212), readable=True),
@@ -300,7 +299,7 @@ def _reliab(d, heavy):
               dict(name='Security', maxMB=20.0, sizeMB=20.0, mode='Circular', records=29950, oldestDays=(6 if heavy else 23), readable=True)],
         secureBootCa=dict(secureBoot=(None if heavy else True), status=(None if heavy else 'InProgress'), hasError=False))
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '2.5.3'
+data['meta']['version'] = '2.5.4'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -349,7 +348,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '2.5.3'
+w['meta']['version'] = '2.5.4'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),

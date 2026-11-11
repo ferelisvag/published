@@ -768,3 +768,5 @@ body.fb-still.th-fable .finding:hover, body.fb-still.th-fable .btn:hover, body.f
 @media (prefers-reduced-motion: reduce) { body.th-fable::before, body.th-fable .tabpane.on, .thhero.th-fable *, body.th-fable .btn.primary::after { animation: none !important; } body.th-fable::after { display: none; } body.th-fable .finding:hover, body.th-fable .btn:hover, .fb-step:hover, body.th-fable nav button:hover { transform: none; } .fb-still { display: none; } }
 @media print { body.th-fable::before, body.th-fable::after { display: none !important; } body.th-fable #tab-summary > .summary { display: block !important; } }
 body.view-simple .techonly { display: none; }
+
+.fb-side h2.lg { font-size: clamp(26px, 2.7vw, 38px); line-height: 1.12; } .fb-ptx b.nm { font: 600 15.5px var(--head); color: #ff8082; }

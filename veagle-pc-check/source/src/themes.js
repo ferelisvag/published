@@ -177,8 +177,10 @@ var THEMES = (function (V) {
     var EX = g(D, 'extras.timeline', null); if (!EX || !EX.length) return null;
     var days = V.days || 30, end = new Date(g(D, 'meta.generated', Date.now())).getTime(), bad = { crash: 1, hang: 1, unclean: 1, bsod: 1, disk: 1, whea: 1, gpu: 1 }, cnt = [], i;
     for (i = 0; i < days; i++) cnt.push(0);
-    EX.forEach(function (e) { var t = new Date(e.t).getTime(); if (!isFinite(t) || !bad[e.k]) return; var d = Math.floor((end - t) / 86400000); if (d >= 0 && d < days) cnt[days - 1 - d]++; });
-    return { cnt: cnt, days: days, end: end };
+    var who = {}, tot = 0;
+    EX.forEach(function (e) { var t = new Date(e.t).getTime(); if (!isFinite(t) || !bad[e.k]) return; var d = Math.floor((end - t) / 86400000); if (d >= 0 && d < days) { cnt[days - 1 - d]++; tot++; if ((e.k === 'crash' || e.k === 'hang') && e.x) who[e.x] = (who[e.x] || 0) + 1; } });
+    var top = Object.keys(who).sort(function (x, y) { return who[y] - who[x]; })[0];
+    return { cnt: cnt, days: days, end: end, total: tot, top: top && who[top] >= 3 && who[top] * 2 >= tot ? { name: top, n: who[top] } : null };
   }
   function fbRose() {
     var A = V.score.areas, n = A.length, c = 200, R0 = 68, R1 = 172, step = 360 / n, gap = 2.6, s = '', lab = '';
@@ -209,7 +211,7 @@ var THEMES = (function (V) {
     }
     p += 'L' + W + ' ' + base;
     var loc = V.lang === 'el' ? 'el-GR' : 'en-GB', f = function (k) { return new Date(d.end - (n - 1 - k) * 86400000).toLocaleDateString(loc, { day: 'numeric', month: 'short' }); };
-    var txt = '<b data-count="' + calm + '">' + calm + '</b> ' + esc(I('of the last ' + n + ' days were calm: no crash, no freeze, no hardware error.', 'από τις τελευταίες ' + n + ' ημέρες ήταν ήρεμες: χωρίς κρασάρισμα, πάγωμα ή σφάλμα υλικού.')) + (wi >= 0 ? ' ' + esc(I('The hardest day was ' + f(wi) + ' (' + worst + (worst === 1 ? ' problem' : ' problems') + ').', 'Η πιο δύσκολη ημέρα ήταν η ' + f(wi) + ' (' + worst + (worst === 1 ? ' πρόβλημα' : ' προβλήματα') + ').')) : '');
+    var txt = '<b data-count="' + calm + '">' + calm + '</b> ' + esc(I('of the last ' + n + ' days were calm: no crash, no freeze, no hardware error.', 'από τις τελευταίες ' + n + ' ημέρες ήταν ήρεμες: χωρίς κρασάρισμα, πάγωμα ή σφάλμα υλικού.')) + (wi >= 0 ? ' ' + esc(I('The hardest day was ' + f(wi) + ' (' + worst + (worst === 1 ? ' problem' : ' problems') + ').', 'Η πιο δύσκολη ημέρα ήταν η ' + f(wi) + ' (' + worst + (worst === 1 ? ' πρόβλημα' : ' προβλήματα') + ').')) : '') + (d.top ? ' ' + esc(I('Most of the problems (' + d.top.n + ' of ' + d.total + ') came from one program: ', 'Τα περισσότερα προβλήματα (' + d.top.n + ' από ' + d.total + ') ήρθαν από ένα πρόγραμμα: ')) + '<b class="nm">' + esc(d.top.name) + '</b>.' : '');
     return '<div class="fb-card fb-pulse fb-rv" style="--i:6"><div class="thh">' + esc(I('THE HEARTBEAT OF THE LAST ' + n + ' DAYS', 'Ο ΠΑΛΜΟΣ ΤΩΝ ΤΕΛΕΥΤΑΙΩΝ ' + n + ' ΗΜΕΡΩΝ')) + '</div><svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" class="fb-ecg" role="img" aria-label="' + esc(I('Heartbeat line: every spike is a day with problems, a taller spike means more problems.', 'Γραμμή παλμού: κάθε αιχμή είναι μια ημέρα με προβλήματα, ψηλότερη αιχμή σημαίνει περισσότερα.')) + '"><defs><linearGradient id="fbE" x1="0" x2="1"><stop offset="0" stop-color="#5a5a64"/><stop offset=".55" stop-color="#ffffff"/><stop offset="1" stop-color="#ff4a4c"/></linearGradient></defs><line x1="0" y1="' + base + '" x2="' + W + '" y2="' + base + '" class="bl"/><path d="' + p + '" pathLength="1" class="ln" stroke="url(#fbE)"/><path d="' + p + '" pathLength="1" class="glow"/></svg><div class="fb-ax"><span>' + esc(f(0)) + '</span><span>' + esc(I('each spike = a day with problems', 'κάθε αιχμή = μια ημέρα με προβλήματα')) + '</span><span>' + esc(f(n - 1)) + '</span></div><p class="fb-ptx">' + txt + '</p></div>';
   }
   function fbStory() {
@@ -229,7 +231,7 @@ var THEMES = (function (V) {
   function fable() {
     var c = counts(), st = VIZ.chkStats();
     return '<div class="fb-wrap"><div class="fb-hero"><div class="fb-rose"><canvas id="fbCv" aria-hidden="true"></canvas>' + fbRose() + '</div>' +
-      '<div class="fb-side"><div class="fb-eye fb-rv" style="--i:0">FABLE52 <i></i> ' + esc(I('THE STORY OF YOUR PC', 'Η ΙΣΤΟΡΙΑ ΤΟΥ ΥΠΟΛΟΓΙΣΤΗ ΣΟΥ')) + '</div><h2 class="fb-rv" style="--i:1">' + esc(headline()) + '</h2><p class="fb-story">' + fbStory() + '</p>' +
+      '<div class="fb-side"><div class="fb-eye fb-rv" style="--i:0">FABLE52 <i></i> ' + esc(I('THE STORY OF YOUR PC', 'Η ΙΣΤΟΡΙΑ ΤΟΥ ΥΠΟΛΟΓΙΣΤΗ ΣΟΥ')) + '</div><h2 class="fb-rv' + (headline().length > 34 ? ' lg' : '') + '" style="--i:1">' + esc(headline()) + '</h2><p class="fb-story">' + fbStory() + '</p>' +
       '<div class="fb-nums fb-rv" style="--i:5"><div class="h"><b data-count="' + c.high + '">' + c.high + '</b><span>' + esc(I('High', 'Υψηλή')) + '</span></div><div><b data-count="' + c.medium + '">' + c.medium + '</b><span>' + esc(I('Medium', 'Μέτρια')) + '</span></div><div><b data-count="' + c.low + '">' + c.low + '</b><span>' + esc(I('Low', 'Χαμηλή')) + '</span></div><div><b>' + st.done + '<small>/' + st.total + '</small></b><span>' + esc(I('Steps done', 'Βήματα που έγιναν')) + '</span></div></div>' +
       note() + '<button class="btn sm fb-still" type="button" data-fbstill aria-pressed="' + (fbStill ? 'true' : 'false') + '">' + esc(fbStill ? I('Play motion', 'Ενεργοποίηση κίνησης') : I('Pause motion', 'Παύση κίνησης')) + '</button></div></div>' +
       fbPulse() + (fbSteps() ? '<div class="thh fb-h3">' + esc(I('YOUR NEXT THREE MOVES', 'ΟΙ ΤΡΕΙΣ ΕΠΟΜΕΝΕΣ ΚΙΝΗΣΕΙΣ ΣΟΥ')) + '</div>' + fbSteps() : '') + '</div>';

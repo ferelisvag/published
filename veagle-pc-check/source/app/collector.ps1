@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.5.0'
+$script:Version = '2.5.1'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.

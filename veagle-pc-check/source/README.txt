@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.3.0
+VEAGLE PC CHECK  v2.4.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -50,6 +50,10 @@ READING THE REPORT
 - You never have to fix everything. Start with the red HIGH ones, one at a time.
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
+
+NEW IN 2.4.0
+- A new report look called Fable52 (choose it in the "Theme" box at the top). It tells the story of your PC with a flower-shaped chart of the 8 areas, a heartbeat line of the last days and your next three moves. It has gentle motion; the "Pause motion" button stops it.
+- Only the look changes. The scan, the findings and the score are the same, and the scan stays read-only.
 
 NEW IN 2.3.0
 - Two new report looks, chosen in the "Theme" box at the top: IQON and Compass. Compass is a new kind of Summary: you say how many minutes you have and it suggests what to fix first, with a map of your problems and a calendar of calm days. Both change every tab. The earlier looks are still there.

@@ -53,7 +53,7 @@ function fixtures() {
     const gr = await page.evaluate(() => { V.lang = 'el'; const bad = V.findings.filter(f => { const t = V.tf(f); return !t || !t.title || !t.why; }).map(f => f.id); V.lang = 'en'; return bad; });
     ok(gr.length === 0, 'Greek text for every finding ' + gr.join(','));
     // themes
-    for (const th of ['classic', 'clean', 'guide', 'cockpit', 'bento', 'cyber', 'iqon', 'compass']) {
+    for (const th of ['classic', 'clean', 'guide', 'cockpit', 'bento', 'cyber', 'iqon', 'compass', 'fable']) {
       await page.evaluate(t => THEMES.set(t, true), th);
       const cls = await page.evaluate(() => document.body.className);
       ok(cls.includes('th-' + th) || th === 'classic', 'theme ' + th);

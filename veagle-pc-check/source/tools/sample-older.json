@@ -2,7 +2,7 @@
  "meta": {
   "mode": "full",
   "tool": "VEAGLE PC Check",
-  "version": "2.1.0",
+  "version": "2.5.4",
   "generated": "2026-10-10T16:35:00",
   "isAdmin": true,
   "psVersion": "5.1.26100.9549",
@@ -12,6 +12,199 @@
   "durationSec": 214,
   "warnings": [
    "winget: first run may be slow"
+  ],
+  "schema": "veagle-pccheck/2",
+  "stepTimes": [
+   {
+    "step": 1,
+    "label": "System, CPU, memory, board",
+    "sec": 3.1,
+    "errors": 0
+   },
+   {
+    "step": 2,
+    "label": "Graphics and display",
+    "sec": 1.2,
+    "errors": 0
+   },
+   {
+    "step": 3,
+    "label": "Storage",
+    "sec": 4.8,
+    "errors": 0
+   },
+   {
+    "step": 4,
+    "label": "Network adapters",
+    "sec": 0.9,
+    "errors": 0
+   },
+   {
+    "step": 5,
+    "label": "Security settings",
+    "sec": 6.3,
+    "errors": 0
+   },
+   {
+    "step": 6,
+    "label": "Power, performance settings, updates",
+    "sec": 2.2,
+    "errors": 0
+   },
+   {
+    "step": 7,
+    "label": "Event Viewer",
+    "sec": 14.6,
+    "errors": 0
+   },
+   {
+    "step": 8,
+    "label": "Boot history",
+    "sec": 1.1,
+    "errors": 0
+   },
+   {
+    "step": 9,
+    "label": "Installed applications",
+    "sec": 2.9,
+    "errors": 0
+   },
+   {
+    "step": 10,
+    "label": "Outdated applications (winget)",
+    "sec": 38.5,
+    "errors": 0
+   },
+   {
+    "step": 11,
+    "label": "Startup items, services, running processes",
+    "sec": 3.4,
+    "errors": 0
+   },
+   {
+    "step": 12,
+    "label": "Drivers and devices",
+    "sec": 7.7,
+    "errors": 0
+   },
+   {
+    "step": 13,
+    "label": "Windows image health (DISM CheckHealth)",
+    "sec": 21.0,
+    "errors": 0
+   },
+   {
+    "step": 14,
+    "label": "Reliability, security details, network test, backups",
+    "sec": 9.8,
+    "errors": 0
+   },
+   {
+    "step": 15,
+    "label": "Where the disk space went",
+    "sec": 64.2,
+    "errors": 0
+   },
+   {
+    "step": 16,
+    "label": "Crash dump files and the timeline of events",
+    "sec": 5.5,
+    "errors": 0
+   },
+   {
+    "step": 17,
+    "label": "Accounts, signatures, add-ons, licences, updates, network, temperature",
+    "sec": 31.9,
+    "errors": 0
+   },
+   {
+    "step": 18,
+    "label": "Equipment, hardening, privacy, performance sample",
+    "sec": 19.4,
+    "errors": 0
+   },
+   {
+    "step": 19,
+    "label": "Windows 11 readiness, tasks and services",
+    "sec": 8.6,
+    "errors": 0
+   },
+   {
+    "step": 20,
+    "label": "Traces",
+    "sec": 12.3,
+    "errors": 0
+   },
+   {
+    "step": 21,
+    "label": "Help",
+    "sec": 4.0,
+    "errors": 0
+   },
+   {
+    "step": 22,
+    "label": "Drive check flag, size of the Windows logs, Secure Boot certificates",
+    "sec": 1.6,
+    "errors": 0
+   }
+  ],
+  "coverage": [
+   {
+    "key": "bitlocker",
+    "status": "ok"
+   },
+   {
+    "key": "features",
+    "status": "ok"
+   },
+   {
+    "key": "outdated",
+    "status": "ok"
+   },
+   {
+    "key": "oldDrivers",
+    "status": "ok"
+   },
+   {
+    "key": "dism",
+    "status": "ok"
+   },
+   {
+    "key": "restore",
+    "status": "ok"
+   },
+   {
+    "key": "winre",
+    "status": "ok"
+   },
+   {
+    "key": "space",
+    "status": "ok"
+   },
+   {
+    "key": "signatures",
+    "status": "ok"
+   },
+   {
+    "key": "dnsSpeed",
+    "status": "ok"
+   },
+   {
+    "key": "perf",
+    "status": "ok"
+   },
+   {
+    "key": "secpol",
+    "status": "ok"
+   },
+   {
+    "key": "sfc",
+    "status": "ok"
+   },
+   {
+    "key": "traces",
+    "status": "ok"
+   }
   ],
   "support": {
    "name": "Vagelis (demo)",
@@ -3082,7 +3275,49 @@
     "serviceDisabled": false,
     "paused": false,
     "policyOff": false,
-    "restartPending": true
+    "restartPending": true,
+    "history": [
+     {
+      "date": "2026-10-30T16:35:00",
+      "title": "Feature update to Windows 11, version 25H2",
+      "result": "Failed",
+      "resultCode": 4,
+      "operation": "Installation",
+      "hResult": "0x80070002",
+      "updateId": "00000000-0000-0000-0000-000000000001",
+      "revision": 1
+     },
+     {
+      "date": "2026-10-25T16:35:00",
+      "title": "2026-10 Cumulative Update for Windows 11 (KB5000001)",
+      "result": "Succeeded",
+      "resultCode": 2,
+      "operation": "Installation",
+      "hResult": "0x00000000",
+      "updateId": "00000000-0000-0000-0000-000000000002",
+      "revision": 1
+     },
+     {
+      "date": "2026-10-25T16:35:00",
+      "title": "Windows Malicious Software Removal Tool (KB890830)",
+      "result": "Succeeded",
+      "resultCode": 2,
+      "operation": "Installation",
+      "hResult": "0x00000000",
+      "updateId": "00000000-0000-0000-0000-000000000003",
+      "revision": 1
+     },
+     {
+      "date": "2026-10-10T16:35:00",
+      "title": "Security Intelligence Update for Microsoft Defender Antivirus",
+      "result": "Aborted",
+      "resultCode": 5,
+      "operation": "Installation",
+      "hResult": "0x80240022",
+      "updateId": "00000000-0000-0000-0000-000000000004",
+      "revision": 1
+     }
+    ]
    },
    "oneDrive": {
     "installed": true,
@@ -3952,6 +4187,48 @@
       }
      ]
     }
+   }
+  },
+  "more4": {
+   "dirty": [
+    {
+     "letter": "C:",
+     "dirty": false
+    }
+   ],
+   "logs": [
+    {
+     "name": "System",
+     "maxMB": 20.0,
+     "sizeMB": 20.0,
+     "mode": "Circular",
+     "records": 41200,
+     "oldestDays": 212,
+     "readable": true
+    },
+    {
+     "name": "Application",
+     "maxMB": 20.0,
+     "sizeMB": 18.4,
+     "mode": "Circular",
+     "records": 38810,
+     "oldestDays": 340,
+     "readable": true
+    },
+    {
+     "name": "Security",
+     "maxMB": 20.0,
+     "sizeMB": 20.0,
+     "mode": "Circular",
+     "records": 29950,
+     "oldestDays": 23,
+     "readable": true
+    }
+   ],
+   "secureBootCa": {
+    "secureBoot": true,
+    "status": "InProgress",
+    "hasError": false
    }
   }
  },

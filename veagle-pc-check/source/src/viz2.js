@@ -125,5 +125,5 @@ var VIZ2 = (function (V, UI) {
   document.addEventListener('change', function (e) { if (e.target && e.target.id === 'findSort') { UI.state.sort = e.target.value; UI.drawFindings(); } });
   document.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('pmn')) { e.preventDefault(); goArea(e.target.getAttribute('data-area')); } });
   function render() { summary(); pcMap(); findingsBar(); }
-  return { render: render, areaName: areaName, worst: worst };
+  return { render: render, areaName: areaName, worst: worst, goArea: goArea };
 })(V, UI);

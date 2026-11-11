@@ -149,7 +149,12 @@ def _more(heavy):
       inventory=dict(serial='DEMO-0000-SN', maker='Demo Maker', model='Demo Model', biosDate='2025-06-10T00:00:00', osInstall='2025-01-12T10:00:00'),
       office=dict(installed=True, subscription=False, releaseIds='ProPlus2019Retail', version='16.0.17928', channel='', licences=[dict(name='Office 19, Office19ProPlus2019R_Retail edition', status=1)]),
       certs=[dict(store='user', name='Work VPN client', days=9, hasKey=True), dict(store='computer', name='Old test cert', days=-40, hasKey=True)],
-      wu=dict(lastSuccessDays=6, failed30=['Feature update to Windows 11, version 25H2 - Error 0x80070002'], serviceDisabled=False, paused=False, policyOff=False, restartPending=True),
+      wu=dict(lastSuccessDays=6, failed30=['Feature update to Windows 11, version 25H2 - Error 0x80070002'], serviceDisabled=False, paused=False, policyOff=False, restartPending=True,
+          history=[
+            dict(date=iso(now - datetime.timedelta(days=1)), title='Feature update to Windows 11, version 25H2', result='Failed', resultCode=4, operation='Installation', hResult='0x80070002', updateId='00000000-0000-0000-0000-000000000001', revision=1),
+            dict(date=iso(now - datetime.timedelta(days=6)), title='2026-10 Cumulative Update for Windows 11 (KB5000001)', result='Succeeded', resultCode=2, operation='Installation', hResult='0x00000000', updateId='00000000-0000-0000-0000-000000000002', revision=1),
+            dict(date=iso(now - datetime.timedelta(days=6)), title='Windows Malicious Software Removal Tool (KB890830)', result='Succeeded', resultCode=2, operation='Installation', hResult='0x00000000', updateId='00000000-0000-0000-0000-000000000003', revision=1),
+            dict(date=iso(now - datetime.timedelta(days=21)), title='Security Intelligence Update for Microsoft Defender Antivirus', result='Aborted', resultCode=5, operation='Installation', hResult='0x80240022', updateId='00000000-0000-0000-0000-000000000004', revision=1)]),
       oneDrive=dict(installed=True, signedIn=not heavy, running=not heavy),
       slowStart=[dict(kind='app', name='Adobe Updater', n=6, avgSec=9.4), dict(kind='service', name='SearchIndexer', n=4, avgSec=6.2), dict(kind='driver', name='nvlddmkm', n=3, avgSec=4.1), dict(kind='app', name='Teams', n=5, avgSec=3.3)],
       dnsSpeed=[dict(label='This PC', ip='192.168.1.1', ms=74), dict(label='Cloudflare', ip='1.1.1.1', ms=14), dict(label='Google', ip='8.8.8.8', ms=19), dict(label='Quad9', ip='9.9.9.9', ms=22)],
@@ -277,8 +282,24 @@ def _addwin(d):
         a['count'] = int(a['count'] * 1.7) + 1; a['count30'] = a['count'] * 6 // 10; a['count7'] = a['count'] // 5; a['count1'] = a['count'] // 20
     ev['days'] = 60; ev['appHangs1'] = ev.get('appHangs', 0) // 20; ev['appHangs7'] = ev.get('appHangs', 0) // 5; ev['appHangs30'] = ev.get('appHangs', 0) * 6 // 10
 
+
+# --- v2.5 reliability: coverage map, time per step, event cap, drive check flag, log sizes, Secure Boot certificates
+_COVK = ['bitlocker', 'features', 'outdated', 'oldDrivers', 'dism', 'restore', 'winre', 'space', 'signatures', 'dnsSpeed', 'perf', 'secpol', 'sfc', 'traces']
+_STEPS = ['System, CPU, memory, board', 'Graphics and display', 'Storage', 'Network adapters', 'Security settings', 'Power, performance settings, updates', 'Event Viewer', 'Boot history', 'Installed applications', 'Outdated applications (winget)', 'Startup items, services, running processes', 'Drivers and devices', 'Windows image health (DISM CheckHealth)', 'Reliability, security details, network test, backups', 'Where the disk space went', 'Crash dump files and the timeline of events', 'Accounts, signatures, add-ons, licences, updates, network, temperature', 'Equipment, hardening, privacy, performance sample', 'Windows 11 readiness, tasks and services', 'Traces', 'Help', 'Drive check flag, size of the Windows logs, Secure Boot certificates']
+def _reliab(d, heavy):
+    secs = [3.1, 1.2, 4.8, 0.9, 6.3, 2.2, 14.6, 1.1, 2.9, 38.5, 3.4, 7.7, 21.0, 9.8, 64.2, 5.5, 31.9, 19.4, 8.6, 12.3, 4.0, 1.6]
+    d['meta']['schema'] = 'veagle-pccheck/2'
+    d['meta']['stepTimes'] = [dict(step=i + 1, label=_STEPS[i], sec=secs[i] * (1.8 if heavy else 1), errors=0) for i in range(22)]
+    adm = ('bitlocker', 'restore', 'winre', 'secpol', 'traces') if heavy else ()
+    d['meta']['coverage'] = [dict(key=k, status=('admin' if k in adm else ('na' if heavy and k == 'outdated' else 'ok'))) for k in _COVK]
+    d['extras']['more4'] = dict(
+        dirty=[dict(letter='C:', dirty=bool(heavy))],
+        logs=[dict(name='System', maxMB=20.0, sizeMB=20.0, mode='Circular', records=41200, oldestDays=(41 if heavy else 212), readable=True),
+              dict(name='Application', maxMB=20.0, sizeMB=18.4, mode='Circular', records=38810, oldestDays=(95 if heavy else 340), readable=True),
+              dict(name='Security', maxMB=20.0, sizeMB=20.0, mode='Circular', records=29950, oldestDays=(6 if heavy else 23), readable=True)],
+        secureBootCa=dict(secureBoot=(None if heavy else True), status=(None if heavy else 'InProgress'), hasError=False))
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '2.1.0'
+data['meta']['version'] = '2.5.4'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -302,6 +323,7 @@ data['extras']['more2'] = _more2(False)
 data['extras']['more3'] = _more3(False)
 data['extras']['forensics'] = _forensics(False)
 data['extras']['help'] = _help(False)
+_reliab(data, False)
 data['meta']['support'] = {'name': 'Vagelis (demo)', 'email': 'helper@example.com', 'phone': '', 'site': 'ferelis.gr', 'note': ''}
 data['trend'] = SAMPLE_TREND
 _addwin(data)
@@ -326,7 +348,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '2.1.0'
+w['meta']['version'] = '2.5.4'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),
@@ -343,6 +365,7 @@ w['extras']['more2'] = _more2(True)
 w['extras']['more3'] = _more3(True)
 w['extras']['forensics'] = _forensics(True)
 w['extras']['help'] = _help(True)
+_reliab(w, True)
 _addwin(w)
 (out / 'sample-win10-laptop.json').write_text(json.dumps(w, indent=1), encoding='utf-8')
 

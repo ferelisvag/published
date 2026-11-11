@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.1.0
+VEAGLE PC CHECK  v2.5.4
 =======================
 VEAGLE - ferelis.gr
 
@@ -50,6 +50,29 @@ READING THE REPORT
 - You never have to fix everything. Start with the red HIGH ones, one at a time.
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
+
+NEW IN 2.5.2
+- The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 2.5.0
+- The report has a new box, "What this scan checked". It lists the deeper checks that were done and the ones that could not be done (quick scan, or not run as administrator). A check that was not done is never shown as "all good".
+- Every question to the Windows information service (WMI) now gives up after 90 seconds, so one stuck answer cannot hang the scan.
+- (Changed in 2.5.4) The scan reads every warning and error of the period again, with no upper limit. On a PC with very many warnings this step can take longer.
+- Three new read-only checks: a drive that Windows marked as "needs a check", how many days the Windows logs remember, and whether the Secure Boot certificates were renewed.
+- The scan has 22 steps now. Everything is still read-only.
+
+NEW IN 2.4.0
+- A new report look called Fable52 (choose it in the "Theme" box at the top). It tells the story of your PC with a flower-shaped chart of the 8 areas, a heartbeat line of the last days and your next three moves. It has gentle motion; the "Pause motion" button stops it.
+- Only the look changes. The scan, the findings and the score are the same, and the scan stays read-only.
+
+NEW IN 2.3.0
+- Two new report looks, chosen in the "Theme" box at the top: IQON and Compass. Compass is a new kind of Summary: you say how many minutes you have and it suggests what to fix first, with a map of your problems and a calendar of calm days. Both change every tab. The earlier looks are still there.
+- Only the look and the Summary layout change. The scan, the findings and the score are the same, and the scan stays read-only.
+
+NEW IN 2.2.0
+- The Insights page shows the recent Windows Update history: the last 10 operations with date, update name, result and error code. Failed or cancelled ones are in red.
+- The scan only reads the local Windows Update history. Nothing is downloaded, installed or changed.
+- On a PC where Windows Update cannot be read, this part is simply left empty.
 
 NEW IN 2.1.0
 - The "AI help" tab is now "Help & AI". It has two parts: "Help from a person (IT)" and "Help from an AI" (the same as before).

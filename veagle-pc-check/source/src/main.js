@@ -84,7 +84,7 @@
       chip.hidden = false;
       sel.innerHTML = [1, 7, 30, 60].map(function (n) { return '<option value="' + n + '">' + (n === 1 ? V.I('1 day (24 hours)', '1 ημέρα (24 ώρες)') : V.I(n + ' days', n + ' ημέρες')) + '</option>'; }).join('');
       sel.value = String(V.days);
-      sel.addEventListener('change', function () { try { localStorage.setItem('veagle.pccheck.period', sel.value); } catch (e) { } location.reload(); });
+      sel.addEventListener('change', function () { try { localStorage.setItem('veagle.pccheck.period', sel.value); } catch (e) { } try { if (typeof THEMES !== 'undefined') THEMES.keepOnce(); } catch (e) { } location.reload(); });
       chip.firstChild.nodeValue = V.I('Period ', 'Περίοδος ');
     })();
     wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init(); THEMES.init(); SIDE.init(); HELP.init();

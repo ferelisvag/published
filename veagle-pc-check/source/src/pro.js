@@ -14,6 +14,13 @@ var PRO = (function (V, AI) {
   function mins(n) { return n >= 60 ? Math.floor(n / 60) + ' h ' + (n % 60 ? (n % 60) + ' min' : '') : n + ' min'; }
   function cFree() { var v = arr(D.volumes).filter(function (x) { return /^C:/i.test(x.letter); })[0]; return v || null; }
   function bar(pct, cls) { return '<div class="bar ' + (cls || '') + '"><i style="width:' + Math.max(0, Math.min(100, pct)) + '%"></i></div>'; }
+  /* Windows Update history: result names in the reader's language (the collector writes English names) */
+  function wuResult(x) {
+    var t = { 1: ['In progress', 'Σε εξέλιξη'], 2: ['Succeeded', 'Επιτυχία'], 3: ['Succeeded with errors', 'Επιτυχία με σφάλματα'], 4: ['Failed', 'Απέτυχε'], 5: ['Aborted', 'Ακυρώθηκε'] }[x.resultCode];
+    var op = x.operation === 'Uninstallation' ? I(' (uninstall)', ' (απεγκατάσταση)') : '';
+    return (t ? I(t[0], t[1]) : (x.result || '-')) + op;
+  }
+
   function card(title, st, inner, id) { return '<div class="win"' + (id ? ' id="' + id + '"' : '') + '><header><span>' + esc(title) + '</span><span class="st">' + esc(st || '') + '</span></header><div class="body">' + inner + '</div></div>'; }
   function sect(t, n) { return '<div class="sect"><h2>' + esc(t) + '</h2><span>' + esc(n || '') + '</span></div>'; }
   function hbars(rows, unit, max, fmt) {
@@ -112,6 +119,31 @@ var PRO = (function (V, AI) {
   }
 
   /* ---------- steps of the scan that may be incomplete (1.1.0) ---------- */
+  /* 2.5.0: what the scan could and could not read (meta.coverage, meta.stepTimes, events.capped, extras.more4.logs) */
+  var COVN = { bitlocker: ['Drive encryption (BitLocker)', 'Κρυπτογράφηση δίσκου (BitLocker)'], features: ['Optional Windows features', 'Προαιρετικές λειτουργίες των Windows'], outdated: ['Programs that have updates (winget)', 'Προγράμματα με διαθέσιμες ενημερώσεις (winget)'], oldDrivers: ['Old drivers', 'Παλιοί οδηγοί'], dism: ['Health of the Windows files (DISM)', 'Υγεία των αρχείων των Windows (DISM)'], restore: ['Restore points', 'Σημεία επαναφοράς'], winre: ['Windows recovery environment', 'Περιβάλλον αποκατάστασης των Windows'], space: ['Where the disk space went', 'Πού πήγε ο χώρος του δίσκου'], signatures: ['Digital signatures of start-up programs', 'Ψηφιακές υπογραφές των προγραμμάτων εκκίνησης'], dnsSpeed: ['DNS speed comparison', 'Σύγκριση ταχύτητας DNS'], perf: ['10-second performance sample', 'Δείγμα απόδοσης 10 δευτερολέπτων'], secpol: ['Security policy settings', 'Ρυθμίσεις πολιτικής ασφαλείας'], sfc: ['Last system file check', 'Τελευταίος έλεγχος αρχείων συστήματος'], traces: ['Security traces (sign-ins, cleared logs)', 'Ίχνη ασφαλείας (συνδέσεις, σβησμένα αρχεία καταγραφής)'] };
+  function covWord(st) {
+    return st === 'quick' ? I('Not checked: the quick scan skips it (run VEAGLE-PC-Check.bat for the full scan)', 'Δεν ελέγχθηκε: η γρήγορη σάρωση το παραλείπει (τρέξε το VEAGLE-PC-Check.bat για πλήρη σάρωση)') : st === 'admin' ? I('Not checked: needs "Run as administrator"', 'Δεν ελέγχθηκε: θέλει «Εκτέλεση ως διαχειριστής»') : st === 'na' ? I('Not available on this PC', 'Δεν υπάρχει σε αυτόν τον υπολογιστή') : I('Checked', 'Ελέγχθηκε');
+  }
+  function coverageHtml() {
+    var M = (V.RAW && V.RAW.meta) || {}, cv = M.coverage, stt = M.stepTimes; if (!cv && !stt) return '';
+    cv = !cv ? [] : (Array.isArray(cv) ? cv : [cv]); stt = !stt ? [] : (Array.isArray(stt) ? stt : [stt]);
+    cv = cv.filter(function (x) { return x && x.key && COVN[x.key]; });
+    var miss = cv.filter(function (x) { return x.status !== 'ok'; }), okN = cv.length - miss.length;
+    var lg = (V.RAW.extras && V.RAW.extras.more4 && V.RAW.extras.more4.logs) || []; if (!Array.isArray(lg)) lg = [lg];
+    var LN = { System: ['System', 'Σύστημα'], Application: ['Application', 'Εφαρμογές'], Security: ['Security', 'Ασφάλεια'] };
+    var h = '<details class="howto' + (miss.length ? ' on' : '') + '" id="scanCov"><summary>' + esc(miss.length ? I('What this scan checked: ' + okN + ' of ' + cv.length + ' deeper checks. ' + miss.length + ' could not be done', 'Τι έλεγξε αυτή η σάρωση: ' + okN + ' από τους ' + cv.length + ' βαθύτερους ελέγχους. ' + miss.length + ' δεν έγιναν') : I('What this scan checked: all the deeper checks were done', 'Τι έλεγξε αυτή η σάρωση: έγιναν όλοι οι βαθύτεροι έλεγχοι')) + '</summary><div>';
+    h += '<p>' + esc(I('When a check could not be done, this report does not know the answer for it. That is different from "everything is fine". The list shows exactly which checks were done and which were not, and why.', 'Όταν ένας έλεγχος δεν μπόρεσε να γίνει, η αναφορά δεν ξέρει την απάντηση. Αυτό είναι διαφορετικό από το «όλα καλά». Η λίστα δείχνει ακριβώς ποιοι έλεγχοι έγιναν, ποιοι όχι, και γιατί.')) + '</p>';
+    if (cv.length) h += '<div class="tbl"><table><tr><th>' + esc(I('Check', 'Έλεγχος')) + '</th><th>' + esc(I('Result', 'Αποτέλεσμα')) + '</th></tr>' + cv.map(function (x) { return '<tr' + (x.status !== 'ok' ? ' class="hot"' : '') + '><td>' + esc(I(COVN[x.key][0], COVN[x.key][1])) + '</td><td>' + (x.status === 'ok' ? '&#10003; ' : '&#9888; ') + esc(covWord(x.status)) + '</td></tr>'; }).join('') + '</table></div>';
+    if (miss.some(function (x) { return x.status === 'admin'; })) h += '<p class="sub">' + esc(I('To get the checks that need an administrator: close this report, right-click "VEAGLE-PC-Check.bat" in the folder of the tool and choose "Run as administrator".', 'Για τους ελέγχους που θέλουν διαχειριστή: κλείσε την αναφορά, κάνε δεξί κλικ στο «VEAGLE-PC-Check.bat» στον φάκελο του εργαλείου και διάλεξε «Εκτέλεση ως διαχειριστής».')) + '</p>';
+    lg = lg.filter(function (x) { return x && LN[x.name]; });
+    if (lg.length) h += '<p class="sub"><b>' + esc(I('How far back Windows remembers: ', 'Πόσο πίσω θυμούνται τα Windows: ')) + '</b>' + lg.map(function (x) { return esc(I(LN[x.name][0], LN[x.name][1])) + ' ' + esc(x.readable && x.oldestDays != null ? I(x.oldestDays + ' days', x.oldestDays + ' ημέρες') : I('could not be read', 'δεν διαβάστηκε')); }).join(' · ') + '</p>';
+    stt = stt.filter(function (x) { return x && x.step; });
+    if (stt.length) {
+      var tot = stt.reduce(function (n, x) { return n + (+x.sec || 0); }, 0);
+      h += '<details class="techonly"><summary>' + esc(I('For a technician: time per step (total ' + Math.round(tot) + ' s)', 'Για τεχνικό: χρόνος ανά βήμα (σύνολο ' + Math.round(tot) + ' δ)')) + '</summary><div class="tbl"><table><tr><th>#</th><th>' + esc(I('Step', 'Βήμα')) + '</th><th>' + esc(I('Seconds', 'Δευτερόλεπτα')) + '</th><th>' + esc(I('Errors', 'Σφάλματα')) + '</th></tr>' + stt.map(function (x) { return '<tr' + (x.errors ? ' class="hot"' : '') + '><td>' + (+x.step) + '</td><td>' + esc(x.label || '') + '</td><td>' + (+x.sec || 0) + '</td><td>' + (+x.errors || 0) + '</td></tr>'; }).join('') + '</table></div></details>';
+    }
+    return h + '</div></details>';
+  }
   function stepIssuesHtml() {
     var a = (V.RAW && V.RAW.meta && V.RAW.meta.stepIssues) || [];
     if (!Array.isArray(a)) a = [a];
@@ -142,6 +174,8 @@ var PRO = (function (V, AI) {
       var sp = el.querySelector('.summary .sub'); 
       if (sp) { var nt = document.createElement('p'); nt.className = 'sub est'; nt.innerHTML = '<b>' + esc(I('Scan result: ' + V.scoreRaw.score + '. With the steps you ticked and what you accepted: ' + V.score.score + '.', 'Αποτέλεσμα σάρωσης: ' + V.scoreRaw.score + '. Με τα βήματα που τικάρισες και όσα αποδέχτηκες: ' + V.score.score + '.')) + '</b> ' + esc(I('This is an estimate. Run the scan again to confirm what you fixed.', 'Είναι εκτίμηση. Τρέξε ξανά τη σάρωση για να επιβεβαιωθεί ό,τι διόρθωσες.')); sp.parentNode.insertBefore(nt, sp.nextSibling); }
     }
+    var cvh = coverageHtml();
+    if (cvh) { var cb = document.createElement('div'); cb.innerHTML = cvh; var anc0 = el.querySelector('.vz2') || el.querySelector('.summary'); if (anc0) anc0.insertAdjacentElement('afterend', cb.firstChild); }
     var si = stepIssuesHtml();
     if (si) { var sb = document.createElement('div'); sb.innerHTML = si; var anc = el.querySelector('.vz2') || el.querySelector('.summary'); if (anc) anc.insertAdjacentElement('afterend', sb.firstChild); }
     var tail = document.createElement('div');
@@ -219,6 +253,8 @@ var PRO = (function (V, AI) {
     h += '<div class="s6">' + card(I('Windows Update and licences', 'Windows Update και άδειες'), '',
       '<dl class="kv" style="grid-template-columns:230px 1fr">' + [[I('Last successful update', 'Τελευταία επιτυχής ενημέρωση'), wu.lastSuccessDays != null ? I(wu.lastSuccessDays + ' days ago', 'πριν ' + wu.lastSuccessDays + ' ημέρες') : '-'], [I('Failed in 30 days', 'Απέτυχαν σε 30 ημέρες'), String(arr(wu.failed30).length)], [I('Restart waiting', 'Επανεκκίνηση σε αναμονή'), wu.restartPending ? I('yes', 'ναι') : I('no', 'όχι')], [I('Updates paused or off', 'Ενημερώσεις σε παύση ή κλειστές'), (wu.paused || wu.serviceDisabled || wu.policyOff) ? I('yes', 'ναι') : I('no', 'όχι')],
         [I('Office', 'Office'), X.office && X.office.installed ? (X.office.releaseIds || X.office.version || I('installed', 'εγκατεστημένο')) : I('not found', 'δεν βρέθηκε')], [I('OneDrive', 'OneDrive'), X.oneDrive && X.oneDrive.installed ? (X.oneDrive.signedIn ? I('signed in', 'συνδεδεμένο') : I('not signed in', 'όχι συνδεδεμένο')) : I('not found', 'δεν βρέθηκε')]].map(function (p) { return '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>'; }).join('') + '</dl>' +
+      (arr(wu.history).length ? '<div class="lbl">' + esc(I('Recent update history', 'Πρόσφατο ιστορικό ενημερώσεων')) + '</div><div class="tbl"><table><thead><tr><th>' + esc(I('Date', 'Ημερομηνία')) + '</th><th>' + esc(I('Update', 'Ενημέρωση')) + '</th><th>' + esc(I('Result', 'Αποτέλεσμα')) + '</th><th>' + esc(I('Code', 'Κωδικός')) + '</th></tr></thead><tbody>' +
+        arr(wu.history).slice(0, 10).map(function (x) { var bad = x.resultCode === 4 || x.resultCode === 5; return '<tr class="' + (bad ? 'hot' : '') + '"><td>' + esc(V.fmtDT(x.date)) + '</td><td>' + esc(x.title || '-') + '</td><td>' + esc(wuResult(x)) + '</td><td style="white-space:nowrap">' + esc(x.hResult || '-') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '') +
       (ce.length ? '<div class="lbl">' + esc(I('Certificates that expire soon', 'Πιστοποιητικά που λήγουν σύντομα')) + '</div>' + hbars(ce.slice(0, 6).map(function (x) { return { l: x.name, v: Math.max(0, x.days), c: x.days < 0 ? 'bad' : (x.days < 15 ? 'warn' : '') }; }), '', 45, function (v) { return v + ' ' + I('days', 'ημέρες'); }) : '')) + '</div>';
     h += '</div>';
     /* tables */

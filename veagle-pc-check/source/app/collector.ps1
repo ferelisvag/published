@@ -9,9 +9,11 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.1.0'
+$script:Version = '2.5.4'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
+# A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
+$PSDefaultParameterValues['Get-CimInstance:OperationTimeoutSec'] = 90
 
 $appDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $root = Split-Path -Parent $appDir
@@ -26,7 +28,19 @@ $script:StepIssues = New-Object System.Collections.ArrayList
 $script:CurStep = 0
 $script:CurLabel = ''
 $script:ErrMark = 0
+$script:StepSec = @{}
+$script:StepLabel = @{}
+$script:StepT0 = 0.0
 function Flush-StepErrors {
+    try {
+        $nowS = [double]$swTotal.Elapsed.TotalSeconds
+        if ($script:CurStep -gt 0) {
+            if (-not $script:StepSec.ContainsKey($script:CurStep)) { $script:StepSec[$script:CurStep] = 0.0 }
+            $script:StepSec[$script:CurStep] = [double]$script:StepSec[$script:CurStep] + ($nowS - $script:StepT0)
+            $script:StepLabel[$script:CurStep] = $script:CurLabel
+        }
+        $script:StepT0 = $nowS
+    } catch { }
     try {
         if ($script:CurStep -gt 0) {
             $cnt = $Error.Count - $script:ErrMark
@@ -253,7 +267,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 21
+$TOTAL = 22
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -624,9 +638,10 @@ $updates = [ordered]@{ hotfixes = $hotfixes; lastPatchDaysAgo = $lastPatchDays }
 $crashDumps = [pscustomobject]@{ dumps = [int]$dumpCount; liveKernelReports = [int]$liveKernel }
 
 # ---------------------------------------------------------------- 7. events
-Step 7 $TOTAL 'Event Viewer, last 30 days (System and Application)'
+Step 7 $TOTAL 'Event Viewer, last 60 days (System and Application)'
 $days = 60
 $since = (Get-Date).AddDays(-$days)
+# Every warning and error of the period is read, with no upper limit (asked by the owner: completeness matters more than speed).
 $sysEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'System'; Level = 1, 2, 3; StartTime = $since } -ErrorAction SilentlyContinue)
 $appEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Level = 1, 2, 3; StartTime = $since } -ErrorAction SilentlyContinue)
 
@@ -1318,17 +1333,40 @@ try {
     $se = $us.CreateUpdateSearcher()
     $cnt = [int]$se.GetTotalHistoryCount()
     $hist = @(); if ($cnt -gt 0) { $hist = @($se.QueryHistory(0, [math]::Min($cnt, 100))) }
-    $lastOk = $null; $failed = @()
+    $lastOk = $null; $failed = @(); $historyDetails = @()
     foreach ($h in $hist) {
-        if ([int]$h.ResultCode -eq 2 -and -not $lastOk) { $lastOk = [int]((Get-Date) - $h.Date).TotalDays }
-        if ([int]$h.ResultCode -eq 4 -and (((Get-Date) - $h.Date).TotalDays -le 30)) { $failed += [string]$h.Title }
+        $rc = [int]$h.ResultCode
+        if ($rc -eq 2 -and -not $lastOk) { $lastOk = [int]((Get-Date) - $h.Date).TotalDays }
+        if ($rc -eq 4 -and (((Get-Date) - $h.Date).TotalDays -le 30)) { $failed += [string]$h.Title }
+
+        # Keep a compact, useful audit trail. No update payloads or personal data are read.
+        if ($historyDetails.Count -lt 20) {
+            $resultName = switch ($rc) { 2 { 'Succeeded' } 3 { 'SucceededWithErrors' } 4 { 'Failed' } 5 { 'Aborted' } 1 { 'InProgress' } default { 'Unknown' } }
+            $operationName = switch ([int]$h.Operation) { 1 { 'Installation' } 2 { 'Uninstallation' } default { 'Other' } }
+            $hr = ''
+            try { $hr = ('0x{0:X8}' -f [uint32]([int64]$h.HResult -band 4294967295)) } catch { }
+            $title = [string]$h.Title
+            if ($title.Length -gt 150) { $title = $title.Substring(0, 150) }
+            $uid = ''; $rev = $null
+            try { $uid = [string]$h.UpdateIdentity.UpdateID; $rev = [int]$h.UpdateIdentity.RevisionNumber } catch { }
+            $historyDetails += [pscustomobject]@{
+                date = Iso $h.Date; title = $title; result = $resultName; resultCode = $rc
+                operation = $operationName; hResult = $hr; updateId = $uid; revision = $rev
+            }
+        }
     }
     $svcWu = $null; try { $svcWu = [string](Get-Service -Name wuauserv -ErrorAction Stop).StartType } catch { }
     $pause = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' 'PauseUpdatesExpiryTime')
     $paused = $false; if ($pause) { try { $paused = ([datetime]$pause -gt (Get-Date)) } catch { } }
     $noAuto = Read-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' 'NoAutoUpdate'
     $rbp = ((Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired') -or (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending'))
-    $wuInfo = [pscustomobject]@{ lastSuccessDays = $lastOk; failed30 = @($failed | Select-Object -Unique | Select-Object -First 6); serviceDisabled = ($svcWu -eq 'Disabled'); paused = $paused; policyOff = ($null -ne $noAuto -and [int]$noAuto -eq 1); restartPending = $rbp }
+    $wuInfo = [pscustomobject]@{
+        lastSuccessDays = $lastOk
+        failed30 = @($failed | Select-Object -Unique | Select-Object -First 6)
+        history = @($historyDetails)
+        serviceDisabled = ($svcWu -eq 'Disabled'); paused = $paused
+        policyOff = ($null -ne $noAuto -and [int]$noAuto -eq 1); restartPending = $rbp
+    }
 } catch { }
 
 # --- OneDrive
@@ -2347,6 +2385,41 @@ $pu['user'] = [string]$env:USERNAME
 $hp['sensors'] = [pscustomobject]$pu
 $extras | Add-Member -NotePropertyName help -NotePropertyValue ([pscustomobject]$hp) -Force
 
+# ---------------------------------------------------------------- 22. drive check flag, log sizes, Secure Boot certificates
+Step 22 $TOTAL 'Drive check flag, size of the Windows logs, Secure Boot certificates'
+$m4 = [ordered]@{}
+# --- "dirty" flag: Windows itself marked a drive as needing a check at the next start (read-only, nothing is scheduled)
+$dirtyVols = @()
+try {
+    foreach ($dv in @(Get-CimInstance Win32_Volume -Filter 'DriveType=3' -ErrorAction Stop | Where-Object { $_.DriveLetter })) {
+        $dirtyVols += [pscustomobject]@{ letter = [string]$dv.DriveLetter; dirty = $(if ($null -ne $dv.DirtyBitSet) { [bool]$dv.DirtyBitSet } else { $null }) }
+    }
+} catch { }
+$m4['dirty'] = @($dirtyVols)
+# --- how much history the three main logs can hold (a small Security log means the "Traces" part only sees a few days)
+$logInfo = @()
+foreach ($ln in @('System', 'Application', 'Security')) {
+    $li = [ordered]@{ name = $ln; maxMB = $null; sizeMB = $null; mode = $null; records = $null; oldestDays = $null; readable = $false }
+    try {
+        $lg = Get-WinEvent -ListLog $ln -ErrorAction Stop
+        $li.maxMB = [math]::Round([double]$lg.MaximumSizeInBytes / 1MB, 1)
+        if ($null -ne $lg.FileSize) { $li.sizeMB = [math]::Round([double]$lg.FileSize / 1MB, 1) }
+        $li.mode = [string]$lg.LogMode
+        if ($null -ne $lg.RecordCount) { $li.records = [long]$lg.RecordCount }
+    } catch { }
+    try {
+        $oe = @(Get-WinEvent -LogName $ln -MaxEvents 1 -Oldest -ErrorAction Stop)
+        if ($oe.Count -gt 0) { $li.oldestDays = [int][math]::Floor(((Get-Date) - $oe[0].TimeCreated).TotalDays); $li.readable = $true }
+    } catch { }
+    $logInfo += [pscustomobject]$li
+}
+$m4['logs'] = @($logInfo)
+# --- Secure Boot certificates of 2011 -> 2023: only the status text that Windows itself keeps
+$sbStatus = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing' 'UEFICA2023Status'
+$sbErr = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing' 'UEFICA2023Error'
+$m4['secureBootCa'] = [pscustomobject]@{ secureBoot = $secureBoot; status = $(if ($null -ne $sbStatus) { [string]$sbStatus } else { $null }); hasError = ($null -ne $sbErr -and "$sbErr" -ne '' -and "$sbErr" -ne '0') }
+$extras | Add-Member -NotePropertyName more4 -NotePropertyValue ([pscustomobject]$m4) -Force
+
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }
 
@@ -2369,7 +2442,36 @@ try {
     }
 } catch { }
 
+# What this scan could and could not read, so the report never shows "all good" for something it did not check.
+# status: ok = read, quick = skipped by the quick scan, admin = needs "Run as administrator", na = not available on this PC
+$covItems = @()
+function Add-Cov([string]$key, [bool]$needAdmin, [bool]$fullOnly, [string]$force) {
+    $st = 'ok'
+    if ($force) { $st = $force } elseif ($fullOnly -and $Quick) { $st = 'quick' } elseif ($needAdmin -and -not $isAdmin) { $st = 'admin' }
+    return [pscustomobject]@{ key = $key; status = $st }
+}
+$covItems += Add-Cov 'bitlocker' $true $false ''
+$covItems += Add-Cov 'features' $true $true ''
+$covItems += Add-Cov 'outdated' $false $true $(if (-not $wingetAvailable) { 'na' } else { '' })
+$covItems += Add-Cov 'oldDrivers' $false $true ''
+$covItems += Add-Cov 'dism' $true $true ''
+$covItems += Add-Cov 'restore' $true $false ''
+$covItems += Add-Cov 'winre' $true $false ''
+$covItems += Add-Cov 'space' $false $true ''
+$covItems += Add-Cov 'signatures' $false $true ''
+$covItems += Add-Cov 'dnsSpeed' $false $true ''
+$covItems += Add-Cov 'perf' $false $true ''
+$covItems += Add-Cov 'secpol' $true $false ''
+$covItems += Add-Cov 'sfc' $false $true ''
+$covItems += Add-Cov 'traces' $true $false ''
+$stepTimes = @()
+foreach ($sk in @($script:StepSec.Keys | Sort-Object)) {
+    $se = 0; foreach ($si in @($script:StepIssues)) { if ($si.step -eq $sk) { $se += [int]$si.errors } }
+    $stepTimes += [pscustomobject]@{ step = [int]$sk; label = [string]$script:StepLabel[$sk]; sec = [math]::Round([double]$script:StepSec[$sk], 1); errors = [int]$se }
+}
+
 $meta = [ordered]@{
+    schema     = 'veagle-pccheck/2'
     tool       = 'VEAGLE PC Check'
     version    = $script:Version
     generated  = Iso (Get-Date)
@@ -2383,6 +2485,8 @@ $meta = [ordered]@{
     durationSec = [int]$swTotal.Elapsed.TotalSeconds
     warnings   = @($script:Warnings)
     stepIssues = @($script:StepIssues)
+    stepTimes  = @($stepTimes)
+    coverage   = @($covItems)
     support    = $support
 }
 

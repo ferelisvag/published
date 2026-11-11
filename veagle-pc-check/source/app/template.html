@@ -4698,6 +4698,13 @@ var PRO = (function (V, AI) {
   function mins(n) { return n >= 60 ? Math.floor(n / 60) + ' h ' + (n % 60 ? (n % 60) + ' min' : '') : n + ' min'; }
   function cFree() { var v = arr(D.volumes).filter(function (x) { return /^C:/i.test(x.letter); })[0]; return v || null; }
   function bar(pct, cls) { return '<div class="bar ' + (cls || '') + '"><i style="width:' + Math.max(0, Math.min(100, pct)) + '%"></i></div>'; }
+  /* Windows Update history: result names in the reader's language (the collector writes English names) */
+  function wuResult(x) {
+    var t = { 1: ['In progress', 'Σε εξέλιξη'], 2: ['Succeeded', 'Επιτυχία'], 3: ['Succeeded with errors', 'Επιτυχία με σφάλματα'], 4: ['Failed', 'Απέτυχε'], 5: ['Aborted', 'Ακυρώθηκε'] }[x.resultCode];
+    var op = x.operation === 'Uninstallation' ? I(' (uninstall)', ' (απεγκατάσταση)') : '';
+    return (t ? I(t[0], t[1]) : (x.result || '-')) + op;
+  }
+
   function card(title, st, inner, id) { return '<div class="win"' + (id ? ' id="' + id + '"' : '') + '><header><span>' + esc(title) + '</span><span class="st">' + esc(st || '') + '</span></header><div class="body">' + inner + '</div></div>'; }
   function sect(t, n) { return '<div class="sect"><h2>' + esc(t) + '</h2><span>' + esc(n || '') + '</span></div>'; }
   function hbars(rows, unit, max, fmt) {
@@ -4903,6 +4910,8 @@ var PRO = (function (V, AI) {
     h += '<div class="s6">' + card(I('Windows Update and licences', 'Windows Update και άδειες'), '',
       '<dl class="kv" style="grid-template-columns:230px 1fr">' + [[I('Last successful update', 'Τελευταία επιτυχής ενημέρωση'), wu.lastSuccessDays != null ? I(wu.lastSuccessDays + ' days ago', 'πριν ' + wu.lastSuccessDays + ' ημέρες') : '-'], [I('Failed in 30 days', 'Απέτυχαν σε 30 ημέρες'), String(arr(wu.failed30).length)], [I('Restart waiting', 'Επανεκκίνηση σε αναμονή'), wu.restartPending ? I('yes', 'ναι') : I('no', 'όχι')], [I('Updates paused or off', 'Ενημερώσεις σε παύση ή κλειστές'), (wu.paused || wu.serviceDisabled || wu.policyOff) ? I('yes', 'ναι') : I('no', 'όχι')],
         [I('Office', 'Office'), X.office && X.office.installed ? (X.office.releaseIds || X.office.version || I('installed', 'εγκατεστημένο')) : I('not found', 'δεν βρέθηκε')], [I('OneDrive', 'OneDrive'), X.oneDrive && X.oneDrive.installed ? (X.oneDrive.signedIn ? I('signed in', 'συνδεδεμένο') : I('not signed in', 'όχι συνδεδεμένο')) : I('not found', 'δεν βρέθηκε')]].map(function (p) { return '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>'; }).join('') + '</dl>' +
+      (arr(wu.history).length ? '<div class="lbl">' + esc(I('Recent update history', 'Πρόσφατο ιστορικό ενημερώσεων')) + '</div><div class="tbl"><table><thead><tr><th>' + esc(I('Date', 'Ημερομηνία')) + '</th><th>' + esc(I('Update', 'Ενημέρωση')) + '</th><th>' + esc(I('Result', 'Αποτέλεσμα')) + '</th><th>' + esc(I('Code', 'Κωδικός')) + '</th></tr></thead><tbody>' +
+        arr(wu.history).slice(0, 10).map(function (x) { var bad = x.resultCode === 4 || x.resultCode === 5; return '<tr class="' + (bad ? 'hot' : '') + '"><td>' + esc(V.fmtDT(x.date)) + '</td><td>' + esc(x.title || '-') + '</td><td>' + esc(wuResult(x)) + '</td><td style="white-space:nowrap">' + esc(x.hResult || '-') + '</td></tr>'; }).join('') + '</tbody></table></div>' : '') +
       (ce.length ? '<div class="lbl">' + esc(I('Certificates that expire soon', 'Πιστοποιητικά που λήγουν σύντομα')) + '</div>' + hbars(ce.slice(0, 6).map(function (x) { return { l: x.name, v: Math.max(0, x.days), c: x.days < 0 ? 'bad' : (x.days < 15 ? 'warn' : '') }; }), '', 45, function (v) { return v + ' ' + I('days', 'ημέρες'); }) : '')) + '</div>';
     h += '</div>';
     /* tables */

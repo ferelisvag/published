@@ -2,7 +2,7 @@
  "meta": {
   "mode": "full",
   "tool": "VEAGLE PC Check",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "generated": "2026-10-10T16:35:00",
   "isAdmin": true,
   "psVersion": "5.1.26100.9549",
@@ -3082,7 +3082,49 @@
     "serviceDisabled": false,
     "paused": false,
     "policyOff": false,
-    "restartPending": true
+    "restartPending": true,
+    "history": [
+     {
+      "date": "2026-10-30T16:35:00",
+      "title": "Feature update to Windows 11, version 25H2",
+      "result": "Failed",
+      "resultCode": 4,
+      "operation": "Installation",
+      "hResult": "0x80070002",
+      "updateId": "00000000-0000-0000-0000-000000000001",
+      "revision": 1
+     },
+     {
+      "date": "2026-10-25T16:35:00",
+      "title": "2026-10 Cumulative Update for Windows 11 (KB5000001)",
+      "result": "Succeeded",
+      "resultCode": 2,
+      "operation": "Installation",
+      "hResult": "0x00000000",
+      "updateId": "00000000-0000-0000-0000-000000000002",
+      "revision": 1
+     },
+     {
+      "date": "2026-10-25T16:35:00",
+      "title": "Windows Malicious Software Removal Tool (KB890830)",
+      "result": "Succeeded",
+      "resultCode": 2,
+      "operation": "Installation",
+      "hResult": "0x00000000",
+      "updateId": "00000000-0000-0000-0000-000000000003",
+      "revision": 1
+     },
+     {
+      "date": "2026-10-10T16:35:00",
+      "title": "Security Intelligence Update for Microsoft Defender Antivirus",
+      "result": "Aborted",
+      "resultCode": 5,
+      "operation": "Installation",
+      "hResult": "0x80240022",
+      "updateId": "00000000-0000-0000-0000-000000000004",
+      "revision": 1
+     }
+    ]
    },
    "oneDrive": {
     "installed": true,

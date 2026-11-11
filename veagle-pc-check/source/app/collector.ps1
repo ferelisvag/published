@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.1.0'
+$script:Version = '2.2.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 
@@ -1318,17 +1318,40 @@ try {
     $se = $us.CreateUpdateSearcher()
     $cnt = [int]$se.GetTotalHistoryCount()
     $hist = @(); if ($cnt -gt 0) { $hist = @($se.QueryHistory(0, [math]::Min($cnt, 100))) }
-    $lastOk = $null; $failed = @()
+    $lastOk = $null; $failed = @(); $historyDetails = @()
     foreach ($h in $hist) {
-        if ([int]$h.ResultCode -eq 2 -and -not $lastOk) { $lastOk = [int]((Get-Date) - $h.Date).TotalDays }
-        if ([int]$h.ResultCode -eq 4 -and (((Get-Date) - $h.Date).TotalDays -le 30)) { $failed += [string]$h.Title }
+        $rc = [int]$h.ResultCode
+        if ($rc -eq 2 -and -not $lastOk) { $lastOk = [int]((Get-Date) - $h.Date).TotalDays }
+        if ($rc -eq 4 -and (((Get-Date) - $h.Date).TotalDays -le 30)) { $failed += [string]$h.Title }
+
+        # Keep a compact, useful audit trail. No update payloads or personal data are read.
+        if ($historyDetails.Count -lt 20) {
+            $resultName = switch ($rc) { 2 { 'Succeeded' } 3 { 'SucceededWithErrors' } 4 { 'Failed' } 5 { 'Aborted' } 1 { 'InProgress' } default { 'Unknown' } }
+            $operationName = switch ([int]$h.Operation) { 1 { 'Installation' } 2 { 'Uninstallation' } default { 'Other' } }
+            $hr = ''
+            try { $hr = ('0x{0:X8}' -f [uint32]([int64]$h.HResult -band 4294967295)) } catch { }
+            $title = [string]$h.Title
+            if ($title.Length -gt 150) { $title = $title.Substring(0, 150) }
+            $uid = ''; $rev = $null
+            try { $uid = [string]$h.UpdateIdentity.UpdateID; $rev = [int]$h.UpdateIdentity.RevisionNumber } catch { }
+            $historyDetails += [pscustomobject]@{
+                date = Iso $h.Date; title = $title; result = $resultName; resultCode = $rc
+                operation = $operationName; hResult = $hr; updateId = $uid; revision = $rev
+            }
+        }
     }
     $svcWu = $null; try { $svcWu = [string](Get-Service -Name wuauserv -ErrorAction Stop).StartType } catch { }
     $pause = [string](Read-Reg 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' 'PauseUpdatesExpiryTime')
     $paused = $false; if ($pause) { try { $paused = ([datetime]$pause -gt (Get-Date)) } catch { } }
     $noAuto = Read-Reg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU' 'NoAutoUpdate'
     $rbp = ((Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired') -or (Test-Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending'))
-    $wuInfo = [pscustomobject]@{ lastSuccessDays = $lastOk; failed30 = @($failed | Select-Object -Unique | Select-Object -First 6); serviceDisabled = ($svcWu -eq 'Disabled'); paused = $paused; policyOff = ($null -ne $noAuto -and [int]$noAuto -eq 1); restartPending = $rbp }
+    $wuInfo = [pscustomobject]@{
+        lastSuccessDays = $lastOk
+        failed30 = @($failed | Select-Object -Unique | Select-Object -First 6)
+        history = @($historyDetails)
+        serviceDisabled = ($svcWu -eq 'Disabled'); paused = $paused
+        policyOff = ($null -ne $noAuto -and [int]$noAuto -eq 1); restartPending = $rbp
+    }
 } catch { }
 
 # --- OneDrive

@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.1.0
+VEAGLE PC CHECK  v2.2.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -50,6 +50,11 @@ READING THE REPORT
 - You never have to fix everything. Start with the red HIGH ones, one at a time.
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
+
+NEW IN 2.2.0
+- The Insights page shows the recent Windows Update history: the last 10 operations with date, update name, result and error code. Failed or cancelled ones are in red.
+- The scan only reads the local Windows Update history. Nothing is downloaded, installed or changed.
+- On a PC where Windows Update cannot be read, this part is simply left empty.
 
 NEW IN 2.1.0
 - The "AI help" tab is now "Help & AI". It has two parts: "Help from a person (IT)" and "Help from an AI" (the same as before).

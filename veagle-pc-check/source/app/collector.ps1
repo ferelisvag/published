@@ -9,9 +9,11 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.4.0'
+$script:Version = '2.5.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
+# A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
+$PSDefaultParameterValues['Get-CimInstance:OperationTimeoutSec'] = 90
 
 $appDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $root = Split-Path -Parent $appDir
@@ -26,7 +28,19 @@ $script:StepIssues = New-Object System.Collections.ArrayList
 $script:CurStep = 0
 $script:CurLabel = ''
 $script:ErrMark = 0
+$script:StepSec = @{}
+$script:StepLabel = @{}
+$script:StepT0 = 0.0
 function Flush-StepErrors {
+    try {
+        $nowS = [double]$swTotal.Elapsed.TotalSeconds
+        if ($script:CurStep -gt 0) {
+            if (-not $script:StepSec.ContainsKey($script:CurStep)) { $script:StepSec[$script:CurStep] = 0.0 }
+            $script:StepSec[$script:CurStep] = [double]$script:StepSec[$script:CurStep] + ($nowS - $script:StepT0)
+            $script:StepLabel[$script:CurStep] = $script:CurLabel
+        }
+        $script:StepT0 = $nowS
+    } catch { }
     try {
         if ($script:CurStep -gt 0) {
             $cnt = $Error.Count - $script:ErrMark
@@ -253,7 +267,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 21
+$TOTAL = 22
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -627,8 +641,13 @@ $crashDumps = [pscustomobject]@{ dumps = [int]$dumpCount; liveKernelReports = [i
 Step 7 $TOTAL 'Event Viewer, last 30 days (System and Application)'
 $days = 60
 $since = (Get-Date).AddDays(-$days)
-$sysEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'System'; Level = 1, 2, 3; StartTime = $since } -ErrorAction SilentlyContinue)
-$appEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Level = 1, 2, 3; StartTime = $since } -ErrorAction SilentlyContinue)
+# Upper limit: a very noisy PC can hold hundreds of thousands of warnings. The newest ones are read first, so a cut only drops the oldest.
+$evMax = 30000
+$sysEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'System'; Level = 1, 2, 3; StartTime = $since } -MaxEvents $evMax -ErrorAction SilentlyContinue)
+$appEv = @(Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Level = 1, 2, 3; StartTime = $since } -MaxEvents $evMax -ErrorAction SilentlyContinue)
+$evCap = [ordered]@{ max = $evMax; system = ($sysEv.Count -ge $evMax); application = ($appEv.Count -ge $evMax); systemDays = $null; applicationDays = $null }
+try { if ($evCap.system) { $evCap.systemDays = [int][math]::Floor(((Get-Date) - $sysEv[$sysEv.Count - 1].TimeCreated).TotalDays) } } catch { }
+try { if ($evCap.application) { $evCap.applicationDays = [int][math]::Floor(((Get-Date) - $appEv[$appEv.Count - 1].TimeCreated).TotalDays) } } catch { }
 
 foreach ($pair in @(@('System', $sysEv), @('Application', $appEv))) {
     try {
@@ -674,6 +693,7 @@ $events = [ordered]@{
     appHangs1   = $hang1
     appHangs7   = $hang7
     appHangs30  = $hang30
+    capped      = [pscustomobject]$evCap
 }
 
 # ---------------------------------------------------------------- 8. boot
@@ -2370,6 +2390,41 @@ $pu['user'] = [string]$env:USERNAME
 $hp['sensors'] = [pscustomobject]$pu
 $extras | Add-Member -NotePropertyName help -NotePropertyValue ([pscustomobject]$hp) -Force
 
+# ---------------------------------------------------------------- 22. drive check flag, log sizes, Secure Boot certificates
+Step 22 $TOTAL 'Drive check flag, size of the Windows logs, Secure Boot certificates'
+$m4 = [ordered]@{}
+# --- "dirty" flag: Windows itself marked a drive as needing a check at the next start (read-only, nothing is scheduled)
+$dirtyVols = @()
+try {
+    foreach ($dv in @(Get-CimInstance Win32_Volume -Filter 'DriveType=3' -ErrorAction Stop | Where-Object { $_.DriveLetter })) {
+        $dirtyVols += [pscustomobject]@{ letter = [string]$dv.DriveLetter; dirty = $(if ($null -ne $dv.DirtyBitSet) { [bool]$dv.DirtyBitSet } else { $null }) }
+    }
+} catch { }
+$m4['dirty'] = @($dirtyVols)
+# --- how much history the three main logs can hold (a small Security log means the "Traces" part only sees a few days)
+$logInfo = @()
+foreach ($ln in @('System', 'Application', 'Security')) {
+    $li = [ordered]@{ name = $ln; maxMB = $null; sizeMB = $null; mode = $null; records = $null; oldestDays = $null; readable = $false }
+    try {
+        $lg = Get-WinEvent -ListLog $ln -ErrorAction Stop
+        $li.maxMB = [math]::Round([double]$lg.MaximumSizeInBytes / 1MB, 1)
+        if ($null -ne $lg.FileSize) { $li.sizeMB = [math]::Round([double]$lg.FileSize / 1MB, 1) }
+        $li.mode = [string]$lg.LogMode
+        if ($null -ne $lg.RecordCount) { $li.records = [long]$lg.RecordCount }
+    } catch { }
+    try {
+        $oe = @(Get-WinEvent -LogName $ln -MaxEvents 1 -Oldest -ErrorAction Stop)
+        if ($oe.Count -gt 0) { $li.oldestDays = [int][math]::Floor(((Get-Date) - $oe[0].TimeCreated).TotalDays); $li.readable = $true }
+    } catch { }
+    $logInfo += [pscustomobject]$li
+}
+$m4['logs'] = @($logInfo)
+# --- Secure Boot certificates of 2011 -> 2023: only the status text that Windows itself keeps
+$sbStatus = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing' 'UEFICA2023Status'
+$sbErr = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing' 'UEFICA2023Error'
+$m4['secureBootCa'] = [pscustomobject]@{ secureBoot = $secureBoot; status = $(if ($null -ne $sbStatus) { [string]$sbStatus } else { $null }); hasError = ($null -ne $sbErr -and "$sbErr" -ne '' -and "$sbErr" -ne '0') }
+$extras | Add-Member -NotePropertyName more4 -NotePropertyValue ([pscustomobject]$m4) -Force
+
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }
 
@@ -2392,7 +2447,36 @@ try {
     }
 } catch { }
 
+# What this scan could and could not read, so the report never shows "all good" for something it did not check.
+# status: ok = read, quick = skipped by the quick scan, admin = needs "Run as administrator", na = not available on this PC
+$covItems = @()
+function Add-Cov([string]$key, [bool]$needAdmin, [bool]$fullOnly, [string]$force) {
+    $st = 'ok'
+    if ($force) { $st = $force } elseif ($fullOnly -and $Quick) { $st = 'quick' } elseif ($needAdmin -and -not $isAdmin) { $st = 'admin' }
+    return [pscustomobject]@{ key = $key; status = $st }
+}
+$covItems += Add-Cov 'bitlocker' $true $false ''
+$covItems += Add-Cov 'features' $true $true ''
+$covItems += Add-Cov 'outdated' $false $true $(if (-not $wingetAvailable) { 'na' } else { '' })
+$covItems += Add-Cov 'oldDrivers' $false $true ''
+$covItems += Add-Cov 'dism' $true $true ''
+$covItems += Add-Cov 'restore' $true $false ''
+$covItems += Add-Cov 'winre' $true $false ''
+$covItems += Add-Cov 'space' $false $true ''
+$covItems += Add-Cov 'signatures' $false $true ''
+$covItems += Add-Cov 'dnsSpeed' $false $true ''
+$covItems += Add-Cov 'perf' $false $true ''
+$covItems += Add-Cov 'secpol' $true $false ''
+$covItems += Add-Cov 'sfc' $false $true ''
+$covItems += Add-Cov 'traces' $true $false ''
+$stepTimes = @()
+foreach ($sk in @($script:StepSec.Keys | Sort-Object)) {
+    $se = 0; foreach ($si in @($script:StepIssues)) { if ($si.step -eq $sk) { $se += [int]$si.errors } }
+    $stepTimes += [pscustomobject]@{ step = [int]$sk; label = [string]$script:StepLabel[$sk]; sec = [math]::Round([double]$script:StepSec[$sk], 1); errors = [int]$se }
+}
+
 $meta = [ordered]@{
+    schema     = 'veagle-pccheck/2'
     tool       = 'VEAGLE PC Check'
     version    = $script:Version
     generated  = Iso (Get-Date)
@@ -2406,6 +2490,8 @@ $meta = [ordered]@{
     durationSec = [int]$swTotal.Elapsed.TotalSeconds
     warnings   = @($script:Warnings)
     stepIssues = @($script:StepIssues)
+    stepTimes  = @($stepTimes)
+    coverage   = @($covItems)
     support    = $support
 }
 

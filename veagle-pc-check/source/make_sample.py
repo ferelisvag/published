@@ -282,8 +282,25 @@ def _addwin(d):
         a['count'] = int(a['count'] * 1.7) + 1; a['count30'] = a['count'] * 6 // 10; a['count7'] = a['count'] // 5; a['count1'] = a['count'] // 20
     ev['days'] = 60; ev['appHangs1'] = ev.get('appHangs', 0) // 20; ev['appHangs7'] = ev.get('appHangs', 0) // 5; ev['appHangs30'] = ev.get('appHangs', 0) * 6 // 10
 
+
+# --- v2.5 reliability: coverage map, time per step, event cap, drive check flag, log sizes, Secure Boot certificates
+_COVK = ['bitlocker', 'features', 'outdated', 'oldDrivers', 'dism', 'restore', 'winre', 'space', 'signatures', 'dnsSpeed', 'perf', 'secpol', 'sfc', 'traces']
+_STEPS = ['System, CPU, memory, board', 'Graphics and display', 'Storage', 'Network adapters', 'Security settings', 'Power, performance settings, updates', 'Event Viewer', 'Boot history', 'Installed applications', 'Outdated applications (winget)', 'Startup items, services, running processes', 'Drivers and devices', 'Windows image health (DISM CheckHealth)', 'Reliability, security details, network test, backups', 'Where the disk space went', 'Crash dump files and the timeline of events', 'Accounts, signatures, add-ons, licences, updates, network, temperature', 'Equipment, hardening, privacy, performance sample', 'Windows 11 readiness, tasks and services', 'Traces', 'Help', 'Drive check flag, size of the Windows logs, Secure Boot certificates']
+def _reliab(d, heavy):
+    secs = [3.1, 1.2, 4.8, 0.9, 6.3, 2.2, 14.6, 1.1, 2.9, 38.5, 3.4, 7.7, 21.0, 9.8, 64.2, 5.5, 31.9, 19.4, 8.6, 12.3, 4.0, 1.6]
+    d['meta']['schema'] = 'veagle-pccheck/2'
+    d['meta']['stepTimes'] = [dict(step=i + 1, label=_STEPS[i], sec=secs[i] * (1.8 if heavy else 1), errors=0) for i in range(22)]
+    adm = ('bitlocker', 'restore', 'winre', 'secpol', 'traces') if heavy else ()
+    d['meta']['coverage'] = [dict(key=k, status=('admin' if k in adm else ('na' if heavy and k == 'outdated' else 'ok'))) for k in _COVK]
+    d['events']['capped'] = dict(max=30000, system=bool(heavy), application=False, systemDays=(41 if heavy else None), applicationDays=None)
+    d['extras']['more4'] = dict(
+        dirty=[dict(letter='C:', dirty=bool(heavy))],
+        logs=[dict(name='System', maxMB=20.0, sizeMB=20.0, mode='Circular', records=41200, oldestDays=(41 if heavy else 212), readable=True),
+              dict(name='Application', maxMB=20.0, sizeMB=18.4, mode='Circular', records=38810, oldestDays=(95 if heavy else 340), readable=True),
+              dict(name='Security', maxMB=20.0, sizeMB=20.0, mode='Circular', records=29950, oldestDays=(6 if heavy else 23), readable=True)],
+        secureBootCa=dict(secureBoot=(None if heavy else True), status=(None if heavy else 'InProgress'), hasError=False))
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '2.4.0'
+data['meta']['version'] = '2.5.0'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -307,6 +324,7 @@ data['extras']['more2'] = _more2(False)
 data['extras']['more3'] = _more3(False)
 data['extras']['forensics'] = _forensics(False)
 data['extras']['help'] = _help(False)
+_reliab(data, False)
 data['meta']['support'] = {'name': 'Vagelis (demo)', 'email': 'helper@example.com', 'phone': '', 'site': 'ferelis.gr', 'note': ''}
 data['trend'] = SAMPLE_TREND
 _addwin(data)
@@ -331,7 +349,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '2.4.0'
+w['meta']['version'] = '2.5.0'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),
@@ -348,6 +366,7 @@ w['extras']['more2'] = _more2(True)
 w['extras']['more3'] = _more3(True)
 w['extras']['forensics'] = _forensics(True)
 w['extras']['help'] = _help(True)
+_reliab(w, True)
 _addwin(w)
 (out / 'sample-win10-laptop.json').write_text(json.dumps(w, indent=1), encoding='utf-8')
 

@@ -68,6 +68,13 @@ function fixtures() {
       const ids = await page.evaluate(() => V.findings.map(f => f.id));
       for (const id of ['win-ready-11', 'cfg-tasks-unusual', 'sec-svc-path', 'sec-svc-unquoted', 'stab-memdiag', 'stab-sfc', 'prn-stuck', 'soft-runtime-eol']) ok(ids.includes(id), 'finding ' + id + ' appears');
     }
+    // 2.5.0 reliability: new findings, coverage box
+    if (name === 'win10-laptop' || name === 'sample') {
+      const ids2 = await page.evaluate(() => V.findings.map(f => f.id));
+      const want = (data.extras && data.extras.more4 && data.extras.more4.dirty || []).some(x => x.dirty) ? ['sto-dirty', 'for-log-short'] : ['sec-sb-cert'];
+      for (const id of want) ok(ids2.includes(id), 'finding ' + id + ' appears');
+    }
+    ok(!!(await page.$('#scanCov')) === !!(data.meta && (data.meta.coverage || data.meta.stepTimes)), 'coverage box matches the data');
     // views
     await page.evaluate(() => UI.setView('simple'));
     ok(await page.evaluate(() => document.body.classList.contains('view-simple')), 'simple view on');
@@ -91,6 +98,28 @@ function fixtures() {
     // share-safe copy drops error texts
     const share = await page.evaluate(() => { try { return typeof SHARE.build === 'function' ? JSON.stringify(SHARE.build()) : null; } catch (e) { return null; } });
     if (share && expect) ok(!share.includes('Access is denied'), 'share-safe copy has no error samples');
+    // privacy: the share-safe copy must not contain the personal values of this scan
+    if (share) {
+      const secrets = [];
+      const add = (v, why) => { if (typeof v === 'string' && v.length >= 4 && !/^(default string|to be filled|none|unknown|workgroup|system|administrator|guest|public)$/i.test(v)) secrets.push([v, why]); };
+      const m = data.meta || {}, mo = (data.extras && data.extras.more) || {}, m2 = (data.extras && data.extras.more2) || {};
+      add(m.computer, 'PC name'); add(m.user, 'user name');
+      add(mo.inventory && mo.inventory.serial, 'serial number');
+      (mo.wifiSaved || []).forEach(w => add(w.name, 'Wi-Fi name'));
+      (mo.accounts || []).forEach(a => add(a.name, 'account name'));
+      (m2.neighbours || []).forEach(n => { add(n.mac, 'neighbour MAC'); add(n.ip, 'neighbour address'); });
+      (m2.usbHistory || []).forEach(u => add(u.serial, 'USB serial'));
+      (m2.mappedDrives || []).forEach(d => add(d.path || d.remote, 'network drive'));
+      add(m.support && m.support.email, 'helper email');
+      const i0 = share.indexOf('window.__PCDATA__ = '), i1 = share.indexOf(';<', i0);
+      const sdata = i0 >= 0 ? share.slice(i0, i1) : share; // only the data part: the program text may contain ordinary words
+      const esc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const hit = v => { const mm = new RegExp('(^|[^A-Za-z0-9])' + esc(v) + '([^A-Za-z0-9]|$)').exec(sdata); return mm ? sdata.slice(Math.max(0, mm.index - 50), mm.index + v.length + 20) : null; };
+      const leaks = secrets.map(x => [x, hit(x[0])]).filter(x => x[1]).map(x => x[0][1] + ' "' + x[0][0] + '" near: ' + x[1].replace(/\s+/g, ' '));
+      ok(leaks.length === 0, 'share-safe copy has no personal values ' + [...new Set(leaks)].slice(0, 12).join('\n      '));
+      const macs = sdata.match(/\b[0-9A-Fa-f]{2}([-:][0-9A-Fa-f]{2}){5}\b/g) || [];
+      ok(macs.length === 0, 'share-safe copy has no network card addresses ' + [...new Set(macs)].slice(0, 3).join(', '));
+    }
     ok(errs.length === 0, 'no JS errors ' + errs.slice(0, 2).join(' | '));
     await page.close();
   }

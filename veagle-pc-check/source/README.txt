@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.4.0
+VEAGLE PC CHECK  v2.5.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -50,6 +50,13 @@ READING THE REPORT
 - You never have to fix everything. Start with the red HIGH ones, one at a time.
   After each fix, restart the PC and scan again. The "Compare" tab shows what got better.
 - The "Tools" tab has a beginner guide, a message you can send to a helper, and more.
+
+NEW IN 2.5.0
+- The report has a new box, "What this scan checked". It lists the deeper checks that were done and the ones that could not be done (quick scan, or not run as administrator). A check that was not done is never shown as "all good".
+- Every question to the Windows information service (WMI) now gives up after 90 seconds, so one stuck answer cannot hang the scan.
+- On a PC with a huge number of warnings, only the newest 30,000 per log are read. The report tells you when this happened.
+- Three new read-only checks: a drive that Windows marked as "needs a check", how many days the Windows logs remember, and whether the Secure Boot certificates were renewed.
+- The scan has 22 steps now. Everything is still read-only.
 
 NEW IN 2.4.0
 - A new report look called Fable52 (choose it in the "Theme" box at the top). It tells the story of your PC with a flower-shaped chart of the 8 areas, a heartbeat line of the last days and your next three moves. It has gentle motion; the "Pause motion" button stops it.

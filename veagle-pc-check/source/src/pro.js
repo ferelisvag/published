@@ -119,6 +119,35 @@ var PRO = (function (V, AI) {
   }
 
   /* ---------- steps of the scan that may be incomplete (1.1.0) ---------- */
+  /* 2.5.0: what the scan could and could not read (meta.coverage, meta.stepTimes, events.capped, extras.more4.logs) */
+  var COVN = { bitlocker: ['Drive encryption (BitLocker)', 'Κρυπτογράφηση δίσκου (BitLocker)'], features: ['Optional Windows features', 'Προαιρετικές λειτουργίες των Windows'], outdated: ['Programs that have updates (winget)', 'Προγράμματα με διαθέσιμες ενημερώσεις (winget)'], oldDrivers: ['Old drivers', 'Παλιοί οδηγοί'], dism: ['Health of the Windows files (DISM)', 'Υγεία των αρχείων των Windows (DISM)'], restore: ['Restore points', 'Σημεία επαναφοράς'], winre: ['Windows recovery environment', 'Περιβάλλον αποκατάστασης των Windows'], space: ['Where the disk space went', 'Πού πήγε ο χώρος του δίσκου'], signatures: ['Digital signatures of start-up programs', 'Ψηφιακές υπογραφές των προγραμμάτων εκκίνησης'], dnsSpeed: ['DNS speed comparison', 'Σύγκριση ταχύτητας DNS'], perf: ['10-second performance sample', 'Δείγμα απόδοσης 10 δευτερολέπτων'], secpol: ['Security policy settings', 'Ρυθμίσεις πολιτικής ασφαλείας'], sfc: ['Last system file check', 'Τελευταίος έλεγχος αρχείων συστήματος'], traces: ['Security traces (sign-ins, cleared logs)', 'Ίχνη ασφαλείας (συνδέσεις, σβησμένα αρχεία καταγραφής)'] };
+  function covWord(st) {
+    return st === 'quick' ? I('Not checked: the quick scan skips it (run VEAGLE-PC-Check.bat for the full scan)', 'Δεν ελέγχθηκε: η γρήγορη σάρωση το παραλείπει (τρέξε το VEAGLE-PC-Check.bat για πλήρη σάρωση)') : st === 'admin' ? I('Not checked: needs "Run as administrator"', 'Δεν ελέγχθηκε: θέλει «Εκτέλεση ως διαχειριστής»') : st === 'na' ? I('Not available on this PC', 'Δεν υπάρχει σε αυτόν τον υπολογιστή') : I('Checked', 'Ελέγχθηκε');
+  }
+  function coverageHtml() {
+    var M = (V.RAW && V.RAW.meta) || {}, cv = M.coverage, stt = M.stepTimes; if (!cv && !stt) return '';
+    cv = !cv ? [] : (Array.isArray(cv) ? cv : [cv]); stt = !stt ? [] : (Array.isArray(stt) ? stt : [stt]);
+    cv = cv.filter(function (x) { return x && x.key && COVN[x.key]; });
+    var miss = cv.filter(function (x) { return x.status !== 'ok'; }), okN = cv.length - miss.length;
+    var cap = (V.RAW.events && V.RAW.events.capped) || null, capL = [];
+    if (cap && cap.system) capL.push(I('System log', 'Αρχείο καταγραφής Συστήματος') + (cap.systemDays != null ? I(' (the scan saw the last ' + cap.systemDays + ' days)', ' (η σάρωση είδε τις τελευταίες ' + cap.systemDays + ' ημέρες)') : ''));
+    if (cap && cap.application) capL.push(I('Application log', 'Αρχείο καταγραφής Εφαρμογών') + (cap.applicationDays != null ? I(' (the scan saw the last ' + cap.applicationDays + ' days)', ' (η σάρωση είδε τις τελευταίες ' + cap.applicationDays + ' ημέρες)') : ''));
+    var lg = (V.RAW.extras && V.RAW.extras.more4 && V.RAW.extras.more4.logs) || []; if (!Array.isArray(lg)) lg = [lg];
+    var LN = { System: ['System', 'Σύστημα'], Application: ['Application', 'Εφαρμογές'], Security: ['Security', 'Ασφάλεια'] };
+    var h = '<details class="howto' + (miss.length || capL.length ? ' on' : '') + '" id="scanCov"><summary>' + esc(miss.length ? I('What this scan checked: ' + okN + ' of ' + cv.length + ' deeper checks. ' + miss.length + ' could not be done', 'Τι έλεγξε αυτή η σάρωση: ' + okN + ' από τους ' + cv.length + ' βαθύτερους ελέγχους. ' + miss.length + ' δεν έγιναν') : I('What this scan checked: all the deeper checks were done', 'Τι έλεγξε αυτή η σάρωση: έγιναν όλοι οι βαθύτεροι έλεγχοι')) + '</summary><div>';
+    h += '<p>' + esc(I('When a check could not be done, this report does not know the answer for it. That is different from "everything is fine". The list shows exactly which checks were done and which were not, and why.', 'Όταν ένας έλεγχος δεν μπόρεσε να γίνει, η αναφορά δεν ξέρει την απάντηση. Αυτό είναι διαφορετικό από το «όλα καλά». Η λίστα δείχνει ακριβώς ποιοι έλεγχοι έγιναν, ποιοι όχι, και γιατί.')) + '</p>';
+    if (cv.length) h += '<div class="tbl"><table><tr><th>' + esc(I('Check', 'Έλεγχος')) + '</th><th>' + esc(I('Result', 'Αποτέλεσμα')) + '</th></tr>' + cv.map(function (x) { return '<tr' + (x.status !== 'ok' ? ' class="hot"' : '') + '><td>' + esc(I(COVN[x.key][0], COVN[x.key][1])) + '</td><td>' + (x.status === 'ok' ? '&#10003; ' : '&#9888; ') + esc(covWord(x.status)) + '</td></tr>'; }).join('') + '</table></div>';
+    if (miss.some(function (x) { return x.status === 'admin'; })) h += '<p class="sub">' + esc(I('To get the checks that need an administrator: close this report, right-click "VEAGLE-PC-Check.bat" in the folder of the tool and choose "Run as administrator".', 'Για τους ελέγχους που θέλουν διαχειριστή: κλείσε την αναφορά, κάνε δεξί κλικ στο «VEAGLE-PC-Check.bat» στον φάκελο του εργαλείου και διάλεξε «Εκτέλεση ως διαχειριστής».')) + '</p>';
+    if (capL.length) h += '<p><b>' + esc(I('Very many warnings.', 'Πάρα πολλές προειδοποιήσεις.')) + '</b> ' + esc(I('This PC wrote more than ' + cap.max + ' warnings and errors, so the scan read only the newest ones: ', 'Αυτός ο υπολογιστής έγραψε πάνω από ' + cap.max + ' προειδοποιήσεις και σφάλματα, οπότε η σάρωση διάβασε μόνο τα πιο πρόσφατα: ') + capL.join(', ') + '. ' + I('Counts for older days are lower than the real ones.', 'Οι μετρήσεις για τις παλιότερες ημέρες είναι μικρότερες από τις πραγματικές.')) + '</p>';
+    lg = lg.filter(function (x) { return x && LN[x.name]; });
+    if (lg.length) h += '<p class="sub"><b>' + esc(I('How far back Windows remembers: ', 'Πόσο πίσω θυμούνται τα Windows: ')) + '</b>' + lg.map(function (x) { return esc(I(LN[x.name][0], LN[x.name][1])) + ' ' + esc(x.readable && x.oldestDays != null ? I(x.oldestDays + ' days', x.oldestDays + ' ημέρες') : I('could not be read', 'δεν διαβάστηκε')); }).join(' · ') + '</p>';
+    stt = stt.filter(function (x) { return x && x.step; });
+    if (stt.length) {
+      var tot = stt.reduce(function (n, x) { return n + (+x.sec || 0); }, 0);
+      h += '<details class="techonly"><summary>' + esc(I('For a technician: time per step (total ' + Math.round(tot) + ' s)', 'Για τεχνικό: χρόνος ανά βήμα (σύνολο ' + Math.round(tot) + ' δ)')) + '</summary><div class="tbl"><table><tr><th>#</th><th>' + esc(I('Step', 'Βήμα')) + '</th><th>' + esc(I('Seconds', 'Δευτερόλεπτα')) + '</th><th>' + esc(I('Errors', 'Σφάλματα')) + '</th></tr>' + stt.map(function (x) { return '<tr' + (x.errors ? ' class="hot"' : '') + '><td>' + (+x.step) + '</td><td>' + esc(x.label || '') + '</td><td>' + (+x.sec || 0) + '</td><td>' + (+x.errors || 0) + '</td></tr>'; }).join('') + '</table></div></details>';
+    }
+    return h + '</div></details>';
+  }
   function stepIssuesHtml() {
     var a = (V.RAW && V.RAW.meta && V.RAW.meta.stepIssues) || [];
     if (!Array.isArray(a)) a = [a];
@@ -149,6 +178,8 @@ var PRO = (function (V, AI) {
       var sp = el.querySelector('.summary .sub'); 
       if (sp) { var nt = document.createElement('p'); nt.className = 'sub est'; nt.innerHTML = '<b>' + esc(I('Scan result: ' + V.scoreRaw.score + '. With the steps you ticked and what you accepted: ' + V.score.score + '.', 'Αποτέλεσμα σάρωσης: ' + V.scoreRaw.score + '. Με τα βήματα που τικάρισες και όσα αποδέχτηκες: ' + V.score.score + '.')) + '</b> ' + esc(I('This is an estimate. Run the scan again to confirm what you fixed.', 'Είναι εκτίμηση. Τρέξε ξανά τη σάρωση για να επιβεβαιωθεί ό,τι διόρθωσες.')); sp.parentNode.insertBefore(nt, sp.nextSibling); }
     }
+    var cvh = coverageHtml();
+    if (cvh) { var cb = document.createElement('div'); cb.innerHTML = cvh; var anc0 = el.querySelector('.vz2') || el.querySelector('.summary'); if (anc0) anc0.insertAdjacentElement('afterend', cb.firstChild); }
     var si = stepIssuesHtml();
     if (si) { var sb = document.createElement('div'); sb.innerHTML = si; var anc = el.querySelector('.vz2') || el.querySelector('.summary'); if (anc) anc.insertAdjacentElement('afterend', sb.firstChild); }
     var tail = document.createElement('div');

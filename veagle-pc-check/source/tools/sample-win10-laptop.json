@@ -2,7 +2,7 @@
  "meta": {
   "mode": "quick",
   "tool": "VEAGLE PC Check",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "generated": "2026-10-31T16:35:00",
   "isAdmin": true,
   "psVersion": "5.1.26100.9549",
@@ -12,6 +12,199 @@
   "durationSec": 41,
   "warnings": [
    "winget: first run may be slow"
+  ],
+  "schema": "veagle-pccheck/2",
+  "stepTimes": [
+   {
+    "step": 1,
+    "label": "System, CPU, memory, board",
+    "sec": 5.58,
+    "errors": 0
+   },
+   {
+    "step": 2,
+    "label": "Graphics and display",
+    "sec": 2.16,
+    "errors": 0
+   },
+   {
+    "step": 3,
+    "label": "Storage",
+    "sec": 8.64,
+    "errors": 0
+   },
+   {
+    "step": 4,
+    "label": "Network adapters",
+    "sec": 1.62,
+    "errors": 0
+   },
+   {
+    "step": 5,
+    "label": "Security settings",
+    "sec": 11.34,
+    "errors": 0
+   },
+   {
+    "step": 6,
+    "label": "Power, performance settings, updates",
+    "sec": 3.9600000000000004,
+    "errors": 0
+   },
+   {
+    "step": 7,
+    "label": "Event Viewer",
+    "sec": 26.28,
+    "errors": 0
+   },
+   {
+    "step": 8,
+    "label": "Boot history",
+    "sec": 1.9800000000000002,
+    "errors": 0
+   },
+   {
+    "step": 9,
+    "label": "Installed applications",
+    "sec": 5.22,
+    "errors": 0
+   },
+   {
+    "step": 10,
+    "label": "Outdated applications (winget)",
+    "sec": 69.3,
+    "errors": 0
+   },
+   {
+    "step": 11,
+    "label": "Startup items, services, running processes",
+    "sec": 6.12,
+    "errors": 0
+   },
+   {
+    "step": 12,
+    "label": "Drivers and devices",
+    "sec": 13.860000000000001,
+    "errors": 0
+   },
+   {
+    "step": 13,
+    "label": "Windows image health (DISM CheckHealth)",
+    "sec": 37.800000000000004,
+    "errors": 0
+   },
+   {
+    "step": 14,
+    "label": "Reliability, security details, network test, backups",
+    "sec": 17.64,
+    "errors": 0
+   },
+   {
+    "step": 15,
+    "label": "Where the disk space went",
+    "sec": 115.56,
+    "errors": 0
+   },
+   {
+    "step": 16,
+    "label": "Crash dump files and the timeline of events",
+    "sec": 9.9,
+    "errors": 0
+   },
+   {
+    "step": 17,
+    "label": "Accounts, signatures, add-ons, licences, updates, network, temperature",
+    "sec": 57.42,
+    "errors": 0
+   },
+   {
+    "step": 18,
+    "label": "Equipment, hardening, privacy, performance sample",
+    "sec": 34.92,
+    "errors": 0
+   },
+   {
+    "step": 19,
+    "label": "Windows 11 readiness, tasks and services",
+    "sec": 15.48,
+    "errors": 0
+   },
+   {
+    "step": 20,
+    "label": "Traces",
+    "sec": 22.14,
+    "errors": 0
+   },
+   {
+    "step": 21,
+    "label": "Help",
+    "sec": 7.2,
+    "errors": 0
+   },
+   {
+    "step": 22,
+    "label": "Drive check flag, size of the Windows logs, Secure Boot certificates",
+    "sec": 2.8800000000000003,
+    "errors": 0
+   }
+  ],
+  "coverage": [
+   {
+    "key": "bitlocker",
+    "status": "admin"
+   },
+   {
+    "key": "features",
+    "status": "ok"
+   },
+   {
+    "key": "outdated",
+    "status": "na"
+   },
+   {
+    "key": "oldDrivers",
+    "status": "ok"
+   },
+   {
+    "key": "dism",
+    "status": "ok"
+   },
+   {
+    "key": "restore",
+    "status": "admin"
+   },
+   {
+    "key": "winre",
+    "status": "admin"
+   },
+   {
+    "key": "space",
+    "status": "ok"
+   },
+   {
+    "key": "signatures",
+    "status": "ok"
+   },
+   {
+    "key": "dnsSpeed",
+    "status": "ok"
+   },
+   {
+    "key": "perf",
+    "status": "ok"
+   },
+   {
+    "key": "secpol",
+    "status": "admin"
+   },
+   {
+    "key": "sfc",
+    "status": "ok"
+   },
+   {
+    "key": "traces",
+    "status": "admin"
+   }
   ],
   "support": {
    "name": "Vagelis (demo)",
@@ -1215,6 +1408,13 @@
    }
   ],
   "appHangs": 2,
+  "capped": {
+   "max": 30000,
+   "system": true,
+   "application": false,
+   "systemDays": 41,
+   "applicationDays": null
+  },
   "appHangs1": 0,
   "appHangs7": 0,
   "appHangs30": 1
@@ -3432,6 +3632,48 @@
       }
      ]
     }
+   }
+  },
+  "more4": {
+   "dirty": [
+    {
+     "letter": "C:",
+     "dirty": true
+    }
+   ],
+   "logs": [
+    {
+     "name": "System",
+     "maxMB": 20.0,
+     "sizeMB": 20.0,
+     "mode": "Circular",
+     "records": 41200,
+     "oldestDays": 41,
+     "readable": true
+    },
+    {
+     "name": "Application",
+     "maxMB": 20.0,
+     "sizeMB": 18.4,
+     "mode": "Circular",
+     "records": 38810,
+     "oldestDays": 95,
+     "readable": true
+    },
+    {
+     "name": "Security",
+     "maxMB": 20.0,
+     "sizeMB": 20.0,
+     "mode": "Circular",
+     "records": 29950,
+     "oldestDays": 6,
+     "readable": true
+    }
+   ],
+   "secureBootCa": {
+    "secureBoot": null,
+    "status": null,
+    "hasError": false
    }
   }
  },

@@ -236,6 +236,7 @@ function Engine(RAW) {
     'sto-diskhealth': [20, 'Ask a pro', 'Back up first'], 'perf-gpuheat': [20, 'Medium', 'Safe'], 'hw-age': [2, 'Easy', 'Safe'], 'perf-bottleneck': [10, 'Easy', 'Safe'], 'sec-persist': [20, 'Ask a pro', 'Safe'], 'sec-hardening': [30, 'Medium', 'Safe'], 'sec-privacy': [15, 'Easy', 'Safe'], 'sto-caches': [5, 'Easy', 'Safe'], 'soft-unused': [15, 'Easy', 'Back up first'], 'sec-browser-old': [3, 'Easy', 'Safe'],
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe'],
     'win-ready-11': [10, 'Medium', 'Safe'], 'cfg-tasks-unusual': [15, 'Medium', 'Safe'], 'sec-svc-path': [15, 'Medium', 'Safe'], 'sec-svc-unquoted': [2, 'Ask a pro', 'Safe'], 'stab-memdiag': [60, 'Medium', 'Back up first'], 'stab-sfc': [40, 'Medium', 'Safe'], 'prn-stuck': [5, 'Easy', 'Safe'], 'soft-runtime-eol': [10, 'Medium', 'Safe'],
+    'sto-dirty': [15, 'Easy', 'Back up first'], 'sec-sb-cert': [30, 'Medium', 'Safe'], 'for-log-short': [5, 'Medium', 'Safe'],
     'for-logon-brute': [20, 'Medium', 'Safe'], 'for-logon-remote': [20, 'Ask a pro', 'Safe'], 'for-audit-off': [5, 'Medium', 'Safe'], 'for-log-cleared': [15, 'Ask a pro', 'Safe'], 'for-acct-new': [10, 'Medium', 'Safe'], 'for-svc-new': [15, 'Medium', 'Safe'], 'for-time-changed': [5, 'Easy', 'Safe'], 'for-run-tools': [20, 'Ask a pro', 'Safe'], 'for-run-odd': [15, 'Medium', 'Safe'], 'for-downloads': [10, 'Easy', 'Safe'], 'for-def-excl': [10, 'Medium', 'Safe'], 'for-def-off': [5, 'Easy', 'Safe'], 'for-def-caught': [10, 'Easy', 'Safe'], 'for-fw-rules': [15, 'Medium', 'Safe'], 'for-shares-open': [10, 'Medium', 'Safe'], 'for-access-backdoor': [40, 'Ask a pro', 'Back up first'], 'for-startup-folder': [5, 'Easy', 'Safe'], 'for-ps-suspicious': [20, 'Ask a pro', 'Safe'], 'for-ps-logging': [5, 'Medium', 'Safe'], 'for-wifi-open': [5, 'Easy', 'Safe'], 'for-listen-risky': [15, 'Ask a pro', 'Safe'], 'use-sensors': [10, 'Easy', 'Safe'], 'dev-peripheral-problem': [15, 'Medium', 'Safe']
   };
   var PROFILES = {
@@ -1723,6 +1724,30 @@ function Engine(RAW) {
         'A stuck job blocks everything behind it, so nothing prints. The usual cure is to clear the queue and restart the print service. Clearing deletes only the waiting print jobs, nothing else.',
         [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste these three lines one after the other. They stop the print service, delete the waiting jobs and start the service again.', 'Stop-Service Spooler -Force\nRemove-Item "$env:SystemRoot\\System32\\spool\\PRINTERS\\*" -Force -ErrorAction SilentlyContinue\nStart-Service Spooler'), S('Try printing a test page. If it gets stuck again, check that the printer is on, has paper and is connected.')],
         nameList(q, function (x) { return x.printer + ' - ' + x.jobs + ' job(s), ' + x.stuck + ' stuck'; }));
+    });
+    /* 2.5.0: drive check flag, Secure Boot certificates, short security log (extras.more4, read-only) */
+    var X4 = EX.more4 || {};
+    R(function () {
+      var d = arr(X4.dirty).filter(function (x) { return x && x.dirty === true; }); if (!d.length) return null;
+      return F('sto-dirty', 'Storage', 'medium', 'Windows wants to check a drive for errors',
+        'Windows itself marked a drive as "needs a check". This happens after a power cut, a hard switch-off or when it noticed something wrong while writing files. Windows checks such a drive by itself the next time the PC starts. If the mark keeps coming back, the drive may be starting to fail. This scan only read the mark; it did not start any check.',
+        [S('First copy your important files to another drive or a USB stick, just in case.'), S('Restart the PC: click Start, click the power symbol, click Restart. If Windows shows "Scanning and repairing drive", let it finish. It can take from a few minutes to more than an hour. Do not switch the PC off while it runs.'), S('Run this scan again. If this finding is gone, you are done.'), S('If it comes back, look at the Storage findings of this report for drive health warnings and ask a helper. A drive that needs checking again and again should be replaced.')],
+        'Drive(s) marked for a check: ' + d.map(function (x) { return x.letter; }).join(', '));
+    });
+    R(function () {
+      var c = X4.secureBootCa; if (!c || c.secureBoot !== true) return null;
+      var st = String(c.status || ''); if (!c.hasError && !/^(NotStarted|InProgress)$/i.test(st)) return null;
+      return F('sec-sb-cert', 'Security', 'low', 'The Secure Boot certificates of this PC are not renewed yet',
+        'Secure Boot is a lock that lets only trusted software start your PC. It works with certificates (think of them as digital ID cards) that Microsoft issued in 2011. They expired in June and October 2026, and Microsoft sends the new ones (issued in 2023) through Windows Update. Windows on this PC says the renewal is not finished. Your PC keeps starting and working normally. But until the renewal is done it may not receive future protections for the start-up of Windows. This is a hint, not an alarm: on some PCs Windows shows "not finished" for a while even after the work is done.',
+        [S('Open Windows Update: press the Windows key, type Windows Update and press Enter. Click "Check for updates" and install everything it offers, including the optional firmware updates if you see them.'), S('Restart the PC. Then repeat the step above once more and restart again. The renewal can need two restarts.'), S('Run this scan again after a few days. If the finding is gone, you are done.'), S('If it stays, your PC may need a newer BIOS (the small program on the motherboard) from its maker. The Tools tab has a link to the maker\'s support page. A BIOS update must not be interrupted, so if you are not sure, ask a helper. It is not urgent.')],
+        'Windows status (UEFICA2023Status): ' + (st || 'not set') + (c.hasError ? '\nWindows recorded an error for this renewal (UEFICA2023Error).' : ''));
+    });
+    R(function () {
+      var l = arr(X4.logs).filter(function (x) { return x && x.name === 'Security'; })[0]; if (!l || !l.readable || l.oldestDays == null || !(num(l.oldestDays) < 14)) return null;
+      return F('for-log-short', 'Security', 'info', 'The security log only goes back ' + l.oldestDays + ' day' + (num(l.oldestDays) === 1 ? '' : 's'),
+        'Windows keeps a diary of sign-ins and security changes, called the Security log. On this PC it holds only the last ' + l.oldestDays + ' day(s), because it is small and the oldest lines are overwritten. So the "Traces" part of this report can only see that far back. Nothing is wrong with your PC. It only means that older events cannot be checked.',
+        [S('You do not have to do anything. This is information.'), S('If you want Windows to remember more days: press the Windows key, type Event Viewer and press Enter. On the left open "Windows Logs", right-click "Security" and choose Properties. In "Maximum log size (KB)" type 102400 (that is 100 MB) and click OK. Windows will ask for an administrator.')],
+        'Security log: ' + (l.sizeMB != null ? l.sizeMB + ' MB used of ' : '') + (l.maxMB != null ? l.maxMB + ' MB allowed' : '') + (l.records != null ? ', ' + l.records + ' lines' : ''));
     });
     R(function () {
       var EOLN = { 1: 1, 2: 1, 3: 1, 5: 1, 6: 1, 7: 1 }, bad = [], soon = [];

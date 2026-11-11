@@ -5903,7 +5903,10 @@ var THEMES = (function (V) {
     { id: 'compass', en: 'Compass', el: 'Compass', light: true, big: false }
   ];
   var cur = 'fable', stored = false; /* Veagle OS (id 'fable') is the look a new user sees first */
-  try { var sv = localStorage.getItem(KEY); if (sv && LIST.some(function (t) { return t.id === sv; })) { cur = sv; stored = true; } } catch (e) { }
+  /* The report always opens with Veagle OS: the look you pick lasts only while the page is open and is not remembered.
+     One exception: changing the "Period" reloads the page, so main.js hands the current look over once (sessionStorage, used once). */
+  try { localStorage.removeItem(KEY); } catch (e) { }
+  try { var sv = sessionStorage.getItem(KEY + '.once'); sessionStorage.removeItem(KEY + '.once'); if (sv && LIST.some(function (t) { return t.id === sv; })) { cur = sv; stored = true; } } catch (e) { }
   var guide = { step: 0, full: false };
   var AREA_EL = { Stability: 'Σταθερότητα', Storage: 'Αποθήκευση', Security: 'Ασφάλεια', Network: 'Δίκτυο', Backup: 'Backup', Performance: 'Απόδοση', Updates: 'Ενημερώσεις', Software: 'Λογισμικό' };
   var TR = { Easy: 'Εύκολο', Medium: 'Μέτριο', 'Ask a pro': 'Ρώτα ειδικό', Safe: 'Ασφαλές', 'Back up first': 'Πρώτα αντίγραφο ασφαλείας', Careful: 'Με προσοχή' };
@@ -6289,7 +6292,6 @@ var THEMES = (function (V) {
   }
   function set(id, fromUser) {
     var t = themeOf(id); cur = t.id;
-    try { localStorage.setItem(KEY, cur); } catch (e) { }
     guide.step = 0; fbPlayed = false;
     if (cur !== 'classic' || fromUser) VIZ.set('light', t.light);
     if (fromUser) { VIZ.set('big', t.big); if (cur === 'guide') UI.setView('simple'); }
@@ -6314,9 +6316,9 @@ var THEMES = (function (V) {
       decorate();
     });
     /* first time: Classic Veagle OS, exactly as before. Later: the theme you chose, with your own text-size choice. */
-    if (!stored) applyClass(); else { if (cur !== 'classic') VIZ.set('light', themeOf(cur).light); applyClass(); }
+    if (!stored) { VIZ.set('light', false); applyClass(); } else { if (cur !== 'classic') VIZ.set('light', themeOf(cur).light); applyClass(); }
   }
-  return { init: init, relabel: relabel, decorate: decorate, set: set, list: LIST, current: function () { return cur; } };
+  return { init: init, relabel: relabel, decorate: decorate, set: set, list: LIST, current: function () { return cur; }, keepOnce: function () { try { sessionStorage.setItem(KEY + '.once', cur); } catch (e) { } } };
 })(V);
 
 /* VEAGLE PC Check - "share-safe copy": the same report with personal details removed from the data */
@@ -6789,7 +6791,7 @@ var HELP = (function (V, UI, AI, SHARE, XLSX) {
       chip.hidden = false;
       sel.innerHTML = [1, 7, 30, 60].map(function (n) { return '<option value="' + n + '">' + (n === 1 ? V.I('1 day (24 hours)', '1 ημέρα (24 ώρες)') : V.I(n + ' days', n + ' ημέρες')) + '</option>'; }).join('');
       sel.value = String(V.days);
-      sel.addEventListener('change', function () { try { localStorage.setItem('veagle.pccheck.period', sel.value); } catch (e) { } location.reload(); });
+      sel.addEventListener('change', function () { try { localStorage.setItem('veagle.pccheck.period', sel.value); } catch (e) { } try { if (typeof THEMES !== 'undefined') THEMES.keepOnce(); } catch (e) { } location.reload(); });
       chip.firstChild.nodeValue = V.I('Period ', 'Περίοδος ');
     })();
     wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init(); THEMES.init(); SIDE.init(); HELP.init();

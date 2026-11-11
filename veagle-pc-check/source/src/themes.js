@@ -15,7 +15,10 @@ var THEMES = (function (V) {
     { id: 'compass', en: 'Compass', el: 'Compass', light: true, big: false }
   ];
   var cur = 'fable', stored = false; /* Veagle OS (id 'fable') is the look a new user sees first */
-  try { var sv = localStorage.getItem(KEY); if (sv && LIST.some(function (t) { return t.id === sv; })) { cur = sv; stored = true; } } catch (e) { }
+  /* The report always opens with Veagle OS: the look you pick lasts only while the page is open and is not remembered.
+     One exception: changing the "Period" reloads the page, so main.js hands the current look over once (sessionStorage, used once). */
+  try { localStorage.removeItem(KEY); } catch (e) { }
+  try { var sv = sessionStorage.getItem(KEY + '.once'); sessionStorage.removeItem(KEY + '.once'); if (sv && LIST.some(function (t) { return t.id === sv; })) { cur = sv; stored = true; } } catch (e) { }
   var guide = { step: 0, full: false };
   var AREA_EL = { Stability: 'Σταθερότητα', Storage: 'Αποθήκευση', Security: 'Ασφάλεια', Network: 'Δίκτυο', Backup: 'Backup', Performance: 'Απόδοση', Updates: 'Ενημερώσεις', Software: 'Λογισμικό' };
   var TR = { Easy: 'Εύκολο', Medium: 'Μέτριο', 'Ask a pro': 'Ρώτα ειδικό', Safe: 'Ασφαλές', 'Back up first': 'Πρώτα αντίγραφο ασφαλείας', Careful: 'Με προσοχή' };
@@ -401,7 +404,6 @@ var THEMES = (function (V) {
   }
   function set(id, fromUser) {
     var t = themeOf(id); cur = t.id;
-    try { localStorage.setItem(KEY, cur); } catch (e) { }
     guide.step = 0; fbPlayed = false;
     if (cur !== 'classic' || fromUser) VIZ.set('light', t.light);
     if (fromUser) { VIZ.set('big', t.big); if (cur === 'guide') UI.setView('simple'); }
@@ -426,7 +428,7 @@ var THEMES = (function (V) {
       decorate();
     });
     /* first time: Classic Veagle OS, exactly as before. Later: the theme you chose, with your own text-size choice. */
-    if (!stored) applyClass(); else { if (cur !== 'classic') VIZ.set('light', themeOf(cur).light); applyClass(); }
+    if (!stored) { VIZ.set('light', false); applyClass(); } else { if (cur !== 'classic') VIZ.set('light', themeOf(cur).light); applyClass(); }
   }
-  return { init: init, relabel: relabel, decorate: decorate, set: set, list: LIST, current: function () { return cur; } };
+  return { init: init, relabel: relabel, decorate: decorate, set: set, list: LIST, current: function () { return cur; }, keepOnce: function () { try { sessionStorage.setItem(KEY + '.once', cur); } catch (e) { } } };
 })(V);

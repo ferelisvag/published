@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.5.4
+VEAGLE PC CHECK  v2.5.5
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,9 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 2.5.5
+- The Veagle OS look of the report now has a glass and gloss finish: frosted-glass panels, a light edge on the top of cards, glossy buttons. Same colours and layout. Small spacing fixes (step numbers, area labels, the scan-checked bar). The scan itself is unchanged.
 
 NEW IN 2.5.0
 - The report has a new box, "What this scan checked". It lists the deeper checks that were done and the ones that could not be done (quick scan, or not run as administrator). A check that was not done is never shown as "all good".

@@ -76,6 +76,7 @@ window.VEAGLE = {
     { id: 'tpass',    folder: 'tools', name: 'Κωδικοί',            desc: 'Γεννήτρια ασφαλών κωδικών',             app: 'passgen', icon: 'key' },
     { id: 'tconv',    folder: 'tools', name: 'Μετατροπές',         desc: 'Base64, hex, URL',                      app: 'convert', icon: 'code' },
     { id: 'tnet',     folder: 'tools', name: 'Διαγνωστικά δικτύου',desc: 'Ping και απάντηση γνωστών sites',       app: 'net',     icon: 'radar' },
+    { id: 'thelp',     folder: 'tools', name: 'Οδηγίες χρήσης',     desc: 'Πώς δουλεύει το Veagle OS, βήμα-βήμα',    app: 'manual',  icon: 'doc' },
     { id: 'tchrome',   folder: 'tools', name: 'Συντομεύσεις Chrome',desc: 'Σελίδες ρυθμίσεων Chrome και Google',    app: 'chromekeys', icon: 'key' },
     { id: 'tset',     folder: 'tools', name: 'Ρυθμίσεις',          desc: 'Θέμα, internet, καιρός, αντίγραφο',     app: 'settings',icon: 'sliders' }
   ],
@@ -84,6 +85,6 @@ window.VEAGLE = {
     { t: 'item', id: 'site' }, { t: 'item', id: 'hub' }, { t: 'sep' },
     { t: 'folder', id: 'apps' }, { t: 'folder', id: 'dash' }, { t: 'folder', id: 'linkhub' }, { t: 'folder', id: 'github' }, { t: 'sep' },
     { t: 'app', id: 'tasks' }, { t: 'app', id: 'weather' }, { t: 'folder', id: 'tools' }, { t: 'sep' },
-    { t: 'launcher' }, { t: 'terminal' }, { t: 'app', id: 'settings' }
+    { t: 'launcher' }, { t: 'terminal' }, { t: 'app', id: 'manual' }, { t: 'app', id: 'settings' }
   ]
 };

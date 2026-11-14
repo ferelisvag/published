@@ -10,7 +10,7 @@
          sliders list cloud code egg fav (fav = εικονίδιο του ίδιου του site)
    color: χρώμα πλακιδίου (προαιρετικό). soon:true = σχέδιο που δεν έχει ακόμα σελίδα. */
 window.VEAGLE = {
-  version: '2.0 Public',
+  version: '2.2 Public',
   folders: [
     { id: 'ferelis',  name: 'ferelis.gr',     path: '/net/ferelis.gr',   icon: 'globe',  desc: 'Ο δημιουργός του Veagle OS και οι εφαρμογές του', slots: 2 },
     { id: 'apps',     name: 'Εφαρμογές',      path: '/usr/apps',         icon: 'box',    desc: 'Δωρεάν δημόσιες εφαρμογές του ferelis.gr', slots: 3 },
@@ -76,6 +76,7 @@ window.VEAGLE = {
     { id: 'tpass',    folder: 'tools', name: 'Κωδικοί',            desc: 'Γεννήτρια ασφαλών κωδικών',             app: 'passgen', icon: 'key' },
     { id: 'tconv',    folder: 'tools', name: 'Μετατροπές',         desc: 'Base64, hex, URL',                      app: 'convert', icon: 'code' },
     { id: 'tnet',     folder: 'tools', name: 'Διαγνωστικά δικτύου',desc: 'Ping και απάντηση γνωστών sites',       app: 'net',     icon: 'radar' },
+    { id: 'tchrome',   folder: 'tools', name: 'Συντομεύσεις Chrome',desc: 'Σελίδες ρυθμίσεων Chrome και Google',    app: 'chromekeys', icon: 'key' },
     { id: 'tset',     folder: 'tools', name: 'Ρυθμίσεις',          desc: 'Θέμα, internet, καιρός, αντίγραφο',     app: 'settings',icon: 'sliders' }
   ],
   /* Dock: item = link/εφαρμογή, folder = παράθυρο φακέλου, app = ενσωματωμένο εργαλείο, launcher, terminal */

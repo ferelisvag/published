@@ -18,7 +18,7 @@
   function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   OS.lsGet = lsGet; OS.lsSet = lsSet;
-  var DEF = { theme: 'veagle', ws: 'all', particles: true, boot: true, status: false, net: false, name: '', wx: null };
+  var DEF = { theme: 'veagle', ws: 'all', particles: true, boot: true, status: false, net: false, name: '', wx: null, widgets: true, wmode: 'one', wpanel: 'normal', density: 'comfortable', iconsize: 'normal', secs: true };
   var S = {};
   try { S = JSON.parse(lsGet('veagleos.settings.v1', '{}')) || {}; } catch (e) { S = {}; }
   OS.settings = {

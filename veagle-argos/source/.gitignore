@@ -1,0 +1,10 @@
+.venv/
+build/
+dist/
+__pycache__/
+*.pyc
+build_icon.ico
+# προσωπικά δεδομένα: κωδικοί καμερών και στιγμιότυπα
+argos_config.json
+argos_config.json.*
+snapshots/

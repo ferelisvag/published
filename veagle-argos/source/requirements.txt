@@ -1,0 +1,5 @@
+av>=14
+sounddevice>=0.5
+numpy>=1.26
+pillow>=10
+pyinstaller>=6

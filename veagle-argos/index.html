@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veagle Argos · All your home cameras on one screen</title>
+<meta name="description" content="Veagle Argos (Panoptis): free portable Windows viewer for ONVIF / RTSP home cameras. 1×1, 1×2 and 2×2 layouts, sound, zoom, PTZ and recording. No install, no cloud, runs from a USB stick. Δωρεάν, φορητό, χωρίς cloud.">
+<meta name="theme-color" content="#050708">
+<link rel="icon" type="image/png" href="eagle-white.png">
+<link rel="stylesheet" href="../veagleos/fonts/fonts.css">
+<style>
+:root{--bg:#050708;--panel:#0a0d10;--line:#191d22;--line2:#262c34;--text:#e7ecf3;--dim:#8a95a6;--red:#ff1e38;--ok:#2ee6a6;--disp:'Space Grotesk',system-ui,sans-serif;--body:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--body)}
+a{color:var(--red)}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+header.top{display:flex;align-items:center;gap:14px;padding:14px 0}
+header.top .brand{display:flex;align-items:center;gap:10px;font:700 14px var(--disp);letter-spacing:.18em}
+header.top .brand img{width:22px;height:23px}
+header.top .brand b{color:var(--red)}
+header.top .brand small{font:500 9px var(--mono);letter-spacing:.2em;color:var(--dim);margin-left:2px}
+.sp{flex:1}
+.langbtn{font:600 12px var(--mono);background:none;color:var(--text);border:1px solid var(--line2);border-radius:999px;padding:5px 12px;cursor:pointer}
+.langbtn:hover{border-color:var(--red)}
+.hero{padding:40px 0 28px;text-align:center}
+.hero .eagle{width:74px;height:auto;margin-bottom:6px;filter:drop-shadow(0 8px 30px rgba(255,30,56,.35))}
+.hero h1{font:700 clamp(36px,7.5vw,68px)/1.02 var(--disp);letter-spacing:.04em;margin:0}
+.hero h1 b{color:var(--red)}
+.hero .tag{font:500 12px var(--mono);letter-spacing:.42em;color:var(--dim);margin:8px 0 18px}
+.hero p.lead{max-width:660px;margin:0 auto 26px;color:var(--dim);font-size:18px}
+.btn{display:inline-block;background:var(--red);color:#fff;text-decoration:none;font:600 16px var(--disp);padding:14px 26px;border-radius:10px;margin:4px}
+.btn.ghost{background:none;border:1px solid var(--line2);color:var(--text)}
+.btn:hover{filter:brightness(1.12)}
+.meta{color:var(--dim);font:12px var(--mono);margin-top:12px}
+.beta{display:inline-flex;align-items:center;gap:6px;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#ffc65c;border:1px solid #4a3a14;border-radius:999px;padding:3px 10px;margin-bottom:16px}
+.beta i{width:7px;height:7px;border-radius:50%;background:#ffc65c;box-shadow:0 0 8px #ffc65c}
+.shot{border:1px solid var(--line2);border-radius:12px;overflow:hidden;box-shadow:0 30px 80px -40px var(--red);background:#000}
+.shot img{display:block;width:100%;height:auto}
+.cap{color:var(--dim);font-size:13.5px;margin:8px 2px 0}
+section{padding:34px 0;border-top:1px solid var(--line)}
+h2{font:700 24px var(--disp);letter-spacing:.04em;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h3{font:600 16px var(--disp);margin:0 0 6px}.card p{margin:0;color:var(--dim);font-size:14.5px}
+.card .ic{font-size:20px;line-height:1;margin-bottom:8px;display:block}
+.priv{border-color:#14573f;background:rgba(46,230,166,.06)}
+.priv p{color:var(--text)}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:18px;align-items:start}
+ol.steps{padding-left:22px}ol.steps li{margin:8px 0}
+code,.mono{font-family:var(--mono);font-size:.9em;background:#10151a;border:1px solid var(--line);border-radius:5px;padding:1px 6px;word-break:break-all}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0}summary{cursor:pointer;font-weight:600}
+details p,details li{color:var(--dim)}
+table.keys{border-collapse:collapse;width:100%;font-size:14.5px}
+table.keys td{border-top:1px solid var(--line);padding:7px 8px;vertical-align:top;color:var(--dim)}
+table.keys td:first-child{white-space:nowrap;color:var(--text);font-family:var(--mono);font-size:13px;width:1%}
+.myth{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
+.myth .eye{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#2a0a10 0,#0a0d10 70%);border:1px solid var(--line2);font:700 30px var(--disp);color:var(--red)}
+.terms p{color:var(--dim);font-size:14.5px;margin:0 0 10px}
+.sha{font:12px var(--mono);color:var(--dim);word-break:break-all}
+footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--dim);font:12px var(--mono);text-align:center}
+footer a{color:var(--dim)}
+@media (max-width:560px){.myth{grid-template-columns:1fr}.myth .eye{margin:0 auto}header.top .brand small{display:none}}
+html[lang=en] .el,html[lang=el] .en{display:none!important}
+</style>
+<!-- SEO -->
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://ferelisvag.github.io/published/veagle-argos/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ferelis.gr">
+<meta property="og:title" content="Veagle Argos · All your home cameras on one screen">
+<meta property="og:description" content="Veagle Argos (Panoptis): free portable Windows viewer for ONVIF / RTSP home cameras. 1×1, 1×2 and 2×2 layouts, sound, zoom, PTZ and recording. No install, no cloud, runs from a USB stick. Δωρεάν, φορητό, χωρίς cloud.">
+<meta property="og:url" content="https://ferelisvag.github.io/published/veagle-argos/">
+<meta property="og:image" content="https://ferelisvag.github.io/published/veagle-argos/icon-512.png">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="el_GR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Veagle Argos · All your home cameras on one screen">
+<meta name="twitter:description" content="Veagle Argos (Panoptis): free portable Windows viewer for ONVIF / RTSP home cameras. 1×1, 1×2 and 2×2 layouts, sound, zoom, PTZ and recording. No install, no cloud, runs from a USB stick. Δωρεάν, φορητό, χωρίς cloud.">
+<meta name="twitter:image" content="https://ferelisvag.github.io/published/veagle-argos/icon-512.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Veagle Argos · All your home cameras on one screen", "url": "https://ferelisvag.github.io/published/veagle-argos/", "description": "Veagle Argos (Panoptis): free portable Windows viewer for ONVIF / RTSP home cameras. 1×1, 1×2 and 2×2 layouts, sound, zoom, PTZ and recording. No install, no cloud, runs from a USB stick. Δωρεάν, φορητό, χωρίς cloud.", "applicationCategory": "MultimediaApplication", "operatingSystem": "Windows 10, Windows 11", "inLanguage": ["en", "el"], "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "image": "https://ferelisvag.github.io/published/veagle-argos/icon-512.png", "publisher": {"@type": "Person", "name": "Vagelis Ferelis", "url": "https://ferelis.gr/"}}</script>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><img src="eagle-white.png" alt=""><span>VEAGLE <b>ARGOS</b></span><small>PANOPTIS</small></div>
+  <div class="sp"></div>
+  <a href="https://ferelis.gr/ferelisapps.html" class="en">All apps</a><a href="https://ferelis.gr/el/ferelisapps.html" class="el">Όλες οι εφαρμογές</a>
+  <button class="langbtn" id="lang" type="button" aria-label="Switch language">EL</button>
+</header>
+
+<div class="hero">
+  <img class="eagle" src="eagle-white.png" alt="">
+  <h1>VEAGLE <b>ARGOS</b></h1>
+  <div class="tag">PANOPTIS</div>
+  <div class="beta"><i></i> Beta</div>
+  <p class="lead en">All your home cameras on one screen. A free, portable Windows program for ONVIF / RTSP cameras: no install, no account, no cloud. It even runs from a USB stick.</p>
+  <p class="lead el">Όλες οι κάμερες του σπιτιού σε μία οθόνη. Δωρεάν φορητό πρόγραμμα για Windows για κάμερες ONVIF / RTSP: χωρίς εγκατάσταση, χωρίς λογαριασμό, χωρίς cloud. Τρέχει ακόμη και από στικάκι.</p>
+  <a class="btn" href="download/VeagleArgos.exe" download><span class="en">Download for Windows</span><span class="el">Λήψη για Windows</span></a>
+  <a class="btn ghost" href="#how"><span class="en">How to use it</span><span class="el">Πώς το χρησιμοποιώ</span></a>
+  <div class="meta"><span class="en">Windows 10 / 11 · free · version 2.0 · one file, 58 MB · no install · open source (MIT)</span><span class="el">Windows 10 / 11 · δωρεάν · έκδοση 2.0 · ένα αρχείο, 58 MB · χωρίς εγκατάσταση · ανοιχτός κώδικας (MIT)</span></div>
+</div>
+
+<div class="shot"><img src="shots/grid.webp" alt="Veagle Argos showing four home cameras in a 2×2 grid" width="1280" height="796"></div>
+<p class="cap en">2×2 layout: sound from the selected camera (🔊) and a recording in progress (⏺ REC). The pictures are demo scenes.</p>
+<p class="cap el">Διάταξη 2×2: ήχος από την επιλεγμένη κάμερα (🔊) και εγγραφή σε εξέλιξη (⏺ REC). Οι εικόνες είναι δοκιμαστικές σκηνές.</p>
+
+<section>
+  <h2><span class="en">What it does</span><span class="el">Τι κάνει</span></h2>
+  <div class="grid">
+    <div class="card"><span class="ic">▦</span><h3><span class="en">1×1, 1×2 and 2×2</span><span class="el">1×1, 1×2 και 2×2</span></h3><p><span class="en">One camera, two side by side, or four at once. Pages for more cameras, double-click to enlarge one, and automatic cycling for a second monitor.</span><span class="el">Μία κάμερα, δύο δίπλα-δίπλα ή τέσσερις μαζί. Σελίδες για περισσότερες κάμερες, διπλό κλικ για να μεγαλώσει μία, και αυτόματη εναλλαγή για δεύτερη οθόνη.</span></p></div>
+    <div class="card"><span class="ic">🔍</span><h3><span class="en">Finds your cameras</span><span class="el">Βρίσκει μόνο του τις κάμερες</span></h3><p><span class="en">Searches your home network for ONVIF cameras. Type the camera's user name and password and it fetches the HD and SD streams by itself. Plain RTSP addresses work too.</span><span class="el">Ψάχνει στο δίκτυο του σπιτιού για κάμερες ONVIF. Γράφεις το όνομα χρήστη και τον κωδικό της κάμερας και βρίσκει μόνο του τις ροές HD και SD. Δουλεύει και με σκέτη διεύθυνση RTSP.</span></p></div>
+    <div class="card"><span class="ic">🔊</span><h3><span class="en">Sound with one click</span><span class="el">Ήχος με ένα κλικ</span></h3><p><span class="en">Click a camera to hear it, click again to stop. One volume slider and a mute button for the whole program.</span><span class="el">Κλικ σε μια κάμερα για να την ακούς, ξανά κλικ για να σταματήσει. Ένα slider έντασης και κουμπί σίγασης για όλο το πρόγραμμα.</span></p></div>
+    <div class="card"><span class="ic">✥</span><h3><span class="en">Zoom and move</span><span class="el">Ζουμ και μετακίνηση</span></h3><p><span class="en">Mouse wheel zooms up to 8× where you point. Hold the mouse button to move around the picture, right-click to reset.</span><span class="el">Η ροδέλα κάνει ζουμ έως 8× εκεί που δείχνεις. Κρατάς πατημένο το ποντίκι για να μετακινήσεις την εικόνα, δεξί κλικ για επαναφορά.</span></p></div>
+    <div class="card"><span class="ic">HD</span><h3><span class="en">HD or SD per camera</span><span class="el">HD ή SD ανά κάμερα</span></h3><p><span class="en">A small AUTO / HD / SD button on every camera: high quality where you need it, a light stream where you don't.</span><span class="el">Μικρό κουμπί AUTO / HD / SD σε κάθε κάμερα: υψηλή ανάλυση όπου τη χρειάζεσαι, ελαφριά ροή όπου όχι.</span></p></div>
+    <div class="card"><span class="ic">✛</span><h3><span class="en">Turn the camera (PTZ)</span><span class="el">Περιστροφή κάμερας (PTZ)</span></h3><p><span class="en">Arrows appear on cameras that can pan and tilt, such as the TP-Link Tapo C210 and C520WS.</span><span class="el">Βελάκια εμφανίζονται στις κάμερες που γυρίζουν, όπως οι TP-Link Tapo C210 και C520WS.</span></p></div>
+    <div class="card"><span class="ic">⏺</span><h3><span class="en">Recording and snapshots</span><span class="el">Εγγραφή και στιγμιότυπα</span></h3><p><span class="en">Record any camera in HD to an .mp4 that plays everywhere, with sound. Snapshots in full resolution. Both are saved next to the program.</span><span class="el">Εγγραφή οποιασδήποτε κάμερας σε HD, σε .mp4 που παίζει παντού, με ήχο. Στιγμιότυπα σε πλήρη ανάλυση. Αποθηκεύονται δίπλα στο πρόγραμμα.</span></p></div>
+    <div class="card"><span class="ic">⇩</span><h3><span class="en">Truly portable</span><span class="el">Πραγματικά φορητό</span></h3><p><span class="en">One .exe and nothing else to download. Settings, snapshots and recordings stay in the same folder, so the whole thing travels on a USB stick.</span><span class="el">Ένα .exe και τίποτα άλλο για κατέβασμα. Ρυθμίσεις, στιγμιότυπα και εγγραφές μένουν στον ίδιο φάκελο, οπότε όλο ταξιδεύει σε ένα στικάκι.</span></p></div>
+  </div>
+  <div class="shots">
+    <div><div class="shot"><img src="shots/zoom_ptz.webp" alt="One camera at 2× zoom with PTZ arrows" loading="lazy" width="1280" height="796"></div>
+      <p class="cap en">1×1 with 2× digital zoom, PTZ arrows and date and time on the picture.</p><p class="cap el">1×1 με ψηφιακό ζουμ 2×, βελάκια PTZ και ώρα πάνω στην εικόνα.</p></div>
+    <div><div class="shot"><img src="shots/manager.webp" alt="Cameras window with network search" loading="lazy" width="819" height="664"></div>
+      <p class="cap en">The Cameras window: search the network, add, reorder, settings.</p><p class="cap el">Το παράθυρο «Κάμερες»: αναζήτηση στο δίκτυο, προσθήκη, σειρά, ρυθμίσεις.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="card priv">
+    <h2><span class="en">Nothing leaves your home</span><span class="el">Τίποτα δεν φεύγει από το σπίτι σου</span></h2>
+    <p class="en">Veagle Argos talks only to the cameras on your own network. It has no cloud, no account, no tracking and sends no data anywhere. Camera settings and passwords are stored only in the file <span class="mono">argos_config.json</span> next to the program, in plain text: keep the USB stick somewhere safe, and give a friend only the .exe, not that file.</p>
+    <p class="el">Το Veagle Argos μιλά μόνο με τις κάμερες του δικού σου δικτύου. Δεν έχει cloud, λογαριασμό ή παρακολούθηση και δεν στέλνει δεδομένα πουθενά. Οι ρυθμίσεις και οι κωδικοί των καμερών αποθηκεύονται μόνο στο αρχείο <span class="mono">argos_config.json</span> δίπλα στο πρόγραμμα, σε απλό κείμενο: φύλαξε το στικάκι, και σε φίλο δώσε μόνο το .exe, όχι αυτό το αρχείο.</p>
+  </div>
+</section>
+
+<section id="how">
+  <h2><span class="en">How to use it</span><span class="el">Πώς το χρησιμοποιείς</span></h2>
+  <ol class="steps en">
+    <li>Click <b>Download for Windows</b> and put <span class="mono">VeagleArgos.exe</span> in a folder of its own, for example <span class="mono">E:\VeagleArgos\</span> on a USB stick.</li>
+    <li>Double-click it. The first start takes a few seconds.</li>
+    <li>Click <b>⚙ Cameras</b> → <b>🔍 Search the network</b>, pick a camera and click <b>Add</b>.</li>
+    <li>Type the camera's user name and password, click <b>⟳ Fetch streams via ONVIF</b>, then <b>Save</b>. Repeat for every camera.</li>
+    <li>Choose <b>1×1</b>, <b>1×2</b> or <b>2×2</b> at the top. Done.</li>
+  </ol>
+  <ol class="steps el">
+    <li>Πάτα <b>Λήψη για Windows</b> και βάλε το <span class="mono">VeagleArgos.exe</span> σε δικό του φάκελο, π.χ. <span class="mono">E:\VeagleArgos\</span> σε στικάκι.</li>
+    <li>Κάνε διπλό κλικ. Η πρώτη εκκίνηση παίρνει λίγα δευτερόλεπτα.</li>
+    <li>Πάτα <b>⚙ Κάμερες</b> → <b>🔍 Αναζήτηση στο δίκτυο</b>, διάλεξε μια κάμερα και πάτα <b>Προσθήκη</b>.</li>
+    <li>Γράψε το όνομα χρήστη και τον κωδικό της κάμερας, πάτα <b>⟳ Ανάκτηση ροών μέσω ONVIF</b> και μετά <b>Αποθήκευση</b>. Το ίδιο για κάθε κάμερα.</li>
+    <li>Διάλεξε <b>1×1</b>, <b>1×2</b> ή <b>2×2</b> πάνω. Έτοιμο.</li>
+  </ol>
+  <details>
+    <summary><span class="en">Windows shows a blue “Windows protected your PC” warning</span><span class="el">Τα Windows δείχνουν μπλε προειδοποίηση «Τα Windows προστάτευσαν τον υπολογιστή σου»</span></summary>
+    <p class="en">This is normal for small free programs that are not signed with a paid certificate. Click <b>More info</b>, then <b>Run anyway</b>. The full source code is on this page, so anyone can check what the program does.</p>
+    <p class="el">Είναι φυσιολογικό για μικρά δωρεάν προγράμματα που δεν έχουν υπογραφή με πληρωμένο πιστοποιητικό. Πάτα <b>Περισσότερες πληροφορίες</b> και μετά <b>Εκτέλεση ούτως ή άλλως</b>. Ο πλήρης κώδικας είναι σε αυτή τη σελίδα, ώστε ο καθένας να ελέγξει τι κάνει.</p>
+  </details>
+  <details>
+    <summary><span class="en">TP-Link Tapo cameras: which password?</span><span class="el">Κάμερες TP-Link Tapo: ποιος κωδικός;</span></summary>
+    <p class="en">Not your TP-Link account. In the Tapo app open the camera → <b>Settings</b> → <b>Advanced settings</b> → <b>Camera account</b> and create a user name and password there. Those go into Veagle Argos. For sound, the camera's microphone must be on.</p>
+    <p class="el">Όχι ο λογαριασμός TP-Link. Στην εφαρμογή Tapo άνοιξε την κάμερα → <b>Ρυθμίσεις</b> → <b>Σύνθετες ρυθμίσεις</b> → <b>Λογαριασμός κάμερας</b> και φτιάξε εκεί όνομα χρήστη και κωδικό. Αυτά μπαίνουν στο Veagle Argos. Για ήχο, το μικρόφωνο της κάμερας πρέπει να είναι ενεργό.</p>
+  </details>
+  <details>
+    <summary><span class="en">The search finds no cameras</span><span class="el">Η αναζήτηση δεν βρίσκει κάμερες</span></summary>
+    <p class="en">Make sure the PC is on the same Wi-Fi or network as the cameras and that ONVIF is enabled on the camera. On the first start Windows may ask about the firewall: allow <b>Private networks</b>. You can always add a camera by hand with its IP address or its RTSP address (for Tapo: <span class="mono">rtsp://IP:554/stream1</span> for HD, <span class="mono">/stream2</span> for SD).</p>
+    <p class="el">Βεβαιώσου ότι ο υπολογιστής είναι στο ίδιο Wi-Fi ή δίκτυο με τις κάμερες και ότι το ONVIF είναι ενεργό στην κάμερα. Την πρώτη φορά τα Windows μπορεί να ρωτήσουν για το Firewall: επίτρεψε τα <b>Ιδιωτικά δίκτυα</b>. Μπορείς πάντα να προσθέσεις κάμερα χειροκίνητα με την IP ή τη διεύθυνση RTSP της (για Tapo: <span class="mono">rtsp://IP:554/stream1</span> για HD, <span class="mono">/stream2</span> για SD).</p>
+  </details>
+  <details>
+    <summary><span class="en">Mouse and keyboard</span><span class="el">Ποντίκι και πλήκτρα</span></summary>
+    <table class="keys">
+      <tr><td>1 · 2 · 4</td><td><span class="en">Layout 1×1, 1×2, 2×2</span><span class="el">Διάταξη 1×1, 1×2, 2×2</span></td></tr>
+      <tr><td>← →</td><td><span class="en">Previous / next page (or camera in 1×1)</span><span class="el">Προηγούμενη / επόμενη σελίδα (ή κάμερα στο 1×1)</span></td></tr>
+      <tr><td><span class="en">click</span><span class="el">κλικ</span></td><td><span class="en">Select a camera and hear it; click again to stop</span><span class="el">Επιλογή κάμερας και ήχος· ξανά κλικ για διακοπή</span></td></tr>
+      <tr><td><span class="en">double-click</span><span class="el">διπλό κλικ</span></td><td><span class="en">Enlarge to 1×1 and back</span><span class="el">Μεγέθυνση σε 1×1 και πίσω</span></td></tr>
+      <tr><td><span class="en">wheel · drag</span><span class="el">ροδέλα · σύρσιμο</span></td><td><span class="en">Zoom · move the picture (without zoom: drag onto another camera to swap them)</span><span class="el">Ζουμ · μετακίνηση εικόνας (χωρίς ζουμ: σύρε πάνω σε άλλη κάμερα για αλλαγή θέσης)</span></td></tr>
+      <tr><td><span class="en">right-click</span><span class="el">δεξί κλικ</span></td><td><span class="en">Reset zoom</span><span class="el">Επαναφορά ζουμ</span></td></tr>
+      <tr><td>S · R · M · C</td><td><span class="en">Snapshot · record · mute · automatic cycling</span><span class="el">Στιγμιότυπο · εγγραφή · σίγαση · αυτόματη εναλλαγή</span></td></tr>
+      <tr><td>F11 · Esc</td><td><span class="en">Full screen · exit full screen</span><span class="el">Πλήρης οθόνη · έξοδος</span></td></tr>
+    </table>
+    <p class="en">The keys also work with a Greek keyboard layout.</p>
+    <p class="el">Τα πλήκτρα δουλεύουν και με ελληνικό πληκτρολόγιο.</p>
+  </details>
+  <p class="sha">SHA-256 (VeagleArgos.exe 2.0): a5f19f3e4619a176f5119973b05c1228a30c7ddb35965afd5b2ef4eebaa9f5c6</p>
+</section>
+
+<section>
+  <div class="myth">
+    <div class="eye" aria-hidden="true">100</div>
+    <div>
+      <h2><span class="en">Why “Argos Panoptis”</span><span class="el">Γιατί «Άργος Πανόπτης»</span></h2>
+      <p class="en">In Greek mythology Argos Panoptis was the giant with a hundred eyes, the guardian who never slept: some of his eyes were always open. “Panoptis” means “the one who sees everything”. A good name for a program that watches through many cameras at once.</p>
+      <p class="el">Στην ελληνική μυθολογία ο Άργος Πανόπτης ήταν ο γίγαντας με τα εκατό μάτια, ο φύλακας που δεν κοιμόταν ποτέ: κάποια από τα μάτια του έμεναν πάντα ανοιχτά. «Πανόπτης» σημαίνει «αυτός που βλέπει τα πάντα». Καλό όνομα για ένα πρόγραμμα που βλέπει από πολλές κάμερες μαζί.</p>
+      <p><a href="https://mythoi.org/argos-panoptis/" target="_blank" rel="noopener"><span class="en">Read more about Argos Panoptis at mythoi.org (Greek)</span><span class="el">Διάβασε περισσότερα για τον Άργο Πανόπτη στο mythoi.org</span></a></p>
+    </div>
+  </div>
+  <div class="shots" style="grid-template-columns:repeat(auto-fit,minmax(240px,320px));justify-content:center">
+    <div><div class="shot"><img src="shots/about_myth.webp" alt="The About window of Veagle Argos" loading="lazy" width="618" height="761"></div></div>
+  </div>
+</section>
+
+<section class="terms">
+  <h2><span class="en">Terms of use</span><span class="el">Όροι χρήσης</span></h2>
+  <p class="en">Veagle Argos is provided “as is”, free of charge and without any warranty of operation, availability or fitness for a particular purpose. The author is not liable for any damage, loss of data or footage, or for events that were not recorded.</p>
+  <p class="el">Το Veagle Argos παρέχεται «ως έχει», δωρεάν και χωρίς καμία εγγύηση λειτουργίας, διαθεσιμότητας ή καταλληλότητας για συγκεκριμένο σκοπό. Ο δημιουργός δεν ευθύνεται για οποιαδήποτε ζημία, απώλεια δεδομένων ή εικόνας, ή για γεγονότα που δεν καταγράφηκαν.</p>
+  <p class="en">It is a viewer for personal, home use. It does not replace a professional security or alarm system.</p>
+  <p class="el">Είναι εργαλείο προβολής για προσωπική, οικιακή χρήση. Δεν αντικαθιστά επαγγελματικό σύστημα ασφαλείας ή συναγερμού.</p>
+  <p class="en">You alone are responsible for the lawful use of your cameras and recordings and for respecting other people's privacy (GDPR): do not film public spaces, neighbours or people without informing them, and put up a notice where required.</p>
+  <p class="el">Ο χρήστης είναι αποκλειστικά υπεύθυνος για τη νόμιμη χρήση των καμερών και των εγγραφών, και για τον σεβασμό της ιδιωτικότητας τρίτων (ΓΚΠΔ / GDPR): όχι λήψη δημόσιων χώρων, γειτόνων ή προσώπων χωρίς ενημέρωση, και κατάλληλη ειδοποίηση όπου απαιτείται.</p>
+  <p class="en">ONVIF, TP-Link and Tapo are trademarks of their owners.</p>
+  <p class="el">Τα ONVIF, TP-Link και Tapo είναι εμπορικά σήματα των κατόχων τους.</p>
+</section>
+
+<section>
+  <h2><span class="en">Source code and credits</span><span class="el">Κώδικας και πηγές</span></h2>
+  <p class="en">Open source under the MIT license: <a href="https://github.com/ferelisvag/published/tree/main/veagle-argos/source">browse the code</a> (Python), see <span class="mono">source/README.md</span> to build the .exe yourself. Built with Python and Tkinter, <a href="https://pyav.basswood-io.com/">PyAV</a> with <a href="https://ffmpeg.org/legal.html">FFmpeg</a> (LGPL/GPL) for video, sound and recording, Pillow, NumPy and <a href="https://python-sounddevice.readthedocs.io/">sounddevice</a> / PortAudio for the speakers. Idea and design: Vagelis Ferelis.</p>
+  <p class="el">Ανοιχτός κώδικας με άδεια MIT: <a href="https://github.com/ferelisvag/published/tree/main/veagle-argos/source">δες τον κώδικα</a> (Python), και στο <span class="mono">source/README.md</span> πώς φτιάχνεις μόνος σου το .exe. Φτιαγμένο με Python και Tkinter, <a href="https://pyav.basswood-io.com/">PyAV</a> με <a href="https://ffmpeg.org/legal.html">FFmpeg</a> (LGPL/GPL) για εικόνα, ήχο και εγγραφή, Pillow, NumPy και <a href="https://python-sounddevice.readthedocs.io/">sounddevice</a> / PortAudio για τα ηχεία. Ιδέα και σχεδιασμός: Vagelis Ferelis.</p>
+</section>
+</div>
+<footer>Veagle Argos · <a href="https://ferelis.gr">ferelis.gr</a> · <span class="en">Version</span><span class="el">Έκδοση</span> 15.11 · 16:30</footer>
+<script>
+(function(){var k='veagleargos.page.lang',l=null;try{l=localStorage.getItem(k)}catch(e){}
+if(l!=='el'&&l!=='en')l=String(navigator.language||'en').toLowerCase().indexOf('el')===0?'el':'en';
+function set(v){document.documentElement.lang=v;var b=document.getElementById('lang');b.textContent=v==='en'?'EL':'EN';b.setAttribute('aria-label',v==='en'?'Αλλαγή σε ελληνικά':'Switch to English');
+document.title=v==='en'?'Veagle Argos · All your home cameras on one screen':'Veagle Argos · Όλες οι κάμερες του σπιτιού σε μία οθόνη'}
+set(l);document.getElementById('lang').addEventListener('click',function(){l=l==='en'?'el':'en';try{localStorage.setItem(k,l)}catch(e){}set(l)});})();
+</script>
+</body>
+</html>

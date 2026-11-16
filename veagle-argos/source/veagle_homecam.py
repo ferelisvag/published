@@ -35,7 +35,7 @@ import onvif_lite as onvif
 PRODUCT = "Argos"              # το όνομα μετά το VEAGLE (αλλάζει μόνο εδώ)
 TAGLINE = "Panoptis"           # ο Άργος ο Πανόπτης, ο φύλακας με τα εκατό μάτια
 APP_NAME = f"Veagle {PRODUCT}"
-APP_VERSION = "2.0"
+APP_VERSION = "2.1"
 BRAND = "VEAGLE - ferelis.gr"
 SITE_URL = "https://ferelis.gr"
 MYTH_URL = "https://mythoi.org/argos-panoptis/"

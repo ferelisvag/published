@@ -195,6 +195,31 @@ footer.foot .wrap{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justif
 footer.foot a{color:var(--dim)}
 .app-foot{margin:0}
 .discl{font:13px/1.55 var(--body);color:var(--dim);max-width:760px;margin:0 0 16px}
+#home{display:none;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:18px 0}
+.hcard{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:18px;color:var(--text);cursor:pointer;font-family:var(--body)}
+.hcard:hover,.hcard:focus-visible{border-color:var(--red);background:var(--panel2)}
+.hcard .ic{width:30px;height:30px;color:var(--red)}
+.hcard b{font:700 19px var(--disp)}
+.hcard span{color:var(--dim);font-size:14px;line-height:1.4}
+#tabbar{display:none;position:sticky;top:56px;z-index:15;background:rgba(5,7,8,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+#tabbar .wrap{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-top:8px;padding-bottom:8px}
+#tabbar .wrap::-webkit-scrollbar{display:none}
+.tchip{flex:none;background:var(--panel);border:1px solid var(--line2);color:var(--dim);border-radius:999px;padding:7px 14px;font:600 13px var(--disp);cursor:pointer;white-space:nowrap}
+.tchip.home{color:var(--text)}
+.tchip[aria-current=true]{background:var(--red);border-color:var(--red);color:#fff}
+body[data-tab="home"] #home{display:grid}
+body:not([data-tab="home"]) #tabbar{display:block}
+body:not([data-tab="home"]) .hero,body:not([data-tab="home"]):not(.searching) #disclaimer{display:none}
+body[data-tab="home"] .sec{display:none}
+body[data-tab="start"] .sec:not([data-g="start"]){display:none}
+body[data-tab="prep"] .sec:not([data-g="prep"]){display:none}
+body[data-tab="lists"] .sec:not([data-g="lists"]){display:none}
+body[data-tab="act"] .sec:not([data-g="act"]){display:none}
+body[data-tab="off"] .sec:not([data-g="off"]){display:none}
+body[data-tab="tools"] .sec:not([data-g="tools"]){display:none}
+body.searching .sec{display:block}
+body.searching #home{display:none}
+@media print{body[data-tab] .sec{display:block!important}#home,#tabbar{display:none!important}}
 .hide{display:none!important}
 #empty{display:none;color:var(--dim)}
 
@@ -288,7 +313,7 @@ footer.foot a{color:var(--dim)}
 <meta name="twitter:image" content="https://ferelisvag.github.io/published/veaglesurvivalbook/icon-512.png">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Veagle Survival Book · Εγχειρίδιο επιβίωσης 10 ημερών", "url": "https://ferelisvag.github.io/published/veaglesurvivalbook/", "description": "Veagle Survival Book: εγχειρίδιο επιβίωσης 10 ημερών για ένα άτομο ή οικογένεια. Νερό, τροφή, φαρμακείο, σχέδιο δράσης, σεισμός, πυρκαγιά, πλημμύρα, blackout, με υπολογιστές και εκτυπώσιμες λίστες ελέγχου.", "applicationCategory": "LifestyleApplication", "operatingSystem": "Any (web browser)", "inLanguage": ["el"], "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "image": "https://ferelisvag.github.io/published/veaglesurvivalbook/icon-512.png", "publisher": {"@type": "Person", "name": "Vagelis Ferelis", "url": "https://ferelis.gr/"}}</script>
 </head>
-<body data-view="both">
+<body data-tab="home" data-view="both">
 
 <!-- εικονίδια -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -354,6 +379,7 @@ footer.foot a{color:var(--dim)}
  </div>
 </div>
 
+<div id="tabbar"><div class="wrap"><button type="button" class="tchip home" data-tab="home">← Αρχική</button><button type="button" class="tchip" data-tab="start">Ξεκίνα εδώ</button><button type="button" class="tchip" data-tab="prep">Προετοιμασία</button><button type="button" class="tchip" data-tab="lists">Λίστες και σχέδιο</button><button type="button" class="tchip" data-tab="act">Όταν συμβεί</button><button type="button" class="tchip" data-tab="off">Επίσημες πηγές</button><button type="button" class="tchip" data-tab="tools">Εκτυπώσεις</button></div></div>
 <main id="top">
 <div class="wrap">
 
@@ -376,8 +402,17 @@ footer.foot a{color:var(--dim)}
 
 <div class="note red disclaimer" id="disclaimer" role="note"><b>Σημαντική αποποίηση ευθύνης.</b> Το Veagle Survival Book είναι ιδιωτική, ανεπίσημη σελίδα γενικής ενημέρωσης. <b>Δεν ανήκει, δεν εκπροσωπεί και δεν συνδέεται</b> με την Πολιτική Προστασία, την Πυροσβεστική, την Αστυνομία, το Λιμενικό, το ΕΚΑΒ, το Χαμόγελο του Παιδιού ή οποιονδήποτε άλλο φορέα. Τα λογότυπα και τα ονόματά τους ανήκουν στους φορείς και εμφανίζονται μόνο για αναγνώριση. Οι οδηγίες είναι ενδεικτικές και <b>δεν αντικαθιστούν</b> τις επίσημες οδηγίες των αρχών, ούτε ιατρική, νομική ή τεχνική συμβουλή. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Οι τηλεφωνικοί αριθμοί και οι σύνδεσμοι μπορεί να αλλάξουν, οπότε επαλήθευσέ τους στις επίσημες σελίδες. Σε πραγματική έκτακτη ανάγκη κάλεσε <b>112</b> και ακολούθησε πρώτα τις οδηγίες των αρχών. Η χρήση γίνεται με δική σου ευθύνη και ο δημιουργός δεν φέρει ευθύνη για ζημιά ή απώλεια από τη χρήση του περιεχομένου.</div>
 
+<nav id="home" aria-label="Κεντρικό μενού">
+ <button type="button" class="hcard" data-tab="start"><svg class="ic"><use href="#i-check"/></svg><b>Ξεκίνα εδώ</b><span>5 απλά βήματα για να αρχίσεις σήμερα.</span></button>
+ <button type="button" class="hcard" data-tab="prep"><svg class="ic"><use href="#i-bag"/></svg><b>Προετοιμασία</b><span>Νερό, τροφή, φάρμακα, εξοπλισμός, υγιεινή, ρούχα, έγγραφα.</span></button>
+ <button type="button" class="hcard" data-tab="lists"><svg class="ic"><use href="#i-doc"/></svg><b>Λίστες και σχέδιο</b><span>Λίστα ελέγχου, οικογενειακό σχέδιο, σακίδιο φυγής, συντήρηση.</span></button>
+ <button type="button" class="hcard" data-tab="act"><svg class="ic"><use href="#i-alert"/></svg><b>Όταν συμβεί</b><span>Πρώτες βοήθειες και τι κάνεις σε σεισμό, φωτιά, πλημμύρα, μπλακάουτ.</span></button>
+ <button type="button" class="hcard" data-tab="off"><svg class="ic"><use href="#i-house"/></svg><b>Επίσημες πηγές</b><span>112, δημόσιοι φορείς και οδηγίες της Πολιτικής Προστασίας.</span></button>
+ <button type="button" class="hcard" data-tab="tools"><svg class="ic"><use href="#i-print"/></svg><b>Εκτυπώσεις και χωρίς internet</b><span>Φύλλα για τύπωμα και αντίγραφο στη συσκευή σου.</span></button>
+</nav>
+
  <!-- ΞΕΚΙΝΑ ΕΔΩ -->
- <section class="sec" id="start" data-s>
+ <section class="sec" id="start" data-g="start" data-s>
   <p class="kick">Ξεκίνα εδώ</p>
   <h2>Δεν ξέρεις από πού να αρχίσεις; 5 απλά βήματα</h2>
   <p class="intro">Δεν χρειάζεται να τα κάνεις όλα σήμερα. Κάνε ένα βήμα τώρα και τα υπόλοιπα όποτε προλάβεις. Κάθε βήμα σε πάει στο σωστό μέρος της σελίδας.</p>
@@ -390,7 +425,7 @@ footer.foot a{color:var(--dim)}
   </ol>
  </section>
  <!-- ΒΑΣΙΚΑ -->
- <section class="sec" id="basics" data-s>
+ <section class="sec" id="basics" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Ο κανόνας των τριών</h2>
   <p class="intro">Δείχνει με ποια σειρά φροντίζεις τις ανάγκες σου. Οι αριθμοί είναι ενδεικτικοί και ισχύουν για υγιή ενήλικα. Ξεκίνα με το ελάχιστο των 3 ημερών (72 ωρών) και χτίσε σιγά σιγά μέχρι τις 10.</p>
@@ -476,7 +511,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΤΡΟΦΗ -->
- <section class="sec" id="food" data-s>
+ <section class="sec" id="food" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Τροφή και θερμίδες</h2>
   <p class="intro">Ένας ενήλικας χρειάζεται 2.000 με 2.500 θερμίδες την ημέρα σε κρίση, δηλαδή 20.000 με 25.000 για 10 ημέρες. Τα παιδιά περίπου 1.500 με 2.000. Διάλεξε τρόφιμα που κρατάνε χρόνια, δεν θέλουν ψυγείο και τρώγονται χωρίς μαγείρεμα.</p>
@@ -497,7 +532,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΦΑΡΜΑΚΕΙΟ -->
- <section class="sec" id="med" data-s>
+ <section class="sec" id="med" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Φαρμακείο και πρώτες βοήθειες</h2>
   <p class="intro">Βάλε το φαρμακείο σε αδιάβροχο κουτί, μακριά από υγρασία και ζέστη, και πες σε όλα τα μέλη πού βρίσκεται.</p>
@@ -518,7 +553,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΠΡΩΤΕΣ ΒΟΗΘΕΙΕΣ -->
- <section class="sec" id="firstaid" data-s>
+ <section class="sec" id="firstaid" data-g="act" data-s>
   <p class="kick">Πρώτες βοήθειες</p>
   <h2>Τι κάνεις πριν έρθει το ασθενοφόρο</h2>
   <p class="intro">Σύντομες οδηγίες για τα συχνότερα προβλήματα: ΚΑΡΠΑ, πνιγμονή, αιμορραγία, πληγές, εγκαύματα, δάγκωμα φιδιού, κατάγματα. Άνοιξε το περιστατικό που σε αφορά. Σε κάθε σοβαρή κατάσταση πρώτα κάλεσε το <b>112</b> ή το <b>166</b>.</p>
@@ -646,7 +681,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΕΞΟΠΛΙΣΜΟΣ -->
- <section class="sec" id="gear" data-s>
+ <section class="sec" id="gear" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Φωτισμός, ενέργεια, επικοινωνία και μαγείρεμα</h2>
   <div class="tw"><table class="t">
@@ -674,7 +709,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΥΓΙΕΙΝΗ -->
- <section class="sec" id="hygiene" data-s>
+ <section class="sec" id="hygiene" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Υγιεινή και τουαλέτα ανάγκης</h2>
   <p class="intro">Χωρίς υγιεινή, οι μολύνσεις και οι γαστρεντερίτιδες εμφανίζονται μέσα σε λίγες ημέρες. Είναι το πρώτο που ξεχνάμε.</p>
@@ -693,7 +728,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΡΟΥΧΙΣΜΟΣ -->
- <section class="sec" id="clothes" data-s>
+ <section class="sec" id="clothes" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Ρουχισμός και καταφύγιο</h2>
   <p class="intro">Ακόμη και μέσα στο σπίτι, χωρίς θέρμανση ή κλιματισμό ο σωστός ρουχισμός γίνεται ζήτημα ασφάλειας.</p>
@@ -711,7 +746,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΕΓΓΡΑΦΑ -->
- <section class="sec" id="docs" data-s>
+ <section class="sec" id="docs" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Έγγραφα και μετρητά</h2>
   <div class="grid">
@@ -722,7 +757,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΛΙΣΤΑ ΕΛΕΓΧΟΥ -->
- <section class="sec" id="checklist" data-s>
+ <section class="sec" id="checklist" data-g="lists" data-s>
   <p class="kick">Λίστα ελέγχου</p>
   <h2>Τσέκαρε τι έχεις ήδη</h2>
   <p class="intro">Πάτα κάθε γραμμή όταν το έχεις έτοιμο. Οι ποσότητες είναι για το απόθεμα του σπιτιού για 10 ημέρες. Η πρόοδος φαίνεται και στον κύκλο στην κορυφή.</p>
@@ -737,7 +772,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΣΧΕΔΙΟ -->
- <section class="sec" id="plan" data-s>
+ <section class="sec" id="plan" data-g="lists" data-s>
   <p class="kick">Σχέδιο δράσης</p>
   <h2>Οικογενειακό σχέδιο</h2>
   <p class="intro">Το εγχειρίδιο δεν βοηθά χωρίς ψυχραιμία και συμφωνημένο σχέδιο. Διαβάστε το όλοι μαζί, με απλά λόγια για τα παιδιά, και κάντε μία πρόβα δύο φορές τον χρόνο.</p>
@@ -763,7 +798,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΑΠΕΙΛΕΣ -->
- <section class="sec" id="threats" data-s>
+ <section class="sec" id="threats" data-g="act" data-s>
   <p class="kick">Ειδικές απειλές</p>
   <h2>Τι κάνεις όταν συμβεί</h2>
   <p class="intro">Άνοιξε την απειλή που σε αφορά περισσότερο. Μέσα σε κάθε μία: πριν, κατά τη διάρκεια, μετά.</p>
@@ -921,7 +956,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΣΑΚΙΔΙΟ -->
- <section class="sec" id="gobag" data-s>
+ <section class="sec" id="gobag" data-g="lists" data-s>
   <p class="kick">Σακίδιο φυγής</p>
   <h2>Go-Bag 72 ωρών</h2>
   <p class="intro">Το σακίδιο φυγής καλύπτει 72 ώρες και πρέπει να είναι αρκετά ελαφρύ για να το κουβαλάς, έως 10–12 kg ο ενήλικας. Τα 30 λίτρα νερού των 10 ημερών ζυγίζουν 30 kg και μένουν στο σπίτι. Στο σακίδιο βάζεις 3 λίτρα και φίλτρο.</p>
@@ -945,7 +980,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΣΥΝΤΗΡΗΣΗ -->
- <section class="sec" id="keep" data-s>
+ <section class="sec" id="keep" data-g="lists" data-s>
   <p class="kick">Συντήρηση</p>
   <h2>Έλεγχος κάθε 6 μήνες</h2>
   <p class="intro">Ένα κιτ που δεν ελέγχεται δεν είναι αξιόπιστο. Κάνε τον έλεγχο με την αλλαγή ώρας, ώστε να μη χρειάζεσαι ημερολόγιο.</p>
@@ -964,7 +999,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΕΠΙΣΗΜΑ -->
- <section class="sec" id="official" data-s>
+ <section class="sec" id="official" data-g="off" data-s>
   <p class="kick">Επίσημες πηγές</p>
   <h2>Δημόσιες δομές και επίσημες οδηγίες</h2>
   <p class="intro">Αυτός ο οδηγός συμπληρώνει και δεν αντικαθιστά τις οδηγίες της Γενικής Γραμματείας Πολιτικής Προστασίας (ΓΓΠΠ). Σε πραγματική κρίση ακολούθησε πρώτα αυτές. Τα κείμενα παρακάτω είναι σύντομη περίληψη από το civilprotection.gov.gr.</p>
@@ -1001,7 +1036,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΧΩΡΙΣ INTERNET -->
- <section class="sec" id="offline" data-s>
+ <section class="sec" id="offline" data-g="tools" data-s>
   <p class="kick">Χωρίς internet</p>
   <h2>Κράτα το εγχειρίδιο στη συσκευή σου</h2>
   <p class="intro">Σε σεισμό ή μπλακάουτ μπορεί να μη δουλεύει το internet. Αν πατήσεις το κουμπί, η σελίδα αποθηκεύεται σε αυτή τη συσκευή (περίπου 1 MB) και ανοίγει και χωρίς σύνδεση. Δεν στέλνεται τίποτα πουθενά. Δεν γίνεται τίποτα αυτόματα: αν δεν το πατήσεις, δεν αποθηκεύεται τίποτα. Μπορείς να το αφαιρέσεις όποτε θέλεις.</p>
@@ -1013,7 +1048,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΕΚΤΥΠΩΣΕΙΣ -->
- <section class="sec" id="print" data-s>
+ <section class="sec" id="print" data-g="tools" data-s>
   <p class="kick">Εκτυπώσεις</p>
   <h2>Εκτύπωσε τα φύλλα</h2>
   <p class="intro">Τα φύλλα βγαίνουν σε A4, ασπρόμαυρα, με το λογότυπο Veagle και το ferelis.gr. Το κάθε φύλλο έχει κενά κουτάκια για να τα τσεκάρεις με στυλό. Φύλαξε ένα αντίγραφο στο σακίδιο, ένα στην κουζίνα και ένα στο αυτοκίνητο.</p>
@@ -1033,7 +1068,7 @@ footer.foot a{color:var(--dim)}
  <div class="wrap">
   <div>
    <p class="discl"><b>Αποποίηση ευθύνης:</b> ανεπίσημη σελίδα, χωρίς σύνδεση με τους δημόσιους φορείς που αναφέρονται. Οι οδηγίες είναι ενδεικτικές και γενικού χαρακτήρα. Δεν αντικαθιστούν τις οδηγίες των αρχών (Πολιτική Προστασία, 112), ούτε ιατρική ή νομική συμβουλή. Σε πραγματική κρίση ακολούθησε πρώτα τις επίσημες οδηγίες. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Η σελίδα δεν κάνει καμία σύνδεση στο internet και δεν στέλνει τίποτα πουθενά.</p>
-   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 17.11 · 01:58</p>
+   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 17.11 · 02:25</p>
   </div>
   <img src="eagle-white.png" alt="" width="34" height="36" style="opacity:.7">
  </div>
@@ -1045,7 +1080,7 @@ footer.foot a{color:var(--dim)}
  <div class="sheet check1" id="sh1"></div>
  <div class="sheet check4" id="sh4"></div>
  <div class="sheet contacts" id="shc"></div>
- <div class="pfoot"><span>Veagle Survival Book · ferelis.gr · Ανεπίσημος, ενδεικτικός οδηγός: δεν αντικαθιστά τις οδηγίες των αρχών (112).</span><span>Έκδοση 17.11 · 01:58</span></div>
+ <div class="pfoot"><span>Veagle Survival Book · ferelis.gr · Ανεπίσημος, ενδεικτικός οδηγός: δεν αντικαθιστά τις οδηγίες των αρχών (112).</span><span>Έκδοση 17.11 · 02:25</span></div>
 </div>
 
 <script>
@@ -1053,7 +1088,7 @@ footer.foot a{color:var(--dim)}
 'use strict';
 var $=function(s,r){return (r||document).querySelector(s)};
 var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
-var VER='Έκδοση 17.11 · 01:58';
+var VER='Έκδοση 17.11 · 02:25';
 
 /* ---------- δεδομένα λίστας ---------- */
 var CK=[
@@ -1193,7 +1228,7 @@ $$('#calc input,#calc select').forEach(function(i){i.addEventListener('input',ca
 
 /* ---------- αναζήτηση ---------- */
 $('#q').addEventListener('input',function(){
- var q=this.value.trim().toLowerCase(),any=false;
+ var q=this.value.trim().toLowerCase(),any=false;document.body.classList.toggle('searching',!!q);
  $$('[data-s]').forEach(function(s){
   if(!q){s.classList.remove('hide');return}
   var m=s.textContent.toLowerCase().indexOf(q)>=0;s.classList.toggle('hide',!m);if(m)any=true;
@@ -1292,6 +1327,30 @@ if(location.hash&&/^#t-/.test(location.hash)){var el=document.querySelector(loca
  btn.addEventListener('click',function(){set(m.hidden)});
  m.addEventListener('click',function(e){if(e.target.closest('[data-close]')||e.target.closest('a'))set(false)});
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!m.hidden)set(false)});
+})();
+
+/* ---------- αρχική με κάρτες / καρτέλες ---------- */
+(function(){
+ var b=document.body;
+ function mark(t){$$('.tchip').forEach(function(c){c.setAttribute('aria-current',c.getAttribute('data-tab')===t?'true':'false')})}
+ function setTab(t,id){
+  b.setAttribute('data-tab',t);mark(t);
+  var el=id&&document.getElementById(id);
+  if(el){el.scrollIntoView({behavior:'instant',block:'start'})}else{window.scrollTo({top:0,behavior:'instant'})}
+ }
+ document.addEventListener('click',function(e){
+  var t=e.target.closest('button[data-tab]');
+  if(t){e.preventDefault();setTab(t.getAttribute('data-tab'));return}
+  var a=e.target.closest('a[href^="#"]');if(!a)return;
+  var id=a.getAttribute('href').slice(1);
+  if(!id||id==='top'){e.preventDefault();setTab('home');return}
+  var el=document.getElementById(id);if(!el)return;
+  var sec=el.closest('.sec');if(!sec||sec.offsetParent!==null)return;
+  e.preventDefault();setTab(sec.getAttribute('data-g'),id);
+ });
+ var h=location.hash.slice(1),el=h&&document.getElementById(h);
+ if(el){var sec=el.closest('.sec');if(sec&&sec.getAttribute('data-g'))setTimeout(function(){setTab(sec.getAttribute('data-g'),h)},0)}
+ mark('home');
 })();
 })();
 </script>

@@ -122,7 +122,7 @@ Repo `ferelisvag/published` (public), δημοσιεύεται με GitHub Pages
 ## veagle-argos/ — Veagle Argos · Panoptis (φορητό πρόγραμμα προβολής καμερών ONVIF / RTSP, Windows)
 - `index.html` = σελίδα παρουσίασης EL/EN (γράφεται στο χέρι, χωρίς build, ίδιο στυλ με το veagle-eye, γραμματοσειρές από `../veagleos/fonts/`, χωρίς παρακολούθηση). `shots/` = screenshots από **δοκιμαστικές σκηνές** (ποτέ εικόνες από τις πραγματικές κάμερες του Βαγγέλη), `source/` = ο κώδικας (MIT), `download/VeagleArgos.exe` = ένα αρχείο, αντικαθίσταται σε κάθε έκδοση.
 - Ο κώδικας ζει στο private repo `ferelisvag/random`, φάκελος `veagleHomeCam/` (`veagle_homecam.py`, `onvif_lite.py`). Το .exe φτιάχνεται τοπικά με `build.ps1` (PyInstaller, PyAV, sounddevice). Κάθε αλλαγή εκεί: ίδια αντιγραφή στο `source/` εδώ, νέο .exe στο `download/` και νέο SHA-256 στη σελίδα (`.sha`).
-- Κατάσταση στη σελίδα εφαρμογών του ferelis.gr: **Beta** (4η κάρτα).
+- Κατάσταση στη σελίδα εφαρμογών του ferelis.gr: **Live** (4η κάρτα, από 17.11· πριν ήταν Beta).
 - Το κείμενο για τον Άργο Πανόπτη από το mythoi.org μπαίνει αυτούσιο ΜΟΝΟ μέσα στο πρόγραμμα (καρτέλα «Ο Άργος Πανόπτης», με πηγή)· στη σελίδα υπάρχει δική μας σύντομη εξήγηση και σύνδεσμος στο mythoi.org. Οι «Όροι χρήσης» της σελίδας είναι ίδιοι με του προγράμματος.
 
 ## veaglesurvivalbook/ — Veagle Survival Book (εγχειρίδιο επιβίωσης 10 ημερών, 1 άτομο ή οικογένεια 4)

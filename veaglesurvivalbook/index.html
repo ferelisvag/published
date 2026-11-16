@@ -32,6 +32,23 @@ button{font:inherit;color:inherit;cursor:pointer}
 .nav::-webkit-scrollbar{display:none}
 .nav a{color:var(--dim);text-decoration:none;font:500 14px var(--body);padding:6px 11px;border-radius:999px;white-space:nowrap}
 .nav a:hover{color:var(--text);background:var(--panel2)}
+.mbtn{display:inline-flex;align-items:center;gap:8px;background:var(--panel2);color:var(--text);border:1px solid var(--line2);border-radius:999px;padding:7px 14px;font:600 13px var(--disp);white-space:nowrap;cursor:pointer}
+.mbtn .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.mbtn:hover{border-color:var(--red)}
+.nav{justify-content:flex-start}
+#menu[hidden]{display:none}
+#menu{position:fixed;inset:0;z-index:60}
+#menu .mback{position:absolute;inset:0;background:rgba(0,0,0,.65)}
+#menu .mpanel{position:absolute;top:0;right:0;bottom:0;width:min(360px,92vw);background:#0a0d10;border-left:1px solid var(--line2);overflow-y:auto;padding:16px 18px 30px}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mhead b{font:700 15px var(--disp);letter-spacing:.08em}
+.mclose{background:none;border:1px solid var(--line2);color:var(--text);border-radius:8px;width:34px;height:34px;font-size:16px;cursor:pointer}
+.mgrp{margin-top:16px}
+.mgrp p{font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 6px}
+.mgrp a{display:block;padding:10px 12px;border-radius:8px;color:var(--text);text-decoration:none;font-size:16px}
+.mgrp a:hover,.mgrp a:focus-visible{background:var(--panel2)}
+@media(max-width:760px){.nav{display:none}}
+@media print{#menu,.mbtn{display:none!important}}
 .sos{background:var(--red);color:#fff;border:0;border-radius:999px;padding:7px 14px;font:700 13px var(--disp);letter-spacing:.06em;white-space:nowrap}
 .sos:hover{filter:brightness(1.12)}
 #sosPanel{display:none;background:#1a0509;border-bottom:2px solid var(--red)}
@@ -302,12 +319,24 @@ footer.foot a{color:var(--dim)}
 <header class="bar">
  <div class="wrap">
   <a class="brand" href="#top"><img src="eagle-white.png" alt="Veagle"><span>VEAGLE <b>SURVIVAL</b> BOOK</span></a>
-  <nav class="nav" aria-label="Ενότητες">
-   <a href="#basics">Βασικά</a><a href="#checklist">Λίστα ελέγχου</a><a href="#firstaid">Πρώτες βοήθειες</a><a href="#plan">Σχέδιο</a><a href="#threats">Απειλές</a><a href="#gobag">Σακίδιο φυγής</a><a href="#keep">Συντήρηση</a><a href="#official">Επίσημα</a>
+  <nav class="nav" aria-label="Βασικές ενότητες">
+   <a href="#start">Ξεκίνα εδώ</a><a href="#firstaid">Πρώτες βοήθειες</a><a href="#threats">Απειλές</a>
   </nav>
+  <button class="mbtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Μενού</span></button>
   <button class="sos" id="sosBtn" aria-expanded="false" aria-controls="sosPanel">ΕΚΤΑΚΤΗ ΑΝΑΓΚΗ</button>
  </div>
 </header>
+<div id="menu" role="dialog" aria-modal="true" aria-label="Μενού ενοτήτων" hidden>
+ <div class="mback" data-close></div>
+ <div class="mpanel">
+  <div class="mhead"><b>Όλες οι ενότητες</b><button type="button" class="mclose" data-close aria-label="Κλείσιμο μενού">✕</button></div>
+  <div class="mgrp"><p>Ξεκίνα</p><a href="#start">Ξεκίνα εδώ: 5 βήματα</a><a href="#basics">Βασικά: ο κανόνας των τριών</a></div>
+  <div class="mgrp"><p>Προετοιμασία</p><a href="#water">Νερό</a><a href="#food">Τροφή</a><a href="#med">Φαρμακείο</a><a href="#gear">Εξοπλισμός</a><a href="#hygiene">Υγιεινή</a><a href="#clothes">Ρουχισμός</a><a href="#docs">Έγγραφα</a></div>
+  <div class="mgrp"><p>Οργάνωση</p><a href="#checklist">Λίστα ελέγχου</a><a href="#plan">Οικογενειακό σχέδιο</a><a href="#gobag">Σακίδιο φυγής</a><a href="#keep">Συντήρηση</a></div>
+  <div class="mgrp"><p>Όταν συμβεί</p><a href="#firstaid">Πρώτες βοήθειες</a><a href="#threats">Ειδικές απειλές</a></div>
+  <div class="mgrp"><p>Πηγές και εργαλεία</p><a href="#official">Επίσημες πηγές</a><a href="#offline">Χωρίς internet</a><a href="#print">Εκτυπώσεις</a></div>
+ </div>
+</div>
 <div id="sosPanel" role="region" aria-label="Τηλέφωνα έκτακτης ανάγκης">
  <div class="wrap">
   <div class="sosgrid">
@@ -1004,7 +1033,7 @@ footer.foot a{color:var(--dim)}
  <div class="wrap">
   <div>
    <p class="discl"><b>Αποποίηση ευθύνης:</b> ανεπίσημη σελίδα, χωρίς σύνδεση με τους δημόσιους φορείς που αναφέρονται. Οι οδηγίες είναι ενδεικτικές και γενικού χαρακτήρα. Δεν αντικαθιστούν τις οδηγίες των αρχών (Πολιτική Προστασία, 112), ούτε ιατρική ή νομική συμβουλή. Σε πραγματική κρίση ακολούθησε πρώτα τις επίσημες οδηγίες. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Η σελίδα δεν κάνει καμία σύνδεση στο internet και δεν στέλνει τίποτα πουθενά.</p>
-   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 17.11 · 01:42</p>
+   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 17.11 · 01:58</p>
   </div>
   <img src="eagle-white.png" alt="" width="34" height="36" style="opacity:.7">
  </div>
@@ -1016,7 +1045,7 @@ footer.foot a{color:var(--dim)}
  <div class="sheet check1" id="sh1"></div>
  <div class="sheet check4" id="sh4"></div>
  <div class="sheet contacts" id="shc"></div>
- <div class="pfoot"><span>Veagle Survival Book · ferelis.gr · Ανεπίσημος, ενδεικτικός οδηγός: δεν αντικαθιστά τις οδηγίες των αρχών (112).</span><span>Έκδοση 17.11 · 01:42</span></div>
+ <div class="pfoot"><span>Veagle Survival Book · ferelis.gr · Ανεπίσημος, ενδεικτικός οδηγός: δεν αντικαθιστά τις οδηγίες των αρχών (112).</span><span>Έκδοση 17.11 · 01:58</span></div>
 </div>
 
 <script>
@@ -1024,7 +1053,7 @@ footer.foot a{color:var(--dim)}
 'use strict';
 var $=function(s,r){return (r||document).querySelector(s)};
 var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
-var VER='Έκδοση 17.11 · 01:42';
+var VER='Έκδοση 17.11 · 01:58';
 
 /* ---------- δεδομένα λίστας ---------- */
 var CK=[
@@ -1254,6 +1283,15 @@ if(location.hash&&/^#t-/.test(location.hash)){var el=document.querySelector(loca
   .then(function(ks){return Promise.all(ks.filter(function(k){return k.indexOf('vsb-')===0}).map(function(k){return caches.delete(k)}))})
   .then(function(){show(false);st.textContent='Το αντίγραφο αφαιρέθηκε από τη συσκευή.'});
  });
+})();
+
+/* ---------- μενού ενοτήτων ---------- */
+(function(){
+ var m=$('#menu'),btn=$('#menuBtn');
+ function set(o){m.hidden=!o;btn.setAttribute('aria-expanded',o?'true':'false');if(o){var f=$('.mgrp a',m);if(f)f.focus()}else btn.focus()}
+ btn.addEventListener('click',function(){set(m.hidden)});
+ m.addEventListener('click',function(e){if(e.target.closest('[data-close]')||e.target.closest('a'))set(false)});
+ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!m.hidden)set(false)});
 })();
 })();
 </script>

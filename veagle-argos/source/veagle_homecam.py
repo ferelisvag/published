@@ -35,7 +35,12 @@ import onvif_lite as onvif
 PRODUCT = "Argos"              # το όνομα μετά το VEAGLE (αλλάζει μόνο εδώ)
 TAGLINE = "Panoptis"           # ο Άργος ο Πανόπτης, ο φύλακας με τα εκατό μάτια
 APP_NAME = f"Veagle {PRODUCT}"
-APP_VERSION = "2.1"
+APP_VERSION = "3.0"
+TEST_BUILD = False            # δοκιμαστική έκδοση: γράφεται στον τίτλο του παραθύρου
+# ανίχνευση κίνησης: ποσοστό εικονοστοιχείων που άλλαξαν (σε μικρή γκρι εικόνα 64x36)
+MOTION_LEVELS = ("off", "low", "med", "high")
+MOTION_THRESH = {"low": 0.06, "med": 0.03, "high": 0.012}
+MOTION_LABEL = {"off": "ΚΙΝ ✕", "low": "ΚΙΝ 1", "med": "ΚΙΝ 2", "high": "ΚΙΝ 3"}
 BRAND = "VEAGLE - ferelis.gr"
 SITE_URL = "https://ferelis.gr"
 MYTH_URL = "https://mythoi.org/argos-panoptis/"
@@ -353,6 +358,10 @@ class Stream:
         self._fps_n = 0
         self._fps_t = time.time()
         self.fps = 0.0
+        self.motion_level = "off"
+        self.motion_t = 0.0
+        self._bg = None
+        self._mcount = 0
         self.unused_since: float | None = None
         self.thread = threading.Thread(target=self._run, daemon=True)
         self.thread.start()
@@ -437,6 +446,7 @@ class Stream:
         if now - self._fps_t >= 2:
             self.fps = self._fps_n / (now - self._fps_t)
             self._fps_n, self._fps_t = 0, now
+        self._detect_motion(f, now)
         if not self.display:
             with self.lock:
                 self.last_frame = f
@@ -465,6 +475,27 @@ class Stream:
             self.last_frame_t = now
             self.status = ""
             self.resolution = f"{W}x{H}"
+
+    def _detect_motion(self, f, now):
+        """Σύγκριση με αργά μεταβαλλόμενο «φόντο» σε μικρή γκρι εικόνα, κάθε 3ο καρέ."""
+        level = self.motion_level
+        if level == "off":
+            self._bg = None
+            return
+        self._mcount += 1
+        if self._mcount % 3:
+            return
+        try:
+            g = f.reformat(width=64, height=36, format="gray").to_ndarray().astype(np.float32)
+        except Exception:
+            return
+        if self._bg is None or self._bg.shape != g.shape:
+            self._bg = g
+            return
+        frac = float((np.abs(g - self._bg) > 22).mean())
+        self._bg += (g - self._bg) * 0.08
+        if frac > MOTION_THRESH.get(level, 1.0):
+            self.motion_t = now
 
     def snapshot_image(self) -> Image.Image | None:
         with self.lock:
@@ -687,6 +718,13 @@ class Tile:
         for it in (self.q_bg, self.q_txt):
             cv.tag_bind(it, "<ButtonPress-1>", self._on_quality)
             cv.tag_bind(it, "<Enter>", lambda e: cv.configure(cursor="hand2"))
+        # κουμπί ανίχνευσης κίνησης + ειδοποίηση
+        self.m_bg = cv.create_rectangle(0, 0, 0, 0, fill="#000000", outline="#484f58", stipple="gray75")
+        self.m_txt = cv.create_text(0, 0, text="", fill=FG, font=("Segoe UI Semibold", 8))
+        for it in (self.m_bg, self.m_txt):
+            cv.tag_bind(it, "<ButtonPress-1>", self._on_motion_btn)
+        self.alert_txt = cv.create_text(0, 0, text="", fill=BAD, font=("Segoe UI Semibold", 11))
+        self._alert_on = False
         # κάτω γραμμή
         self.zoom_txt = cv.create_text(0, 0, text="", fill=FG, anchor="sw", font=("Segoe UI Semibold", 9))
         self.info_txt = cv.create_text(0, 0, text="", fill=DIM, anchor="sw", font=("Segoe UI", 8))
@@ -726,7 +764,7 @@ class Tile:
         self.cv.itemconfigure(self.name_shadow, text=name)
         if cam is None:
             self.cv.itemconfigure(self.status_item, text="Κενή θέση", fill="#484f58")
-            for it in (self.q_bg, self.q_txt):
+            for it in (self.q_bg, self.q_txt, self.m_bg, self.m_txt):
                 self.cv.itemconfigure(it, state="hidden")
         elif not url:
             self.cv.itemconfigure(self.status_item, text="Δεν έχει οριστεί RTSP διεύθυνση", fill=WARN)
@@ -752,6 +790,9 @@ class Tile:
         cv.coords(self.dot, w - 20, 12, w - 10, 22)
         cv.coords(self.q_bg, w - 64, 9, w - 28, 25)
         cv.coords(self.q_txt, w - 46, 17)
+        cv.coords(self.m_bg, w - 122, 9, w - 70, 25)
+        cv.coords(self.m_txt, w - 96, 17)
+        cv.coords(self.alert_txt, w // 2, 46)
         cv.coords(self.zoom_txt, 12, h - 10)
         cv.coords(self.info_txt, 12, h - 28)
         cv.coords(self.clock_txt, w - 12, h - 26)
@@ -875,6 +916,11 @@ class Tile:
         if self.cam is not None:
             self.app.cycle_quality(self.cam)
 
+    def _on_motion_btn(self, e):
+        self._consumed = True
+        if self.cam is not None:
+            self.app.cycle_motion(self.cam)
+
     def _ptz_press(self, dx, dy):
         self._consumed = True
         if self.cam is not None:
@@ -899,6 +945,9 @@ class Tile:
             cv.itemconfigure(self.q_txt, text={"auto": "AUTO", "hd": "HD", "sd": "SD"}[q],
                              fill=OK if q == "hd" else (FG if q == "auto" else WARN), state="normal")
             cv.itemconfigure(self.q_bg, state="normal")
+            ml = self.cam.get("motion", "off")
+            cv.itemconfigure(self.m_txt, text=MOTION_LABEL.get(ml, "ΚΙΝ ✕"), fill=DIM if ml == "off" else WARN, state="normal")
+            cv.itemconfigure(self.m_bg, state="normal")
         icons = []
         if has_cam and app.selected_id == self.cam_id:
             icons.append("🔇" if (app.audio.muted or app.audio_unavailable) else "🔊")
@@ -943,6 +992,26 @@ class Tile:
             cv.itemconfigure(self.status_item, text=msg, fill=WARN if self.photo else DIM)
             bad = any(k in msg for k in ("Δεν", "Χάθηκε", "Λάθος", "αρνήθηκε"))
             cv.itemconfigure(self.dot, fill=BAD if bad else WARN, state="normal")
+        # ανίχνευση κίνησης
+        lvl = self.cam.get("motion", "off") if has_cam else "off"
+        st.motion_level = lvl
+        recent = lvl != "off" and st.motion_t and now - st.motion_t < 3
+        if recent:
+            flash = int(now * 3) % 2 == 0
+            cv.configure(highlightthickness=4, highlightbackground=BAD if flash else "#7a1520")
+            cv.itemconfigure(self.alert_txt, fill=BAD,
+                             text="⚠ ΚΙΝΗΣΗ " + time.strftime("%H:%M:%S", time.localtime(st.motion_t)))
+            self._alert_on = True
+        else:
+            if self._alert_on:
+                self._alert_on = False
+                cv.configure(highlightthickness=2)
+                self.set_selected(self.cam_id is not None and app.selected_id == self.cam_id)
+            if lvl != "off" and st.motion_t and now - st.motion_t < 600:
+                cv.itemconfigure(self.alert_txt, fill=DIM,
+                                 text="τελευταία κίνηση " + time.strftime("%H:%M:%S", time.localtime(st.motion_t)))
+            else:
+                cv.itemconfigure(self.alert_txt, text="")
         if self.hover and live:
             res = getattr(st, "resolution", "")
             cv.itemconfigure(self.info_txt, text=f"{res} · {st.fps:.0f} fps · {st.info}")
@@ -950,6 +1019,7 @@ class Tile:
             cv.itemconfigure(self.info_txt, text="")
         cv.tag_raise(self.status_item)
         for it in (self.name_shadow, self.name_item, self.icons, self.dot, self.q_bg, self.q_txt, self.zoom_txt,
+                   self.m_bg, self.m_txt, self.alert_txt,
                    self.info_txt, self.clock_shadow, self.clock_txt):
             cv.tag_raise(it)
         for o, t in self.ptz_items:
@@ -990,7 +1060,7 @@ class App:
         self._ui_q: queue.Queue = queue.Queue()
         threading.Thread(target=self._ptz_worker, daemon=True).start()
 
-        root.title(APP_NAME)
+        root.title(APP_NAME + (f" {APP_VERSION} · δοκιμαστική έκδοση" if TEST_BUILD else ""))
         root.configure(bg=BG)
         root.minsize(760, 440)
         try:
@@ -1272,6 +1342,15 @@ class App:
         self.build_wall()
         self.show_toast({"auto": "AUTO: SD στο πλέγμα, HD στο 1×1", "hd": "Πάντα HD (υψηλή ανάλυση)",
                          "sd": "Πάντα SD (ελαφριά ροή)"}[nq] + f" — {cam.get('name', '')}", 2500)
+
+    def cycle_motion(self, cam: dict):
+        m = cam.get("motion", "off")
+        nm = MOTION_LEVELS[(MOTION_LEVELS.index(m) + 1) % len(MOTION_LEVELS)] if m in MOTION_LEVELS else "low"
+        cam["motion"] = nm
+        save_config(self.cfg)
+        self.show_toast({"off": "Ανίχνευση κίνησης: κλειστή", "low": "Ανίχνευση κίνησης: χαμηλή ευαισθησία",
+                         "med": "Ανίχνευση κίνησης: μεσαία ευαισθησία", "high": "Ανίχνευση κίνησης: υψηλή ευαισθησία"}[nm]
+                        + f" — {cam.get('name', '')}", 2500)
 
     def toggle_fullscreen(self):
         self.fullscreen = not self.fullscreen

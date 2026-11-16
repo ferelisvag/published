@@ -136,6 +136,7 @@ button.primary{background:var(--accent);border-color:var(--accent);color:var(--o
 #status #lastExp.nobk{color:#fbbf24}#status #st.dirty{color:#fbbf24}#status #st.ok{color:#4ade80}
 #welcome{background:var(--f-bg2)}
 #welcome .card{background:var(--panel);color:var(--ink)}
+.col .item.drop{outline:2px dashed var(--accent);outline-offset:-2px;background:rgba(255,255,255,.12)}
 .swatches{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 4px}
 .swatches button{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:999px}
 .swatches button i{width:26px;height:26px;border-radius:50%;display:block;border:2px solid rgba(0,0,0,.25)}
@@ -215,7 +216,7 @@ button.primary{background:var(--accent);border-color:var(--accent);color:var(--o
       <span><span id="st">—</span> &nbsp;·&nbsp; <span id="lastExp"></span></span>
       <span>
         <label title="Αν το ενεργοποιήσεις, η σελίδα αποθηκεύεται μόνη της λίγα δευτερόλεπτα αφού σταματήσεις να γράφεις. Αν είναι κλειστό, αποθηκεύεις εσύ με το κουμπί."><input type="checkbox" id="auto"> Αυτόματη αποθήκευση</label>
-        &nbsp;·&nbsp; Φάκελος: <b id="folderName">—</b> &nbsp;·&nbsp; <a href="https://ferelis.gr" target="_blank" rel="noopener" style="color:inherit">Veagle Notes · ferelis.gr</a> &nbsp;·&nbsp; Έκδοση 4.11 · 18:31
+        &nbsp;·&nbsp; Φάκελος: <b id="folderName">—</b> &nbsp;·&nbsp; <a href="https://ferelis.gr" target="_blank" rel="noopener" style="color:inherit">Veagle Notes · ferelis.gr</a> &nbsp;·&nbsp; Έκδοση 1611 2252
       </span>
     </div>
   </div>
@@ -297,6 +298,7 @@ button.primary{background:var(--accent);border-color:var(--accent);color:var(--o
     <li>Κάθε <b>σελίδα</b> είναι ένα αρχείο <code>.html</code> (ανοίγει με οποιονδήποτε browser, ακόμα και χωρίς αυτή την εφαρμογή).</li>
     <li>Οι <b>εικόνες</b> είναι κανονικά αρχεία μέσα στον υποφάκελο <code>_images</code> της κάθε ενότητας.</li>
     <li>Μπορείς να αντιγράψεις τον φάκελο για αντίγραφο ασφαλείας, να τον βάλεις σε OneDrive/Google Drive/USB, ή να μετονομάσεις ενότητες από τον Εξερευνητή αρχείων.</li>
+    <li><b>Μεταφορά σελίδας σε άλλη ενότητα:</b> πάτησε και κράτησε μια σελίδα στη λίστα, σύρε την με το ποντίκι πάνω σε μια ενότητα αριστερά και άφησέ την. Η εφαρμογή θα σε ρωτήσει πρώτα. Η σελίδα και οι εικόνες της αντιγράφονται στη νέα ενότητα και η σελίδα αφαιρείται από την παλιά.</li>
     <li>Όταν «διαγράφεις» σελίδα, το αρχείο της μπαίνει στον υποφάκελο <code>_trash</code> και δεν χάνεται οριστικά. Οι εικόνες δεν σβήνονται ποτέ από την εφαρμογή.</li>
   </ul>
   <div class="row"><button class="primary" value="ok">Κατάλαβα</button></div>
@@ -306,7 +308,7 @@ button.primary{background:var(--accent);border-color:var(--accent);color:var(--o
 (function(){
 'use strict';
 const $=s=>document.querySelector(s);
-const S={root:null,sections:[],section:null,secDir:null,pages:[],cur:null,open:false,dirty:false,pending:new Map(),urls:[],counter:0,timer:null,searchMode:false,results:[]};
+const S={root:null,sections:[],section:null,secDir:null,pages:[],cur:null,open:false,dirty:false,pending:new Map(),urls:[],counter:0,timer:null,searchMode:false,results:[],drag:null};
 const SUPPORTED='showDirectoryPicker' in window;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -369,7 +371,11 @@ function revokeUrls(){S.urls.forEach(u=>URL.revokeObjectURL(u));S.urls=[];S.pend
 function renderSections(){
   const l=$('#secList');l.innerHTML='';
   if(!S.sections.length){l.innerHTML='<div class="muted">Δεν υπάρχει ακόμα ενότητα. Πάτα «+ Νέα ενότητα».</div>'}
-  S.sections.forEach(n=>{const d=document.createElement('div');d.className='item'+(n===S.section?' on':'');const t=document.createElement('div');t.className='t';t.textContent='📁 '+n;d.appendChild(t);d.onclick=()=>selectSection(n);l.appendChild(d)});
+  S.sections.forEach(n=>{const d=document.createElement('div');d.className='item'+(n===S.section?' on':'');const t=document.createElement('div');t.className='t';t.textContent='📁 '+n;d.appendChild(t);d.onclick=()=>selectSection(n);
+    d.ondragover=e=>{if(S.drag&&S.drag.sec!==n){e.preventDefault();e.dataTransfer.dropEffect='move';d.classList.add('drop')}};
+    d.ondragleave=()=>d.classList.remove('drop');
+    d.ondrop=e=>{e.preventDefault();d.classList.remove('drop');if(S.drag&&S.drag.sec!==n)movePage(S.drag.file,n)};
+    l.appendChild(d)});
 }
 function renderPages(){
   const l=$('#pageList');l.innerHTML='';
@@ -383,7 +389,11 @@ function renderPages(){
   }
   $('#pagesH').textContent=S.section?'Σελίδες · '+S.section:'Σελίδες';
   if(S.section&&!S.pages.length)l.innerHTML='<div class="muted">Δεν υπάρχουν σελίδες. Πάτα «+ Νέα σελίδα».</div>';
-  S.pages.forEach(p=>{const d=document.createElement('div');d.className='item'+(S.cur&&S.cur.file===p.file?' on':'');d.innerHTML='<div class="t"></div><small></small>';d.firstChild.textContent=p.title;d.lastChild.textContent=new Date(p.mod).toLocaleString('el-GR',{dateStyle:'short',timeStyle:'short'});d.onclick=()=>openPage(p.file);l.appendChild(d)});
+  S.pages.forEach(p=>{const d=document.createElement('div');d.className='item'+(S.cur&&S.cur.file===p.file?' on':'');d.innerHTML='<div class="t"></div><small></small>';d.firstChild.textContent=p.title;d.lastChild.textContent=new Date(p.mod).toLocaleString('el-GR',{dateStyle:'short',timeStyle:'short'});d.onclick=()=>openPage(p.file);
+    d.draggable=true;d.title='Σύρε με το ποντίκι πάνω σε άλλη ενότητα για να μεταφερθεί';
+    d.ondragstart=e=>{S.drag={file:p.file,sec:S.section};e.dataTransfer.setData('text/plain',p.title);e.dataTransfer.effectAllowed='move'};
+    d.ondragend=()=>{S.drag=null;document.querySelectorAll('#secList .drop').forEach(x=>x.classList.remove('drop'))};
+    l.appendChild(d)});
 }
 
 /* ---------- φάκελος / ενότητες / σελίδες ---------- */
@@ -499,6 +509,45 @@ async function deletePage(){
   const td=await S.secDir.getDirectoryHandle('_trash',{create:true});
   await writeFile(td,file,txt);await S.secDir.removeEntry(file);
   closePage();await loadPages();toast('Η σελίδα μπήκε στο _trash.');
+}
+
+
+/* ---------- μεταφορά σελίδας σε άλλη ενότητα (drag and drop) ---------- */
+async function movePage(file,destName){
+  try{
+    const title=file.replace(/\.html$/i,'');
+    const r=await ask({text:'Να μεταφερθεί η σελίδα «'+title+'» από την ενότητα «'+S.section+'» στην ενότητα «'+destName+'»;\nΤο αρχείο και οι εικόνες της θα αντιγραφούν στη νέα ενότητα και η σελίδα θα αφαιρεθεί από την παλιά. Οι εικόνες μένουν και στην παλιά ενότητα, για να μη χαθεί τίποτα.',ok:'Μεταφορά'});
+    if(r.v!=='ok')return;
+    if(S.cur&&S.cur.file===file&&S.open){if(!await guard())return}
+    const src=S.secDir,dest=await S.root.getDirectoryHandle(destName);
+    let txt=await (await (await src.getFileHandle(file)).getFile()).text();
+    const names=[...new Set([...txt.matchAll(/_images\/([^"'\s)?#<>]+)/g)].map(m=>m[1]))];
+    const map=new Map();
+    if(names.length){
+      const sd=await src.getDirectoryHandle('_images');
+      const dd=await dest.getDirectoryHandle('_images',{create:true});
+      for(const n of names){
+        let blob;try{blob=await (await sd.getFileHandle(decodeURIComponent(n))).getFile()}catch(e){continue}
+        let nn=decodeURIComponent(n);
+        if(await exists(dd,nn)){
+          const old=await (await dd.getFileHandle(nn)).getFile();
+          if(old.size!==blob.size){const dot=nn.lastIndexOf('.');const b0=dot>0?nn.slice(0,dot):nn,ext=dot>0?nn.slice(dot):'';let k=1;while(await exists(dd,b0+'-m'+k+ext))k++;nn=b0+'-m'+k+ext;await writeFile(dd,nn,blob)}
+        }else await writeFile(dd,nn,blob);
+        if(nn!==decodeURIComponent(n))map.set(n,encodeURIComponent(nn));
+      }
+      for(const [o,nw] of map)txt=txt.split('_images/'+o).join('_images/'+nw);
+    }
+    let out=file;
+    if(await exists(dest,out)){const b0=title;let k=1,c=b0+' (μεταφορά).html';while(await exists(dest,c)){k++;c=b0+' (μεταφορά '+k+').html'}out=c}
+    await writeFile(dest,out,txt);
+    const chk=await (await dest.getFileHandle(out)).getFile();
+    if(chk.size===0)throw new Error('Το αρχείο στη νέα ενότητα βγήκε κενό. Δεν έγινε καμία διαγραφή.');
+    await src.removeEntry(file);
+    if(S.cur&&S.cur.file===file)closePage();
+    await loadPages();
+    toast('Η σελίδα μεταφέρθηκε στην ενότητα «'+destName+'».');
+  }catch(e){toast('Η μεταφορά απέτυχε: '+e.message+' (η αρχική σελίδα δεν διαγράφηκε)')}
+  finally{S.drag=null}
 }
 
 /* ---------- αναζήτηση ---------- */

@@ -7,6 +7,8 @@
 <meta name="description" content="Veagle Survival Book: εγχειρίδιο επιβίωσης 10 ημερών για ένα άτομο ή οικογένεια. Νερό, τροφή, φαρμακείο, σχέδιο δράσης, σεισμός, πυρκαγιά, πλημμύρα, blackout, με υπολογιστές και εκτυπώσιμες λίστες ελέγχου.">
 <meta name="theme-color" content="#050708">
 <link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="../veagleos/fonts/fonts.css">
 <style>
 /* Veagle Survival Book. Μαύρο, λευκό, κόκκινο όπως τα υπόλοιπα Veagle. Σκοτεινή οθόνη, ανοιχτό φύλλο στην εκτύπωση. */
@@ -30,6 +32,23 @@ button{font:inherit;color:inherit;cursor:pointer}
 .nav::-webkit-scrollbar{display:none}
 .nav a{color:var(--dim);text-decoration:none;font:500 14px var(--body);padding:6px 11px;border-radius:999px;white-space:nowrap}
 .nav a:hover{color:var(--text);background:var(--panel2)}
+.mbtn{display:inline-flex;align-items:center;gap:8px;background:var(--panel2);color:var(--text);border:1px solid var(--line2);border-radius:999px;padding:7px 14px;font:600 13px var(--disp);white-space:nowrap;cursor:pointer}
+.mbtn .ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.mbtn:hover{border-color:var(--red)}
+.nav{justify-content:flex-start}
+#menu[hidden]{display:none}
+#menu{position:fixed;inset:0;z-index:60}
+#menu .mback{position:absolute;inset:0;background:rgba(0,0,0,.65)}
+#menu .mpanel{position:absolute;top:0;right:0;bottom:0;width:min(360px,92vw);background:#0a0d10;border-left:1px solid var(--line2);overflow-y:auto;padding:16px 18px 30px}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.mhead b{font:700 15px var(--disp);letter-spacing:.08em}
+.mclose{background:none;border:1px solid var(--line2);color:var(--text);border-radius:8px;width:34px;height:34px;font-size:16px;cursor:pointer}
+.mgrp{margin-top:16px}
+.mgrp p{font:500 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 6px}
+.mgrp a{display:block;padding:10px 12px;border-radius:8px;color:var(--text);text-decoration:none;font-size:16px}
+.mgrp a:hover,.mgrp a:focus-visible{background:var(--panel2)}
+@media(max-width:760px){.nav{display:none}}
+@media print{#menu,.mbtn{display:none!important}}
 .sos{background:var(--red);color:#fff;border:0;border-radius:999px;padding:7px 14px;font:700 13px var(--disp);letter-spacing:.06em;white-space:nowrap}
 .sos:hover{filter:brightness(1.12)}
 #sosPanel{display:none;background:#1a0509;border-bottom:2px solid var(--red)}
@@ -157,6 +176,11 @@ details.thr .body{padding:4px 18px 20px}
 .ph ul,.ph ol{margin:4px 0;padding-left:20px}
 .ph li{margin:6px 0;font-size:15px;color:#c9d1dc}
 .fig{background:#000;border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,215px));gap:10px;margin:4px 0 14px}
+.st{background:#0a0d10;border:1px solid var(--line);border-radius:12px;padding:6px 6px 10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;break-inside:avoid}
+.st svg{width:100%;height:auto;display:block}
+.st p{margin:6px 4px 0;font-size:14px;line-height:1.35;display:flex;gap:8px;align-items:flex-start}
+.st p b{flex:none;width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;font:700 13px var(--disp);display:grid;place-items:center}
 .fig svg{width:100%;height:auto;display:block}
 .fig figcaption{color:var(--dim);font-size:13px;margin-top:8px}
 
@@ -171,6 +195,31 @@ footer.foot .wrap{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justif
 footer.foot a{color:var(--dim)}
 .app-foot{margin:0}
 .discl{font:13px/1.55 var(--body);color:var(--dim);max-width:760px;margin:0 0 16px}
+#home{display:none;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:18px 0}
+.hcard{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:var(--panel);border:1px solid var(--line2);border-radius:14px;padding:18px;color:var(--text);cursor:pointer;font-family:var(--body)}
+.hcard:hover,.hcard:focus-visible{border-color:var(--red);background:var(--panel2)}
+.hcard .ic{width:30px;height:30px;color:var(--red)}
+.hcard b{font:700 19px var(--disp)}
+.hcard span{color:var(--dim);font-size:14px;line-height:1.4}
+#tabbar{display:none;position:sticky;top:56px;z-index:15;background:rgba(5,7,8,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+#tabbar .wrap{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-top:8px;padding-bottom:8px}
+#tabbar .wrap::-webkit-scrollbar{display:none}
+.tchip{flex:none;background:var(--panel);border:1px solid var(--line2);color:var(--dim);border-radius:999px;padding:7px 14px;font:600 13px var(--disp);cursor:pointer;white-space:nowrap}
+.tchip.home{color:var(--text)}
+.tchip[aria-current=true]{background:var(--red);border-color:var(--red);color:#fff}
+body[data-tab="home"] #home{display:grid}
+body:not([data-tab="home"]) #tabbar{display:block}
+body:not([data-tab="home"]) .hero,body:not([data-tab="home"]):not(.searching) #disclaimer{display:none}
+body[data-tab="home"] .sec{display:none}
+body[data-tab="start"] .sec:not([data-g="start"]){display:none}
+body[data-tab="prep"] .sec:not([data-g="prep"]){display:none}
+body[data-tab="lists"] .sec:not([data-g="lists"]){display:none}
+body[data-tab="act"] .sec:not([data-g="act"]){display:none}
+body[data-tab="off"] .sec:not([data-g="off"]){display:none}
+body[data-tab="tools"] .sec:not([data-g="tools"]){display:none}
+body.searching .sec{display:block}
+body.searching #home{display:none}
+@media print{body[data-tab] .sec{display:block!important}#home,#tabbar{display:none!important}}
 .hide{display:none!important}
 #empty{display:none;color:var(--dim)}
 
@@ -264,7 +313,7 @@ footer.foot a{color:var(--dim)}
 <meta name="twitter:image" content="https://ferelisvag.github.io/published/veaglesurvivalbook/icon-512.png">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Veagle Survival Book · Εγχειρίδιο επιβίωσης 10 ημερών", "url": "https://ferelisvag.github.io/published/veaglesurvivalbook/", "description": "Veagle Survival Book: εγχειρίδιο επιβίωσης 10 ημερών για ένα άτομο ή οικογένεια. Νερό, τροφή, φαρμακείο, σχέδιο δράσης, σεισμός, πυρκαγιά, πλημμύρα, blackout, με υπολογιστές και εκτυπώσιμες λίστες ελέγχου.", "applicationCategory": "LifestyleApplication", "operatingSystem": "Any (web browser)", "inLanguage": ["el"], "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "image": "https://ferelisvag.github.io/published/veaglesurvivalbook/icon-512.png", "publisher": {"@type": "Person", "name": "Vagelis Ferelis", "url": "https://ferelis.gr/"}}</script>
 </head>
-<body data-view="both">
+<body data-tab="home" data-view="both">
 
 <!-- εικονίδια -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -295,12 +344,24 @@ footer.foot a{color:var(--dim)}
 <header class="bar">
  <div class="wrap">
   <a class="brand" href="#top"><img src="eagle-white.png" alt="Veagle"><span>VEAGLE <b>SURVIVAL</b> BOOK</span></a>
-  <nav class="nav" aria-label="Ενότητες">
-   <a href="#basics">Βασικά</a><a href="#checklist">Λίστα ελέγχου</a><a href="#plan">Σχέδιο</a><a href="#threats">Απειλές</a><a href="#gobag">Σακίδιο φυγής</a><a href="#keep">Συντήρηση</a><a href="#official">Επίσημα</a>
+  <nav class="nav" aria-label="Βασικές ενότητες">
+   <a href="#start">Ξεκίνα εδώ</a><a href="#firstaid">Πρώτες βοήθειες</a><a href="#threats">Απειλές</a>
   </nav>
+  <button class="mbtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Μενού</span></button>
   <button class="sos" id="sosBtn" aria-expanded="false" aria-controls="sosPanel">ΕΚΤΑΚΤΗ ΑΝΑΓΚΗ</button>
  </div>
 </header>
+<div id="menu" role="dialog" aria-modal="true" aria-label="Μενού ενοτήτων" hidden>
+ <div class="mback" data-close></div>
+ <div class="mpanel">
+  <div class="mhead"><b>Όλες οι ενότητες</b><button type="button" class="mclose" data-close aria-label="Κλείσιμο μενού">✕</button></div>
+  <div class="mgrp"><p>Ξεκίνα</p><a href="#start">Ξεκίνα εδώ: 5 βήματα</a><a href="#basics">Βασικά: ο κανόνας των τριών</a></div>
+  <div class="mgrp"><p>Προετοιμασία</p><a href="#water">Νερό</a><a href="#food">Τροφή</a><a href="#med">Φαρμακείο</a><a href="#gear">Εξοπλισμός</a><a href="#hygiene">Υγιεινή</a><a href="#clothes">Ρουχισμός</a><a href="#docs">Έγγραφα</a></div>
+  <div class="mgrp"><p>Οργάνωση</p><a href="#checklist">Λίστα ελέγχου</a><a href="#plan">Οικογενειακό σχέδιο</a><a href="#gobag">Σακίδιο φυγής</a><a href="#keep">Συντήρηση</a></div>
+  <div class="mgrp"><p>Όταν συμβεί</p><a href="#firstaid">Πρώτες βοήθειες</a><a href="#threats">Ειδικές απειλές</a></div>
+  <div class="mgrp"><p>Πηγές και εργαλεία</p><a href="#official">Επίσημες πηγές</a><a href="#offline">Χωρίς internet</a><a href="#print">Εκτυπώσεις</a></div>
+ </div>
+</div>
 <div id="sosPanel" role="region" aria-label="Τηλέφωνα έκτακτης ανάγκης">
  <div class="wrap">
   <div class="sosgrid">
@@ -309,14 +370,16 @@ footer.foot a{color:var(--dim)}
    <a href="tel:199"><b>199</b><span>Πυροσβεστική</span></a>
    <a href="tel:100"><b>100</b><span>Αστυνομία</span></a>
    <a href="tel:108"><b>108</b><span>Λιμενικό</span></a>
+   <a href="tel:1056"><b>1056</b><span>Το Χαμόγελο του Παιδιού, δωρεάν γραμμή SOS</span></a>
    <a href="tel:2107793777"><b>210 7793777</b><span>Κέντρο Δηλητηριάσεων</span></a>
-   <a href="tel:11500"><b>11500</b><span>ΔΕΔΔΗΕ, βλάβες ρεύματος</span></a>
-   <a href="tel:1022"><b>1022</b><span>ΕΥΔΑΠ, βλάβες νερού (Αττική)</span></a>
+   <a href="tel:11500"><b>11500</b><span>ΔΕΔΔΗΕ, βλάβες ρεύματος (απ' το εξωτερικό: +30 211 1900 500)</span></a>
+   <a href="tel:1022"><b>1022</b><span>ΕΥΔΑΠ, βλάβες νερού (Αττική), όλο το 24ωρο</span></a>
   </div>
-  <p class="sosnote">Τι λες στο 112: ποιος είσαι, πού ακριβώς βρίσκεσαι, τι συνέβη, πόσοι είναι τραυματίες. Μην κλείσεις πρώτος. Επαλήθευσε τους αριθμούς στις επίσημες σελίδες των φορέων.</p>
+  <p class="sosnote">Τι λες στο 112: ποιος είσαι, πού ακριβώς βρίσκεσαι, τι συνέβη, πόσοι είναι τραυματίες. Μην κλείσεις πρώτος. Οι αριθμοί 1056, 11500 και 1022 ελέγχθηκαν στις σελίδες των φορέων στις 17.11. Ο αριθμός του Κέντρου Δηλητηριάσεων (210 7793777) βρέθηκε μόνο σε δευτερεύουσες πηγές: επαλήθευσέ τον στο gov.gr πριν τον τυπώσεις.</p>
  </div>
 </div>
 
+<div id="tabbar"><div class="wrap"><button type="button" class="tchip home" data-tab="home">← Αρχική</button><button type="button" class="tchip" data-tab="start">Ξεκίνα εδώ</button><button type="button" class="tchip" data-tab="prep">Προετοιμασία</button><button type="button" class="tchip" data-tab="lists">Λίστες και σχέδιο</button><button type="button" class="tchip" data-tab="act">Όταν συμβεί</button><button type="button" class="tchip" data-tab="off">Επίσημες πηγές</button><button type="button" class="tchip" data-tab="tools">Εκτυπώσεις</button></div></div>
 <main id="top">
 <div class="wrap">
 
@@ -338,8 +401,31 @@ footer.foot a{color:var(--dim)}
  </div>
 
 <div class="note red disclaimer" id="disclaimer" role="note"><b>Σημαντική αποποίηση ευθύνης.</b> Το Veagle Survival Book είναι ιδιωτική, ανεπίσημη σελίδα γενικής ενημέρωσης. <b>Δεν ανήκει, δεν εκπροσωπεί και δεν συνδέεται</b> με την Πολιτική Προστασία, την Πυροσβεστική, την Αστυνομία, το Λιμενικό, το ΕΚΑΒ, το Χαμόγελο του Παιδιού ή οποιονδήποτε άλλο φορέα. Τα λογότυπα και τα ονόματά τους ανήκουν στους φορείς και εμφανίζονται μόνο για αναγνώριση. Οι οδηγίες είναι ενδεικτικές και <b>δεν αντικαθιστούν</b> τις επίσημες οδηγίες των αρχών, ούτε ιατρική, νομική ή τεχνική συμβουλή. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Οι τηλεφωνικοί αριθμοί και οι σύνδεσμοι μπορεί να αλλάξουν, οπότε επαλήθευσέ τους στις επίσημες σελίδες. Σε πραγματική έκτακτη ανάγκη κάλεσε <b>112</b> και ακολούθησε πρώτα τις οδηγίες των αρχών. Η χρήση γίνεται με δική σου ευθύνη και ο δημιουργός δεν φέρει ευθύνη για ζημιά ή απώλεια από τη χρήση του περιεχομένου.</div>
+
+<nav id="home" aria-label="Κεντρικό μενού">
+ <button type="button" class="hcard" data-tab="start"><svg class="ic"><use href="#i-check"/></svg><b>Ξεκίνα εδώ</b><span>5 απλά βήματα για να αρχίσεις σήμερα.</span></button>
+ <button type="button" class="hcard" data-tab="prep"><svg class="ic"><use href="#i-bag"/></svg><b>Προετοιμασία</b><span>Νερό, τροφή, φάρμακα, εξοπλισμός, υγιεινή, ρούχα, έγγραφα.</span></button>
+ <button type="button" class="hcard" data-tab="lists"><svg class="ic"><use href="#i-doc"/></svg><b>Λίστες και σχέδιο</b><span>Λίστα ελέγχου, οικογενειακό σχέδιο, σακίδιο φυγής, συντήρηση.</span></button>
+ <button type="button" class="hcard" data-tab="act"><svg class="ic"><use href="#i-alert"/></svg><b>Όταν συμβεί</b><span>Πρώτες βοήθειες και τι κάνεις σε σεισμό, φωτιά, πλημμύρα, μπλακάουτ.</span></button>
+ <button type="button" class="hcard" data-tab="off"><svg class="ic"><use href="#i-house"/></svg><b>Επίσημες πηγές</b><span>112, δημόσιοι φορείς και οδηγίες της Πολιτικής Προστασίας.</span></button>
+ <button type="button" class="hcard" data-tab="tools"><svg class="ic"><use href="#i-print"/></svg><b>Εκτυπώσεις και χωρίς internet</b><span>Φύλλα για τύπωμα και αντίγραφο στη συσκευή σου.</span></button>
+</nav>
+
+ <!-- ΞΕΚΙΝΑ ΕΔΩ -->
+ <section class="sec" id="start" data-g="start" data-s>
+  <p class="kick">Ξεκίνα εδώ</p>
+  <h2>Δεν ξέρεις από πού να αρχίσεις; 5 απλά βήματα</h2>
+  <p class="intro">Δεν χρειάζεται να τα κάνεις όλα σήμερα. Κάνε ένα βήμα τώρα και τα υπόλοιπα όποτε προλάβεις. Κάθε βήμα σε πάει στο σωστό μέρος της σελίδας.</p>
+  <ol class="t start5">
+   <li><b>Γράψε τους αριθμούς σε χαρτί.</b> 112, 166, 199 και ένα πρόσωπο εκτός πόλης που θα παίρνετε όλοι. Τύπωσε το φύλλο επαφών: <a href="#print">Εκτυπώσεις</a>.</li>
+   <li><b>Βρες πού κλείνει το ρεύμα, το νερό και το αέριο.</b> Δείξε το σε όλους στο σπίτι. Δες το σχέδιο: <a href="#plan">Οικογενειακό σχέδιο</a>.</li>
+   <li><b>Φύλαξε νερό.</b> 3 λίτρα ανά άτομο την ημέρα, για 3 ημέρες για αρχή. Δες τον υπολογιστή: <a href="#basics">Νερό</a>.</li>
+   <li><b>Ετοίμασε φακό, ραδιόφωνο μπαταρίας και powerbank,</b> φορτισμένα. Δες: <a href="#gear">Εξοπλισμός</a>.</li>
+   <li><b>Κανονίστε πού θα βρεθείτε</b> αν χαθείτε: ένα σημείο κοντά στο σπίτι και ένα πιο μακριά. Δες: <a href="#plan">Οικογενειακό σχέδιο</a>.</li>
+  </ol>
+ </section>
  <!-- ΒΑΣΙΚΑ -->
- <section class="sec" id="basics" data-s>
+ <section class="sec" id="basics" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Ο κανόνας των τριών</h2>
   <p class="intro">Δείχνει με ποια σειρά φροντίζεις τις ανάγκες σου. Οι αριθμοί είναι ενδεικτικοί και ισχύουν για υγιή ενήλικα. Ξεκίνα με το ελάχιστο των 3 ημερών (72 ωρών) και χτίσε σιγά σιγά μέχρι τις 10.</p>
@@ -425,7 +511,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΤΡΟΦΗ -->
- <section class="sec" id="food" data-s>
+ <section class="sec" id="food" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Τροφή και θερμίδες</h2>
   <p class="intro">Ένας ενήλικας χρειάζεται 2.000 με 2.500 θερμίδες την ημέρα σε κρίση, δηλαδή 20.000 με 25.000 για 10 ημέρες. Τα παιδιά περίπου 1.500 με 2.000. Διάλεξε τρόφιμα που κρατάνε χρόνια, δεν θέλουν ψυγείο και τρώγονται χωρίς μαγείρεμα.</p>
@@ -446,7 +532,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΦΑΡΜΑΚΕΙΟ -->
- <section class="sec" id="med" data-s>
+ <section class="sec" id="med" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Φαρμακείο και πρώτες βοήθειες</h2>
   <p class="intro">Βάλε το φαρμακείο σε αδιάβροχο κουτί, μακριά από υγρασία και ζέστη, και πες σε όλα τα μέλη πού βρίσκεται.</p>
@@ -466,8 +552,136 @@ footer.foot a{color:var(--dim)}
   <p style="color:var(--dim);font-size:14px">Παρακολούθησε ένα σεμινάριο πρώτων βοηθειών (Ελληνικός Ερυθρός Σταυρός ή άλλος φορέας). Αξίζει περισσότερο από οποιοδήποτε κουτί.</p>
  </section>
 
+ <!-- ΠΡΩΤΕΣ ΒΟΗΘΕΙΕΣ -->
+ <section class="sec" id="firstaid" data-g="act" data-s>
+  <p class="kick">Πρώτες βοήθειες</p>
+  <h2>Τι κάνεις πριν έρθει το ασθενοφόρο</h2>
+  <p class="intro">Σύντομες οδηγίες για τα συχνότερα προβλήματα: ΚΑΡΠΑ, πνιγμονή, αιμορραγία, πληγές, εγκαύματα, δάγκωμα φιδιού, κατάγματα. Άνοιξε το περιστατικό που σε αφορά. Σε κάθε σοβαρή κατάσταση πρώτα κάλεσε το <b>112</b> ή το <b>166</b>.</p>
+  <div class="note red"><b>Σημαντικό:</b> οι οδηγίες είναι γενικές και ενδεικτικές. Δεν αντικαθιστούν γιατρό, εκπαίδευση πρώτων βοηθειών ή τις οδηγίες του 112 και του ΕΚΑΒ. Ένα σεμινάριο πρώτων βοηθειών (π.χ. Ελληνικός Ερυθρός Σταυρός) αξίζει πολύ περισσότερο από οποιοδήποτε κείμενο.</div>
+  <details class="thr" id="fa-first">
+   <summary><svg class="ic"><use href="#i-med"/></svg><span>Πρώτα απ' όλα: 4 κινήσεις<small>Ισχύουν σε κάθε περιστατικό</small></span></summary>
+   <div class="body">
+    <div class="steps" role="group" aria-label="Βήμα βήμα">
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Ασφάλεια" font-family="IBM Plex Sans, sans-serif"><path d="M110 30L146 90H74Z" fill="none" stroke="#ffb020" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="110" y="78" font-size="30" font-weight="700" fill="#ffb020" text-anchor="middle">!</text><text x="110" y="128" font-size="13" font-weight="500" fill="#8a95a6" text-anchor="middle">δεν κινδυνεύω κι εγώ</text></svg><p><b>1</b>Ασφάλεια</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Κάλεσε 112, μεγάφωνο" font-family="IBM Plex Sans, sans-serif"><g transform="translate(82,26) scale(1)"><rect width="56" height="96" rx="9" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="10" width="40" height="50" rx="4" fill="#1a0509" stroke="#ff1e38"/><text x="28" y="42" font-size="16" font-weight="700" fill="#ff1e38" text-anchor="middle">112</text><circle cx="28" cy="78" r="5" fill="none" stroke="#8a95a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M150 50q14 12 0 24M162 42q22 20 0 40" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>2</b>Κάλεσε 112, μεγάφωνο</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Έλεγξε: αντιδρά, αναπνέει" font-family="IBM Plex Sans, sans-serif"><path d="M20 116H200" fill="none" stroke="#262c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="40" cy="100" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M54 102H156M156 102L190 92M156 102L190 112M98 102L116 80" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M80 36q30-24 60 0q-30 24-60 0Z" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="110" cy="36" r="6" fill="#ffb020"/></svg><p><b>3</b>Έλεγξε: αντιδρά, αναπνέει</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Μείνε μαζί του, κράτα τον ζεστό" font-family="IBM Plex Sans, sans-serif"><path d="M20 126H200" fill="none" stroke="#262c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="30" cy="110" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M44 112H146M146 112L180 102M146 112L180 122M88 112L106 90" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="56" y="92" width="100" height="22" rx="6" fill="#ffb020" fill-opacity=".25" stroke="#ffb020" stroke-dasharray="5 4"/><circle cx="170" cy="50" r="12" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M170 62V96" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>4</b>Μείνε μαζί του, κράτα τον ζεστό</p></div>
+    </div>
+    <ol class="t"><li><b>Ασφάλεια.</b> Έλεγξε ότι δεν κινδυνεύεις κι εσύ (φωτιά, κίνηση, ρεύμα, κατάρρευση). Αν χρειαστεί, απομάκρυνε τον πάσχοντα.</li><li><b>Φώναξε βοήθεια:</b> 112 ή 166. Βάλε το τηλέφωνο στο μεγάφωνο για να έχεις ελεύθερα τα χέρια σου και να ακούς τις οδηγίες του διασώστη.</li><li><b>Έλεγξε:</b> μιλάει ή ανοίγει τα μάτια; Αναπνέει φυσιολογικά; Αιμορραγεί πολύ; Αυτά τρία πρώτα, πριν από οτιδήποτε άλλο.</li><li><b>Μείνε μαζί του</b> μέχρι να έρθει βοήθεια, κράτα τον ζεστό και ήρεμο και πες του τι κάνεις.</li></ol>
+    <p style="color:var(--dim);font-size:14px">Αν δεν έχεις εκπαίδευση, κάνε τα βασικά που γράφει εδώ και ακολούθα τις οδηγίες του 112. Κάνεις καλύτερα να βοηθήσεις απλά, παρά να μην κάνεις τίποτα.</p>
+   </div>
+  </details>
+  <details class="thr" id="fa-cpr">
+   <summary><svg class="ic"><use href="#i-med"/></svg><span>Δεν αναπνέει, δεν αντιδρά (ΚΑΡΠΑ)<small>Ο άνθρωπος δεν ξυπνά και δεν αναπνέει φυσιολογικά</small></span></summary>
+   <div class="body">
+    <div class="steps" role="group" aria-label="Βήμα βήμα">
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Κούνα τον από τους ώμους" font-family="IBM Plex Sans, sans-serif"><path d="M20 116H200" fill="none" stroke="#262c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="100" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M48 102H150M150 102L184 92M150 102L184 112M92 102L110 80" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M70 70L80 90M92 70L80 90" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="150" y="50" font-size="16" font-weight="700" fill="#ffb020" text-anchor="middle">Ξύπνα!</text></svg><p><b>1</b>Κούνα τον από τους ώμους</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Κάλεσε 112, ζήτα απινιδωτή" font-family="IBM Plex Sans, sans-serif"><g transform="translate(30,26) scale(0.9)"><rect width="56" height="96" rx="9" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="10" width="40" height="50" rx="4" fill="#1a0509" stroke="#ff1e38"/><text x="28" y="42" font-size="16" font-weight="700" fill="#ff1e38" text-anchor="middle">112</text><circle cx="28" cy="78" r="5" fill="none" stroke="#8a95a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="120" y="44" width="66" height="50" rx="8" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M159 48L141 74H153L147 92L167 64H155Z" fill="#ffb020"/><text x="153" y="112" font-size="14" font-weight="700" fill="#8a95a6" text-anchor="middle">AED</text></svg><p><b>2</b>Κάλεσε 112, ζήτα απινιδωτή</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Χέρια στο κέντρο του στήθους" font-family="IBM Plex Sans, sans-serif"><rect x="64" y="12" width="92" height="126" rx="30" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="110" cy="58" r="5" fill="#ff1e38"/><rect x="92" y="46" width="36" height="24" rx="6" fill="#ffb020" fill-opacity=".85"/><text x="110" y="106" font-size="13" font-weight="500" fill="#8a95a6" text-anchor="middle">κέντρο στήθους</text></svg><p><b>3</b>Χέρια στο κέντρο του στήθους</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Πίεσε βαθιά και γρήγορα" font-family="IBM Plex Sans, sans-serif"><path d="M20 120H200" fill="none" stroke="#262c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="40" cy="104" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M54 108H170M170 108L200 118" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 52V102M92 62L100 52L108 62" fill="none" stroke="#ffb020" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="150" y="52" font-size="16" font-weight="700" fill="#ffb020" text-anchor="middle">5–6 cm</text></svg><p><b>4</b>Πίεσε βαθιά και γρήγορα</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="30 πιέσεις, 2 εμφυσήσεις" font-family="IBM Plex Sans, sans-serif"><circle cx="64" cy="70" r="34" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="64" y="80" font-size="28" font-weight="700" fill="#e7ecf3" text-anchor="middle">30</text><circle cx="156" cy="70" r="34" fill="none" stroke="#ffb020" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="156" y="80" font-size="28" font-weight="700" fill="#e7ecf3" text-anchor="middle">2</text><text x="64" y="128" font-size="13" font-weight="500" fill="#8a95a6" text-anchor="middle">πιέσεις</text><text x="156" y="128" font-size="13" font-weight="500" fill="#8a95a6" text-anchor="middle">εμφυσήσεις</text></svg><p><b>5</b>30 πιέσεις, 2 εμφυσήσεις</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Απινιδωτής: ακολούθα τη φωνή" font-family="IBM Plex Sans, sans-serif"><rect x="20" y="20" width="76" height="58" rx="8" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M64 27L46 53H58L52 71L72 43H60Z" fill="#ffb020"/><path d="M96 40C130 40 140 60 150 84M96 62C120 62 130 80 138 98" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="140" y="80" width="42" height="26" rx="5" fill="#222a33" stroke="#e7ecf3"/><text x="110" y="132" font-size="13" font-weight="500" fill="#8a95a6" text-anchor="middle">ακολούθα τη φωνή</text></svg><p><b>6</b>Απινιδωτής: ακολούθα τη φωνή</p></div>
+    </div>
+    <ol class="t"><li>Φώναξε δυνατά, κούνα τον απαλά από τους ώμους. Αν δεν αντιδρά και δεν αναπνέει καθόλου ή αναπνέει με ασυνήθιστους, αργούς ρόγχους, <b>κάλεσε 112</b> (ή ζήτησε από κάποιον να καλέσει) και ζήτησε απινιδωτή (AED) αν υπάρχει κοντά.</li><li>Βάλε τον ανάσκελα σε σκληρή επιφάνεια. Τοποθέτησε τη βάση του ενός χεριού στο κέντρο του στήθους και το άλλο χέρι πάνω του.</li><li>Πίεσε δυνατά και γρήγορα, με τεντωμένα χέρια: περίπου 5 έως 6 εκατοστά βάθος, 100 έως 120 πιέσεις το λεπτό (ρυθμός περίπου «Stayin' Alive»). Άφηνε το στήθος να επανέρχεται ανάμεσα στις πιέσεις.</li><li>Αν ξέρεις και θέλεις, μετά από κάθε 30 πιέσεις δώσε 2 εμφυσήσεις. Αν δεν ξέρεις ή διστάζεις, συνέχισε μόνο τις πιέσεις.</li><li>Μόλις φτάσει απινιδωτής, άνοιξέ τον και ακολούθα τις φωνητικές οδηγίες. Μην σταματάς μέχρι να έρθει το ασθενοφόρο, να ξυπνήσει ο άνθρωπος ή να εξαντληθείς.</li></ol>
+   </div>
+  </details>
+  <details class="thr" id="fa-choke">
+   <summary><svg class="ic"><use href="#i-med"/></svg><span>Πνιγμονή (κάτι έχει κολλήσει στο λαιμό)<small>Δεν μπορεί να μιλήσει, να βήξει ή να αναπνεύσει</small></span></summary>
+   <div class="body">
+    <div class="steps" role="group" aria-label="Βήμα βήμα">
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Παρότρυνε να βήξει" font-family="IBM Plex Sans, sans-serif"><circle cx="100" cy="34" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 46V86M100 58L80 76M100 58L120 76M100 86L86 120M100 86L114 120" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M92 66q8 8 16 0" fill="none" stroke="#ffb020" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M128 26q16-8 28 0M132 40q18 0 28 8" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>1</b>Παρότρυνε να βήξει</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="5 χτυπήσεις στην πλάτη" font-family="IBM Plex Sans, sans-serif"><circle cx="96" cy="44" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M104 54L150 84M150 84V132M150 84L172 130" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M56 40L110 78" fill="none" stroke="#ffb020" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><text x="60" y="100" font-size="18" font-weight="700" fill="#ffb020" text-anchor="middle">5×</text></svg><p><b>2</b>5 χτυπήσεις στην πλάτη</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="5 πιέσεις στην κοιλιά" font-family="IBM Plex Sans, sans-serif"><circle cx="88" cy="34" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M88 46V86M88 58L68 76M88 58L108 76M88 86L74 120M88 86L102 120" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="128" cy="36" r="12" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M128 48V88M128 60L102 78M128 88L138 124M128 88L116 124" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="98" cy="76" r="7" fill="#ffb020"/><path d="M106 70L92 56" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="170" y="84" font-size="18" font-weight="700" fill="#ffb020" text-anchor="middle">5×</text></svg><p><b>3</b>5 πιέσεις στην κοιλιά</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Εναλλάσσεις· κάλεσε 112" font-family="IBM Plex Sans, sans-serif"><path d="M56 60a34 34 0 0 1 70-8M126 52l2-14l-14 6" fill="none" stroke="#ffb020" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M164 90a34 34 0 0 1-70 8M94 98l-2 14l14-6" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="110" y="80" font-size="18" font-weight="700" fill="#e7ecf3" text-anchor="middle">5+5</text><g transform="translate(172,10) scale(0.5)"><rect width="56" height="96" rx="9" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="10" width="40" height="50" rx="4" fill="#1a0509" stroke="#ff1e38"/><text x="28" y="42" font-size="16" font-weight="700" fill="#ff1e38" text-anchor="middle">112</text><circle cx="28" cy="78" r="5" fill="none" stroke="#8a95a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g></svg><p><b>4</b>Εναλλάσσεις· κάλεσε 112</p></div>
+    </div>
+    <ol class="t"><li>Ρώτα «Πνίγεσαι;». Αν μπορεί να βήχει, παρότρυνέ τον να συνεχίσει να βήχει και μην τον χτυπάς.</li><li>Αν δεν μπορεί να βήξει, γείρε τον μπροστά και δώσε <b>έως 5 δυνατές χτυπήσεις</b> στην πλάτη, ανάμεσα στις ωμοπλάτες, με τη βάση της παλάμης.</li><li>Αν δεν βγει, κάνε <b>έως 5 πιέσεις στην κοιλιά</b>: στάσου πίσω του, αγκάλιασέ τον, γροθιά πάνω από τον ομφαλό και τράβηξε απότομα προς τα μέσα και πάνω.</li><li>Αν δεν λυθεί, κάλεσε 112 και εναλλάσσεις 5 χτυπήσεις - 5 πιέσεις μέχρι να βγει το αντικείμενο. Αν χάσει τις αισθήσεις του, ξεκίνα ΚΑΡΠΑ.</li><li>Έγκυες και βρέφη κάτω του έτους: όχι πιέσεις στην κοιλιά. Ζήτησε οδηγίες από το 112. Όποιος πνίγηκε και βοηθήθηκε με πιέσεις, να τον δει γιατρός μετά.</li></ol>
+    <div class="note red"><b>Μην κάνεις:</b> να βάζεις τα δάχτυλά σου στα τυφλά μέσα στο στόμα για να βγάλεις το αντικείμενο.</div>
+   </div>
+  </details>
+  <details class="thr" id="fa-bleed">
+   <summary><svg class="ic"><use href="#i-med"/></svg><span>Σοβαρή αιμορραγία<small>Το αίμα τρέχει συνέχεια ή περνά από τον επίδεσμο</small></span></summary>
+   <div class="body">
+    <div class="steps" role="group" aria-label="Βήμα βήμα">
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Γάντια αν έχεις, κάλεσε 112" font-family="IBM Plex Sans, sans-serif"><path d="M50 120V70q0-10 10-10t10 10v-24q0-10 10-10t10 10v24q0-8 10-8t10 8v50q0 10-20 10H70q-20 0-20-10Z" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="66" y="142" font-size="12" font-weight="500" fill="#8a95a6" text-anchor="middle">γάντια</text><g transform="translate(140,24) scale(0.8)"><rect width="56" height="96" rx="9" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="10" width="40" height="50" rx="4" fill="#1a0509" stroke="#ff1e38"/><text x="28" y="42" font-size="16" font-weight="700" fill="#ff1e38" text-anchor="middle">112</text><circle cx="28" cy="78" r="5" fill="none" stroke="#8a95a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g></svg><p><b>1</b>Γάντια αν έχεις, κάλεσε 112</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Πίεσε πάνω στην πληγή" font-family="IBM Plex Sans, sans-serif"><path d="M28 86H192" fill="none" stroke="#8a95a6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 86H192" fill="none" stroke="#0a0d10" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><rect x="86" y="70" width="44" height="32" rx="6" fill="#331015" stroke="#ff1e38" stroke-width="2.5"/><path d="M108 34C108 34 99 47 99 53a9 9 0 0 0 18 0C117 47 108 34 108 34Z" fill="#ff1e38"/><path d="M150 34L150 70M146 62L150 70L154 62" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="108" y="128" font-size="13" font-weight="500" fill="#8a95a6" text-anchor="middle">πίεσε με το χέρι</text></svg><p><b>2</b>Πίεσε πάνω στην πληγή</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Αν περνά το αίμα, νέο ύφασμα από πάνω" font-family="IBM Plex Sans, sans-serif"><path d="M28 86H192" fill="none" stroke="#8a95a6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 86H192" fill="none" stroke="#0a0d10" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><rect x="78" y="72" width="48" height="32" rx="6" fill="#222a33" stroke="#8a95a6" stroke-width="2.5"/><rect x="90" y="66" width="48" height="32" rx="6" fill="#2d3640" stroke="#e7ecf3" stroke-width="2.5"/><text x="110" y="128" font-size="12" font-weight="500" fill="#8a95a6" text-anchor="middle">μην αφαιρείς, βάλε από πάνω</text></svg><p><b>3</b>Αν περνά το αίμα, νέο ύφασμα από πάνω</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Δέσε σφιχτό επίδεσμο" font-family="IBM Plex Sans, sans-serif"><path d="M28 86H192" fill="none" stroke="#8a95a6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 86H192" fill="none" stroke="#0a0d10" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><path d="M80 70L104 102M92 70L116 102M104 70L128 102M116 70L140 102" fill="none" stroke="#e7ecf3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>4</b>Δέσε σφιχτό επίδεσμο</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Ξάπλωσε, ύψωσε το μέλος, κράτα τον ζεστό" font-family="IBM Plex Sans, sans-serif"><path d="M20 120H200" fill="none" stroke="#262c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="104" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M48 108H110L152 76" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="40" y="90" width="64" height="24" rx="6" fill="#ffb020" fill-opacity=".22" stroke="#ffb020" stroke-dasharray="5 4"/></svg><p><b>5</b>Ξάπλωσε, ύψωσε το μέλος, κράτα τον ζεστό</p></div>
+    </div>
+    <ol class="t"><li>Φόρα γάντια αν έχεις. Κάλεσε 112.</li><li>Πίεσε <b>με το χέρι</b> κατευθείαν πάνω στην πληγή, με καθαρό, μη χνουδωτό ύφασμα ή γάζα. Μην το σηκώνεις να δεις αν σταμάτησε.</li><li>Αν το αίμα περνά, μην αφαιρείς το ύφασμα: βάλε άλλο από πάνω και συνέχισε να πιέζεις. Δέσε σφιχτό επίδεσμο πάνω από τα υφάσματα.</li><li>Ξάπλωσε τον άνθρωπο και σήκωσε το τραυματισμένο μέλος αν δεν υπάρχει κάταγμα. Κράτα τον ζεστό. Ωχρό, κρύο, ιδρωμένο δέρμα και ζάλη σημαίνουν σοβαρή κατάσταση.</li><li>Αν υπάρχει αντικείμενο καρφωμένο στην πληγή, <b>άφησέ το</b> στη θέση του και πίεσε γύρω του.</li><li>Αν η πίεση με το χέρι δεν ελέγχει μια βαριά αιμορραγία από χέρι ή πόδι, ο εκπαιδευμένος μπορεί να χρησιμοποιήσει αιμοστατικό επίδεσμο ή αντιαιμορραγικό ιμάντα (tourniquet). Χωρίς εκπαίδευση, συνέχισε την πίεση και ακολούθα το 112.</li></ol>
+   </div>
+  </details>
+  <details class="thr" id="fa-wound">
+   <summary><svg class="ic"><use href="#i-med"/></svg><span>Μικρά τραύματα και εκδορές<small>Κοψίματα, γδαρσίματα, αγκάθια</small></span></summary>
+   <div class="body">
+    <div class="steps" role="group" aria-label="Βήμα βήμα">
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Ξέπλυνε με τρεχούμενο νερό" font-family="IBM Plex Sans, sans-serif"><path d="M80 10h50v12h-14v12" fill="none" stroke="#8a95a6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M118 46V64M106 46V72M130 46V72" fill="none" stroke="#4aa8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 112H192" fill="none" stroke="#8a95a6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 112H192" fill="none" stroke="#0a0d10" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><text x="110" y="142" font-size="12" font-weight="500" fill="#8a95a6" text-anchor="middle">πολύ νερό</text></svg><p><b>1</b>Ξέπλυνε με τρεχούμενο νερό</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Σταμάτα το αίμα με πίεση" font-family="IBM Plex Sans, sans-serif"><path d="M28 86H192" fill="none" stroke="#8a95a6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 86H192" fill="none" stroke="#0a0d10" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><rect x="84" y="72" width="44" height="28" rx="6" fill="#331015" stroke="#e7ecf3" stroke-width="2.5"/><path d="M106 40L106 68M102 60L106 68L110 60" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="106" y="126" font-size="13" font-weight="500" fill="#8a95a6" text-anchor="middle">ελαφριά πίεση</text></svg><p><b>2</b>Σταμάτα το αίμα με πίεση</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Κάλυψε με γάζα" font-family="IBM Plex Sans, sans-serif"><path d="M28 86H192" fill="none" stroke="#8a95a6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 86H192" fill="none" stroke="#0a0d10" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><rect x="84" y="72" width="44" height="30" rx="6" fill="#e7ecf3" stroke="#e7ecf3" stroke-width="2.5"/><path d="M106 78V96M97 87H115" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>3</b>Κάλυψε με γάζα</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Δες γιατρό αν χρειάζεται" font-family="IBM Plex Sans, sans-serif"><circle cx="110" cy="62" r="34" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M110 44V80M92 62H128" fill="none" stroke="#ff1e38" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><text x="110" y="126" font-size="12" font-weight="500" fill="#8a95a6" text-anchor="middle">βαθιά ή βρώμικη, πυρετός</text></svg><p><b>4</b>Δες γιατρό αν χρειάζεται</p></div>
+    </div>
+    <ul class="t"><li>Πλύνε τα χέρια σου. Ξέπλυνε την πληγή με άφθονο καθαρό τρεχούμενο νερό για αρκετά λεπτά, μέχρι να φύγει η βρωμιά.</li><li>Σταμάτα το αίμα με ελαφριά πίεση και καθαρή γάζα. Καθάρισε γύρω από την πληγή, από μέσα προς τα έξω.</li><li>Κάλυψε με αποστειρωμένη γάζα ή αυτοκόλλητο επίθεμα. Άλλαζε το κάλυμμα καθημερινά ή όταν βραχεί ή λερωθεί.</li><li>Δες γιατρό αν η πληγή είναι βαθιά ή ανοιχτή και δεν κλείνει, είναι από δάγκωμα ζώου ή σκουριασμένο αντικείμενο, έχει χώμα που δεν βγαίνει, ή αν μετά από μέρες γίνει κόκκινη, πρησμένη, πονάει περισσότερο, βγάζει πύο ή έχεις πυρετό. Ρώτα για αντιτετανικό αν δεν είσαι εμβολιασμένος εδώ και πολλά χρόνια.</li></ul>
+    <div class="note red"><b>Μην κάνεις:</b> να βάζεις οινόπνευμα ή οξυζενέ μέσα σε πληγή ή να βγάζεις με το ζόρι ό,τι είναι βαθιά καρφωμένο.</div>
+   </div>
+  </details>
+  <details class="thr" id="fa-burn">
+   <summary><svg class="ic"><use href="#i-med"/></svg><span>Εγκαύματα και ζεματίσματα<small>Φωτιά, καυτό νερό, λάδι, σόμπα, μάτι κουζίνας</small></span></summary>
+   <div class="body">
+    <div class="steps" role="group" aria-label="Βήμα βήμα">
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Σταμάτα το κάψιμο" font-family="IBM Plex Sans, sans-serif"><path d="M80 40C84 60 106 64 106 84a26 26 0 0 1-52 0C54 70 68 64 72 48C78 58 80 50 80 40Z" fill="#ffb020"/><path d="M110 76L170 76M162 80L170 76L162 72" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="24" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M34 36V76M34 48L14 66M34 48L54 66M34 76L20 110M34 76L48 110" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>1</b>Σταμάτα το κάψιμο</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Δροσερό νερό 20 λεπτά" font-family="IBM Plex Sans, sans-serif"><path d="M76 10h50v12h-14v12" fill="none" stroke="#8a95a6" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M114 46V64M102 46V72M126 46V72" fill="none" stroke="#4aa8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 110H192" fill="none" stroke="#8a95a6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 110H192" fill="none" stroke="#0a0d10" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><text x="168" y="64" font-size="16" font-weight="700" fill="#ffb020" text-anchor="middle">20 λεπτά</text></svg><p><b>2</b>Δροσερό νερό 20 λεπτά</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Βγάλε δαχτυλίδια, ρολόγια" font-family="IBM Plex Sans, sans-serif"><path d="M30 80H150" fill="none" stroke="#8a95a6" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 80H150" fill="none" stroke="#0a0d10" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="110" cy="80" rx="8" ry="14" fill="none" stroke="#ffb020" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M120 56L170 36M164 43L170 36L161 35" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>3</b>Βγάλε δαχτυλίδια, ρολόγια</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Κάλυψε χαλαρά" font-family="IBM Plex Sans, sans-serif"><path d="M28 86H192" fill="none" stroke="#8a95a6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 86H192" fill="none" stroke="#0a0d10" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><rect x="60" y="68" width="100" height="40" rx="8" fill="#e7ecf3" fill-opacity=".14" stroke="#e7ecf3" stroke-width="3" stroke-dasharray="6 4"/><text x="110" y="128" font-size="12" font-weight="500" fill="#8a95a6" text-anchor="middle">μεμβράνη τροφίμων, χαλαρά</text></svg><p><b>4</b>Κάλυψε χαλαρά</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Όχι πάγο" font-family="IBM Plex Sans, sans-serif"><rect x="70" y="40" width="80" height="60" rx="8" fill="#16324b" stroke="#4aa8ff" stroke-width="3"/><path d="M84 44L136 96M136 44L84 96" fill="none" stroke="#ffb020" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><text x="110" y="126" font-size="12" font-weight="500" fill="#8a95a6" text-anchor="middle">ούτε βούτυρο, κρέμες</text></svg><p><b>5</b>Όχι πάγο</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Κάλεσε 112 αν είναι σοβαρό" font-family="IBM Plex Sans, sans-serif"><g transform="translate(30,26) scale(0.9)"><rect width="56" height="96" rx="9" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="10" width="40" height="50" rx="4" fill="#1a0509" stroke="#ff1e38"/><text x="28" y="42" font-size="16" font-weight="700" fill="#ff1e38" text-anchor="middle">112</text><circle cx="28" cy="78" r="5" fill="none" stroke="#8a95a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><text x="150" y="56" font-size="14" font-weight="700" fill="#ffb020" text-anchor="middle">μεγάλο</text><text x="150" y="76" font-size="14" font-weight="700" fill="#ffb020" text-anchor="middle">πρόσωπο</text><text x="150" y="96" font-size="14" font-weight="700" fill="#ffb020" text-anchor="middle">παιδί</text></svg><p><b>6</b>Κάλεσε 112 αν είναι σοβαρό</p></div>
+    </div>
+    <ol class="t"><li><b>Σταμάτα το κάψιμο:</b> απομάκρυνε τον άνθρωπο από την πηγή. Αν καίγονται ρούχα, σβήσε με νερό ή τύλιξέ τον σε κουβέρτα. Μην κινδυνέψεις κι εσύ.</li><li><b>Δρόσισε</b> με δροσερό ή χλιαρό τρεχούμενο νερό για <b>20 λεπτά</b>, όσο πιο νωρίς γίνεται. Βοηθά ακόμη κι αν ξεκινήσεις αργότερα.</li><li>Βγάλε δαχτυλίδια, ρολόγια και ρούχα γύρω από το έγκαυμα πριν πρηστεί, <b>εκτός</b> από ό,τι έχει κολλήσει στο δέρμα.</li><li>Κάλυψε ελαφρά με μεμβράνη τροφίμων (σε στρώσεις, όχι τυλιγμένη σφιχτά) ή καθαρή πλαστική σακούλα ή καθαρή, μη χνουδωτή γάζα. Κράτα τον άνθρωπο ζεστό.</li><li><b>Κάλεσε 112 ή πήγαινε στο νοσοκομείο</b> αν το έγκαυμα είναι μεγάλο, στο πρόσωπο, στα χέρια, στα γεννητικά όργανα ή σε κάμψεις, αν είναι βαθύ (λευκό, καφέ ή σκληρό σαν δέρμα), αν προκλήθηκε από χημικά ή ρεύμα, αν αναπνέει δύσκολα ή αν το θύμα είναι παιδί ή βρέφος.</li></ol>
+    <div class="note red"><b>Μην κάνεις:</b> πάγο ή παγωμένο νερό, βούτυρο, λάδι, οδοντόκρεμα ή κρέμες. Μην σπας τις φουσκάλες. Ο πόνος δεν δείχνει πάντα πόσο σοβαρό είναι: ένα βαθύ έγκαυμα μπορεί να μην πονά.</div>
+   </div>
+  </details>
+  <details class="thr" id="fa-snake">
+   <summary><svg class="ic"><use href="#i-med"/></svg><span>Δάγκωμα φιδιού<small>Στην Ελλάδα επικίνδυνες είναι κυρίως οι οχιές</small></span></summary>
+   <div class="body">
+    <div class="steps" role="group" aria-label="Βήμα βήμα">
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Απομακρύνσου από το φίδι" font-family="IBM Plex Sans, sans-serif"><path d="M150 40c20-20 40 10 14 22s-10 30 18 30" fill="none" stroke="#ffb020" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="60" cy="30" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M60 42V82M60 54L40 72M60 54L80 72M60 82L46 116M60 82L74 116" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M90 70L40 70M48 66L40 70L48 74" fill="none" stroke="#ff1e38" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>1</b>Απομακρύνσου από το φίδι</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Κάλεσε 112 ή 166" font-family="IBM Plex Sans, sans-serif"><g transform="translate(82,26) scale(1)"><rect width="56" height="96" rx="9" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="10" width="40" height="50" rx="4" fill="#1a0509" stroke="#ff1e38"/><text x="28" y="42" font-size="16" font-weight="700" fill="#ff1e38" text-anchor="middle">112</text><circle cx="28" cy="78" r="5" fill="none" stroke="#8a95a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><path d="M150 50q14 12 0 24" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>2</b>Κάλεσε 112 ή 166</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Κάθισε ή ξάπλωσε ήρεμα" font-family="IBM Plex Sans, sans-serif"><path d="M20 116H200" fill="none" stroke="#262c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="34" cy="100" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M48 102H150M150 102L184 92M150 102L184 112M92 102L110 80" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="110" y="50" font-size="14" font-weight="700" fill="#ffb020" text-anchor="middle">ήρεμος, μην τρέχεις</text></svg><p><b>3</b>Κάθισε ή ξάπλωσε ήρεμα</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Βγάλε δαχτυλίδια, ακινητοποίησε" font-family="IBM Plex Sans, sans-serif"><path d="M40 24V92L108 130" fill="none" stroke="#8a95a6" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 24V92L108 130" fill="none" stroke="#0a0d10" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 64L64 50M24 82L66 68" fill="none" stroke="#e7ecf3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="140" cy="60" r="12" fill="none" stroke="#ffb020" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M160 60L190 40M186 48L190 40L181 41" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>4</b>Βγάλε δαχτυλίδια, ακινητοποίησε</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Όχι κόψιμο, ρούφηγμα, τουρνικέ" font-family="IBM Plex Sans, sans-serif"><path d="M30 100L70 50" fill="none" stroke="#8a95a6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><rect x="60" y="34" width="30" height="10" rx="3" transform="rotate(50 75 39)" fill="#8a95a6"/><path d="M30 46L90 106M90 46L30 106" fill="none" stroke="#ffb020" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><rect x="120" y="60" width="70" height="14" rx="4" fill="#8a95a6"/><path d="M131 43L179 91M179 43L131 91" fill="none" stroke="#ffb020" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>5</b>Όχι κόψιμο, ρούφηγμα, τουρνικέ</p></div>
+    </div>
+    <ol class="t"><li>Απομακρύνσου από το φίδι. Μην προσπαθήσεις να το πιάσεις ή να το σκοτώσεις. Αν προλάβεις, θυμήσου πώς ήταν (μέγεθος, χρώμα, σχέδιο) ή τράβηξε μια φωτογραφία από μακριά.</li><li><b>Κάλεσε 112 ή 166</b> και πήγαινε σε νοσοκομείο το συντομότερο, ακόμη κι αν φαίνεται ήπιο. Μην περπατάς πολύ και μην τρέχεις.</li><li>Κάθισε ή ξάπλωσε, ήρεμος, ιδανικά στη σκιά. Ηρέμησε τον άνθρωπο: το δηλητήριο συχνά δεν ενεργοποιείται ή προκαλεί τοπική αντίδραση, αλλά πρέπει να τον δει γιατρός.</li><li>Βγάλε δαχτυλίδια, ρολόγια και σφιχτά ρούχα από το μέλος πριν πρηστεί. Κράτα το μέλος ακίνητο, σε στάση που δεν πονά, με νάρθηκα ή αντηρίδα.</li><li>Σημείωσε την ώρα και πώς εξελίσσεται το πρήξιμο (αν ξέρεις, μάρκαρε με στυλό το όριο του πρηξίματος) και πες το στο νοσοκομείο.</li></ol>
+    <div class="note red"><b>Μην κάνεις:</b> δεν κόβεις την πληγή, δεν ρουφάς το δηλητήριο, δεν βάζεις τουρνικέ ή σφιχτό δέσιμο, δεν βάζεις πάγο ή θερμότητα, δεν δίνεις αλκοόλ και δεν δοκιμάζεις «λαϊκές» συνταγές. Όλα αυτά κάνουν χειρότερα και καθυστερούν τη θεραπεία. Ανάλογα με το φίδι, μπορεί να χρειαστεί αντίδοτο στο νοσοκομείο.</div>
+   </div>
+  </details>
+  <details class="thr" id="fa-fract">
+   <summary><svg class="ic"><use href="#i-med"/></svg><span>Κατάγματα, διαστρέμματα, εξαρθρώματα<small>Πόνος, πρήξιμο, παραμόρφωση, δεν μπορεί να κινηθεί</small></span></summary>
+   <div class="body">
+    <div class="steps" role="group" aria-label="Βήμα βήμα">
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Κράτα ακίνητο όπως βρέθηκε" font-family="IBM Plex Sans, sans-serif"><circle cx="100" cy="26" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 38V78M100 50L80 68M100 50L120 68M100 78L86 112M100 78L114 112" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M100 50L66 72L88 98" fill="none" stroke="#ffb020" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><text x="160" y="70" font-size="14" font-weight="700" fill="#ffb020" text-anchor="middle">όπως είναι</text></svg><p><b>1</b>Κράτα ακίνητο όπως βρέθηκε</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Νάρθηκας και χαλαρός επίδεσμος" font-family="IBM Plex Sans, sans-serif"><path d="M28 86H192" fill="none" stroke="#8a95a6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 86H192" fill="none" stroke="#0a0d10" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><rect x="60" y="64" width="100" height="10" rx="3" fill="#8a95a6"/><rect x="60" y="98" width="100" height="10" rx="3" fill="#8a95a6"/><path d="M76 62V110M110 62V110M144 62V110" fill="none" stroke="#e7ecf3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>2</b>Νάρθηκας και χαλαρός επίδεσμος</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Ανοιχτό: κάλυψε, πίεσε γύρω" font-family="IBM Plex Sans, sans-serif"><path d="M28 86H192" fill="none" stroke="#8a95a6" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 86H192" fill="none" stroke="#0a0d10" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><rect x="84" y="70" width="48" height="32" rx="6" fill="#e7ecf3" stroke="#e7ecf3" stroke-width="2.5"/><path d="M70 40L90 68M82 64L90 68L89 59" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M150 40L130 68M131 59L130 68L138 64" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><text x="110" y="128" font-size="12" font-weight="500" fill="#8a95a6" text-anchor="middle">πίεσε γύρω, όχι πάνω</text></svg><p><b>3</b>Ανοιχτό: κάλυψε, πίεσε γύρω</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Αυχένας: κράτα το κεφάλι ακίνητο" font-family="IBM Plex Sans, sans-serif"><path d="M20 120H200" fill="none" stroke="#262c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="100" r="14" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M64 104H170" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 80Q50 66 70 80M30 120Q50 134 70 120" fill="none" stroke="#ffb020" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><text x="110" y="50" font-size="14" font-weight="700" fill="#ffb020" text-anchor="middle">μην τον μετακινείς</text></svg><p><b>4</b>Αυχένας: κράτα το κεφάλι ακίνητο</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Κρύο για διάστρεμμα" font-family="IBM Plex Sans, sans-serif"><path d="M50 70q30-10 50 10l40 24" fill="none" stroke="#8a95a6" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 70q30-10 50 10l40 24" fill="none" stroke="#0a0d10" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><rect x="84" y="56" width="42" height="40" rx="9" fill="#16324b" stroke="#4aa8ff" stroke-width="3"/><text x="110" y="128" font-size="12" font-weight="500" fill="#8a95a6" text-anchor="middle">10–15 λεπτά, με πανί</text></svg><p><b>5</b>Κρύο για διάστρεμμα</p></div>
+    </div>
+    <ol class="t"><li>Κράτα το σημείο <b>ακίνητο</b> στη στάση που βρέθηκε και στήριξέ το με χέρια, μαξιλάρια ή ρούχα. Μην προσπαθήσεις να το ισιώσεις.</li><li>Βάλε νάρθηκα από ό,τι έχεις (σανίδα, περιοδικό, ράβδο) πάνω από και κάτω από το σημείο και δέσε χαλαρά με κασκόλ ή επίδεσμο, που να μην κόβει την κυκλοφορία. Για το χέρι, ένας φαρδύς επίδεσμος δίνει στήριξη.</li><li>Αν είναι ανοιχτό κάταγμα (φαίνεται το οστό), κάλυψε με καθαρή γάζα και πίεσε γύρω γύρω, όχι πάνω στο οστό. Κάλεσε 112.</li><li>Αν υπάρχει υποψία για τραυματισμό στον αυχένα ή τη σπονδυλική στήλη (πτώση από ύψος, τροχαίο, πόνος στον αυχένα, μούδιασμα), <b>μην μετακινείς τον άνθρωπο</b> και κράτα το κεφάλι ακίνητο μέχρι να έρθει το ασθενοφόρο.</li><li>Για διάστρεμμα και μώλωπα: ξεκούραση, ανύψωση και κρύο (παγοκύστη ή πάγος τυλιγμένος σε πανί, όχι απευθείας στο δέρμα) για 10 έως 15 λεπτά κάθε λίγες ώρες το πρώτο 24ωρο. Αν δεν πατά ή υπάρχει παραμόρφωση, ακτινογραφία.</li></ol>
+   </div>
+  </details>
+  <details class="thr" id="fa-misc">
+   <summary><svg class="ic"><use href="#i-med"/></svg><span>Λιποθυμία και αναφυλαξία<small>Ζαλάδα, λιποθυμία, σοβαρή αλλεργία</small></span></summary>
+   <div class="body">
+    <div class="steps" role="group" aria-label="Βήμα βήμα">
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Λιποθυμία: πόδια ψηλά" font-family="IBM Plex Sans, sans-serif"><path d="M20 116H200" fill="none" stroke="#262c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="36" cy="100" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M50 104H118L166 70" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M158 54V84" fill="none" stroke="#ffb020" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>1</b>Λιποθυμία: πόδια ψηλά</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Αναπνέει αλλά δεν ξυπνά: στο πλάι" font-family="IBM Plex Sans, sans-serif"><path d="M20 120H200" fill="none" stroke="#262c34" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="46" cy="100" r="12" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M60 104H130M130 104L160 90M130 104L154 118M80 104L100 84L116 100" fill="none" stroke="#ff1e38" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><p><b>2</b>Αναπνέει αλλά δεν ξυπνά: στο πλάι</p></div>
+     <div class="st"><svg viewBox="0 0 220 150" role="img" aria-label="Αλλεργία: 112, αδρεναλίνη αν έχει" font-family="IBM Plex Sans, sans-serif"><rect x="40" y="56" width="110" height="22" rx="8" fill="none" stroke="#8a95a6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><rect x="40" y="56" width="26" height="22" rx="6" fill="#ffb020"/><path d="M150 67H174" fill="none" stroke="#e7ecf3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(164,10) scale(0.5)"><rect width="56" height="96" rx="9" fill="none" stroke="#8a95a6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="10" width="40" height="50" rx="4" fill="#1a0509" stroke="#ff1e38"/><text x="28" y="42" font-size="16" font-weight="700" fill="#ff1e38" text-anchor="middle">112</text><circle cx="28" cy="78" r="5" fill="none" stroke="#8a95a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><text x="95" y="110" font-size="12" font-weight="500" fill="#8a95a6" text-anchor="middle">συσκευή αδρεναλίνης</text></svg><p><b>3</b>Αλλεργία: 112, αδρεναλίνη αν έχει</p></div>
+    </div>
+    <ul class="t"><li><b>Λιποθυμία:</b> ξάπλωσε τον άνθρωπο και σήκωσε τα πόδια του. Άνοιξε το παράθυρο, χαλάρωσε ρούχα. Αν συνέλθει γρήγορα, δώσε νερό σταδιακά. Αν δεν συνέρχεται σε 1 λεπτό, κάλεσε 112.</li><li><b>Αναπνέει αλλά δεν ξυπνά:</b> γύρισέ τον στο πλάι (θέση ανάνηψης) με το κεφάλι ελαφρά πίσω, ώστε να μένει ελεύθερος ο αεραγωγός, και κάλεσε 112. Παρακολούθησε την αναπνοή του διαρκώς.</li><li><b>Σοβαρή αλλεργική αντίδραση:</b> πρήξιμο προσώπου ή γλώσσας, δυσκολία στην αναπνοή, κνίδωση σε όλο το σώμα, ζάλη. Κάλεσε 112 αμέσως. Αν ο άνθρωπος έχει συνταγογραφημένη συσκευή αδρεναλίνης, βοήθησέ τον να την κάνει όπως έχει εκπαιδευτεί. Μην τον αφήσεις μόνο.</li></ul>
+   </div>
+  </details>
+  <p style="color:var(--dim);font-size:13px">Οι περιλήψεις βασίζονται σε οδηγίες αναγνωρισμένων φορέων (Resuscitation Council UK, British Red Cross, NHS) και είναι γραμμένες με δικά μας λόγια. Ελέγχθηκαν στις 17.11. Για επαγγελματική εκπαίδευση: Ελληνικός Ερυθρός Σταυρός, redcross.gr.</p>
+ </section>
+
  <!-- ΕΞΟΠΛΙΣΜΟΣ -->
- <section class="sec" id="gear" data-s>
+ <section class="sec" id="gear" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Φωτισμός, ενέργεια, επικοινωνία και μαγείρεμα</h2>
   <div class="tw"><table class="t">
@@ -495,7 +709,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΥΓΙΕΙΝΗ -->
- <section class="sec" id="hygiene" data-s>
+ <section class="sec" id="hygiene" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Υγιεινή και τουαλέτα ανάγκης</h2>
   <p class="intro">Χωρίς υγιεινή, οι μολύνσεις και οι γαστρεντερίτιδες εμφανίζονται μέσα σε λίγες ημέρες. Είναι το πρώτο που ξεχνάμε.</p>
@@ -514,7 +728,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΡΟΥΧΙΣΜΟΣ -->
- <section class="sec" id="clothes" data-s>
+ <section class="sec" id="clothes" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Ρουχισμός και καταφύγιο</h2>
   <p class="intro">Ακόμη και μέσα στο σπίτι, χωρίς θέρμανση ή κλιματισμό ο σωστός ρουχισμός γίνεται ζήτημα ασφάλειας.</p>
@@ -532,7 +746,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΕΓΓΡΑΦΑ -->
- <section class="sec" id="docs" data-s>
+ <section class="sec" id="docs" data-g="prep" data-s>
   <p class="kick">Βασικά</p>
   <h2>Έγγραφα και μετρητά</h2>
   <div class="grid">
@@ -543,7 +757,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΛΙΣΤΑ ΕΛΕΓΧΟΥ -->
- <section class="sec" id="checklist" data-s>
+ <section class="sec" id="checklist" data-g="lists" data-s>
   <p class="kick">Λίστα ελέγχου</p>
   <h2>Τσέκαρε τι έχεις ήδη</h2>
   <p class="intro">Πάτα κάθε γραμμή όταν το έχεις έτοιμο. Οι ποσότητες είναι για το απόθεμα του σπιτιού για 10 ημέρες. Η πρόοδος φαίνεται και στον κύκλο στην κορυφή.</p>
@@ -558,7 +772,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΣΧΕΔΙΟ -->
- <section class="sec" id="plan" data-s>
+ <section class="sec" id="plan" data-g="lists" data-s>
   <p class="kick">Σχέδιο δράσης</p>
   <h2>Οικογενειακό σχέδιο</h2>
   <p class="intro">Το εγχειρίδιο δεν βοηθά χωρίς ψυχραιμία και συμφωνημένο σχέδιο. Διαβάστε το όλοι μαζί, με απλά λόγια για τα παιδιά, και κάντε μία πρόβα δύο φορές τον χρόνο.</p>
@@ -584,7 +798,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΑΠΕΙΛΕΣ -->
- <section class="sec" id="threats" data-s>
+ <section class="sec" id="threats" data-g="act" data-s>
   <p class="kick">Ειδικές απειλές</p>
   <h2>Τι κάνεις όταν συμβεί</h2>
   <p class="intro">Άνοιξε την απειλή που σε αφορά περισσότερο. Μέσα σε κάθε μία: πριν, κατά τη διάρκεια, μετά.</p>
@@ -742,7 +956,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΣΑΚΙΔΙΟ -->
- <section class="sec" id="gobag" data-s>
+ <section class="sec" id="gobag" data-g="lists" data-s>
   <p class="kick">Σακίδιο φυγής</p>
   <h2>Go-Bag 72 ωρών</h2>
   <p class="intro">Το σακίδιο φυγής καλύπτει 72 ώρες και πρέπει να είναι αρκετά ελαφρύ για να το κουβαλάς, έως 10–12 kg ο ενήλικας. Τα 30 λίτρα νερού των 10 ημερών ζυγίζουν 30 kg και μένουν στο σπίτι. Στο σακίδιο βάζεις 3 λίτρα και φίλτρο.</p>
@@ -766,7 +980,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΣΥΝΤΗΡΗΣΗ -->
- <section class="sec" id="keep" data-s>
+ <section class="sec" id="keep" data-g="lists" data-s>
   <p class="kick">Συντήρηση</p>
   <h2>Έλεγχος κάθε 6 μήνες</h2>
   <p class="intro">Ένα κιτ που δεν ελέγχεται δεν είναι αξιόπιστο. Κάνε τον έλεγχο με την αλλαγή ώρας, ώστε να μη χρειάζεσαι ημερολόγιο.</p>
@@ -785,7 +999,7 @@ footer.foot a{color:var(--dim)}
  </section>
 
  <!-- ΕΠΙΣΗΜΑ -->
- <section class="sec" id="official" data-s>
+ <section class="sec" id="official" data-g="off" data-s>
   <p class="kick">Επίσημες πηγές</p>
   <h2>Δημόσιες δομές και επίσημες οδηγίες</h2>
   <p class="intro">Αυτός ο οδηγός συμπληρώνει και δεν αντικαθιστά τις οδηγίες της Γενικής Γραμματείας Πολιτικής Προστασίας (ΓΓΠΠ). Σε πραγματική κρίση ακολούθησε πρώτα αυτές. Τα κείμενα παρακάτω είναι σύντομη περίληψη από το civilprotection.gov.gr.</p>
@@ -804,7 +1018,7 @@ footer.foot a{color:var(--dim)}
    <div class="card"><h3><img class="blogo" src="logo-limeniko.png" alt="Λογότυπο: Λιμενικό Σώμα" width="44" height="44">Λιμενικό Σώμα · 108</h3><p>Κίνδυνος στη θάλασσα και στις ακτές, διάσωση στο νερό.</p><p style="margin-top:6px"><a href="https://www.hcg.gr/el/" target="_blank" rel="noopener">hcg.gr</a></p></div>
    <div class="card"><h3><img class="blogo" src="logo-ekab.png" alt="Λογότυπο: ΕΚΑΒ" width="44" height="44">ΕΚΑΒ · 166</h3><p>Ασθενοφόρο και επείγουσα ιατρική βοήθεια.</p><p style="margin-top:6px"><a href="https://www.ekab.gr/" target="_blank" rel="noopener">ekab.gr</a></p></div>
    <div class="card"><h3><img class="blogo" src="logo-hamogelo.png" alt="Λογότυπο: Το Χαμόγελο του Παιδιού" width="44" height="44">Το Χαμόγελο του Παιδιού · 1056</h3><p>Γραμμή για παιδιά που κινδυνεύουν ή χάθηκαν και για όποιον ανησυχεί για ένα παιδί.</p><p style="margin-top:6px"><a href="https://www.hamogelo.gr/gr/el/" target="_blank" rel="noopener">hamogelo.gr</a></p></div>
-   <div class="card"><h3><svg class="ic"><use href="#i-house"/></svg>Γενική Γραμματεία Πολιτικής Προστασίας</h3><p>Κέντρο επικοινωνίας: 213 1510 100 · info@civilprotection.gr. Για κρατική αρωγή μετά από καταστροφή: ΓΓΑΦΚΚΑ και Πλατφόρμα Πρώτης Αρωγής (213 162 1000).</p><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/epikoinonia" target="_blank" rel="noopener">Τηλεφωνικός κατάλογος</a></p></div>
+   <div class="card"><h3><svg class="ic"><use href="#i-house"/></svg>Γενική Γραμματεία Πολιτικής Προστασίας</h3><p>Κέντρο επικοινωνίας: 213 1510 100 · info@civilprotection.gr. Για κρατική αρωγή μετά από καταστροφή: ΓΓΑΦΚΚΑ και Πλατφόρμα Πρώτης Αρωγής (213 162 1000, ο αριθμός δεν επαληθεύτηκε: έλεγξέ τον στο civilprotection.gov.gr).</p><p style="margin-top:6px"><a href="https://civilprotection.gov.gr/epikoinonia" target="_blank" rel="noopener">Τηλεφωνικός κατάλογος</a></p></div>
   </div>
   <p style="color:var(--dim);font-size:13px">Τα λογότυπα ανήκουν στους αντίστοιχους φορείς και μπαίνουν μόνο για αναγνώριση. Οι αριθμοί 1056 και 213 1510 100 να επαληθεύονται στις σελίδες των φορέων πριν τυπωθούν. Οι σύνδεσμοι ανοίγουν εξωτερικές σελίδες μόνο όταν τους πατήσεις, και η ίδια η σελίδα δεν στέλνει τίποτα.</p>
 
@@ -821,8 +1035,20 @@ footer.foot a{color:var(--dim)}
   <div class="note">Πηγή των περιλήψεων: Γενική Γραμματεία Πολιτικής Προστασίας, civilprotection.gov.gr (διαβάστηκαν στις 08.11). Οι οδηγίες των αρχών ενημερώνονται, οπότε έλεγξε τη σελίδα τους.</div>
  </section>
 
+ <!-- ΧΩΡΙΣ INTERNET -->
+ <section class="sec" id="offline" data-g="tools" data-s>
+  <p class="kick">Χωρίς internet</p>
+  <h2>Κράτα το εγχειρίδιο στη συσκευή σου</h2>
+  <p class="intro">Σε σεισμό ή μπλακάουτ μπορεί να μη δουλεύει το internet. Αν πατήσεις το κουμπί, η σελίδα αποθηκεύεται σε αυτή τη συσκευή (περίπου 1 MB) και ανοίγει και χωρίς σύνδεση. Δεν στέλνεται τίποτα πουθενά. Δεν γίνεται τίποτα αυτόματα: αν δεν το πατήσεις, δεν αποθηκεύεται τίποτα. Μπορείς να το αφαιρέσεις όποτε θέλεις.</p>
+  <div class="printrow">
+   <button class="btn" type="button" id="offOn">Αποθήκευση για χρήση χωρίς internet</button>
+   <button class="btn ghost" type="button" id="offOff" hidden>Αφαίρεση του αντιγράφου</button>
+  </div>
+  <p id="offStatus" style="color:var(--dim);font-size:14px" role="status" aria-live="polite"></p>
+ </section>
+
  <!-- ΕΚΤΥΠΩΣΕΙΣ -->
- <section class="sec" id="print" data-s>
+ <section class="sec" id="print" data-g="tools" data-s>
   <p class="kick">Εκτυπώσεις</p>
   <h2>Εκτύπωσε τα φύλλα</h2>
   <p class="intro">Τα φύλλα βγαίνουν σε A4, ασπρόμαυρα, με το λογότυπο Veagle και το ferelis.gr. Το κάθε φύλλο έχει κενά κουτάκια για να τα τσεκάρεις με στυλό. Φύλαξε ένα αντίγραφο στο σακίδιο, ένα στην κουζίνα και ένα στο αυτοκίνητο.</p>
@@ -842,7 +1068,7 @@ footer.foot a{color:var(--dim)}
  <div class="wrap">
   <div>
    <p class="discl"><b>Αποποίηση ευθύνης:</b> ανεπίσημη σελίδα, χωρίς σύνδεση με τους δημόσιους φορείς που αναφέρονται. Οι οδηγίες είναι ενδεικτικές και γενικού χαρακτήρα. Δεν αντικαθιστούν τις οδηγίες των αρχών (Πολιτική Προστασία, 112), ούτε ιατρική ή νομική συμβουλή. Σε πραγματική κρίση ακολούθησε πρώτα τις επίσημες οδηγίες. Οι ποσότητες είναι εκτιμήσεις για υγιείς ενήλικες. Η σελίδα δεν κάνει καμία σύνδεση στο internet και δεν στέλνει τίποτα πουθενά.</p>
-   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 08.11 · 19:15</p>
+   <p class="app-foot">Veagle Survival Book · <a href="https://ferelis.gr">ferelis.gr</a> · Έκδοση 17.11 · 02:25</p>
   </div>
   <img src="eagle-white.png" alt="" width="34" height="36" style="opacity:.7">
  </div>
@@ -854,7 +1080,7 @@ footer.foot a{color:var(--dim)}
  <div class="sheet check1" id="sh1"></div>
  <div class="sheet check4" id="sh4"></div>
  <div class="sheet contacts" id="shc"></div>
- <div class="pfoot"><span>Veagle Survival Book · ferelis.gr · Ανεπίσημος, ενδεικτικός οδηγός: δεν αντικαθιστά τις οδηγίες των αρχών (112).</span><span>Έκδοση 08.11 · 19:15</span></div>
+ <div class="pfoot"><span>Veagle Survival Book · ferelis.gr · Ανεπίσημος, ενδεικτικός οδηγός: δεν αντικαθιστά τις οδηγίες των αρχών (112).</span><span>Έκδοση 17.11 · 02:25</span></div>
 </div>
 
 <script>
@@ -862,7 +1088,7 @@ footer.foot a{color:var(--dim)}
 'use strict';
 var $=function(s,r){return (r||document).querySelector(s)};
 var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
-var VER='Έκδοση 08.11 · 19:15';
+var VER='Έκδοση 17.11 · 02:25';
 
 /* ---------- δεδομένα λίστας ---------- */
 var CK=[
@@ -1002,7 +1228,7 @@ $$('#calc input,#calc select').forEach(function(i){i.addEventListener('input',ca
 
 /* ---------- αναζήτηση ---------- */
 $('#q').addEventListener('input',function(){
- var q=this.value.trim().toLowerCase(),any=false;
+ var q=this.value.trim().toLowerCase(),any=false;document.body.classList.toggle('searching',!!q);
  $$('[data-s]').forEach(function(s){
   if(!q){s.classList.remove('hide');return}
   var m=s.textContent.toLowerCase().indexOf(q)>=0;s.classList.toggle('hide',!m);if(m)any=true;
@@ -1069,6 +1295,63 @@ window.addEventListener('beforeprint',function(){if(!document.body.hasAttribute(
 renderList();progress();calc();
 /* άνοιγμα απειλής από #hash */
 if(location.hash&&/^#t-/.test(location.hash)){var el=document.querySelector(location.hash);if(el&&el.tagName==='DETAILS')el.open=true}
+
+/* ---------- λειτουργία χωρίς internet (μόνο όταν πατηθεί το κουμπί) ---------- */
+(function(){
+ var on=$('#offOn'),off=$('#offOff'),st=$('#offStatus');
+ if(!on)return;
+ if(!('serviceWorker' in navigator)||!window.isSecureContext){
+  on.hidden=true;
+  st.textContent=location.protocol==='file:'?'Η λειτουργία χωρίς internet δουλεύει όταν ανοίγεις τη σελίδα από τη διαδικτυακή της διεύθυνση, όχι από αρχείο στον υπολογιστή.':'Ο browser σου δεν υποστηρίζει αποθήκευση για χρήση χωρίς internet.';
+  return;
+ }
+ function show(has){on.hidden=has;off.hidden=!has;st.textContent=has?'Έτοιμο: η σελίδα είναι αποθηκευμένη σε αυτή τη συσκευή και ανοίγει και χωρίς internet.':'Δεν είναι αποθηκευμένη. Πάτα το κουμπί αν το θέλεις.';}
+ navigator.serviceWorker.getRegistration('./').then(function(r){show(!!r)}).catch(function(){show(false)});
+ on.addEventListener('click',function(){
+  st.textContent='Αποθηκεύεται, μισό λεπτό…';on.disabled=true;
+  navigator.serviceWorker.register('sw.js',{scope:'./'}).then(function(){return navigator.serviceWorker.ready}).then(function(){on.disabled=false;show(true)})
+  .catch(function(){on.disabled=false;st.textContent='Δεν πέτυχε η αποθήκευση. Δοκίμασε ξανά με internet.'});
+ });
+ off.addEventListener('click',function(){
+  navigator.serviceWorker.getRegistration('./').then(function(r){return r?r.unregister():0})
+  .then(function(){return window.caches?caches.keys():[]})
+  .then(function(ks){return Promise.all(ks.filter(function(k){return k.indexOf('vsb-')===0}).map(function(k){return caches.delete(k)}))})
+  .then(function(){show(false);st.textContent='Το αντίγραφο αφαιρέθηκε από τη συσκευή.'});
+ });
+})();
+
+/* ---------- μενού ενοτήτων ---------- */
+(function(){
+ var m=$('#menu'),btn=$('#menuBtn');
+ function set(o){m.hidden=!o;btn.setAttribute('aria-expanded',o?'true':'false');if(o){var f=$('.mgrp a',m);if(f)f.focus()}else btn.focus()}
+ btn.addEventListener('click',function(){set(m.hidden)});
+ m.addEventListener('click',function(e){if(e.target.closest('[data-close]')||e.target.closest('a'))set(false)});
+ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!m.hidden)set(false)});
+})();
+
+/* ---------- αρχική με κάρτες / καρτέλες ---------- */
+(function(){
+ var b=document.body;
+ function mark(t){$$('.tchip').forEach(function(c){c.setAttribute('aria-current',c.getAttribute('data-tab')===t?'true':'false')})}
+ function setTab(t,id){
+  b.setAttribute('data-tab',t);mark(t);
+  var el=id&&document.getElementById(id);
+  if(el){el.scrollIntoView({behavior:'instant',block:'start'})}else{window.scrollTo({top:0,behavior:'instant'})}
+ }
+ document.addEventListener('click',function(e){
+  var t=e.target.closest('button[data-tab]');
+  if(t){e.preventDefault();setTab(t.getAttribute('data-tab'));return}
+  var a=e.target.closest('a[href^="#"]');if(!a)return;
+  var id=a.getAttribute('href').slice(1);
+  if(!id||id==='top'){e.preventDefault();setTab('home');return}
+  var el=document.getElementById(id);if(!el)return;
+  var sec=el.closest('.sec');if(!sec||sec.offsetParent!==null)return;
+  e.preventDefault();setTab(sec.getAttribute('data-g'),id);
+ });
+ var h=location.hash.slice(1),el=h&&document.getElementById(h);
+ if(el){var sec=el.closest('.sec');if(sec&&sec.getAttribute('data-g'))setTimeout(function(){setTab(sec.getAttribute('data-g'),h)},0)}
+ mark('home');
+})();
 })();
 </script>
 </body>

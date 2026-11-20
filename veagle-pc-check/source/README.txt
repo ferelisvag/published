@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.6.0
+VEAGLE PC CHECK  v2.6.1
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,9 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 2.6.1
+- Fix: a Microsoft account is no longer reported as "allowed to have no password" (it signs in with your Microsoft password or PIN). App names on the Privacy page are shorter and clearer.
 
 NEW IN 2.6.0
 - A new "Privacy" page (and a ninth area, Privacy, in the charts). It shows, in plain words: what Windows shares with Microsoft, which ads and tips are switched on, which programs may use your camera, microphone, location, contacts and files (and when they last did), what your PC remembers about you, and who can sign in to it. Every row says where to click if you want to change it. Nothing is changed for you.

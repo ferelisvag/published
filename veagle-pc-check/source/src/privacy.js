@@ -17,6 +17,7 @@ var PRIV = (function (V) {
     documentsLibrary: ['Documents folder', 'Φάκελος Έγγραφα'], picturesLibrary: ['Pictures folder', 'Φάκελος Εικόνες'], videosLibrary: ['Videos folder', 'Φάκελος Βίντεο'], broadFileSystemAccess: ['All your files', 'Όλα τα αρχεία σου'],
     appDiagnostics: ['Info about other apps', 'Πληροφορίες για άλλες εφαρμογές'], userNotificationListener: ['Your notifications', 'Οι ειδοποιήσεις σου'], graphicsCaptureProgrammatic: ['Screen capture', 'Λήψη οθόνης'], gazeInput: ['Eye tracking', 'Παρακολούθηση ματιών'], activity: ['Activity', 'Δραστηριότητα']
   };
+  function appName(a) { return String(a || '').split('\\').pop().replace(/_[a-z0-9]{13}$/i, '').replace(/^Microsoft\./, ''); }
   function when(iso) { return iso ? V.fmtDT(iso) : ''; }
   function box(title, st, inner) { return '<div class="win"><header><span>' + esc(title) + '</span><span class="st">' + esc(st || '') + '</span></header><div class="body">' + inner + '</div></div>'; }
   function sect(t, n) { return '<div class="sect"><h2>' + esc(t) + '</h2><span>' + esc(n || '') + '</span></div>'; }
@@ -30,7 +31,7 @@ var PRIV = (function (V) {
     var st = gl === 'Deny' ? I('off for all apps', 'κλειστό για όλες τις εφαρμογές') : (gl === 'Allow' ? I('on', 'ανοιχτό') : gl);
     var h = '<div class="s4"><div class="win"><header><span>' + esc(nm) + '</span><span class="st">' + esc(st) + '</span></header><div class="body">' +
       '<div class="muted" style="margin-bottom:6px">' + esc(I(allowed + ' app(s) allowed, ' + recent + ' used it in the last 30 days', allowed + ' εφαρμογή/ές με άδεια, ' + recent + ' το χρησιμοποίησαν τις τελευταίες 30 ημέρες')) + '</div>';
-    h += apps.length ? apps.slice(0, 6).map(function (a) { return '<div class="row" style="gap:8px;justify-content:space-between"><span>' + esc(a.app) + '</span><span class="muted">' + esc(a.last ? when(a.last) : I('never used', 'δεν χρησιμοποιήθηκε')) + '</span></div>'; }).join('') : '<div class="muted">' + esc(I('No app has this permission.', 'Καμία εφαρμογή δεν έχει αυτή την άδεια.')) + '</div>';
+    h += apps.length ? apps.slice(0, 6).map(function (a) { return '<div class="row" style="gap:8px;justify-content:space-between"><span>' + esc(appName(a.app)) + '</span><span class="muted">' + esc(a.last ? when(a.last) : I('never used', 'δεν χρησιμοποιήθηκε')) + '</span></div>'; }).join('') : '<div class="muted">' + esc(I('No app has this permission.', 'Καμία εφαρμογή δεν έχει αυτή την άδεια.')) + '</div>';
     return h + '</div></div></div>';
   }
   function sensorCaps() {
@@ -73,7 +74,7 @@ var PRIV = (function (V) {
       '<div class="muted" style="margin-top:8px">' + esc(I('To change a permission: Settings > Privacy & security, click the permission, and switch the app off. If a program stops working, switch it back on.', 'Για να αλλάξεις μια άδεια: Ρυθμίσεις > Απόρρητο και ασφάλεια, πάτα την άδεια και κλείσε την εφαρμογή. Αν ένα πρόγραμμα σταματήσει να δουλεύει, ξανάνοιξέ το.')) + '</div>';
 
     h += sect(I('Accounts and sign-in', 'Λογαριασμοί και είσοδος'), I('who can get into this PC, and how', 'ποιος μπορεί να μπει σε αυτόν τον υπολογιστή και πώς'));
-    var admins = accts.filter(function (u) { return u.isAdmin; }).length, nopw = accts.filter(function (u) { return u.noPassword && !u.isGuest; }).length, guest = accts.some(function (u) { return u.isGuest; });
+    var admins = accts.filter(function (u) { return u.isAdmin; }).length, onlyMs = SG.msAccounts > 0 && SG.localAccounts === 0, nopw = accts.filter(function (u) { return u.noPassword && !u.isGuest && !u.msa && !onlyMs; }).length, guest = accts.some(function (u) { return u.isGuest; });
     h += '<div class="grid"><div class="s6">' + box(I('Accounts on this PC', 'Λογαριασμοί σε αυτόν τον υπολογιστή'), accts.length ? accts.length + '' : '', kv([
       [I('Active accounts', 'Ενεργοί λογαριασμοί'), accts.length || ''],
       [I('Administrators', 'Διαχειριστές'), accts.length ? admins : ''],

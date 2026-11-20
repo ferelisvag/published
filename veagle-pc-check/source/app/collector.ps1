@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.6.0'
+$script:Version = '2.6.1'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
@@ -1148,7 +1148,7 @@ try {
         $ll = $null; if ($_.LastLogon) { $ll = [int]((Get-Date) - $_.LastLogon).TotalDays }
         [pscustomobject]@{
             name = [string]$_.Name; enabled = [bool]$_.Enabled
-            noPassword = (-not [bool]$_.PasswordRequired); neverExpires = ($null -eq $_.PasswordExpires)
+            noPassword = (-not [bool]$_.PasswordRequired); msa = ([string]$_.PrincipalSource -eq 'MicrosoftAccount'); neverExpires = ($null -eq $_.PasswordExpires)
             lastLogonDays = $ll; isGuest = ([string]$_.SID.Value -like '*-501'); isBuiltinAdmin = ([string]$_.SID.Value -like '*-500')
             isAdmin = $false
         }

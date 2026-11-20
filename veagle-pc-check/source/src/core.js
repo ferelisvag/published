@@ -1238,7 +1238,8 @@ function Engine(RAW) {
         [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter. It only switches the Guest account off.', 'net user guest /active:no')], 'Account: ' + a[0].name);
     });
     R(function () {
-      var a = arr(X6.accounts).filter(function (u) { return u.enabled && u.noPassword && !u.isGuest; });
+      var sg0 = (EX.more5 || {}).signIn || {}, onlyMs = sg0.msAccounts > 0 && sg0.localAccounts === 0;
+      var a = arr(X6.accounts).filter(function (u) { return u.enabled && u.noPassword && !u.isGuest && !u.msa && !onlyMs; });
       if (!a.length) return null;
       var adm = a.some(function (u) { return u.isAdmin; });
       return F('sec-nopass', 'Privacy', 'low', a.length + ' account' + (a.length > 1 ? 's are' : ' is') + ' allowed to have no password',

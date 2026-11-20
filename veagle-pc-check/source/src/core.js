@@ -209,7 +209,9 @@ function Engine(RAW) {
     'Application Hang|1002': 'A program stopped responding and was closed.',
     'Microsoft-Windows-Search|10024': 'The Windows search indexer was closed. See the Windows Search finding.',
     'Tcpip|4266': 'Windows ran out of free network ports for a moment. See the network ports finding.',
-    'Microsoft-Windows-BitLocker-Driver|24641': 'A BitLocker message during restart. Usually harmless if BitLocker works.'
+    'Microsoft-Windows-BitLocker-Driver|24641': 'A BitLocker message during restart. Usually harmless if BitLocker works.',
+    'e2fexpress|27': 'The network cable or Wi-Fi link of an Intel network card dropped for a moment and came back. A few are normal. Many in a row mean a loose cable, a bad port or a power-saving setting on the card.',
+    'Microsoft-Windows-Hyper-V-Hypervisor|167': 'Windows says a security protection for virtual machines is not on, because HyperThreading is enabled. Harmless on a home PC. It only matters if you run untrusted virtual machines.'
   };
   function noiseFor(provider, id) { return NOISE[provider + '|' + id] || ''; }
 
@@ -237,7 +239,7 @@ function Engine(RAW) {
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe'],
     'win-ready-11': [10, 'Medium', 'Safe'], 'cfg-tasks-unusual': [15, 'Medium', 'Safe'], 'sec-svc-path': [15, 'Medium', 'Safe'], 'sec-svc-unquoted': [2, 'Ask a pro', 'Safe'], 'stab-memdiag': [60, 'Medium', 'Back up first'], 'stab-sfc': [40, 'Medium', 'Safe'], 'prn-stuck': [5, 'Easy', 'Safe'], 'soft-runtime-eol': [10, 'Medium', 'Safe'],
     'sto-dirty': [15, 'Easy', 'Back up first'],
-    'priv-apps-wide': [10, 'Easy', 'Safe'], 'priv-delivery': [3, 'Easy', 'Safe'], 'priv-hello': [5, 'Easy', 'Safe'], 'priv-idle-lock': [5, 'Easy', 'Safe'], 'upd-paused': [2, 'Easy', 'Safe'], 'net-metered': [2, 'Easy', 'Safe'], 'net-doh': [5, 'Medium', 'Safe'], 'net-wifi-powersave': [3, 'Medium', 'Safe'], 'sto-defrag': [2, 'Easy', 'Safe'], 'sto-sense': [2, 'Easy', 'Safe'], 'perf-effects': [3, 'Easy', 'Safe'], 'stab-disk-where': [5, 'Easy', 'Safe'], 'net-ports-who': [5, 'Medium', 'Safe'], 'priv-browser': [3, 'Easy', 'Safe'], 'sec-sb-cert': [30, 'Medium', 'Safe'], 'for-log-short': [5, 'Medium', 'Safe'],
+    'priv-apps-wide': [10, 'Easy', 'Safe'], 'priv-delivery': [3, 'Easy', 'Safe'], 'priv-hello': [5, 'Easy', 'Safe'], 'priv-idle-lock': [5, 'Easy', 'Safe'], 'upd-paused': [2, 'Easy', 'Safe'], 'net-metered': [2, 'Easy', 'Safe'], 'net-doh': [5, 'Medium', 'Safe'], 'net-wifi-powersave': [3, 'Medium', 'Safe'], 'sto-defrag': [2, 'Easy', 'Safe'], 'sto-sense': [2, 'Easy', 'Safe'], 'perf-effects': [3, 'Easy', 'Safe'], 'stab-disk-where': [5, 'Easy', 'Safe'], 'net-ports-who': [5, 'Medium', 'Safe'], 'priv-browser': [3, 'Easy', 'Safe'], 'gam-where': [10, 'Easy', 'Safe'], 'gam-hz': [2, 'Easy', 'Safe'], 'sec-sb-cert': [30, 'Medium', 'Safe'], 'for-log-short': [5, 'Medium', 'Safe'],
     'for-logon-brute': [20, 'Medium', 'Safe'], 'for-logon-remote': [20, 'Ask a pro', 'Safe'], 'for-audit-off': [5, 'Medium', 'Safe'], 'for-log-cleared': [15, 'Ask a pro', 'Safe'], 'for-acct-new': [10, 'Medium', 'Safe'], 'for-svc-new': [15, 'Medium', 'Safe'], 'for-time-changed': [5, 'Easy', 'Safe'], 'for-run-tools': [20, 'Ask a pro', 'Safe'], 'for-run-odd': [15, 'Medium', 'Safe'], 'for-downloads': [10, 'Easy', 'Safe'], 'for-def-excl': [10, 'Medium', 'Safe'], 'for-def-off': [5, 'Easy', 'Safe'], 'for-def-caught': [10, 'Easy', 'Safe'], 'for-fw-rules': [15, 'Medium', 'Safe'], 'for-shares-open': [10, 'Medium', 'Safe'], 'for-access-backdoor': [40, 'Ask a pro', 'Back up first'], 'for-startup-folder': [5, 'Easy', 'Safe'], 'for-ps-suspicious': [20, 'Ask a pro', 'Safe'], 'for-ps-logging': [5, 'Medium', 'Safe'], 'for-wifi-open': [5, 'Easy', 'Safe'], 'for-listen-risky': [15, 'Ask a pro', 'Safe'], 'use-sensors': [10, 'Easy', 'Safe'], 'dev-peripheral-problem': [15, 'Medium', 'Safe']
   };
   var PROFILES = {
@@ -2244,6 +2246,27 @@ function Engine(RAW) {
          S('Restart or update the programs at the top of the list, then check the VPN clients and virtual machines. A browser with very many tabs can also do this.'),
          S('Only if it keeps happening: a technician can widen the range of ports Windows may use. This is a system change, so ask first.')],
         'Open connections at scan time: ' + P.tcpTotal + ' (waiting to close: ' + tw + '). Ports Windows may use: ' + (range == null ? 'unknown' : range) + '. Top programs: ' + top.map(function (x) { return x.process + ' ' + x.n; }).join(', ') + '. VPN or virtual network cards: ' + (virtNics + vpn) + '.');
+    });
+    R(function () {
+      var G = arr(g(EX, 'more8.games', [])).filter(function (x) { return /hdd/i.test(String(x.media || '')) && !/ssd|nvme/i.test(String(x.media || '')) && num(x.games) > 0; });
+      if (!G.length) return null;
+      var hasSsd = arr(g(D, 'disks', [])).some(function (d) { return /ssd|nvme/i.test(String(d.mediaType) + ' ' + String(d.busType)); });
+      var n = G.reduce(function (a, x) { return a + num(x.games); }, 0);
+      return F('gam-where', 'Performance', hasSsd ? 'low' : 'info', n + ' game(s) are installed on a slow hard disk' + (hasSsd ? ' while this PC has an SSD' : ''),
+        'Games load much faster from an SSD (a modern drive without moving parts) than from an old hard disk. Long loading screens and stutter while a level loads are typical of a game on a hard disk.' + (hasSsd ? ' This PC already has an SSD with room to use.' : ''),
+        [S('Open the launcher (Steam or Epic), then move the games you play most to the SSD. In Steam: right-click the game, Properties, Installed Files, Move install folder. Nothing is deleted.'),
+         S('Keep rarely played games on the hard disk. Check first that the SSD has enough free space (see the Storage findings).')],
+        G.map(function (x) { return x.launcher + ' on drive ' + x.drive + ': (' + x.games + ' game(s), ' + x.media + ')'; }).join('; '));
+    });
+    R(function () {
+      var cur = num(g(D, 'extras.more5.display.hz', 0)) || arr(g(D, 'gpus', [])).reduce(function (a, x) { return a || num(x.refreshHz); }, 0);
+      var max = num(g(EX, 'more8.maxRefreshHz', 0));
+      if (!cur || !max || max - cur < 20 || cur > 75) return null;
+      return F('gam-hz', 'Performance', 'info', 'Your screen runs at ' + cur + ' Hz but can probably do more',
+        'The screen is set to ' + cur + ' refreshes per second. The graphics card reports a higher possible value (' + max + ' Hz). If your screen supports it, a higher setting makes the mouse, scrolling and games feel smoother. This may also be a limit of the cable or the screen, so it is information only.',
+        [S('Right-click the desktop, Display settings, Advanced display, "Choose a refresh rate", and pick the highest value in the list. If the screen goes black, wait 15 seconds: it goes back by itself.'),
+         S('If the higher value is not in the list, the screen or the cable (HDMI/DisplayPort) does not support it. Nothing to fix.')],
+        'Now: ' + cur + ' Hz. Maximum reported by the graphics card: ' + max + ' Hz.');
     });
     R(function () {
       var bs = browserPriv(); if (!bs.length) return null;

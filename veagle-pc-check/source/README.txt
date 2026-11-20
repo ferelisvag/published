@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.7.0
+VEAGLE PC CHECK  v2.8.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,12 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 2.8.0
+- Games: the scan finds where Steam and Epic games are installed. If they are on a slow hard disk while the PC has an SSD, the report says so and explains how to move them (nothing is moved for you).
+- Screen: if the screen runs at a lower refresh rate than the graphics card reports, the report tells you where to change it. Information only.
+- Explanations for two more Event Viewer messages (Intel network link drops, Hyper-V HyperThreading warning).
+- The scan now has 26 steps. The new step has not been tried on every Windows version yet.
 
 NEW IN 2.7.0
 - Start-up programs: every program registered to start with Windows is listed, and the ones that are really active (running now) are marked. Others are shown as "allowed, not running" or "switched off in Windows".

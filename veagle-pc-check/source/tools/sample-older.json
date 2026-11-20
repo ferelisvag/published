@@ -4597,6 +4597,23 @@
    },
    "hiberfilMB": 12800
   },
+  "more8": {
+   "games": [
+    {
+     "launcher": "Steam",
+     "drive": "D",
+     "games": 14,
+     "media": "HDD SATA"
+    },
+    {
+     "launcher": "Steam",
+     "drive": "C",
+     "games": 3,
+     "media": "SSD NVMe"
+    }
+   ],
+   "maxRefreshHz": 165
+  },
   "more5": {
    "power": {
     "acDisplayMin": 10,

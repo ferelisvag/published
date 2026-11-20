@@ -58,7 +58,7 @@ outdated = [
 ] + [('Sample app %d'%i,'Vendor.App%d'%i,'1.%d'%i,'2.%d'%i,'winget') for i in range(17)]
 startup_names = ['GoogleDriveFS','OneDrive','Discord','EpicGamesLauncher','CCXProcess','BraveSoftware Update','Adobe Acrobat Synchronizer','Agent Tray','ACDSeeCommanderFree','Wargaming.net Game Center','Studio.QuickLook','EADM','FilmoraTray','NVIDIA Broadcast','GogGalaxy','MicrosoftEdgeAutoLaunch','AnyDesk','SecurityHealth','RtkAudUService','SteelSeriesGG','Bdagent','ACFW02EN','BdVpnApp','Steam','Viber','Spotify','Zoom','Dropbox']
 data = {
- 'meta': dict(mode='full', tool='VEAGLE PC Check', version='2.7.0', generated=iso(now), isAdmin=True, psVersion='5.1.26100.9549', user='demo', computer='DEMO-PC', domain='DEMO-PC', durationSec=214, warnings=['winget: first run may be slow']),
+ 'meta': dict(mode='full', tool='VEAGLE PC Check', version='2.8.0', generated=iso(now), isAdmin=True, psVersion='5.1.26100.9549', user='demo', computer='DEMO-PC', domain='DEMO-PC', durationSec=214, warnings=['winget: first run may be slow']),
  'system': dict(manufacturer='Gigabyte Technology Co., Ltd.', model='Z590 AORUS PRO AX', chassis='Desktop', isLaptop=False, firmware='UEFI',
    board=dict(manufacturer='Gigabyte Technology Co., Ltd.', product='Z590 AORUS PRO AX'),
    bios=dict(vendor='American Megatrends International, LLC.', version='ALASKA - 1072009', date='2025-06-10T00:00:00', smbios='3.4'),
@@ -342,6 +342,7 @@ data['extras']['more7'] = dict(
     mouse=dict(speed=1, sensitivity=10),
     folders=dict(desktop=dict(items=38, files=30, mb=420, old=12), downloads=dict(items=210, files=190, mb=24800, old=140)),
     hiberfilMB=12800)
+data['extras']['more8'] = dict(games=[dict(launcher='Steam', drive='D', games=14, media='HDD SATA'), dict(launcher='Steam', drive='C', games=3, media='SSD NVMe')], maxRefreshHz=165)
 for _d in data['extras']['forensics']['downloads']:
     _d['sha256'] = ''
 data['extras']['forensics']['downloads'].append(dict(name='setup_tool.exe', folder='Downloads', t=iso(now - datetime.timedelta(days=2)), sizeKB=3100, zone=3, host='example-files.net', sig='NotSigned', signer='', sha256='A' * 64))

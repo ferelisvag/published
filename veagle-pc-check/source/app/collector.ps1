@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.7.0'
+$script:Version = '2.8.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
@@ -267,7 +267,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 25
+$TOTAL = 26
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -2782,6 +2782,58 @@ try { $hf = Get-Item -LiteralPath (Join-Path $env:SystemDrive 'hiberfil.sys') -F
 $m7['hiberfilMB'] = $hib
 $extras | Add-Member -NotePropertyName more7 -NotePropertyValue ([pscustomobject]$m7) -Force
 
+Step 26 $TOTAL 'Where your games are installed, maximum screen refresh rate (read-only)'
+$m8 = [ordered]@{}
+$games = @()
+try {
+    $libs = New-Object System.Collections.ArrayList
+    $steamRoot = $null
+    foreach ($k in 'HKLM:\SOFTWARE\WOW6432Node\Valve\Steam', 'HKLM:\SOFTWARE\Valve\Steam', 'HKCU:\Software\Valve\Steam') {
+        $v = Rg $k 'InstallPath'; if (-not $v) { $v = Rg $k 'SteamPath' }
+        if ($v) { $steamRoot = [string]$v; break }
+    }
+    if ($steamRoot) {
+        [void]$libs.Add($steamRoot)
+        $vdf = Join-Path $steamRoot 'steamapps\libraryfolders.vdf'
+        if (Test-Path -LiteralPath $vdf) {
+            foreach ($ln in (Get-Content -LiteralPath $vdf -ErrorAction Stop)) {
+                if ($ln -match '"path"\s+"([^"]+)"') { [void]$libs.Add(($Matches[1] -replace '\\\\', '\')) }
+            }
+        }
+    }
+    $seen = @{}
+    foreach ($lp in $libs) {
+        $key = $lp.ToLower(); if ($seen[$key]) { continue }; $seen[$key] = $true
+        $common = Join-Path $lp 'steamapps\common'
+        if (-not (Test-Path -LiteralPath $common)) { continue }
+        $n = @(Get-ChildItem -LiteralPath $common -Directory -ErrorAction SilentlyContinue).Count
+        $drv = $lp.Substring(0, 1).ToUpper()
+        $games += [pscustomobject]@{ launcher = 'Steam'; drive = $drv; games = $n }
+    }
+    $epic = 'C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests'
+    if (Test-Path -LiteralPath $epic) {
+        $byDrive = @{}
+        foreach ($f in (Get-ChildItem -LiteralPath $epic -Filter *.item -ErrorAction SilentlyContinue)) {
+            try { $j = Get-Content -LiteralPath $f.FullName -Raw | ConvertFrom-Json; if ($j.InstallLocation) { $d = ([string]$j.InstallLocation).Substring(0, 1).ToUpper(); $byDrive[$d] = 1 + [int]$byDrive[$d] } } catch { }
+        }
+        foreach ($d in $byDrive.Keys) { $games += [pscustomobject]@{ launcher = 'Epic'; drive = $d; games = [int]$byDrive[$d] } }
+    }
+} catch { }
+foreach ($gm in $games) {
+    $media = ''
+    try {
+        $dk = Get-Partition -DriveLetter $gm.drive -ErrorAction Stop | Get-Disk -ErrorAction Stop
+        $pdk = Get-PhysicalDisk -ErrorAction Stop | Where-Object { [string]$_.DeviceId -eq [string]$dk.Number } | Select-Object -First 1
+        if ($pdk) { $media = ([string]$pdk.MediaType + ' ' + [string]$pdk.BusType).Trim() }
+    } catch { }
+    $gm | Add-Member -NotePropertyName media -NotePropertyValue $media -Force
+}
+$m8['games'] = @($games)
+$maxHz = $null
+try { $vc8 = @(Get-CimInstance Win32_VideoController -ErrorAction Stop | Where-Object { $_.MaxRefreshRate } | Select-Object -First 1); if ($vc8.Count -gt 0) { $maxHz = [int]$vc8[0].MaxRefreshRate } } catch { }
+$m8['maxRefreshHz'] = $maxHz
+$extras | Add-Member -NotePropertyName more8 -NotePropertyValue ([pscustomobject]$m8) -Force
+
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }
 
@@ -2829,6 +2881,7 @@ $covItems += Add-Cov 'traces' $true $false ''
 $covItems += Add-Cov 'settings' $false $false ''
 $covItems += Add-Cov 'startupState' $false $false ''
 $covItems += Add-Cov 'browserPriv' $false $false ''
+$covItems += Add-Cov 'gameLibs' $false $false ''
 $covItems += Add-Cov 'rebar' $false $true $(if (-not $m5['rebar'].checked -and -not $Quick) { 'na' } else { '' })
 $stepTimes = @()
 foreach ($sk in @($script:StepSec.Keys | Sort-Object)) {

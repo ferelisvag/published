@@ -9,6 +9,7 @@ var SIDE = (function (V, UI) {
     dashboard: '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
     findings: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/>',
     insights: '<circle cx="12" cy="11" r="6"/><path d="M9 20h6"/>',
+    privacy: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><circle cx="12" cy="11" r="2.5"/>',
     inventory: '<rect x="3" y="4" width="18" height="12"/><path d="M8 20h8M12 16v4"/>',
     hardware: '<rect x="6" y="6" width="12" height="12"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
     software: '<path d="M4 4h16v16H4z"/><path d="M8 9l3 3-3 3M13 15h4"/>',

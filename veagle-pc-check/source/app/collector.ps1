@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.5.5'
+$script:Version = '2.6.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
@@ -267,7 +267,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 22
+$TOTAL = 23
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -2420,6 +2420,191 @@ $sbErr = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing' 
 $m4['secureBootCa'] = [pscustomobject]@{ secureBoot = $secureBoot; status = $(if ($null -ne $sbStatus) { [string]$sbStatus } else { $null }); hasError = ($null -ne $sbErr -and "$sbErr" -ne '' -and "$sbErr" -ne '0') }
 $extras | Add-Member -NotePropertyName more4 -NotePropertyValue ([pscustomobject]$m4) -Force
 
+Step 23 $TOTAL 'Windows settings: power, screen, updates, sign-in, privacy, network, language (read-only)'
+$m5 = [ordered]@{}
+function Rg([string]$p, [string]$n) { try { return Read-Reg $p $n } catch { return $null } }
+function ToIntOrNull($v) { if ($null -eq $v -or "$v" -eq '') { return $null } try { return [int]$v } catch { return $null } }
+# --- power: minutes until the screen turns off and until the PC sleeps (powercfg only reads; hex numbers are the same in every language)
+$pw = [ordered]@{ acDisplayMin = $null; dcDisplayMin = $null; acSleepMin = $null; dcSleepMin = $null }
+try {
+    foreach ($pp in @(@('SUB_VIDEO', 'VIDEOIDLE', 'Display'), @('SUB_SLEEP', 'STANDBYIDLE', 'Sleep'))) {
+        $txt = (& powercfg /query SCHEME_CURRENT $pp[0] $pp[1] 2>&1 | Out-String)
+        $hx = @([regex]::Matches($txt, '0x[0-9a-fA-F]{8}') | ForEach-Object { $_.Value })
+        if ($hx.Count -ge 2) {
+            $ac = [Convert]::ToInt64($hx[$hx.Count - 2], 16); $dc = [Convert]::ToInt64($hx[$hx.Count - 1], 16)
+            $pw[('ac' + $pp[2] + 'Min')] = [math]::Round($ac / 60, 1); $pw[('dc' + $pp[2] + 'Min')] = [math]::Round($dc / 60, 1)
+        }
+    }
+} catch { }
+$m5['power'] = [pscustomobject]$pw
+# --- looks: visual effects, transparency, animations, light/dark theme
+$m5['visual'] = [pscustomobject]@{
+    fx = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects' 'VisualFXSetting'))
+    transparency = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize' 'EnableTransparency'))
+    animations = (ToIntOrNull (Rg 'HKCU:\Control Panel\Desktop\WindowMetrics' 'MinAnimate'))
+    appsLight = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize' 'AppsUseLightTheme'))
+    systemLight = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize' 'SystemUsesLightTheme'))
+}
+# --- screen: refresh rate, resolution, scaling
+$dsp = [ordered]@{ hz = $null; width = $null; height = $null; scalePct = $null }
+try {
+    $vc = @(Get-CimInstance Win32_VideoController -ErrorAction Stop | Where-Object { $_.CurrentRefreshRate -and $_.CurrentHorizontalResolution } | Select-Object -First 1)
+    if ($vc.Count -gt 0) { $dsp.hz = [int]$vc[0].CurrentRefreshRate; $dsp.width = [int]$vc[0].CurrentHorizontalResolution; $dsp.height = [int]$vc[0].CurrentVerticalResolution }
+} catch { }
+$dpi = ToIntOrNull (Rg 'HKCU:\Control Panel\Desktop\WindowMetrics' 'AppliedDPI'); if ($null -eq $dpi) { $dpi = ToIntOrNull (Rg 'HKCU:\Control Panel\Desktop' 'LogPixels') }
+if ($null -ne $dpi -and $dpi -gt 0) { $dsp.scalePct = [int][math]::Round($dpi / 96 * 100) }
+$m5['display'] = [pscustomobject]$dsp
+# --- processor priority between the program you use and the ones in the background (2 = Windows default)
+$m5['bgPriority'] = ToIntOrNull (Rg 'HKLM:\SYSTEM\CurrentControlSet\Control\PriorityControl' 'Win32PrioritySeparation')
+# --- Resizable BAR: only readable when an NVIDIA driver tool is installed (a large BAR1 window means it is on)
+$rb = [ordered]@{ checked = $false; bar1MiB = $null }
+try {
+    $nv = $null
+    foreach ($cand in @('nvidia-smi', (Join-Path $env:ProgramFiles 'NVIDIA Corporation\NVSMI\nvidia-smi.exe'), (Join-Path $env:SystemRoot 'System32\nvidia-smi.exe'))) {
+        try { $c = Get-Command $cand -ErrorAction Stop; if ($c) { $nv = $c.Source; break } } catch { }
+    }
+    if ($nv -and -not $Quick) {
+        $rb.checked = $true
+        $mt = (& $nv -q -d MEMORY 2>&1 | Out-String)
+        $mm = [regex]::Match($mt, 'BAR1 Memory Usage\s*[\r\n]+\s*Total\s*:\s*(\d+)\s*MiB')
+        if ($mm.Success) { $rb.bar1MiB = [int]$mm.Groups[1].Value }
+    }
+} catch { }
+$m5['rebar'] = [pscustomobject]$rb
+# --- storage care: Storage Sense details and the scheduled drive optimisation task
+$ssb = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
+$m5['storageCare'] = [pscustomobject]@{
+    senseOn = (ToIntOrNull (Rg $ssb '01')); senseEvery = (ToIntOrNull (Rg $ssb '2048')); recycleDays = (ToIntOrNull (Rg $ssb '256')); downloadsDays = (ToIntOrNull (Rg $ssb '512'))
+    defragTask = $(try { [string](Get-ScheduledTask -TaskPath '\Microsoft\Windows\Defrag\' -TaskName 'ScheduledDefrag' -ErrorAction Stop).State } catch { $null })
+}
+# --- Windows Update settings: active hours, delays, pause, restart policy
+$wuu = 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings'; $wup = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
+$pauseTxt = Rg $wuu 'PauseUpdatesExpiryTime'
+$m5['wuSettings'] = [pscustomobject]@{
+    activeStart = (ToIntOrNull (Rg $wuu 'ActiveHoursStart')); activeEnd = (ToIntOrNull (Rg $wuu 'ActiveHoursEnd')); smartActive = (ToIntOrNull (Rg $wuu 'SmartActiveHoursState'))
+    deferQualityDays = (ToIntOrNull (Rg $wuu 'DeferQualityUpdatesPeriodInDays')); deferFeatureDays = (ToIntOrNull (Rg $wuu 'DeferFeatureUpdatesPeriodInDays'))
+    pausedUntil = $(if ($pauseTxt) { [string]$pauseTxt } else { $null })
+    noAutoRebootWhenSignedIn = (ToIntOrNull (Rg ($wup + '\AU') 'NoAutoRebootWithLoggedOnUsers')); policyAuOptions = (ToIntOrNull (Rg ($wup + '\AU') 'AUOptions'))
+    otherMsProducts = (ToIntOrNull (Rg 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings' 'AllowMUUpdateService'))
+}
+# --- Remote Desktop and Remote Assistance (status only)
+$rdpk = 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server'
+$deny = ToIntOrNull (Rg $rdpk 'fDenyTSConnections')
+$m5['remote'] = [pscustomobject]@{
+    rdpOn = $(if ($null -ne $deny) { ($deny -eq 0) } else { $null })
+    rdpPort = (ToIntOrNull (Rg ($rdpk + '\WinStations\RDP-Tcp') 'PortNumber')); rdpNla = (ToIntOrNull (Rg ($rdpk + '\WinStations\RDP-Tcp') 'UserAuthentication'))
+    assistanceOn = $(if ($null -ne (Rg 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' 'fAllowToGetHelp')) { ((ToIntOrNull (Rg 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance' 'fAllowToGetHelp')) -eq 1) } else { $null })
+}
+# --- how people sign in: counts only (no account names, no ids are stored)
+$si = [ordered]@{ msAccounts = $null; localAccounts = $null; pinSet = $null; biometricDevice = $null; hello = $null }
+try {
+    $lu = @(Get-LocalUser -ErrorAction Stop | Where-Object { $_.Enabled })
+    $si.msAccounts = @($lu | Where-Object { [string]$_.PrincipalSource -eq 'MicrosoftAccount' }).Count
+    $si.localAccounts = @($lu | Where-Object { [string]$_.PrincipalSource -eq 'Local' }).Count
+} catch { }
+try {
+    $sidMe = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+    $si.pinSet = [bool](Test-Path ('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\Credential Providers\{D6886603-9D2F-4EB2-B667-1971041FA96B}\' + $sidMe) -ErrorAction SilentlyContinue)
+} catch { }
+try { $si.biometricDevice = (@(Get-CimInstance Win32_PnPEntity -Filter "PNPClass='Biometric'" -ErrorAction Stop).Count -gt 0) } catch { }
+$m5['signIn'] = [pscustomobject]$si
+# --- locking: screen saver, inactivity policy
+$m5['lockMore'] = [pscustomobject]@{
+    saverOn = (ToIntOrNull (Rg 'HKCU:\Control Panel\Desktop' 'ScreenSaveActive')); saverSecs = (ToIntOrNull (Rg 'HKCU:\Control Panel\Desktop' 'ScreenSaveTimeOut')); saverSecure = (ToIntOrNull (Rg 'HKCU:\Control Panel\Desktop' 'ScreenSaverIsSecure'))
+    inactivitySecs = (ToIntOrNull (Rg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' 'InactivityTimeoutSecs'))
+}
+# --- more privacy switches and SmartScreen detail (status only)
+$cdm = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+$m5['privacyMore'] = [pscustomobject]@{
+    autoplayOff = (ToIntOrNull (Rg 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\AutoplayHandlers' 'DisableAutoplay'))
+    suggestions = (ToIntOrNull (Rg $cdm 'SystemPaneSuggestionsEnabled')); lockScreenTips = (ToIntOrNull (Rg $cdm 'RotatingLockScreenOverlayEnabled')); startAds = (ToIntOrNull (Rg $cdm 'SubscribedContent-338388Enabled'))
+    typingCollectionRestricted = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\InputPersonalization' 'RestrictImplicitTextCollection'))
+    smartscreenApps = $(try { [string](Rg 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' 'SmartScreenEnabled') } catch { $null })
+    smartscreenEdge = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\Edge\SmartScreenEnabled' '(default)'))
+    smartscreenStoreApps = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\AppHost' 'EnableWebContentEvaluation'))
+}
+# --- network: encrypted DNS, metered connection, adapters allowed to switch off to save power
+$nt = [ordered]@{ dohServers = $null; autoDoh = $null; costType = $null; adapters = @() }
+try { $nt.dohServers = @(Get-DnsClientDohServerAddress -ErrorAction Stop).Count } catch { }
+$nt.autoDoh = ToIntOrNull (Rg 'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters' 'EnableAutoDoh')
+try {
+    [void][Windows.Networking.Connectivity.NetworkInformation, Windows.Networking.Connectivity, ContentType = WindowsRuntime]
+    $cp = [Windows.Networking.Connectivity.NetworkInformation]::GetInternetConnectionProfile()
+    if ($cp) { $nt.costType = [string]$cp.GetConnectionCost().NetworkCostType }
+} catch { }
+try {
+    $ads = @()
+    foreach ($na in @(Get-NetAdapter -Physical -ErrorAction Stop)) {
+        $kind = 'ethernet'; if ($na.InterfaceDescription -match 'Wireless|Wi-?Fi|802\.11|WLAN') { $kind = 'wifi' } elseif ($na.InterfaceDescription -match 'Bluetooth') { $kind = 'bluetooth' }
+        $allow = $null
+        try { $allow = [string](Get-NetAdapterPowerManagement -Name $na.Name -ErrorAction Stop).AllowComputerToTurnOffDevice } catch { }
+        $ads += [pscustomobject]@{ kind = $kind; allowOff = $allow }
+    }
+    $nt.adapters = @($ads)
+} catch { }
+$m5['net'] = [pscustomobject]$nt
+# --- language, keyboards, region, time zone
+$rg = [ordered]@{ uiLanguage = $null; systemLocale = $null; inputLanguages = @(); homeGeoId = $null; tzAutoSet = $null; tzDst = $null }
+try { $rg.uiLanguage = (Get-UICulture).Name } catch { }
+try { $rg.systemLocale = (Get-WinSystemLocale).Name } catch { }
+try { $rg.inputLanguages = @(Get-WinUserLanguageList -ErrorAction Stop | ForEach-Object { [string]$_.LanguageTag }) } catch { }
+try { $rg.homeGeoId = [int](Get-WinHomeLocation -ErrorAction Stop).GeoId } catch { }
+$tzs = ToIntOrNull (Rg 'HKLM:\SYSTEM\CurrentControlSet\Services\tzautoupdate' 'Start'); if ($null -ne $tzs) { $rg.tzAutoSet = ($tzs -eq 3) }
+try { $rg.tzDst = [bool](Get-TimeZone).SupportsDaylightSavingTime } catch { }
+$m5['region'] = [pscustomobject]$rg
+# --- privacy: what apps are allowed to use (Windows keeps this list itself; status only, nothing is changed)
+$permCaps = @('contacts', 'appointments', 'email', 'chat', 'phoneCall', 'phoneCallHistory', 'radios', 'bluetooth', 'userAccountInformation', 'documentsLibrary', 'picturesLibrary', 'videosLibrary', 'broadFileSystemAccess', 'appDiagnostics', 'userNotificationListener', 'graphicsCaptureProgrammatic', 'gazeInput', 'activity')
+$perm = @()
+foreach ($cap in $permCaps) {
+    $row = [ordered]@{ key = $cap; global = $null; allowed = 0; usedRecently = 0; apps = @() }
+    try {
+        $base = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\' + $cap
+        if (-not (Test-Path $base)) { continue }
+        $row.global = [string](Rg $base 'Value')
+        $its = @()
+        $kids = @(Get-ChildItem -Path $base -ErrorAction SilentlyContinue | Where-Object { $_.PSChildName -ne 'NonPackaged' })
+        $kids += @(Get-ChildItem -Path (Join-Path $base 'NonPackaged') -ErrorAction SilentlyContinue)
+        foreach ($k in $kids) {
+            try {
+                $p = Get-ItemProperty -Path $k.PSPath -ErrorAction SilentlyContinue
+                if ([string]$p.Value -ne 'Allow') { continue }
+                $row.allowed = [int]$row.allowed + 1
+                $nm = [string]$k.PSChildName; if ($k.PSParentPath -like '*NonPackaged') { $nm = ($nm -replace '#', '\') }
+                $nm = Fx-Leaf $nm
+                $st = [int64]$p.LastUsedTimeStart; $lastIso = $null
+                if ($st -gt 0) { $lt = [DateTime]::FromFileTimeUtc([math]::Max($st, [int64]$p.LastUsedTimeStop)).ToLocalTime(); $lastIso = Iso $lt; if (((Get-Date) - $lt).TotalDays -le 30) { $row.usedRecently = [int]$row.usedRecently + 1 } }
+                $its += [pscustomobject]@{ app = $nm; last = $lastIso }
+            } catch { }
+        }
+        $row.apps = @($its | Sort-Object last -Descending | Select-Object -First 8)
+    } catch { }
+    $perm += [pscustomobject]$row
+}
+$m5['permissions'] = @($perm)
+# --- privacy: more switches (Windows tracking, search, speech, sharing); numbers as Windows keeps them
+$expAdv = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'; $srch = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\SearchSettings'
+$doCfg = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config'
+$diagSvc = $null; try { $diagSvc = [string](Get-Service -Name DiagTrack -ErrorAction Stop).Status } catch { }
+$sample = $null; try { $sample = [int](Get-MpPreference -ErrorAction Stop).SubmitSamplesConsent } catch { }
+$recentN = $null; try { $recentN = @(Get-ChildItem -Path (Join-Path $env:APPDATA 'Microsoft\Windows\Recent') -File -ErrorAction Stop).Count } catch { }
+$m5['privacy2'] = [pscustomobject]@{
+    diagTrack = $diagSvc
+    feedbackPeriod = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\Siuf\Rules' 'NumberOfSIUFInPeriod'))
+    onlineSpeech = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\Speech_OneCore\Settings\OnlineSpeechPrivacy' 'HasAccepted'))
+    languageListShared = $(if ($null -ne (ToIntOrNull (Rg 'HKCU:\Control Panel\International\User Profile' 'HttpAcceptLanguageOptOut'))) { ((ToIntOrNull (Rg 'HKCU:\Control Panel\International\User Profile' 'HttpAcceptLanguageOptOut')) -eq 0) } else { $null })
+    findMyDevice = (ToIntOrNull (Rg 'HKLM:\SOFTWARE\Microsoft\Settings\FindMyDevice' 'LocationSyncEnabled'))
+    activityFeed = (ToIntOrNull (Rg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' 'EnableActivityFeed'))
+    activityUpload = (ToIntOrNull (Rg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System' 'UploadUserActivities'))
+    cloudClipboard = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\Clipboard' 'CloudClipboardAutomaticUpload'))
+    trackDocs = (ToIntOrNull (Rg $expAdv 'Start_TrackDocs')); trackProgs = (ToIntOrNull (Rg $expAdv 'Start_TrackProgs'))
+    searchHistory = (ToIntOrNull (Rg $srch 'IsDeviceSearchHistoryEnabled')); cloudSearchMs = (ToIntOrNull (Rg $srch 'IsMSACloudSearchEnabled')); cloudSearchWork = (ToIntOrNull (Rg $srch 'IsAADCloudSearchEnabled'))
+    deliveryOptMode = $(if ($null -ne (ToIntOrNull (Rg $doCfg 'DODownloadMode'))) { (ToIntOrNull (Rg $doCfg 'DODownloadMode')) } else { (ToIntOrNull (Rg 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DeliveryOptimization' 'DODownloadMode')) })
+    defenderSamples = $sample
+    recentFiles = $recentN
+    syncSettings = (ToIntOrNull (Rg 'HKCU:\Software\Microsoft\Windows\CurrentVersion\SettingSync' 'SyncPolicy'))
+}
+$extras | Add-Member -NotePropertyName more5 -NotePropertyValue ([pscustomobject]$m5) -Force
+
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }
 
@@ -2464,6 +2649,8 @@ $covItems += Add-Cov 'perf' $false $true ''
 $covItems += Add-Cov 'secpol' $true $false ''
 $covItems += Add-Cov 'sfc' $false $true ''
 $covItems += Add-Cov 'traces' $true $false ''
+$covItems += Add-Cov 'settings' $false $false ''
+$covItems += Add-Cov 'rebar' $false $true $(if (-not $m5['rebar'].checked -and -not $Quick) { 'na' } else { '' })
 $stepTimes = @()
 foreach ($sk in @($script:StepSec.Keys | Sort-Object)) {
     $se = 0; foreach ($si in @($script:StepIssues)) { if ($si.step -eq $sk) { $se += [int]$si.errors } }

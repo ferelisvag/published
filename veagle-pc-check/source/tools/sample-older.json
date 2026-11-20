@@ -4230,6 +4230,75 @@
     "status": "InProgress",
     "hasError": false
    }
+  },
+  "more5": {
+   "power": {
+    "acDisplayMin": 10,
+    "dcDisplayMin": 5,
+    "acSleepMin": 0,
+    "dcSleepMin": 15
+   },
+   "signIn": {
+    "msAccounts": 1,
+    "localAccounts": 1,
+    "pinSet": true,
+    "biometricDevice": false,
+    "hello": false
+   },
+   "lockMore": {
+    "saverOn": 1,
+    "saverSecs": 600,
+    "saverSecure": 1,
+    "inactivitySecs": null
+   },
+   "permissions": [
+    {
+     "key": "contacts",
+     "global": "Allow",
+     "allowed": 2,
+     "usedRecently": 1,
+     "apps": [
+      {
+       "app": "Microsoft.People",
+       "last": "2026-10-28T16:35:00"
+      },
+      {
+       "app": "C:\\Program Files\\Zoom\\bin\\Zoom.exe",
+       "last": null
+      }
+     ]
+    },
+    {
+     "key": "documentsLibrary",
+     "global": "Allow",
+     "allowed": 1,
+     "usedRecently": 0,
+     "apps": [
+      {
+       "app": "Microsoft.Office.Desktop",
+       "last": "2026-10-19T16:35:00"
+      }
+     ]
+    }
+   ],
+   "privacyMore": {
+    "autoplayOff": 0,
+    "suggestions": 1,
+    "lockScreenTips": 1,
+    "startAds": 1
+   },
+   "privacy2": {
+    "activityFeed": 1,
+    "activityUpload": 1,
+    "cloudClipboard": 1,
+    "searchHistory": 1,
+    "recentFiles": 1,
+    "trackDocs": 1,
+    "onlineSpeech": 0,
+    "defenderSamples": 1,
+    "deliveryOptMode": 3,
+    "findMyDevice": 0
+   }
   }
  },
  "trend": [

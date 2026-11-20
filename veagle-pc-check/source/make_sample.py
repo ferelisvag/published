@@ -58,7 +58,7 @@ outdated = [
 ] + [('Sample app %d'%i,'Vendor.App%d'%i,'1.%d'%i,'2.%d'%i,'winget') for i in range(17)]
 startup_names = ['GoogleDriveFS','OneDrive','Discord','EpicGamesLauncher','CCXProcess','BraveSoftware Update','Adobe Acrobat Synchronizer','Agent Tray','ACDSeeCommanderFree','Wargaming.net Game Center','Studio.QuickLook','EADM','FilmoraTray','NVIDIA Broadcast','GogGalaxy','MicrosoftEdgeAutoLaunch','AnyDesk','SecurityHealth','RtkAudUService','SteelSeriesGG','Bdagent','ACFW02EN','BdVpnApp','Steam','Viber','Spotify','Zoom','Dropbox']
 data = {
- 'meta': dict(mode='full', tool='VEAGLE PC Check', version='0.2.0', generated=iso(now), isAdmin=True, psVersion='5.1.26100.9549', user='demo', computer='DEMO-PC', domain='DEMO-PC', durationSec=214, warnings=['winget: first run may be slow']),
+ 'meta': dict(mode='full', tool='VEAGLE PC Check', version='2.6.0', generated=iso(now), isAdmin=True, psVersion='5.1.26100.9549', user='demo', computer='DEMO-PC', domain='DEMO-PC', durationSec=214, warnings=['winget: first run may be slow']),
  'system': dict(manufacturer='Gigabyte Technology Co., Ltd.', model='Z590 AORUS PRO AX', chassis='Desktop', isLaptop=False, firmware='UEFI',
    board=dict(manufacturer='Gigabyte Technology Co., Ltd.', product='Z590 AORUS PRO AX'),
    bios=dict(vendor='American Megatrends International, LLC.', version='ALASKA - 1072009', date='2025-06-10T00:00:00', smbios='3.4'),
@@ -299,7 +299,7 @@ def _reliab(d, heavy):
               dict(name='Security', maxMB=20.0, sizeMB=20.0, mode='Circular', records=29950, oldestDays=(6 if heavy else 23), readable=True)],
         secureBootCa=dict(secureBoot=(None if heavy else True), status=(None if heavy else 'InProgress'), hasError=False))
 # --- v0.3 extras (mild for the desktop demo, heavy for the old laptop)
-data['meta']['version'] = '2.5.5'
+data['meta']['version'] = '2.6.0'
 data['extras'] = dict(
   reliability=dict(stabilityIndex=6.8, stabilityLatest=7.4, bugchecks=[dict(time=iso(now - datetime.timedelta(days=19)), code='0x00000116')]),
   securityMore=dict(defender=dict(signatureAgeDays=2, quickScanAgeDays=3, fullScanAgeDays=30, tamperProtected=True, threats30d=0, lastThreat=None),
@@ -329,6 +329,14 @@ data['trend'] = SAMPLE_TREND
 _addwin(data)
 for v in data['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
+data['extras']['more5'] = dict(
+    power=dict(acDisplayMin=10, dcDisplayMin=5, acSleepMin=0, dcSleepMin=15),
+    signIn=dict(msAccounts=1, localAccounts=1, pinSet=True, biometricDevice=False, hello=False),
+    lockMore=dict(saverOn=(0 if False else 1), saverSecs=600, saverSecure=(0 if False else 1), inactivitySecs=None),
+    permissions=[{'key': 'contacts', 'global': 'Allow', 'allowed': 2, 'usedRecently': 1, 'apps': [{'app': 'Microsoft.People', 'last': iso(now - datetime.timedelta(days=3))}, {'app': 'C:\\Program Files\\Zoom\\bin\\Zoom.exe', 'last': None}]},
+                 {'key': 'documentsLibrary', 'global': 'Allow', 'allowed': 1, 'usedRecently': 0, 'apps': [{'app': 'Microsoft.Office.Desktop', 'last': iso(now - datetime.timedelta(days=12))}]}],
+    privacyMore=dict(autoplayOff=0, suggestions=1, lockScreenTips=1, startAds=1),
+    privacy2=dict(activityFeed=1, activityUpload=1, cloudClipboard=1, searchHistory=1, recentFiles=1, trackDocs=1, onlineSpeech=0, defenderSamples=1, deliveryOptMode=3, findMyDevice=0))
 (out / 'sample-data.json').write_text(json.dumps(data, indent=1), encoding='utf-8')
 
 # --- variant: Windows 10 laptop, quick scan
@@ -348,7 +356,7 @@ w['apps']['outdated'] = []; w['apps']['wingetSkipped'] = True
 w['dism'] = dict(state='skipped', text='')
 w['drivers']['oldDrivers'] = []
 # --- v0.3 extras (reliability, security details, network test, backups)
-w['meta']['version'] = '2.5.5'
+w['meta']['version'] = '2.6.0'
 w['extras'] = dict(
   reliability=dict(stabilityIndex=4.2, stabilityLatest=3.1, bugchecks=[dict(time=iso(now - datetime.timedelta(days=6)), code='0x00000133'), dict(time=iso(now - datetime.timedelta(days=9)), code='0x00000116'), dict(time=iso(now - datetime.timedelta(days=12)), code='0x00000133')]),
   securityMore=dict(defender=dict(signatureAgeDays=9, quickScanAgeDays=41, fullScanAgeDays=None, tamperProtected=False, threats30d=2, lastThreat=iso(now - datetime.timedelta(days=5))),

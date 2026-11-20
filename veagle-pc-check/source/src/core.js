@@ -113,7 +113,7 @@ function Engine(RAW) {
   /* ---------------- finding builder ---------------- */
   var SEV_ORDER = { high: 0, medium: 1, low: 2, info: 3 };
   var PEN = { high: 8, medium: 3, low: 0.8, info: 0 };
-  var AREAS = ['Stability', 'Storage', 'Security', 'Network', 'Backup', 'Performance', 'Updates', 'Software'];
+  var AREAS = ['Stability', 'Storage', 'Security', 'Privacy', 'Network', 'Backup', 'Performance', 'Updates', 'Software'];
   function sing(s) { return typeof s === 'string' ? s.replace(/\b1 days\b/g, '1 day') : s; }
   function F(id, area, sev, title, why, steps, evidence) {
     return { id: id, area: area, sev: sev, title: sing(title), why: sing(why), steps: arr(steps), evidence: sing(evidence) || '' };
@@ -236,12 +236,13 @@ function Engine(RAW) {
     'sto-diskhealth': [20, 'Ask a pro', 'Back up first'], 'perf-gpuheat': [20, 'Medium', 'Safe'], 'hw-age': [2, 'Easy', 'Safe'], 'perf-bottleneck': [10, 'Easy', 'Safe'], 'sec-persist': [20, 'Ask a pro', 'Safe'], 'sec-hardening': [30, 'Medium', 'Safe'], 'sec-privacy': [15, 'Easy', 'Safe'], 'sto-caches': [5, 'Easy', 'Safe'], 'soft-unused': [15, 'Easy', 'Back up first'], 'sec-browser-old': [3, 'Easy', 'Safe'],
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe'],
     'win-ready-11': [10, 'Medium', 'Safe'], 'cfg-tasks-unusual': [15, 'Medium', 'Safe'], 'sec-svc-path': [15, 'Medium', 'Safe'], 'sec-svc-unquoted': [2, 'Ask a pro', 'Safe'], 'stab-memdiag': [60, 'Medium', 'Back up first'], 'stab-sfc': [40, 'Medium', 'Safe'], 'prn-stuck': [5, 'Easy', 'Safe'], 'soft-runtime-eol': [10, 'Medium', 'Safe'],
-    'sto-dirty': [15, 'Easy', 'Back up first'], 'sec-sb-cert': [30, 'Medium', 'Safe'], 'for-log-short': [5, 'Medium', 'Safe'],
+    'sto-dirty': [15, 'Easy', 'Back up first'],
+    'priv-apps-wide': [10, 'Easy', 'Safe'], 'priv-delivery': [3, 'Easy', 'Safe'], 'priv-hello': [5, 'Easy', 'Safe'], 'priv-idle-lock': [5, 'Easy', 'Safe'], 'upd-paused': [2, 'Easy', 'Safe'], 'net-metered': [2, 'Easy', 'Safe'], 'net-doh': [5, 'Medium', 'Safe'], 'net-wifi-powersave': [3, 'Medium', 'Safe'], 'sto-defrag': [2, 'Easy', 'Safe'], 'sto-sense': [2, 'Easy', 'Safe'], 'perf-effects': [3, 'Easy', 'Safe'], 'sec-sb-cert': [30, 'Medium', 'Safe'], 'for-log-short': [5, 'Medium', 'Safe'],
     'for-logon-brute': [20, 'Medium', 'Safe'], 'for-logon-remote': [20, 'Ask a pro', 'Safe'], 'for-audit-off': [5, 'Medium', 'Safe'], 'for-log-cleared': [15, 'Ask a pro', 'Safe'], 'for-acct-new': [10, 'Medium', 'Safe'], 'for-svc-new': [15, 'Medium', 'Safe'], 'for-time-changed': [5, 'Easy', 'Safe'], 'for-run-tools': [20, 'Ask a pro', 'Safe'], 'for-run-odd': [15, 'Medium', 'Safe'], 'for-downloads': [10, 'Easy', 'Safe'], 'for-def-excl': [10, 'Medium', 'Safe'], 'for-def-off': [5, 'Easy', 'Safe'], 'for-def-caught': [10, 'Easy', 'Safe'], 'for-fw-rules': [15, 'Medium', 'Safe'], 'for-shares-open': [10, 'Medium', 'Safe'], 'for-access-backdoor': [40, 'Ask a pro', 'Back up first'], 'for-startup-folder': [5, 'Easy', 'Safe'], 'for-ps-suspicious': [20, 'Ask a pro', 'Safe'], 'for-ps-logging': [5, 'Medium', 'Safe'], 'for-wifi-open': [5, 'Easy', 'Safe'], 'for-listen-risky': [15, 'Ask a pro', 'Safe'], 'use-sensors': [10, 'Easy', 'Safe'], 'dev-peripheral-problem': [15, 'Medium', 'Safe']
   };
   var PROFILES = {
     home: { label: 'Home PC', note: 'Balanced advice for a normal home computer.' },
-    work: { label: 'Work or clinic PC', note: 'Security, backups and time sync count one level more.', areas: ['Security', 'Backup'], ids: ['net-time', 'sec-def-sigs'] },
+    work: { label: 'Work or clinic PC', note: 'Security, backups and time sync count one level more.', areas: ['Security', 'Privacy', 'Backup'], ids: ['net-time', 'sec-def-sigs'] },
     gaming: { label: 'Gaming PC', note: 'Graphics, memory speed and storage speed count one level more.', ids: ['gam-mode', 'gam-hags', 'gam-dvr', 'perf-xmp', 'stab-gpu', 'perf-power', 'upd-gpu', 'perf-dual', 'perf-fast', 'perf-boot', 'sto-hdd', 'sto-temp'] }
   };
   function bump(sev) { return sev === 'info' ? 'low' : (sev === 'low' ? 'medium' : 'high'); }
@@ -584,7 +585,7 @@ function Engine(RAW) {
     R(function () {
       var n = g(D, 'security.localAdmins', null);
       if (n == null || n <= 2) return null;
-      return F('sec-admins', 'Security', 'low', n + ' accounts are local administrators', 'Fewer admin accounts mean less risk.',
+      return F('sec-admins', 'Privacy', 'low', n + ' accounts are local administrators', 'Fewer admin accounts mean less risk.',
         [S('Review them.', 'Get-LocalGroupMember -SID S-1-5-32-544'), S('Use a standard account for daily work.')], arr(g(D, 'extras.securityMore.adminNames', [])).join(', '));
     });
     R(function () {
@@ -852,7 +853,7 @@ function Engine(RAW) {
     });
     R(function () {
       if (SEC.autoLogon !== true) return null;
-      return F('sec-autologon', 'Security', 'medium', 'Windows logs in by itself without a password',
+      return F('sec-autologon', 'Privacy', 'medium', 'Windows logs in by itself without a password',
         'Anyone who switches this PC on gets straight into your files and saved passwords. On a laptop that is stolen, that is very bad.',
         [S('Press Windows key + R, type netplwiz and press Enter.', 'netplwiz'),
          S('Tick "Users must enter a user name and password to use this computer", click OK and type your password if asked.')], '');
@@ -1232,7 +1233,7 @@ function Engine(RAW) {
     R(function () {
       var a = arr(X6.accounts).filter(function (u) { return u.isGuest && u.enabled; });
       if (!a.length) return null;
-      return F('sec-guest', 'Security', 'medium', 'The "Guest" account is switched on',
+      return F('sec-guest', 'Privacy', 'medium', 'The "Guest" account is switched on',
         'The Guest account lets anyone use this PC without a real account. Nobody needs it today and it is a favourite door for attackers.',
         [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter. It only switches the Guest account off.', 'net user guest /active:no')], 'Account: ' + a[0].name);
     });
@@ -1240,7 +1241,7 @@ function Engine(RAW) {
       var a = arr(X6.accounts).filter(function (u) { return u.enabled && u.noPassword && !u.isGuest; });
       if (!a.length) return null;
       var adm = a.some(function (u) { return u.isAdmin; });
-      return F('sec-nopass', 'Security', 'low', a.length + ' account' + (a.length > 1 ? 's are' : ' is') + ' allowed to have no password',
+      return F('sec-nopass', 'Privacy', 'low', a.length + ' account' + (a.length > 1 ? 's are' : ' is') + ' allowed to have no password',
         'Windows says ' + (a.length > 1 ? 'these accounts do not have to have' : 'this account does not have to have') + ' a password. That does not mean it is empty: accounts that sign in with a PIN or a Microsoft account often show like this. But if it really is empty, anybody who can sit at the PC could use it. ' + (adm ? 'At least one of them is an administrator, so it is worth checking.' : ''),
         [S('Press the Windows key, type "Sign-in options" and open it. If you see "Password" with a Change button, a password exists and you are fine.'), S('If it says "Add" instead, add a strong password (12 characters or more; a short sentence you will remember works well).')],
         nameList(a, function (u) { return u.name + (u.isAdmin ? ' (administrator)' : ''); }));
@@ -1248,14 +1249,14 @@ function Engine(RAW) {
     R(function () {
       var a = arr(X6.accounts).filter(function (u) { return u.isBuiltinAdmin && u.enabled; });
       if (!a.length) return null;
-      return F('sec-builtinadmin', 'Security', 'medium', 'The hidden built-in "Administrator" account is switched on',
+      return F('sec-builtinadmin', 'Privacy', 'medium', 'The hidden built-in "Administrator" account is switched on',
         'Windows has a special all-powerful account that is normally off. When it is on, attackers know its name and only need to guess the password.',
         [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste this and press Enter. Make sure you can sign in with another administrator account first.', 'net user administrator /active:no')], 'Account: ' + a[0].name);
     });
     R(function () {
       var a = arr(X6.accounts).filter(function (u) { return u.enabled && u.neverExpires && !u.isGuest && !u.noPassword && u.isAdmin; });
       if (!a.length) return null;
-      return F('sec-pwexp', 'Security', 'info', 'The password of an administrator account never expires',
+      return F('sec-pwexp', 'Privacy', 'info', 'The password of an administrator account never expires',
         'This is normal at home. At work, a password that never changes means a leaked password stays useful forever.',
         [S('At home: nothing to do. Just make sure the password is long and not used anywhere else.'), S('At work: ask your IT team if a password policy is needed.')],
         nameList(a, function (u) { return u.name; }));
@@ -1282,7 +1283,7 @@ function Engine(RAW) {
       var ex = arr(X6.browserExt); if (!ex.length) return null;
       var strong = ex.filter(function (e) { return (e.allUrls && arr(e.risky).length >= 2) || arr(e.risky).some(function (p) { return /^(proxy|debugger|nativeMessaging)$/.test(p); }); });
       if (!strong.length) return null;
-      return F('sec-ext', 'Security', 'low', strong.length + ' browser add-on' + (strong.length > 1 ? 's have' : ' has') + ' wide powers: they can see or change what you do on websites',
+      return F('sec-ext', 'Privacy', 'low', strong.length + ' browser add-on' + (strong.length > 1 ? 's have' : ' has') + ' wide powers: they can see or change what you do on websites',
         'Browser add-ons (extensions) are tiny programs inside your browser. Some need wide powers to do their job: ad blockers, VPNs, password managers and crypto wallets are normal examples. The risk is a forgotten or unknown add-on with the same powers, a common way to steal data. So: keep the ones you know and use, remove the rest.',
         [S('Open your browser and type chrome://extensions (Chrome) or edge://extensions (Edge) in the address bar.'), S('Compare with the list under "Evidence". For every add-on you do not use or do not know, click Remove.'), S('Keep only what you really need.')],
         nameList(strong, function (e) { return e.browser + ': ' + e.name + ' - ' + (e.allUrls ? 'all websites, ' : '') + arr(e.risky).slice(0, 4).join(', '); }, 15));
@@ -1294,7 +1295,7 @@ function Engine(RAW) {
       var idleLock = L.screensaverSecure || (L.inactivityLimitSec && L.inactivityLimitSec > 0);
       if (!wakeOff && idleLock) return null;
       if (!wakeOff && !laptop) return null;
-      return F('sec-lock', 'Security', 'low', wakeOff ? 'The PC does not ask for your password after sleep' : 'The screen does not lock by itself when you walk away',
+      return F('sec-lock', 'Privacy', 'low', wakeOff ? 'The PC does not ask for your password after sleep' : 'The screen does not lock by itself when you walk away',
         wakeOff ? 'When the PC wakes up from sleep it opens straight on your desktop. Anybody who picks it up sees everything.' : 'If you leave the PC for a few minutes, anybody can sit down and use it. On a laptop this also covers theft.',
         [S('Press the Windows key, type "Sign-in options" and open it.'), S('Under "If you have been away, when should Windows require you to sign in again?" choose "Every time".'), S('Tip: press Windows key + L to lock the PC yourself whenever you stand up.')], '');
     });
@@ -1598,6 +1599,8 @@ function Engine(RAW) {
     });
     /* privacy */
     var PR = X2.privacy || null;
+    var X5 = EX.more5 || {};
+    var PV2 = X5.privacy2 || {}, PVM = X5.privacyMore || {}, SIG = X5.signIn || {}, LKM = X5.lockMore || {};
     function privList() {
       if (!PR) return [];
       var r = [];
@@ -1616,11 +1619,11 @@ function Engine(RAW) {
       return r;
     }
     R(function () {
-      var o = privList().filter(function (x) { return x.open && x.id !== 'microphone' && x.id !== 'camera' && x.id !== 'copilot'; });
+      var o = privAll().filter(function (x) { return x.open && x.id !== 'microphone' && x.id !== 'camera' && x.id !== 'copilot'; });
       if (o.length < 2) return null;
-      return F('sec-privacy', 'Security', 'info', o.length + ' Windows privacy settings share more than they need to',
-        'Windows can send diagnostic data, show ads based on you, remember what you copy and more. None of it is dangerous, but it is your choice. The Insights tab lists every setting with how to change it.',
-        [S('Open the Insights tab and read the "Privacy of Windows" box.'), S('Change only what you want. Nothing here is required for the PC to work.')], o.map(function (x) { return x.en; }).join('\n'));
+      return F('sec-privacy', 'Privacy', 'info', o.length + ' Windows privacy settings share more than they need to',
+        'Windows can send diagnostic data, show ads based on you, remember what you copy and more. None of it is dangerous, but it is your choice. The Privacy tab lists every setting with how to change it.',
+        [S('Open the Privacy tab of this report and read the table "Every privacy switch".'), S('Change only what you want. Nothing here is required for the PC to work.')], o.map(function (x) { return x.en; }).join('\n'));
     });
     /* caches */
     R(function () {
@@ -1724,6 +1727,157 @@ function Engine(RAW) {
         'A stuck job blocks everything behind it, so nothing prints. The usual cure is to clear the queue and restart the print service. Clearing deletes only the waiting print jobs, nothing else.',
         [S('Open PowerShell as administrator. ' + ADMINHOW), S('Paste these three lines one after the other. They stop the print service, delete the waiting jobs and start the service again.', 'Stop-Service Spooler -Force\nRemove-Item "$env:SystemRoot\\System32\\spool\\PRINTERS\\*" -Force -ErrorAction SilentlyContinue\nStart-Service Spooler'), S('Try printing a test page. If it gets stuck again, check that the printer is on, has paper and is connected.')],
         nameList(q, function (x) { return x.printer + ' - ' + x.jobs + ' job(s), ' + x.stuck + ' stuck'; }));
+    });
+    /* 2.6.0: Windows settings, privacy and accounts (extras.more5, read-only) */
+    function minTxt(m) { m = (m == null) ? null : +m; if (m == null || isNaN(m)) return ''; return m === 0 ? 'never' : (m >= 60 ? (Math.round(m / 6) / 10) + ' h' : m + ' min'); }
+    function minTxtEl(m) { var t = minTxt(m); return t === 'never' ? 'ποτέ' : t.replace(' h', ' ώρ.').replace(' min', ' λεπτά'); }
+    /* every privacy switch: open = true when it shares or remembers more than it needs to. group: ms (Microsoft), ads (ads and tips), apps, local (traces on this PC), people (who can get in) */
+    function privAll() {
+      var out = [], seen = {};
+      privList().forEach(function (p) {
+        var grp = ({ telemetry: 'ms', adId: 'ads', location: 'apps', activityHistory: 'ms', recall: 'local', copilot: 'ms', tailored: 'ads', clipboardHistory: 'local', bingSearch: 'ms', microphone: 'apps', camera: 'apps' })[p.id] || 'ms';
+        out.push({ id: p.id, group: grp, open: !!p.open, en: p.en, el: p.el, fen: p.fen, fel: p.fel }); seen[p.id] = 1;
+      });
+      function add(id, group, open, en, el, fen, fel) { if (!seen[id]) { out.push({ id: id, group: group, open: !!open, en: en, el: el, fen: fen, fel: fel }); seen[id] = 1; } }
+      function on(v) { return v === 1 || v === true; }
+      if (PV2.onlineSpeech != null) add('onlineSpeech', 'ms', on(PV2.onlineSpeech), 'Online speech recognition is ' + (on(PV2.onlineSpeech) ? 'on (your voice is sent to Microsoft)' : 'off'), 'Η αναγνώριση ομιλίας μέσω internet είναι ' + (on(PV2.onlineSpeech) ? 'ανοιχτή (η φωνή σου στέλνεται στη Microsoft)' : 'κλειστή'), 'Settings > Privacy & security > Speech', 'Ρυθμίσεις > Απόρρητο και ασφάλεια > Ομιλία');
+      if (PV2.activityUpload != null || PV2.activityFeed != null) add('activitySync', 'ms', on(PV2.activityUpload) || on(PV2.activityFeed), 'Your activity can be sent to Microsoft (' + (on(PV2.activityUpload) ? 'upload on' : 'a policy allows it') + ')', 'Η δραστηριότητά σου μπορεί να σταλεί στη Microsoft (' + (on(PV2.activityUpload) ? 'η αποστολή είναι ανοιχτή' : 'το επιτρέπει μια πολιτική') + ')', 'Settings > Privacy & security > Activity history', 'Ρυθμίσεις > Απόρρητο και ασφάλεια > Ιστορικό δραστηριότητας');
+      if (PV2.cloudClipboard != null) add('cloudClipboard', 'ms', on(PV2.cloudClipboard), 'Clipboard sync to your Microsoft account is ' + (on(PV2.cloudClipboard) ? 'on' : 'off'), 'Ο συγχρονισμός προχείρου με τον λογαριασμό Microsoft είναι ' + (on(PV2.cloudClipboard) ? 'ανοιχτός' : 'κλειστός'), 'Settings > System > Clipboard', 'Ρυθμίσεις > Σύστημα > Πρόχειρο');
+      if (PV2.languageListShared != null) add('langList', 'ads', PV2.languageListShared === true, 'Websites can read your language list to show local content', 'Οι ιστοσελίδες μπορούν να διαβάζουν τη λίστα γλωσσών σου', 'Settings > Privacy & security > General', 'Ρυθμίσεις > Απόρρητο και ασφάλεια > Γενικά');
+      if (PVM.suggestions != null || PVM.startAds != null || PVM.lockScreenTips != null) {
+        var sg = on(PVM.suggestions) || on(PVM.startAds) || on(PVM.lockScreenTips);
+        add('suggestions', 'ads', sg, 'Windows shows suggestions and promotions in Start, Settings or on the lock screen', 'Τα Windows δείχνουν προτάσεις και διαφημίσεις στο Έναρξη, στις Ρυθμίσεις ή στην οθόνη κλειδώματος', 'Settings > Personalization > Start / Lock screen, and Privacy & security > General', 'Ρυθμίσεις > Εξατομίκευση > Έναρξη / Οθόνη κλειδώματος, και Απόρρητο και ασφάλεια > Γενικά');
+      }
+      if (PVM.typingCollectionRestricted != null) add('typing', 'ms', !on(PVM.typingCollectionRestricted), 'Windows ' + (on(PVM.typingCollectionRestricted) ? 'does not collect' : 'collects samples of') + ' your typing and handwriting', 'Τα Windows ' + (on(PVM.typingCollectionRestricted) ? 'δεν συλλέγουν' : 'συλλέγουν δείγματα από') + ' το πληκτρολόγιο και το γραφικό σου', 'Settings > Privacy & security > Inking & typing personalization', 'Ρυθμίσεις > Απόρρητο και ασφάλεια > Εξατομίκευση γραφής και πληκτρολόγησης');
+      if (PV2.trackDocs != null) add('trackDocs', 'local', on(PV2.trackDocs), 'Start remembers recently opened files (' + (PV2.recentFiles != null ? PV2.recentFiles + ' listed' : 'list kept') + ')', 'Το Έναρξη θυμάται τα αρχεία που άνοιξες πρόσφατα (' + (PV2.recentFiles != null ? PV2.recentFiles + ' στη λίστα' : 'η λίστα κρατιέται') + ')', 'Settings > Personalization > Start > "Show recently opened items"', 'Ρυθμίσεις > Εξατομίκευση > Έναρξη > «Εμφάνιση πρόσφατων στοιχείων»');
+      if (PV2.searchHistory != null) add('searchHistory', 'local', on(PV2.searchHistory), 'Windows Search keeps a history of what you search for on this PC', 'Η Αναζήτηση των Windows κρατά ιστορικό όσων ψάχνεις σε αυτόν τον υπολογιστή', 'Settings > Privacy & security > Search permissions', 'Ρυθμίσεις > Απόρρητο και ασφάλεια > Δικαιώματα αναζήτησης');
+      if (PV2.cloudSearchMs != null || PV2.cloudSearchWork != null) { var cs = on(PV2.cloudSearchMs) || on(PV2.cloudSearchWork); add('cloudSearch', 'ms', cs, 'Search can look into your cloud accounts (Microsoft or work)', 'Η Αναζήτηση μπορεί να ψάχνει στους λογαριασμούς cloud σου (Microsoft ή εργασίας)', 'Settings > Privacy & security > Search permissions', 'Ρυθμίσεις > Απόρρητο και ασφάλεια > Δικαιώματα αναζήτησης'); }
+      if (PV2.deliveryOptMode != null) add('deliveryOpt', 'ms', num(PV2.deliveryOptMode) === 3, num(PV2.deliveryOptMode) === 3 ? 'Windows shares downloaded updates with PCs on the internet' : (num(PV2.deliveryOptMode) === 0 ? 'Update sharing with other PCs is off' : 'Windows shares downloaded updates only with PCs on your own network'), num(PV2.deliveryOptMode) === 3 ? 'Τα Windows μοιράζονται ενημερώσεις που κατέβασαν με υπολογιστές στο internet' : (num(PV2.deliveryOptMode) === 0 ? 'Ο διαμοιρασμός ενημερώσεων με άλλους υπολογιστές είναι κλειστός' : 'Τα Windows μοιράζονται ενημερώσεις μόνο με υπολογιστές του δικού σου δικτύου'), 'Settings > Windows Update > Advanced options > Delivery Optimization', 'Ρυθμίσεις > Windows Update > Επιλογές για προχωρημένους > Βελτιστοποίηση παράδοσης');
+      if (PV2.defenderSamples != null && num(PV2.defenderSamples) >= 0) add('defSamples', 'ms', num(PV2.defenderSamples) === 3, num(PV2.defenderSamples) === 3 ? 'Windows Security sends every suspicious file to Microsoft automatically' : (num(PV2.defenderSamples) === 2 ? 'Windows Security never sends files to Microsoft' : (num(PV2.defenderSamples) === 0 ? 'Windows Security asks before sending a file' : 'Windows Security sends safe samples automatically')), num(PV2.defenderSamples) === 3 ? 'Η Ασφάλεια των Windows στέλνει αυτόματα στη Microsoft κάθε ύποπτο αρχείο' : (num(PV2.defenderSamples) === 2 ? 'Η Ασφάλεια των Windows δεν στέλνει ποτέ αρχεία στη Microsoft' : (num(PV2.defenderSamples) === 0 ? 'Η Ασφάλεια των Windows ρωτά πριν στείλει αρχείο' : 'Η Ασφάλεια των Windows στέλνει αυτόματα ασφαλή δείγματα')), 'Windows Security > Virus & threat protection > Settings > Automatic sample submission', 'Ασφάλεια των Windows > Προστασία από ιούς και απειλές > Ρυθμίσεις > Αυτόματη υποβολή δειγμάτων');
+      if (PV2.findMyDevice != null) add('findMyDevice', 'ms', false, 'Find my device is ' + (on(PV2.findMyDevice) ? 'on (useful if the PC is lost)' : 'off'), 'Το «Εύρεση συσκευής» είναι ' + (on(PV2.findMyDevice) ? 'ανοιχτό (χρήσιμο αν χαθεί ο υπολογιστής)' : 'κλειστό'), 'Settings > Privacy & security > Find my device', 'Ρυθμίσεις > Απόρρητο και ασφάλεια > Εύρεση συσκευής');
+      return out;
+    }
+    /* apps with a wide permission (not Microsoft's own): file access, other apps' info, notifications, screen capture, contacts, mail, messages, call history */
+    var WIDE = { broadFileSystemAccess: ['all your files', 'όλα τα αρχεία σου'], appDiagnostics: ['what other apps do', 'τι κάνουν οι άλλες εφαρμογές'], userNotificationListener: ['your notifications', 'τις ειδοποιήσεις σου'], graphicsCaptureProgrammatic: ['your screen', 'την οθόνη σου'], contacts: ['your contacts', 'τις επαφές σου'], email: ['your e-mail', 'το email σου'], chat: ['your messages', 'τα μηνύματά σου'], phoneCallHistory: ['your call history', 'το ιστορικό κλήσεών σου'] };
+    function isMsApp(n) { return /^(Microsoft|Windows|MicrosoftWindows|NcsiUwpApp|c5e2524a|1527c705|E2A4F912|F46D4000|windows\.)/i.test(String(n || '')); }
+    function wideApps() {
+      var r = [];
+      arr(X5.permissions).forEach(function (p) {
+        if (!WIDE[p.key] || p.global === 'Deny') return;
+        arr(p.apps).forEach(function (a) { if (a && a.app && !isMsApp(a.app)) r.push({ cap: p.key, app: a.app }); });
+      });
+      return r;
+    }
+    function settingsRows() {
+      var r = [];
+      function row(grp, en, el, ven, vel, st, hen, hel) { r.push({ grp: grp, en: en, el: el, ven: ven, vel: vel, st: st || 'ok', hen: hen || '', hel: hel || '' }); }
+      var P = X5.power || {}, VS = X5.visual || {}, DS = X5.display || {}, SC = X5.storageCare || {}, WU = X5.wuSettings || {}, RM = X5.remote || {}, NT = X5.net || {}, RG = X5.region || {};
+      if (P.acDisplayMin != null) row('Power', 'Screen turns off after (plugged in / battery)', 'Η οθόνη σβήνει μετά από (στην πρίζα / μπαταρία)', minTxt(P.acDisplayMin) + ' / ' + minTxt(P.dcDisplayMin), minTxtEl(P.acDisplayMin) + ' / ' + minTxtEl(P.dcDisplayMin), P.acDisplayMin === 0 ? 'note' : 'ok', 'Settings > System > Power > Screen and sleep', 'Ρυθμίσεις > Σύστημα > Ενέργεια > Οθόνη και αναστολή');
+      if (P.acSleepMin != null) row('Power', 'PC goes to sleep after (plugged in / battery)', 'Ο υπολογιστής κοιμάται μετά από (στην πρίζα / μπαταρία)', minTxt(P.acSleepMin) + ' / ' + minTxt(P.dcSleepMin), minTxtEl(P.acSleepMin) + ' / ' + minTxtEl(P.dcSleepMin), 'ok', 'Settings > System > Power > Screen and sleep', 'Ρυθμίσεις > Σύστημα > Ενέργεια > Οθόνη και αναστολή');
+      if (VS.fx != null) row('Looks', 'Visual effects mode', 'Λειτουργία οπτικών εφέ', ({ 0: 'Let Windows choose', 1: 'Best appearance', 2: 'Best performance', 3: 'Custom' })[VS.fx] || String(VS.fx), ({ 0: 'Επιλογή από τα Windows', 1: 'Καλύτερη εμφάνιση', 2: 'Καλύτερη απόδοση', 3: 'Προσαρμοσμένο' })[VS.fx] || String(VS.fx), 'ok', 'Press Windows key, type "Adjust the appearance and performance of Windows"', 'Πάτα το πλήκτρο Windows, γράψε «Προσαρμογή της εμφάνισης και της απόδοσης των Windows»');
+      if (VS.transparency != null) row('Looks', 'Transparency effects', 'Εφέ διαφάνειας', VS.transparency === 1 ? 'on' : 'off', VS.transparency === 1 ? 'ανοιχτά' : 'κλειστά', 'ok', 'Settings > Personalization > Colors', 'Ρυθμίσεις > Εξατομίκευση > Χρώματα');
+      if (VS.appsLight != null) row('Looks', 'Theme for apps / Windows', 'Θέμα για εφαρμογές / Windows', (VS.appsLight === 1 ? 'light' : 'dark') + ' / ' + (VS.systemLight === 1 ? 'light' : 'dark'), (VS.appsLight === 1 ? 'ανοιχτό' : 'σκούρο') + ' / ' + (VS.systemLight === 1 ? 'ανοιχτό' : 'σκούρο'), 'ok', 'Settings > Personalization > Colors', 'Ρυθμίσεις > Εξατομίκευση > Χρώματα');
+      if (DS.hz != null) row('Screen', 'Screen refresh rate', 'Συχνότητα ανανέωσης οθόνης', DS.hz + ' Hz', DS.hz + ' Hz', 'ok', 'Settings > System > Display > Advanced display. A gaming screen can often run faster than 60 Hz.', 'Ρυθμίσεις > Σύστημα > Οθόνη > Σύνθετη οθόνη. Μια οθόνη για gaming συχνά τρέχει πάνω από 60 Hz.');
+      if (DS.width != null) row('Screen', 'Resolution and scaling', 'Ανάλυση και κλίμακα', DS.width + ' x ' + DS.height + (DS.scalePct ? ', ' + DS.scalePct + '%' : ''), DS.width + ' x ' + DS.height + (DS.scalePct ? ', ' + DS.scalePct + '%' : ''), 'ok', 'Settings > System > Display', 'Ρυθμίσεις > Σύστημα > Οθόνη');
+      if (X5.bgPriority != null) row('Performance', 'Processor time given to the program you use', 'Χρόνος επεξεργαστή στο πρόγραμμα που χρησιμοποιείς', X5.bgPriority === 2 ? 'Windows default' : (X5.bgPriority === 38 ? 'foreground programs first' : (X5.bgPriority === 24 ? 'background services first' : 'custom (' + X5.bgPriority + ')')), X5.bgPriority === 2 ? 'προεπιλογή Windows' : (X5.bgPriority === 38 ? 'πρώτα τα προγράμματα που βλέπεις' : (X5.bgPriority === 24 ? 'πρώτα οι υπηρεσίες παρασκηνίου' : 'προσαρμοσμένο (' + X5.bgPriority + ')')), X5.bgPriority === 2 || X5.bgPriority === 38 ? 'ok' : 'note', 'Press Windows key, type "Adjust the appearance and performance of Windows" > Advanced > Processor scheduling', 'Πάτα το πλήκτρο Windows, γράψε «Προσαρμογή της εμφάνισης και της απόδοσης των Windows» > Για προχωρημένους > Προγραμματισμός επεξεργαστή');
+      if (X5.rebar && X5.rebar.checked) row('Performance', 'Resizable BAR (graphics card memory access)', 'Resizable BAR (πρόσβαση στη μνήμη της κάρτας γραφικών)', X5.rebar.bar1MiB == null ? 'could not be read' : (X5.rebar.bar1MiB > 256 ? 'on (' + X5.rebar.bar1MiB + ' MiB window)' : 'off (256 MiB window)'), X5.rebar.bar1MiB == null ? 'δεν μπόρεσε να διαβαστεί' : (X5.rebar.bar1MiB > 256 ? 'ανοιχτό (παράθυρο ' + X5.rebar.bar1MiB + ' MiB)' : 'κλειστό (παράθυρο 256 MiB)'), 'ok', 'It is switched on in the BIOS ("Above 4G decoding" and "Resizable BAR"). Only some games gain from it.', 'Ανοίγει από το BIOS («Above 4G decoding» και «Resizable BAR»). Ωφελεί μόνο μερικά παιχνίδια.');
+      if (SC.senseOn != null) row('Storage', 'Storage Sense (automatic clean-up)', 'Storage Sense (αυτόματος καθαρισμός)', SC.senseOn === 1 ? 'on' : 'off', SC.senseOn === 1 ? 'ανοιχτό' : 'κλειστό', 'ok', 'Settings > System > Storage > Storage Sense', 'Ρυθμίσεις > Σύστημα > Αποθήκευση > Storage Sense');
+      if (SC.recycleDays != null) row('Storage', 'Recycle Bin emptied after', 'Ο Κάδος ανακύκλωσης αδειάζει μετά από', SC.recycleDays === 0 ? 'never' : SC.recycleDays + ' days', SC.recycleDays === 0 ? 'ποτέ' : SC.recycleDays + ' ημέρες', 'ok', 'Settings > System > Storage > Storage Sense', 'Ρυθμίσεις > Σύστημα > Αποθήκευση > Storage Sense');
+      if (SC.defragTask) row('Storage', 'Scheduled drive optimisation', 'Προγραμματισμένη βελτιστοποίηση δίσκων', SC.defragTask === 'Disabled' ? 'off' : 'on', SC.defragTask === 'Disabled' ? 'κλειστή' : 'ανοιχτή', SC.defragTask === 'Disabled' ? 'note' : 'ok', 'Press Windows key, type "Defragment and Optimize Drives" > Change settings', 'Πάτα το πλήκτρο Windows, γράψε «Ανασυγκρότηση και βελτιστοποίηση μονάδων δίσκου» > Αλλαγή ρυθμίσεων');
+      if (WU.activeStart != null) row('Updates', 'Active hours (no automatic restart)', 'Ώρες ενεργής χρήσης (χωρίς αυτόματη επανεκκίνηση)', WU.activeStart + ':00 - ' + WU.activeEnd + ':00' + (WU.smartActive === 1 ? ' (Windows adjusts them)' : ''), WU.activeStart + ':00 - ' + WU.activeEnd + ':00' + (WU.smartActive === 1 ? ' (τις προσαρμόζουν τα Windows)' : ''), 'ok', 'Settings > Windows Update > Advanced options > Active hours', 'Ρυθμίσεις > Windows Update > Επιλογές για προχωρημένους > Ώρες ενεργής χρήσης');
+      if (WU.deferQualityDays != null || WU.deferFeatureDays != null) row('Updates', 'Updates delayed on purpose (quality / feature)', 'Ενημερώσεις που καθυστερούν επίτηδες (ασφαλείας / λειτουργιών)', (WU.deferQualityDays || 0) + ' / ' + (WU.deferFeatureDays || 0) + ' days', (WU.deferQualityDays || 0) + ' / ' + (WU.deferFeatureDays || 0) + ' ημέρες', (WU.deferQualityDays || 0) >= 14 ? 'note' : 'ok', 'Set by a company policy or the registry. Settings > Windows Update shows if updates are paused.', 'Ορίζεται από πολιτική εταιρείας ή το registry. Στις Ρυθμίσεις > Windows Update φαίνεται αν είναι σε παύση.');
+      if (WU.pausedUntil) row('Updates', 'Updates paused until', 'Οι ενημερώσεις είναι σε παύση μέχρι', String(WU.pausedUntil).slice(0, 10), String(WU.pausedUntil).slice(0, 10), 'note', 'Settings > Windows Update > Resume updates', 'Ρυθμίσεις > Windows Update > Συνέχιση ενημερώσεων');
+      if (RM.rdpOn != null) row('Remote access', 'Remote Desktop', 'Απομακρυσμένη επιφάνεια εργασίας', RM.rdpOn ? 'on, port ' + (RM.rdpPort || '?') + (RM.rdpNla === 1 ? ', asks for a login first' : ', does not ask for a login first') : 'off', RM.rdpOn ? 'ανοιχτή, θύρα ' + (RM.rdpPort || '?') + (RM.rdpNla === 1 ? ', ζητά πρώτα σύνδεση' : ', δεν ζητά πρώτα σύνδεση') : 'κλειστή', RM.rdpOn ? 'note' : 'ok', 'Settings > System > Remote Desktop', 'Ρυθμίσεις > Σύστημα > Απομακρυσμένη επιφάνεια εργασίας');
+      if (RM.assistanceOn != null) row('Remote access', 'Remote Assistance', 'Απομακρυσμένη βοήθεια', RM.assistanceOn ? 'on' : 'off', RM.assistanceOn ? 'ανοιχτή' : 'κλειστή', 'ok', 'Press Windows key, type "Allow Remote Assistance invitations"', 'Πάτα το πλήκτρο Windows, γράψε «Να επιτρέπονται προσκλήσεις απομακρυσμένης βοήθειας»');
+      if (NT.dohServers != null || NT.autoDoh != null) row('Network', 'Encrypted DNS (DNS over HTTPS)', 'Κρυπτογραφημένο DNS (DNS over HTTPS)', NT.autoDoh === 2 ? 'on (automatic)' : (NT.autoDoh === 3 ? 'on (required)' : 'off'), NT.autoDoh === 2 ? 'ανοιχτό (αυτόματα)' : (NT.autoDoh === 3 ? 'ανοιχτό (υποχρεωτικό)' : 'κλειστό'), 'ok', 'Settings > Network & internet > Wi-Fi or Ethernet > DNS server assignment (Windows 11)', 'Ρυθμίσεις > Δίκτυο και internet > Wi-Fi ή Ethernet > Εκχώρηση διακομιστή DNS (Windows 11)');
+      if (NT.costType) row('Network', 'Metered connection', 'Μετρημένη σύνδεση', NT.costType === 'Unrestricted' ? 'no' : 'yes (' + NT.costType + ')', NT.costType === 'Unrestricted' ? 'όχι' : 'ναι (' + NT.costType + ')', NT.costType === 'Unrestricted' ? 'ok' : 'note', 'Settings > Network & internet > Wi-Fi > your network > Metered connection', 'Ρυθμίσεις > Δίκτυο και internet > Wi-Fi > το δίκτυό σου > Μετρημένη σύνδεση');
+      var wf = arr(NT.adapters).filter(function (a) { return a.kind === 'wifi'; });
+      if (wf.length) row('Network', 'Wi-Fi card may switch off to save power', 'Η κάρτα Wi-Fi μπορεί να σβήνει για εξοικονόμηση ενέργειας', wf[0].allowOff === 'Enabled' ? 'yes' : (wf[0].allowOff === 'Disabled' ? 'no' : 'unknown'), wf[0].allowOff === 'Enabled' ? 'ναι' : (wf[0].allowOff === 'Disabled' ? 'όχι' : 'άγνωστο'), 'ok', 'Device Manager > Network adapters > your Wi-Fi card > Power Management', 'Διαχείριση συσκευών > Προσαρμογείς δικτύου > η κάρτα Wi-Fi > Διαχείριση ενέργειας');
+      if (RG.uiLanguage) row('Language', 'Windows language / system language', 'Γλώσσα Windows / γλώσσα συστήματος', RG.uiLanguage + ' / ' + (RG.systemLocale || '?'), RG.uiLanguage + ' / ' + (RG.systemLocale || '?'), 'ok', 'Settings > Time & language > Language & region', 'Ρυθμίσεις > Ώρα και γλώσσα > Γλώσσα και περιοχή');
+      if (arr(RG.inputLanguages).length) row('Language', 'Keyboard languages', 'Γλώσσες πληκτρολογίου', arr(RG.inputLanguages).join(', '), arr(RG.inputLanguages).join(', '), 'ok', 'Settings > Time & language > Typing > Advanced keyboard settings', 'Ρυθμίσεις > Ώρα και γλώσσα > Πληκτρολόγηση > Σύνθετες ρυθμίσεις πληκτρολογίου');
+      if (RG.tzAutoSet != null) row('Language', 'Time zone set automatically', 'Αυτόματη ρύθμιση ζώνης ώρας', RG.tzAutoSet ? 'yes' : 'no' + (RG.tzDst === false ? ' (no daylight saving here)' : ''), RG.tzAutoSet ? 'ναι' : 'όχι' + (RG.tzDst === false ? ' (χωρίς θερινή ώρα)' : ''), 'ok', 'Settings > Time & language > Date & time', 'Ρυθμίσεις > Ώρα και γλώσσα > Ημερομηνία και ώρα');
+      return r;
+    }
+    R(function () {
+      var w = wideApps(); if (!w.length) return null;
+      var caps = {}; w.forEach(function (x) { caps[x.cap] = 1; });
+      return F('priv-apps-wide', 'Privacy', w.length >= 3 ? 'low' : 'info', w.length + ' app permission' + (w.length > 1 ? 's give' : ' gives') + ' programs wide access to your data',
+        'Windows keeps a list of which apps may use your files, notifications, screen, contacts, e-mail, messages or call history. Some programs on this PC have such a permission. Many of them need it (a messaging app needs your notifications, a backup tool needs your files). But a program you no longer use, or do not recognise, should not keep a wide permission. This scan only read the list, it did not change anything.',
+        [S('Open the Privacy tab of this report and look at "What apps are allowed to use". It names the programs and when they last used each permission.'), S('Open Settings > Privacy & security. Click the permission you want to check (for example "File system" or "Notifications"). You see the list of apps and a switch for each.'), S('Switch off the ones you do not recognise or no longer use. If a program stops working, switch it back on. Nothing is lost.')],
+        w.slice(0, 12).map(function (x) { return x.app + ': ' + (WIDE[x.cap] ? WIDE[x.cap][0] : x.cap); }).join('\n'));
+    });
+    R(function () {
+      if (num(PV2.deliveryOptMode) !== 3 || PV2.deliveryOptMode == null) return null;
+      return F('priv-delivery', 'Privacy', 'low', 'Windows shares updates it downloaded with PCs on the internet',
+        'To speed up updates, Windows can hand pieces of the updates it downloaded to other people\'s PCs, and fetch pieces from them. On this PC the sharing reaches PCs anywhere on the internet. It uses a part of your internet upload and tells those PCs that yours is online. Sharing only inside your own home or office network is the safer choice. This scan only read the setting.',
+        [S('Press the Windows key, type Delivery Optimization settings and press Enter.'), S('Switch off "Allow downloads from other PCs", or if you want to keep it, choose "Devices on my local network".'), S('You do not need to restart. Updates keep working the same way.')],
+        'Delivery Optimization download mode: ' + PV2.deliveryOptMode + ' (3 = PCs on the internet)');
+    });
+    R(function () {
+      if (SIG.biometricDevice !== true || SIG.pinSet !== false) return null;
+      return F('priv-hello', 'Privacy', 'info', 'Windows Hello is possible on this PC but you sign in with a password only',
+        'This PC has a fingerprint or face sensor, but your sign-in does not use a PIN. A PIN or fingerprint stays on this PC and cannot be reused by a stranger on another website, while a password can be typed by anyone who watches you. It is also faster. This is only a suggestion. Nothing was changed.',
+        [S('Open Settings > Accounts > Sign-in options.'), S('Click "PIN (Windows Hello)" and follow the steps to set a PIN. Then set up the fingerprint or face option you see.'), S('Keep your password too. You need it if the sensor stops working.')],
+        'A fingerprint or face sensor was found. A PIN was not found for the user who ran this scan.');
+    });
+    R(function () {
+      var saverSafe = LKM.saverOn === 1 && LKM.saverSecure === 1 && num(LKM.saverSecs) > 0, pol = num(LKM.inactivitySecs) > 0;
+      var P = X5.power || {}; if (saverSafe || pol || P.acDisplayMin == null || P.acDisplayMin !== 0) return null;
+      return F('priv-idle-lock', 'Privacy', 'low', 'This PC never switches off the screen or locks itself when you walk away',
+        'If you leave the PC for a while, the screen stays on and nobody needs a password to use it. At home that is fine. In a shared home, an office or a clinic, a passer-by could read your mail or open your files. A short wait before the screen turns off and a password afterwards is the simple protection. This scan only read the settings.',
+        [S('Open Settings > System > Power & battery > Screen and sleep. Set "Turn off my screen after" to 10 minutes or less.'), S('Open Settings > Accounts > Sign-in options. Under "If you have been away, when should Windows require you to sign in again?" choose "Every time".'), S('You can lock the PC yourself at any time: hold the Windows key and press L.')],
+        'Screen turns off: never (plugged in). Screen saver with password: ' + (saverSafe ? 'yes' : 'no') + '. Company inactivity limit: ' + (pol ? LKM.inactivitySecs + ' s' : 'none') + '.');
+    });
+    R(function () {
+      var W = X5.wuSettings || {}; if (!W.pausedUntil) return null; var d = new Date(W.pausedUntil); if (isNaN(d.getTime()) || d.getTime() < Date.now()) return null;
+      return F('upd-paused', 'Updates', 'low', 'Windows updates are paused',
+        'Someone pressed "Pause updates" on this PC, so Windows is not installing new updates until the date shown. Updates also close security holes, so a long pause leaves the PC exposed. Sometimes a pause is useful, for example while you are travelling or in the middle of important work. This scan only read the setting.',
+        [S('Open Settings > Windows Update.'), S('Click "Resume updates".'), S('Click "Check for updates" and install what it offers.')],
+        'Paused until: ' + String(W.pausedUntil).slice(0, 10));
+    });
+    R(function () {
+      var N = X5.net || {}; if (!N.costType || N.costType === 'Unrestricted') return null;
+      return F('net-metered', 'Network', 'low', 'Your internet connection is set as "metered"',
+        'A metered connection tells Windows that your data is limited or costs money. Windows then holds back big downloads: updates, OneDrive syncing, app updates. If this is your normal home or office internet, the setting is probably a leftover and your PC is quietly missing updates. If you use a phone hotspot with a data limit, keep it on.',
+        [S('Open Settings > Network & internet > Wi-Fi (or Ethernet) and click the name of your network.'), S('Switch "Metered connection" to Off.'), S('Open Windows Update and click "Check for updates".')],
+        'Windows reports the connection cost as: ' + N.costType);
+    });
+    R(function () {
+      var N = X5.net || {}; if (N.dohServers == null || N.autoDoh === 2 || N.autoDoh === 3) return null;
+      return F('net-doh', 'Network', 'info', 'Your DNS lookups are not encrypted',
+        'Every time you open a website, your PC first asks a "phone book" server (DNS) for its address. Normally that question travels as plain text, so your internet provider and anyone on the same Wi-Fi can see which sites you visit. Windows 11 can encrypt it ("DNS over HTTPS"). It is a privacy choice, not a defect. This scan only read the setting.',
+        [S('Open Settings > Network & internet > Wi-Fi (or Ethernet) > your network > DNS server assignment > Edit.'), S('Choose Manual, switch on IPv4 and type 1.1.1.1 (or 8.8.8.8). Under "Preferred DNS encryption" choose "Encrypted only (DNS over HTTPS)". Click Save.'), S('If a website stops opening, go back and choose Automatic again.')],
+        'DNS over HTTPS (automatic mode): ' + (N.autoDoh == null ? 'not set' : N.autoDoh) + '. Known encrypted servers in Windows: ' + N.dohServers);
+    });
+    R(function () {
+      var W = arr((X5.net || {}).adapters).filter(function (a) { return a.kind === 'wifi' && a.allowOff === 'Enabled'; }); if (!W.length) return null;
+      var wifiTrouble = V_findingsNow().some(function (f) { return /^net-(wifi|gw|dns)$/.test(f.id); }); if (!wifiTrouble) return null;
+      return F('net-wifi-powersave', 'Network', 'info', 'Windows may switch off your Wi-Fi card to save power',
+        'Windows lets itself turn the Wi-Fi card off briefly to save energy. On some PCs this makes the internet drop or become slow for a moment, and this scan also saw network trouble. Turning the saving off is harmless: the PC uses a tiny bit more power.',
+        [S('Press the Windows key, type Device Manager and press Enter.'), S('Open "Network adapters", double-click your Wi-Fi card (the name has Wi-Fi, Wireless or 802.11).'), S('Click the "Power Management" tab and remove the tick from "Allow the computer to turn off this device to save power". Click OK.')],
+        'The Wi-Fi card is allowed to switch off to save power.');
+    });
+    R(function () {
+      var C = X5.storageCare || {}; if (C.defragTask !== 'Disabled') return null;
+      return F('sto-defrag', 'Storage', 'low', 'The automatic drive optimisation is switched off',
+        'Windows normally tidies your drives once a week by itself: it sends the "trim" command to an SSD and defragments a hard disk. On this PC that weekly task is disabled. Without it a hard disk slowly gets slower. On an SSD it matters less. This scan only read the setting.',
+        [S('Press the Windows key, type Defragment and Optimize Drives and press Enter.'), S('Click "Change settings" and tick "Run on a schedule (recommended)". Click OK.')],
+        'Scheduled task ScheduledDefrag is Disabled.');
+    });
+    R(function () {
+      var C = X5.storageCare || {}; if (C.senseOn == null || C.senseOn === 1) return null;
+      var cv = arr(D.volumes).filter(function (v) { return /^C:/i.test(v.letter); })[0]; if (!cv || !(num(cv.sizeGB) > 0) || num(cv.freeGB) / num(cv.sizeGB) >= 0.25) return null;
+      return F('sto-sense', 'Storage', 'info', 'Storage Sense is off and the C: drive is getting full',
+        'Storage Sense is a Windows helper that deletes temporary files and empties the Recycle Bin on its own. Your C: drive has less than a quarter free, and the helper is off. Turning it on is a safe way to win back some space without looking for files yourself. It never touches your documents.',
+        [S('Open Settings > System > Storage.'), S('Switch "Storage Sense" on and click it to choose how often it runs (for example every week).')],
+        'Storage Sense is off. Free space on C: ' + Math.round(num(cv.freeGB) / num(cv.sizeGB) * 100) + '%');
+    });
+    R(function () {
+      var VS = X5.visual || {}, ram = num(g(D, 'system.ram.totalGB', 0)); if (!(ram > 0 && ram <= 8) || VS.transparency !== 1) return null;
+      return F('perf-effects', 'Performance', 'info', 'Visual effects are on, and this PC has little memory',
+        'Transparency and animations make Windows prettier but use some memory and graphics power. With ' + Math.round(ram) + ' GB of memory every bit helps, and switching them off can make an older PC feel a little snappier. It changes only the looks, nothing is lost.',
+        [S('Open Settings > Personalization > Colors and switch "Transparency effects" off.'), S('Press the Windows key, type "Adjust the appearance and performance of Windows", press Enter and choose "Adjust for best performance", or leave only "Smooth edges of screen fonts" ticked. Click OK.')],
+        'Memory: ' + Math.round(ram) + ' GB. Transparency effects: on.');
     });
     /* 2.5.0: drive check flag, Secure Boot certificates, short security log (extras.more4, read-only) */
     var X4 = EX.more4 || {};
@@ -1980,7 +2134,7 @@ function Engine(RAW) {
         arr((sn[c] || {}).items).forEach(function (x) { if (x.classic && dAgo(x.last) <= 14 && oddPath(x.app.replace(/^([A-Za-z]):/, '$1:'))) hits.push(names[c] + ': ' + x.app + ' - ' + fmtDT(x.last)); });
       });
       if (!hits.length) return null;
-      return F('use-sensors', 'Security', 'low', hits.length + ' program' + (hits.length === 1 ? '' : 's') + ' from an unusual folder used your camera, microphone or location lately',
+      return F('use-sensors', 'Privacy', 'low', hits.length + ' program' + (hits.length === 1 ? '' : 's') + ' from an unusual folder used your camera, microphone or location lately',
         'Windows remembers which programs used your camera, microphone or location. These ones live in a folder where normal programs rarely are (Temp, AppData or a shared folder). That can be harmless (a portable tool you downloaded) but you should recognise them.',
         [S('Read the list under "Evidence". Do you know each program?'), S('If you do not, open Settings, Privacy & security, then Camera, Microphone or Location, and switch off the program.'), S('If you are unsure, send the report to your IT helper (Help & AI tab).')],
         hits.join('\n'));
@@ -2021,7 +2175,7 @@ function Engine(RAW) {
     function V_findingsNow() { return out; }
 
     // expose helpers that need the data and the findings of this scan
-    RT = { hardList: hardList, hardScore: hardScore, privList: privList, basicList: basicList, hwAge: hwAge, unusedApps: unusedApps, HCHK: HCHK };
+    RT = { privAll: privAll, settingsRows: settingsRows, wideApps: wideApps, hardList: hardList, hardScore: hardScore, privList: privList, basicList: basicList, hwAge: hwAge, unusedApps: unusedApps, HCHK: HCHK };
     out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });
     return out;
   }

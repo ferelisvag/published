@@ -402,7 +402,7 @@ var PRO = (function (V, AI) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'hq'; b.textContent = '?'; b.setAttribute('aria-label', I('What is this?', 'Τι είναι αυτό;')); b.title = I('What is this?', 'Τι είναι αυτό;');
       b.setAttribute('data-help', id); hd.insertBefore(b, hd.querySelector('.st'));
     });
-    insights(); if (typeof INV !== 'undefined') INV.render(); notices(); howFind();
+    insights(); if (typeof INV !== 'undefined') INV.render(); if (typeof PRIV !== 'undefined') PRIV.render(); notices(); howFind();
   }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.hq'); if (!b) return;

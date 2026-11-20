@@ -4,10 +4,10 @@ var VIZ2 = (function (V, UI) {
   var $ = V.$, $$ = V.$$, esc = V.esc, arr = V.arr, num = V.num, g = V.g, D = V.D;
   function I(en, el) { return V.I(en, el); }
   var COL = { red: '#e82c2d', amber: '#f5b44a', green: '#3ddc84', grey: '#8a8a94', white: '#ececf0' };
-  var AREA_EL = { Stability: 'Σταθερότητα', Storage: 'Αποθήκευση', Security: 'Ασφάλεια', Network: 'Δίκτυο', Backup: 'Αντίγραφα', Performance: 'Απόδοση', Updates: 'Ενημερώσεις', Software: 'Λογισμικό' };
+  var AREA_EL = { Stability: 'Σταθερότητα', Storage: 'Αποθήκευση', Security: 'Ασφάλεια', Network: 'Δίκτυο', Backup: 'Αντίγραφα', Performance: 'Απόδοση', Updates: 'Ενημερώσεις', Software: 'Λογισμικό', Privacy: 'Απόρρητο' };
   var AREA_HINT = {
     Stability: ['crashes and blue screens', 'κρασαρίσματα και μπλε οθόνες'], Storage: ['drives and free space', 'δίσκοι και ελεύθερος χώρος'], Security: ['antivirus, accounts, doors', 'antivirus, λογαριασμοί, πόρτες'],
-    Network: ['internet and Wi-Fi', 'internet και Wi-Fi'], Backup: ['copies of your files', 'αντίγραφα των αρχείων σου'], Performance: ['speed, heat, start-up', 'ταχύτητα, θερμοκρασία, εκκίνηση'], Updates: ['Windows and programs', 'Windows και προγράμματα'], Software: ['installed programs', 'εγκατεστημένα προγράμματα']
+    Network: ['internet and Wi-Fi', 'internet και Wi-Fi'], Backup: ['copies of your files', 'αντίγραφα των αρχείων σου'], Performance: ['speed, heat, start-up', 'ταχύτητα, θερμοκρασία, εκκίνηση'], Updates: ['Windows and programs', 'Windows και προγράμματα'], Software: ['installed programs', 'εγκατεστημένα προγράμματα'], Privacy: ['accounts, sign-in, apps', 'λογαριασμοί, είσοδος, εφαρμογές']
   };
   function areaName(a) { return I(a, AREA_EL[a] || a); }
   function worst(area) {
@@ -80,8 +80,8 @@ var VIZ2 = (function (V, UI) {
   /* ---------- Dashboard: the map of the PC ---------- */
   function pcMap() {
     var el = $('#pcMap'); if (!el) return;
-    var A = ['Stability', 'Storage', 'Security', 'Network', 'Backup', 'Performance', 'Updates', 'Software'];
-    var pos = [[110, 52], [370, 52], [630, 52], [890, 52], [110, 258], [370, 258], [630, 258], [890, 258]];
+    var A = ['Stability', 'Storage', 'Security', 'Privacy', 'Network', 'Backup', 'Performance', 'Updates', 'Software'];
+    var pos = [[100, 52], [300, 52], [500, 52], [700, 52], [900, 52], [150, 258], [350, 258], [650, 258], [850, 258]];
     var cx = 500, cy = 155, svg = '<svg viewBox="0 0 1000 310" class="pcmap" role="img" aria-label="' + esc(I('Map of your PC: each box is an area, the colour shows how it is doing', 'Χάρτης του υπολογιστή σου: κάθε κουτί είναι μια περιοχή, το χρώμα δείχνει πώς πάει')) + '">';
     svg += '<defs><linearGradient id="pmg" x1="0" x2="1"><stop offset="0" stop-color="#e82c2d" stop-opacity=".0"/><stop offset=".5" stop-color="#e82c2d" stop-opacity=".9"/><stop offset="1" stop-color="#e82c2d" stop-opacity=".0"/></linearGradient></defs>';
     A.forEach(function (a, i) {
@@ -92,10 +92,10 @@ var VIZ2 = (function (V, UI) {
     A.forEach(function (a, i) {
       var p = pos[i], w = worst(a), sc = areaScore(a), x = p[0], y = p[1];
       svg += '<g class="pmn" data-area="' + a + '" tabindex="0" role="button" aria-label="' + esc(areaName(a) + ' ' + sc) + '"><rect x="' + (x - 104) + '" y="' + (y - 40) + '" width="208" height="80" rx="6" fill="var(--panel)" stroke="' + w.col + '" stroke-width="2"/>' +
-        '<rect x="' + (x - 104) + '" y="' + (y - 40) + '" width="6" height="80" fill="' + w.col + '"/>' +
-        '<text x="' + (x - 88) + '" y="' + (y - 14) + '" class="pmt" fill="var(--text)">' + esc(areaName(a)) + '</text><text x="' + (x - 88) + '" y="' + (y + 4) + '" class="pms">' + esc((function (s) { return s.length > 27 ? s.slice(0, 26) + '…' : s; })(I(AREA_HINT[a][0], AREA_HINT[a][1]))) + '</text>' +
-        '<text x="' + (x + 94) + '" y="' + (y - 12) + '" text-anchor="end" class="pmv" fill="' + w.col + '">' + sc + '</text>' +
-        '<text x="' + (x - 88) + '" y="' + (y + 28) + '" class="pms" fill="' + w.col + '">' + (w.n ? (w.h ? w.h + ' ' + I('serious', 'σοβαρά') + ' ' : '') + (w.m ? w.m + ' ' + I('medium', 'μέτρια') + ' ' : '') + (w.l ? w.l + ' ' + I('small', 'μικρά') : '') : '&#10003; ' + I('all good', 'όλα καλά')) + '</text></g>';
+        '<rect x="' + (x - 94) + '" y="' + (y - 40) + '" width="6" height="80" fill="' + w.col + '"/>' +
+        '<text x="' + (x - 80) + '" y="' + (y - 14) + '" class="pmt" fill="var(--text)">' + esc(areaName(a)) + '</text><text x="' + (x - 80) + '" y="' + (y + 4) + '" class="pms">' + esc((function (s) { return s.length > 23 ? s.slice(0, 22) + '…' : s; })(I(AREA_HINT[a][0], AREA_HINT[a][1]))) + '</text>' +
+        '<text x="' + (x + 84) + '" y="' + (y - 12) + '" text-anchor="end" class="pmv" fill="' + w.col + '">' + sc + '</text>' +
+        '<text x="' + (x - 80) + '" y="' + (y + 28) + '" class="pms" fill="' + w.col + '">' + (w.n ? (w.h ? w.h + ' ' + I('serious', 'σοβαρά') + ' ' : '') + (w.m ? w.m + ' ' + I('medium', 'μέτρια') + ' ' : '') + (w.l ? w.l + ' ' + I('small', 'μικρά') : '') : '&#10003; ' + I('all good', 'όλα καλά')) + '</text></g>';
     });
     svg += '</svg>';
     el.innerHTML = '<div class="win"><header><span>pc.map</span><span class="st">' + esc(I('click a box to see its findings', 'πάτα ένα κουτί για τα ευρήματά του')) + '</span></header><div class="body">' + svg + '</div></div>';

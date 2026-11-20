@@ -79,6 +79,12 @@ var INV = (function (V, AI) {
     h += '<div class="s6">' + card(I('USB drives used in the past', 'USB δίσκοι που χρησιμοποιήθηκαν παλιότερα'), us.length + '', tbl([I('Name', 'Όνομα')], us.map(function (u) { return [u.name]; })) + '<div class="sub">' + LOCK() + '</div>') + '</div></div>';
     h += '<div class="win" style="margin-top:18px"><header><span>' + esc(I('Other devices this PC knows on your network', 'Άλλες συσκευές που γνωρίζει ο υπολογιστής στο δίκτυό σου')) + '</span><span class="st">' + nb.length + '</span></header><div class="body">' + tbl([I('Address', 'Διεύθυνση'), I('Hardware ID (MAC)', 'Αναγνωριστικό υλικού (MAC)'), I('State', 'Κατάσταση')], nb.map(function (n) { return [n.ip, n.mac, n.state]; })) +
       '<p class="sub" style="margin:8px 0 0">' + esc(I('This is only the list that the PC keeps in memory (the ARP cache). Nothing on the network was scanned. The first 6 characters of the MAC identify the maker of the device.', 'Είναι μόνο η λίστα που κρατά ο υπολογιστής στη μνήμη του (ARP cache). Δεν σαρώθηκε τίποτα στο δίκτυο. Οι πρώτοι 6 χαρακτήρες του MAC δείχνουν τον κατασκευαστή της συσκευής.')) + ' ' + LOCK() + '</p></div></div>';
+    var SR = (V.RT.settingsRows ? V.RT.settingsRows() : []);
+    if (SR.length) {
+      h += sect(I('Windows settings at a glance', 'Οι ρυθμίσεις των Windows με μια ματιά'), I('read only; nothing was changed. "Look" marks a value you may want to review.', 'μόνο ανάγνωση, τίποτα δεν άλλαξε. Το «Δες το» σημαίνει τιμή που ίσως θες να ελέγξεις.'));
+      h += '<div class="win"><div class="body"><div class="tbl"><table><thead><tr><th>' + esc(I('Group', 'Ομάδα')) + '</th><th>' + esc(I('Setting', 'Ρύθμιση')) + '</th><th>' + esc(I('Value', 'Τιμή')) + '</th><th>' + esc(I('Note', 'Σημείωση')) + '</th></tr></thead><tbody>' +
+        SR.map(function (r) { return '<tr><td class="muted">' + esc(r.grp) + '</td><td>' + esc(I(r.en, r.el)) + '</td><td>' + esc(I(r.ven, r.vel)) + (r.st === 'ok' ? '' : ' <span class="tag medium">' + esc(I('Look', 'Δες το')) + '</span>') + '</td><td class="muted">' + esc(I(r.hen, r.hel)) + '</td></tr>'; }).join('') + '</tbody></table></div></div></div>';
+    }
     el.innerHTML = h;
     var xb = $('#xlsBtn'); if (xb) xb.addEventListener('click', exportXlsx);
   }

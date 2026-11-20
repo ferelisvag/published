@@ -46,7 +46,7 @@
       if (e.target && /^(input|textarea)$/i.test(e.target.tagName)) return;
       if (e.key === '/') { e.preventDefault(); go('findings'); $('#findQ').focus(); }
     });
-    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (/^(summary|dashboard|findings|insights|inventory|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true); });
+    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (/^(summary|dashboard|findings|insights|privacy|inventory|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true); });
   }
 
   /* ---------- boot intro ---------- */
@@ -89,7 +89,7 @@
     })();
     wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init(); THEMES.init(); SIDE.init(); HELP.init();
     var h = location.hash.replace('#', '');
-    if (/^(summary|dashboard|findings|insights|inventory|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true);
+    if (/^(summary|dashboard|findings|insights|privacy|inventory|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true);
     var dm = g(D, 'meta.isAdmin', true) === false; if (dm) { var chip = document.createElement('span'); chip.className = 'chip warn'; chip.textContent = 'not run as admin: partial'; $('.topright').insertBefore(chip, $('#btnPrint')); }
     if (g(D, 'meta.mode', 'full') === 'quick') { var qc = document.createElement('span'); qc.className = 'chip warn'; qc.textContent = 'quick scan'; $('.topright').insertBefore(qc, $('#btnShare')); }
     if (g(D, 'meta.shareSafe', false)) { var sc = document.createElement('span'); sc.className = 'chip'; sc.textContent = 'share-safe copy: personal details removed'; $('.topright').insertBefore(sc, $('#btnShare')); var sb = $('#btnShare'); if (sb) sb.style.display = 'none'; }

@@ -216,6 +216,7 @@ var INV = (function (V, AI) {
           tbl([I('Network', 'Δίκτυο'), I('Times', 'Φορές'), I('Last', 'Τελευταία'), I('Type', 'Τύπος')], nets.map(function (x) { return [x.name, x.count, when(x.last), String(x.category) === '0' ? I('public', 'δημόσιο') : (String(x.category) === '2' ? I('domain', 'domain') : I('private', 'ιδιωτικό'))]; })) + '</div></div>';
       }
     }
+    if (typeof V3 !== 'undefined') h += V3.insightsHtml();
     h += '</div>';
     el.insertAdjacentHTML('beforeend', h);
   }

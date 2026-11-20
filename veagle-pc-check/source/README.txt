@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.6.1
+VEAGLE PC CHECK  v2.7.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,15 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 2.7.0
+- Start-up programs: every program registered to start with Windows is listed, and the ones that are really active (running now) are marked. Others are shown as "allowed, not running" or "switched off in Windows".
+- The drive errors are matched to the disk they came from, so a virtual or USB disk is no longer mistaken for a failing internal drive. Network ports: who holds the most connections.
+- Privacy page: your browsers (Chrome, Edge, Brave, Firefox: only on/off switches), which programs talk to the internet and who made them, saved Wi-Fi networks.
+- Unsigned downloads get a button that opens VirusTotal (only when you click; the fingerprint of the file is asked, the file is not uploaded).
+- Tools: a script to update your programs with winget. Every line starts switched off.
+- Checks at a glance: Windows protection (core isolation, Defender extras), gaming settings, Desktop and Downloads size.
+- The scan now has 25 steps. These new checks have not been tried on every Windows version yet.
 
 NEW IN 2.6.1
 - Fix: a Microsoft account is no longer reported as "allowed to have no password" (it signs in with your Microsoft password or PIN). App names on the Privacy page are shorter and clearer.

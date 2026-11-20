@@ -58,7 +58,7 @@ outdated = [
 ] + [('Sample app %d'%i,'Vendor.App%d'%i,'1.%d'%i,'2.%d'%i,'winget') for i in range(17)]
 startup_names = ['GoogleDriveFS','OneDrive','Discord','EpicGamesLauncher','CCXProcess','BraveSoftware Update','Adobe Acrobat Synchronizer','Agent Tray','ACDSeeCommanderFree','Wargaming.net Game Center','Studio.QuickLook','EADM','FilmoraTray','NVIDIA Broadcast','GogGalaxy','MicrosoftEdgeAutoLaunch','AnyDesk','SecurityHealth','RtkAudUService','SteelSeriesGG','Bdagent','ACFW02EN','BdVpnApp','Steam','Viber','Spotify','Zoom','Dropbox']
 data = {
- 'meta': dict(mode='full', tool='VEAGLE PC Check', version='2.6.1', generated=iso(now), isAdmin=True, psVersion='5.1.26100.9549', user='demo', computer='DEMO-PC', domain='DEMO-PC', durationSec=214, warnings=['winget: first run may be slow']),
+ 'meta': dict(mode='full', tool='VEAGLE PC Check', version='2.7.0', generated=iso(now), isAdmin=True, psVersion='5.1.26100.9549', user='demo', computer='DEMO-PC', domain='DEMO-PC', durationSec=214, warnings=['winget: first run may be slow']),
  'system': dict(manufacturer='Gigabyte Technology Co., Ltd.', model='Z590 AORUS PRO AX', chassis='Desktop', isLaptop=False, firmware='UEFI',
    board=dict(manufacturer='Gigabyte Technology Co., Ltd.', product='Z590 AORUS PRO AX'),
    bios=dict(vendor='American Megatrends International, LLC.', version='ALASKA - 1072009', date='2025-06-10T00:00:00', smbios='3.4'),
@@ -329,6 +329,22 @@ data['trend'] = SAMPLE_TREND
 _addwin(data)
 for v in data['network']['adapters']:
     if not v.get('virtual') and 'ethernet' in (v['name'] + v['description']).lower(): v['linkSpeed'] = '100 Mbps'
+data['extras']['more6'] = dict(
+    startup=[dict(name=x['name'], scope='user', enabled=(i % 4 != 3), running=(i % 3 != 2), proc=x['name'].lower(), hasCmd=True) for i, x in enumerate(data['startup']['items'])],
+    browserPrivacy=[dict(browser='Chrome', engine='chromium', signedIn=True, dnt=False, safe=True, enhanced=False, passwords=True, cookies3p=2, suggest=True, doh='automatic'),
+                    dict(browser='Edge', engine='chromium', signedIn=False, dnt=False, safe=True, enhanced=False, passwords=True, cookies3p=0, suggest=True, doh='off'),
+                    dict(browser='Firefox', engine='gecko', dnt=False, tracking=True, blockLevel='standard', telemetry=True, doh='0')],
+    ports=dict(tcpTotal=412, states=dict(Established=96, TimeWait=233, Listen=44), top=[dict(process='chrome', n=88), dict(process='vmware-vmx', n=54)], udpTotal=120, udpTop=[dict(process='svchost', n=40)], dynStart=49152, dynNum=16384),
+    connOwners=[dict(process='chrome', company='Google LLC', product='Google Chrome'), dict(process='Teams', company='Microsoft Corporation', product='Microsoft Teams'), dict(process='OneDrive', company='Microsoft Corporation', product='Microsoft OneDrive')],
+    diskMap=[dict(number=0, name='Samsung SSD 860 EVO 1TB', bus='SATA', sizeGB=932, offline=False, style='GPT'), dict(number=1, name='Msft Virtual Disk', bus='File Backed Virtual', sizeGB=64, offline=False, style='GPT')])
+data['extras']['more7'] = dict(
+    defenderExtra=dict(controlledFolders=0, networkProtection=0, asrRules=0, pua=1, cloud=2, sampleConsent=1),
+    mouse=dict(speed=1, sensitivity=10),
+    folders=dict(desktop=dict(items=38, files=30, mb=420, old=12), downloads=dict(items=210, files=190, mb=24800, old=140)),
+    hiberfilMB=12800)
+for _d in data['extras']['forensics']['downloads']:
+    _d['sha256'] = ''
+data['extras']['forensics']['downloads'].append(dict(name='setup_tool.exe', folder='Downloads', t=iso(now - datetime.timedelta(days=2)), sizeKB=3100, zone=3, host='example-files.net', sig='NotSigned', signer='', sha256='A' * 64))
 data['extras']['more5'] = dict(
     power=dict(acDisplayMin=10, dcDisplayMin=5, acSleepMin=0, dcSleepMin=15),
     signIn=dict(msAccounts=1, localAccounts=1, pinSet=True, biometricDevice=False, hello=False),

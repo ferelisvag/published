@@ -237,7 +237,7 @@ function Engine(RAW) {
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe'],
     'win-ready-11': [10, 'Medium', 'Safe'], 'cfg-tasks-unusual': [15, 'Medium', 'Safe'], 'sec-svc-path': [15, 'Medium', 'Safe'], 'sec-svc-unquoted': [2, 'Ask a pro', 'Safe'], 'stab-memdiag': [60, 'Medium', 'Back up first'], 'stab-sfc': [40, 'Medium', 'Safe'], 'prn-stuck': [5, 'Easy', 'Safe'], 'soft-runtime-eol': [10, 'Medium', 'Safe'],
     'sto-dirty': [15, 'Easy', 'Back up first'],
-    'priv-apps-wide': [10, 'Easy', 'Safe'], 'priv-delivery': [3, 'Easy', 'Safe'], 'priv-hello': [5, 'Easy', 'Safe'], 'priv-idle-lock': [5, 'Easy', 'Safe'], 'upd-paused': [2, 'Easy', 'Safe'], 'net-metered': [2, 'Easy', 'Safe'], 'net-doh': [5, 'Medium', 'Safe'], 'net-wifi-powersave': [3, 'Medium', 'Safe'], 'sto-defrag': [2, 'Easy', 'Safe'], 'sto-sense': [2, 'Easy', 'Safe'], 'perf-effects': [3, 'Easy', 'Safe'], 'sec-sb-cert': [30, 'Medium', 'Safe'], 'for-log-short': [5, 'Medium', 'Safe'],
+    'priv-apps-wide': [10, 'Easy', 'Safe'], 'priv-delivery': [3, 'Easy', 'Safe'], 'priv-hello': [5, 'Easy', 'Safe'], 'priv-idle-lock': [5, 'Easy', 'Safe'], 'upd-paused': [2, 'Easy', 'Safe'], 'net-metered': [2, 'Easy', 'Safe'], 'net-doh': [5, 'Medium', 'Safe'], 'net-wifi-powersave': [3, 'Medium', 'Safe'], 'sto-defrag': [2, 'Easy', 'Safe'], 'sto-sense': [2, 'Easy', 'Safe'], 'perf-effects': [3, 'Easy', 'Safe'], 'stab-disk-where': [5, 'Easy', 'Safe'], 'net-ports-who': [5, 'Medium', 'Safe'], 'priv-browser': [3, 'Easy', 'Safe'], 'sec-sb-cert': [30, 'Medium', 'Safe'], 'for-log-short': [5, 'Medium', 'Safe'],
     'for-logon-brute': [20, 'Medium', 'Safe'], 'for-logon-remote': [20, 'Ask a pro', 'Safe'], 'for-audit-off': [5, 'Medium', 'Safe'], 'for-log-cleared': [15, 'Ask a pro', 'Safe'], 'for-acct-new': [10, 'Medium', 'Safe'], 'for-svc-new': [15, 'Medium', 'Safe'], 'for-time-changed': [5, 'Easy', 'Safe'], 'for-run-tools': [20, 'Ask a pro', 'Safe'], 'for-run-odd': [15, 'Medium', 'Safe'], 'for-downloads': [10, 'Easy', 'Safe'], 'for-def-excl': [10, 'Medium', 'Safe'], 'for-def-off': [5, 'Easy', 'Safe'], 'for-def-caught': [10, 'Easy', 'Safe'], 'for-fw-rules': [15, 'Medium', 'Safe'], 'for-shares-open': [10, 'Medium', 'Safe'], 'for-access-backdoor': [40, 'Ask a pro', 'Back up first'], 'for-startup-folder': [5, 'Easy', 'Safe'], 'for-ps-suspicious': [20, 'Ask a pro', 'Safe'], 'for-ps-logging': [5, 'Medium', 'Safe'], 'for-wifi-open': [5, 'Easy', 'Safe'], 'for-listen-risky': [15, 'Ask a pro', 'Safe'], 'use-sensors': [10, 'Easy', 'Safe'], 'dev-peripheral-problem': [15, 'Medium', 'Safe']
   };
   var PROFILES = {
@@ -336,6 +336,8 @@ function Engine(RAW) {
       var age = lastAge('system', /^(disk|Ntfs|stornvme|storahci|volmgr|iaStor.*|nvme)$/i, [7, 11, 15, 51, 55, 98, 129, 153, 157]);
       var sev = n >= 10 ? 'high' : (n >= 3 ? 'medium' : 'low');
       if (age != null && age > 14) sev = down(sev);
+      var DT = diskTargets();
+      if (DT.rows.length && DT.rows.every(function (r) { return r.kind === 'virtual' || r.kind === 'gone'; }) && !DT.unnumbered) sev = 'low';
       return F('stab-disk', 'Stability', sev, 'Drive or file system errors (' + n + (age != null && age > 14 ? ', last ' + age + ' days ago' : '') + ')',
         'Windows logged read/write retries or file system problems. A few can come from a USB or virtual disk; many point to a failing drive or cable.',
         [S('Back up important data first.'),
@@ -667,10 +669,12 @@ function Engine(RAW) {
     });
     R(function () {
       var items = uniq(arr(g(D, 'startup.items', [])).map(function (s) { return s.name; }));
-      var n = items.length;
+      var SS = startupState(), act = SS.known ? SS.list.filter(function (x) { return x.state === 'active'; }) : [];
+      var on = SS.known ? SS.list.filter(function (x) { return x.state !== 'off'; }) : [];
+      var n = SS.known ? on.length : items.length;
       if (n < 15) return null;
-      var heavy = items.filter(function (x) { return RE.launcher.test(x); });
-      return F('perf-startup', 'Performance', n >= 25 ? 'medium' : 'low', n + ' programs start with Windows',
+      var heavy = (SS.known ? on.map(function (x) { return x.name; }) : items).filter(function (x) { return RE.launcher.test(x); });
+      return F('perf-startup', 'Performance', n >= 25 ? 'medium' : 'low', n + ' programs start with Windows' + (SS.known ? ' (' + act.length + ' running now)' : ''),
         'Each one uses memory, CPU and disk during startup, and most keep running in the background.',
         [S('Open Task Manager, Startup apps (Ctrl+Shift+Esc) and disable what you do not need at login: game launchers, updaters and chat apps are the usual suspects.', 'taskmgr.exe /0 /startup'),
          S('Programs still work. They simply do not start before you open them.')],
@@ -2173,10 +2177,87 @@ function Engine(RAW) {
         grp('Updates', 'Ενημερώσεις', 'Windows, Office and programs kept up to date', 'Windows, Office και προγράμματα ενημερωμένα', ['upd-patch', 'upd-fail', 'upd-off', 'upd-apps', 'win-eol', 'win-eol-11', 'soft-office-eol', 'sec-browser-old'])
       ];
     }
+
+    /* 2.7.0: what really starts with Windows, what the drive errors point to, who holds the ports, browser privacy */
+    var M6 = EX.more6 || {};
+    function startupState() {
+      var M6 = EX.more6 || {};
+      var st = arr(M6.startup);
+      var base = arr(g(D, 'startup.items', []));
+      if (!st.length) return base.length ? { known: false, list: uniq(base.map(function (x) { return x.name; })).map(function (n) { return { name: n, state: 'unknown', scope: '', launcher: RE.launcher.test(n) }; }) } : { known: false, list: [] };
+      var seen = {}, list = [];
+      st.forEach(function (x) {
+        var k = String(x.name).toLowerCase() + '|' + x.scope; if (seen[k]) return; seen[k] = 1;
+        var state = !x.enabled ? 'off' : (x.running ? 'active' : (x.hasCmd === false ? 'unknown' : 'idle'));
+        list.push({ name: x.name, state: state, scope: x.scope, proc: x.proc, launcher: RE.launcher.test(x.name) });
+      });
+      list.sort(function (a, b) { var o = { active: 0, idle: 1, unknown: 2, off: 3 }; return (o[a.state] - o[b.state]) || String(a.name).localeCompare(String(b.name)); });
+      return { known: true, list: list };
+    }
+    function diskTargets() {
+      var M6 = EX.more6 || {}, DISKEV = /^(disk|Ntfs|stornvme|storahci|volmgr|iaStor.*|nvme)$/i, DISKIDS = [7, 11, 15, 51, 55, 98, 129, 153, 157, 158];
+      var by = {}, total = 0, unnumbered = 0;
+      arr(g(D, 'events.system.groups', [])).forEach(function (gr) {
+        if (!DISKEV.test(String(gr.provider)) || DISKIDS.indexOf(Number(gr.id)) < 0) return;
+        var c = num(gr.count); total += c;
+        var m = /(?:Harddisk|Disk)\s*(\d+)/i.exec(String(gr.sample || ''));
+        if (m) by[m[1]] = (by[m[1]] || 0) + c; else unnumbered += c;
+      });
+      var dm = arr(M6.diskMap), disks = arr(g(D, 'disks', []));
+      var virt = function (d) { return /virtual|file backed/i.test(String(d.bus || '') + ' ' + String(d.name || d.mediaType || '') + ' ' + String(d.busType || '')); };
+      var rows = Object.keys(by).map(function (n) {
+        var d = dm.filter(function (x) { return String(x.number) === n; })[0];
+        var kind = 'unknown', label = '';
+        if (d) { kind = virt(d) ? 'virtual' : (/usb/i.test(d.bus) ? 'usb' : 'physical'); label = d.name + ' (' + d.bus + ', ' + d.sizeGB + ' GB)'; }
+        else if (dm.length) { kind = 'gone'; label = ''; }
+        return { number: n, count: by[n], kind: kind, label: label };
+      });
+      var virtPresent = dm.length ? dm.some(virt) : disks.some(virt);
+      return { total: total, rows: rows, unnumbered: unnumbered, virtPresent: virtPresent, haveMap: dm.length > 0 };
+    }
+    function browserPriv() { return arr((EX.more6 || {}).browserPrivacy); }
+    R(function () {
+      var T = diskTargets(); if (T.total < 1 || !T.rows.length) return null;
+      var nums = T.rows.map(function (r) { return 'Disk ' + r.number + ' (' + r.count + ')'; }).join(', ');
+      var phys = arr(g(D, 'disks', [])).filter(function (d) { return !/virtual/i.test(String(d.name)); });
+      var healthy = phys.length && phys.every(function (d) { return /healthy/i.test(String(d.health)) && num(g(d, 'reliability.readErrors', 0)) === 0; });
+      var allOdd = T.rows.every(function (r) { return r.kind === 'virtual' || r.kind === 'gone' || r.kind === 'usb' || r.kind === 'unknown'; });
+      var line = T.rows.map(function (r) { return 'Disk ' + r.number + ': ' + (r.kind === 'virtual' ? 'virtual disk, ' : (r.kind === 'gone' ? 'not connected now, ' : (r.kind === 'usb' ? 'USB drive, ' : (r.kind === 'physical' ? 'physical drive, ' : '')))) + (r.label || (T.virtPresent && !T.haveMap ? 'a virtual disk is present on this PC' : '')); }).join(' | ');
+      return F('stab-disk-where', 'Stability', 'info', 'The drive errors point to ' + (allOdd && T.virtPresent ? 'a virtual or removable disk' : 'specific disks') + ' (' + nums + ')',
+        'The Windows log names the disk number each error came from. This page matches those numbers with the drives that are in this PC. ' + (allOdd && T.virtPresent ? 'The errors are about a disk that is virtual or not always connected (for example a virtual machine disk, a mounted disk image or a USB drive), not about your internal drives. Your internal drives report ' + (healthy ? 'good health with no read errors.' : 'their own status in the Hardware tab.') : 'Check the Hardware tab for the drive health of those disks.'),
+        [S('Open Disk Management to see which disk is "Disk ' + T.rows[0].number + '" (press the Windows key, type "Create and format hard disk partitions", press Enter). Look at the numbers on the left. Nothing changes if you only look.'),
+         S('If it is a virtual disk or a disk image (VMware, Hyper-V, Windows Sandbox, a .vhd or .vhdx file), detach it when you are not using it: right-click it in Disk Management and choose Detach VHD.'),
+         S('If it is a USB drive, try another cable or port, and back up what is on it.')],
+        line + (T.unnumbered ? ' | ' + T.unnumbered + ' events had no disk number' : ''));
+    });
+    R(function () {
+      var P = (EX.more6 || {}).ports || {}; var n = evCount('system', /Tcpip/, [4266, 4231]);
+      if (n < 1 || P.tcpTotal == null) return null;
+      var top = arr(P.top).filter(function (x) { return x.process; });
+      var tw = num(g(P, 'states.TimeWait', 0));
+      var range = P.dynNum ? P.dynNum : null;
+      var vpn = arr(g(D, 'extras.more2.vpn', [])).length;
+      var virtNics = arr(g(D, 'network.adapters', [])).filter(function (a) { return /vmware|virtualbox|hyper-v|vethernet|wireguard|tap-|openvpn/i.test(String(a.name || a.description || '')); }).length;
+      return F('net-ports-who', 'Network', 'info', 'Who holds your network connections (' + (top[0] ? top[0].process : 'program names') + ' had the most when scanned)',
+        'Windows ran out of free "doors" (ports) ' + n + ' times lately. The scan counted the connections open at the moment it ran: ' + P.tcpTotal + ' in total, ' + tw + ' of them waiting to close. A program that opens connections and never closes them is the usual cause, and VPNs and virtual machines that share your connection make it more likely.',
+        [S('See which program holds the most connections right now (it only reads).', 'Get-NetTCPConnection | Group-Object OwningProcess | Sort-Object Count -Descending | Select-Object -First 5 Count, @{n=\'Process\';e={(Get-Process -Id $_.Name -ErrorAction SilentlyContinue).ProcessName}}'),
+         S('Restart or update the programs at the top of the list, then check the VPN clients and virtual machines. A browser with very many tabs can also do this.'),
+         S('Only if it keeps happening: a technician can widen the range of ports Windows may use. This is a system change, so ask first.')],
+        'Open connections at scan time: ' + P.tcpTotal + ' (waiting to close: ' + tw + '). Ports Windows may use: ' + (range == null ? 'unknown' : range) + '. Top programs: ' + top.map(function (x) { return x.process + ' ' + x.n; }).join(', ') + '. VPN or virtual network cards: ' + (virtNics + vpn) + '.');
+    });
+    R(function () {
+      var bs = browserPriv(); if (!bs.length) return null;
+      var bad = bs.filter(function (b) { return b.safe === false; });
+      if (!bad.length) return null;
+      return F('priv-browser', 'Privacy', 'low', 'Safe Browsing is switched off in ' + bad.map(function (b) { return b.browser; }).join(', '),
+        'Safe Browsing warns you before you open a dangerous site or download. It checks addresses against a list; with the standard setting it does not send your browsing history. If it is off on purpose, ignore this.',
+        [S('Open the browser, then Settings > Privacy and security > Security (Chrome and Brave) or Privacy, search, and services > Security (Edge), and choose Standard protection.')],
+        bad.map(function (b) { return b.browser + ': Safe Browsing off'; }).join('; '));
+    });
     function V_findingsNow() { return out; }
 
     // expose helpers that need the data and the findings of this scan
-    RT = { privAll: privAll, settingsRows: settingsRows, wideApps: wideApps, hardList: hardList, hardScore: hardScore, privList: privList, basicList: basicList, hwAge: hwAge, unusedApps: unusedApps, HCHK: HCHK };
+    RT = { startupState: startupState, diskTargets: diskTargets, browserPriv: browserPriv, privAll: privAll, settingsRows: settingsRows, wideApps: wideApps, hardList: hardList, hardScore: hardScore, privList: privList, basicList: basicList, hwAge: hwAge, unusedApps: unusedApps, HCHK: HCHK };
     out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });
     return out;
   }

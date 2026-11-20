@@ -41,7 +41,7 @@ var SHARE = (function (V, AI) {
         (fx.servicesNew || []).forEach(function (x) { x.path = x.path ? '<PATH>' : ''; x.account = /^(localsystem|nt |local service|network service)/i.test(String(x.account || '')) ? x.account : '<ACCOUNT>'; });
         (fx.bam || []).forEach(function (x) { x.path = String(x.path || '').replace(/\\Users\\[^\\]+\\/i, '\\Users\\<user>\\'); });
         ((fx.shimcache || {}).sus || []).forEach(function (x) { x.path = String(x.path || '').replace(/\\Users\\[^\\]+\\/i, '\\Users\\<user>\\'); });
-        (fx.downloads || []).forEach(function (x, i) { x.name = '<FILE ' + (i + 1) + '>' + (/\.[A-Za-z0-9]{2,5}$/.exec(x.name) || [''])[0]; x.host = x.host ? '<SITE>' : ''; x.signer = x.signer ? '<SIGNER>' : ''; });
+        (fx.downloads || []).forEach(function (x, i) { x.name = '<FILE ' + (i + 1) + '>' + (/\.[A-Za-z0-9]{2,5}$/.exec(x.name) || [''])[0]; x.host = x.host ? '<SITE>' : ''; x.sha256 = x.sha256 ? '<HASH>' : ''; x.signer = x.signer ? '<SIGNER>' : ''; });
         var dfx = fx.defender || {};
         dfx.exclPaths = (dfx.exclPaths || []).map(function (x, i) { return '<PATH ' + (i + 1) + '>'; });
         dfx.exclProcs = (dfx.exclProcs || []).map(function (x, i) { return '<PROGRAM ' + (i + 1) + '>'; });

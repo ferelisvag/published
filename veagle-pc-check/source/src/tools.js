@@ -91,6 +91,38 @@ var TOOLS = (function (V, AI, CMP) {
     return ascii(L.join('\r\n'));
   }
 
+  function wingetScript() {
+    var o = arr(g(D, 'apps.outdated', []));
+    var L = [];
+    L.push('# VEAGLE PC Check - program update script for ' + g(D, 'meta.computer', 'this PC'));
+    L.push('# Made ' + new Date().toISOString().slice(0, 10) + ' from your scan. Nothing in this file runs yet.');
+    L.push('#');
+    L.push('# EVERY command below is switched OFF (it starts with "# ").');
+    L.push('# HOW TO USE IT:');
+    L.push('#  1. Read the list. Skip anything you do not use or do not want to change.');
+    L.push('#  2. To switch a line ON, delete the "# " in front of it.');
+    L.push('#  3. Press the Windows key, type PowerShell, right-click it, choose Run as administrator.');
+    L.push('#  4. Type:  Set-ExecutionPolicy -Scope Process Bypass   and press Enter (this only lasts for this window).');
+    L.push('#  5. Type the path of this file, for example  & "C:\\Users\\You\\Downloads\\veagle-update-script.ps1"');
+    L.push('#');
+    L.push('# Close the programs first. Each update may ask you to confirm. A few updates need a restart.');
+    L.push('# Note: "winget upgrade" installs the newest version the maker published. If a program stops working, install the old one again from its maker.');
+    L.push('');
+    if (!o.length) { L.push('# No program with an available update was found in this scan.'); return ascii(L.join('\r\n')); }
+    var sec = /vcredist|redistributable|\.net|powershell|windowsdesktop|adobe|acrobat|anydesk|openvpn|notepad\+\+|github|chrome|firefox|brave|edge|7-zip|winrar|vlc|java|openssl|python|steam/i;
+    var first = o.filter(function (x) { return sec.test(String(x.id) + ' ' + String(x.name)); }), rest = o.filter(function (x) { return first.indexOf(x) < 0; });
+    function line(x) {
+      var src = /msstore/i.test(String(x.source)) ? ' --source msstore' : '';
+      L.push('# ' + x.name + ': ' + x.version + ' -> ' + x.available);
+      L.push('# winget upgrade --id "' + x.id + '" --exact' + src + ' --accept-package-agreements --accept-source-agreements');
+    }
+    if (first.length) { L.push('# ' + new Array(60).join('=')); L.push('# Programs that are often attack targets or runtimes other programs need (do these first)'); first.forEach(line); L.push(''); }
+    if (rest.length) { L.push('# ' + new Array(60).join('=')); L.push('# Everything else'); rest.forEach(line); L.push(''); }
+    L.push('# ' + new Array(60).join('='));
+    L.push('# To update everything at once (only if you are sure): winget upgrade --all');
+    return ascii(L.join('\r\n'));
+  }
+
   function csvCell(v) { v = String(v == null ? '' : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
   function findingsCsv() {
     var rows = [['No', 'Severity', 'Area', 'Title', 'Why', 'Evidence', 'Steps', 'Minutes', 'Difficulty', 'Risk']];
@@ -187,6 +219,11 @@ var TOOLS = (function (V, AI, CMP) {
       '</div><p class="sub" id="profileNote" style="margin-top:10px">' + esc(V.PROFILES[V.profile].note) + '</p></div></div>';
 
     if (V.readiness && V.readiness.rows.length && !V.readiness.alreadyWin11) { h += sect(I('Moving from Windows 10 to Windows 11', 'Μετάβαση από Windows 10 σε Windows 11'), I('what to do for your PC', 'τι να κάνεις για τον δικό σου υπολογιστή')); h += box('windows11_guide.txt', V.readiness.verdict, VIZ.win11Html()); }
+    if (arr(g(D, 'apps.outdated', [])).length) {
+      h += sect(I('Update your programs', 'Ενημέρωσε τα προγράμματά σου'), I('a script you read first; every command stays switched off', 'ένα script που διαβάζεις πρώτα· κάθε εντολή μένει κλειστή'));
+      h += box('veagle-update-script.ps1', I('safe by design', 'ασφαλές εκ σχεδιασμού'), '<p class="sub">' + I('The programs that have a newer version, with the winget command for each. <b>Nothing runs by itself:</b> every line starts switched off and you switch on only what you want.', 'Τα προγράμματα που έχουν νεότερη έκδοση, με την εντολή winget για το καθένα. <b>Τίποτα δεν τρέχει μόνο του:</b> κάθε γραμμή ξεκινά κλειστή και ανοίγεις μόνο όσες θέλεις.') + '</p>' +
+        '<textarea id="wgText" class="mono" rows="10" readonly style="width:100%;margin-top:10px"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="wgCopy">' + I('Copy', 'Αντιγραφή') + '</button><button class="btn sm" type="button" id="wgSave">' + I('Save as file', 'Αποθήκευση ως αρχείο') + '</button></div>');
+    }
     h += sect(I('Message for someone who helps you', 'Μήνυμα για κάποιον που σε βοηθά'), I('copy and paste into an email or ticket', 'αντίγραψε και επικόλλησε σε email ή ticket'));
     h += box('ticket.txt', I('short summary', 'σύντομη σύνοψη'), '<textarea id="ticketText" class="mono" rows="12" readonly style="width:100%"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="tkCopy">' + I('Copy summary', 'Αντιγραφή σύνοψης') + '</button></div><p class="sub" style="margin-top:8px">' + I('It contains the PC name. Remove that line if you do not want to share it.', 'Περιέχει το όνομα του PC. Σβήσε αυτή τη γραμμή αν δεν θέλεις να το μοιραστείς.') + '</p>');
 
@@ -229,6 +266,7 @@ var TOOLS = (function (V, AI, CMP) {
   function refreshTexts() {
     var a = $('#ticketText'); if (a) a.value = ticket();
     var b = $('#fixText'); if (b) b.value = fixScript();
+    var wg = $('#wgText'); if (wg) wg.value = wingetScript();
     var root = g(D, 'meta.root', '') || 'C:\\path\\to\\VEAGLE-PC-Check';
     var rq = String(root).replace(/'/g, "''");
     var on = $('#schOn'); if (on) on.value = "$a = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File \"" + rq + "\\app\\collector.ps1\" -Quick -NoOpen'\r\n$t = New-ScheduledTaskTrigger -Weekly -WeeksInterval 4 -DaysOfWeek Sunday -At 8pm\r\n$s = New-ScheduledTaskSettingsSet -StartWhenAvailable\r\nRegister-ScheduledTask -TaskName 'VEAGLE PC Check monthly' -Action $a -Trigger $t -Settings $s -RunLevel Highest -Description 'Quick read-only PC health scan (VEAGLE PC Check)'";
@@ -242,6 +280,8 @@ var TOOLS = (function (V, AI, CMP) {
     function on(id, fn) { var el = $(id); if (el) el.addEventListener('click', fn); }
     on('#tkCopy', function () { AI.toast(AI.copyText($('#ticketText').value) ? 'Summary copied.' : 'Copy failed. Select the text and press Ctrl+C.'); });
     on('#fxCopy', function () { AI.toast(AI.copyText($('#fixText').value) ? 'Fix script copied.' : 'Copy failed. Select the text and press Ctrl+C.'); });
+    on('#wgCopy', function () { AI.toast(AI.copyText($('#wgText').value) ? 'Update script copied.' : 'Copy failed. Select the text and press Ctrl+C.'); });
+    on('#wgSave', function () { saveFile('veagle-update-script.ps1', $('#wgText').value, 'text/plain', true); AI.toast('Saved veagle-update-script.ps1. All commands inside are switched off.'); });
     on('#fxSave', function () { saveFile('veagle-fix-script.ps1', $('#fixText').value, 'text/plain', true); AI.toast('Saved veagle-fix-script.ps1. All commands inside are switched off.'); });
     on('#schOnCopy', function () { AI.toast(AI.copyText($('#schOn').value) ? 'Copied. Paste it into PowerShell (as administrator).' : 'Copy failed.'); });
     on('#schOffCopy', function () { AI.toast(AI.copyText($('#schOff').value) ? 'Copied. Paste it into PowerShell (as administrator).' : 'Copy failed.'); });

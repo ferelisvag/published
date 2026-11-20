@@ -1224,7 +1224,7 @@ function Engine(RAW) {
     'win-eol': [60, 'Medium', 'Back up first'], 'bat-wear': [10, 'Easy', 'Safe'], 'scan-quick': [5, 'Easy', 'Safe'],
     'win-ready-11': [10, 'Medium', 'Safe'], 'cfg-tasks-unusual': [15, 'Medium', 'Safe'], 'sec-svc-path': [15, 'Medium', 'Safe'], 'sec-svc-unquoted': [2, 'Ask a pro', 'Safe'], 'stab-memdiag': [60, 'Medium', 'Back up first'], 'stab-sfc': [40, 'Medium', 'Safe'], 'prn-stuck': [5, 'Easy', 'Safe'], 'soft-runtime-eol': [10, 'Medium', 'Safe'],
     'sto-dirty': [15, 'Easy', 'Back up first'],
-    'priv-apps-wide': [10, 'Easy', 'Safe'], 'priv-delivery': [3, 'Easy', 'Safe'], 'priv-hello': [5, 'Easy', 'Safe'], 'priv-idle-lock': [5, 'Easy', 'Safe'], 'upd-paused': [2, 'Easy', 'Safe'], 'net-metered': [2, 'Easy', 'Safe'], 'net-doh': [5, 'Medium', 'Safe'], 'net-wifi-powersave': [3, 'Medium', 'Safe'], 'sto-defrag': [2, 'Easy', 'Safe'], 'sto-sense': [2, 'Easy', 'Safe'], 'perf-effects': [3, 'Easy', 'Safe'], 'sec-sb-cert': [30, 'Medium', 'Safe'], 'for-log-short': [5, 'Medium', 'Safe'],
+    'priv-apps-wide': [10, 'Easy', 'Safe'], 'priv-delivery': [3, 'Easy', 'Safe'], 'priv-hello': [5, 'Easy', 'Safe'], 'priv-idle-lock': [5, 'Easy', 'Safe'], 'upd-paused': [2, 'Easy', 'Safe'], 'net-metered': [2, 'Easy', 'Safe'], 'net-doh': [5, 'Medium', 'Safe'], 'net-wifi-powersave': [3, 'Medium', 'Safe'], 'sto-defrag': [2, 'Easy', 'Safe'], 'sto-sense': [2, 'Easy', 'Safe'], 'perf-effects': [3, 'Easy', 'Safe'], 'stab-disk-where': [5, 'Easy', 'Safe'], 'net-ports-who': [5, 'Medium', 'Safe'], 'priv-browser': [3, 'Easy', 'Safe'], 'sec-sb-cert': [30, 'Medium', 'Safe'], 'for-log-short': [5, 'Medium', 'Safe'],
     'for-logon-brute': [20, 'Medium', 'Safe'], 'for-logon-remote': [20, 'Ask a pro', 'Safe'], 'for-audit-off': [5, 'Medium', 'Safe'], 'for-log-cleared': [15, 'Ask a pro', 'Safe'], 'for-acct-new': [10, 'Medium', 'Safe'], 'for-svc-new': [15, 'Medium', 'Safe'], 'for-time-changed': [5, 'Easy', 'Safe'], 'for-run-tools': [20, 'Ask a pro', 'Safe'], 'for-run-odd': [15, 'Medium', 'Safe'], 'for-downloads': [10, 'Easy', 'Safe'], 'for-def-excl': [10, 'Medium', 'Safe'], 'for-def-off': [5, 'Easy', 'Safe'], 'for-def-caught': [10, 'Easy', 'Safe'], 'for-fw-rules': [15, 'Medium', 'Safe'], 'for-shares-open': [10, 'Medium', 'Safe'], 'for-access-backdoor': [40, 'Ask a pro', 'Back up first'], 'for-startup-folder': [5, 'Easy', 'Safe'], 'for-ps-suspicious': [20, 'Ask a pro', 'Safe'], 'for-ps-logging': [5, 'Medium', 'Safe'], 'for-wifi-open': [5, 'Easy', 'Safe'], 'for-listen-risky': [15, 'Ask a pro', 'Safe'], 'use-sensors': [10, 'Easy', 'Safe'], 'dev-peripheral-problem': [15, 'Medium', 'Safe']
   };
   var PROFILES = {
@@ -1323,6 +1323,8 @@ function Engine(RAW) {
       var age = lastAge('system', /^(disk|Ntfs|stornvme|storahci|volmgr|iaStor.*|nvme)$/i, [7, 11, 15, 51, 55, 98, 129, 153, 157]);
       var sev = n >= 10 ? 'high' : (n >= 3 ? 'medium' : 'low');
       if (age != null && age > 14) sev = down(sev);
+      var DT = diskTargets();
+      if (DT.rows.length && DT.rows.every(function (r) { return r.kind === 'virtual' || r.kind === 'gone'; }) && !DT.unnumbered) sev = 'low';
       return F('stab-disk', 'Stability', sev, 'Drive or file system errors (' + n + (age != null && age > 14 ? ', last ' + age + ' days ago' : '') + ')',
         'Windows logged read/write retries or file system problems. A few can come from a USB or virtual disk; many point to a failing drive or cable.',
         [S('Back up important data first.'),
@@ -1654,10 +1656,12 @@ function Engine(RAW) {
     });
     R(function () {
       var items = uniq(arr(g(D, 'startup.items', [])).map(function (s) { return s.name; }));
-      var n = items.length;
+      var SS = startupState(), act = SS.known ? SS.list.filter(function (x) { return x.state === 'active'; }) : [];
+      var on = SS.known ? SS.list.filter(function (x) { return x.state !== 'off'; }) : [];
+      var n = SS.known ? on.length : items.length;
       if (n < 15) return null;
-      var heavy = items.filter(function (x) { return RE.launcher.test(x); });
-      return F('perf-startup', 'Performance', n >= 25 ? 'medium' : 'low', n + ' programs start with Windows',
+      var heavy = (SS.known ? on.map(function (x) { return x.name; }) : items).filter(function (x) { return RE.launcher.test(x); });
+      return F('perf-startup', 'Performance', n >= 25 ? 'medium' : 'low', n + ' programs start with Windows' + (SS.known ? ' (' + act.length + ' running now)' : ''),
         'Each one uses memory, CPU and disk during startup, and most keep running in the background.',
         [S('Open Task Manager, Startup apps (Ctrl+Shift+Esc) and disable what you do not need at login: game launchers, updaters and chat apps are the usual suspects.', 'taskmgr.exe /0 /startup'),
          S('Programs still work. They simply do not start before you open them.')],
@@ -3160,10 +3164,87 @@ function Engine(RAW) {
         grp('Updates', 'Ενημερώσεις', 'Windows, Office and programs kept up to date', 'Windows, Office και προγράμματα ενημερωμένα', ['upd-patch', 'upd-fail', 'upd-off', 'upd-apps', 'win-eol', 'win-eol-11', 'soft-office-eol', 'sec-browser-old'])
       ];
     }
+
+    /* 2.7.0: what really starts with Windows, what the drive errors point to, who holds the ports, browser privacy */
+    var M6 = EX.more6 || {};
+    function startupState() {
+      var M6 = EX.more6 || {};
+      var st = arr(M6.startup);
+      var base = arr(g(D, 'startup.items', []));
+      if (!st.length) return base.length ? { known: false, list: uniq(base.map(function (x) { return x.name; })).map(function (n) { return { name: n, state: 'unknown', scope: '', launcher: RE.launcher.test(n) }; }) } : { known: false, list: [] };
+      var seen = {}, list = [];
+      st.forEach(function (x) {
+        var k = String(x.name).toLowerCase() + '|' + x.scope; if (seen[k]) return; seen[k] = 1;
+        var state = !x.enabled ? 'off' : (x.running ? 'active' : (x.hasCmd === false ? 'unknown' : 'idle'));
+        list.push({ name: x.name, state: state, scope: x.scope, proc: x.proc, launcher: RE.launcher.test(x.name) });
+      });
+      list.sort(function (a, b) { var o = { active: 0, idle: 1, unknown: 2, off: 3 }; return (o[a.state] - o[b.state]) || String(a.name).localeCompare(String(b.name)); });
+      return { known: true, list: list };
+    }
+    function diskTargets() {
+      var M6 = EX.more6 || {}, DISKEV = /^(disk|Ntfs|stornvme|storahci|volmgr|iaStor.*|nvme)$/i, DISKIDS = [7, 11, 15, 51, 55, 98, 129, 153, 157, 158];
+      var by = {}, total = 0, unnumbered = 0;
+      arr(g(D, 'events.system.groups', [])).forEach(function (gr) {
+        if (!DISKEV.test(String(gr.provider)) || DISKIDS.indexOf(Number(gr.id)) < 0) return;
+        var c = num(gr.count); total += c;
+        var m = /(?:Harddisk|Disk)\s*(\d+)/i.exec(String(gr.sample || ''));
+        if (m) by[m[1]] = (by[m[1]] || 0) + c; else unnumbered += c;
+      });
+      var dm = arr(M6.diskMap), disks = arr(g(D, 'disks', []));
+      var virt = function (d) { return /virtual|file backed/i.test(String(d.bus || '') + ' ' + String(d.name || d.mediaType || '') + ' ' + String(d.busType || '')); };
+      var rows = Object.keys(by).map(function (n) {
+        var d = dm.filter(function (x) { return String(x.number) === n; })[0];
+        var kind = 'unknown', label = '';
+        if (d) { kind = virt(d) ? 'virtual' : (/usb/i.test(d.bus) ? 'usb' : 'physical'); label = d.name + ' (' + d.bus + ', ' + d.sizeGB + ' GB)'; }
+        else if (dm.length) { kind = 'gone'; label = ''; }
+        return { number: n, count: by[n], kind: kind, label: label };
+      });
+      var virtPresent = dm.length ? dm.some(virt) : disks.some(virt);
+      return { total: total, rows: rows, unnumbered: unnumbered, virtPresent: virtPresent, haveMap: dm.length > 0 };
+    }
+    function browserPriv() { return arr((EX.more6 || {}).browserPrivacy); }
+    R(function () {
+      var T = diskTargets(); if (T.total < 1 || !T.rows.length) return null;
+      var nums = T.rows.map(function (r) { return 'Disk ' + r.number + ' (' + r.count + ')'; }).join(', ');
+      var phys = arr(g(D, 'disks', [])).filter(function (d) { return !/virtual/i.test(String(d.name)); });
+      var healthy = phys.length && phys.every(function (d) { return /healthy/i.test(String(d.health)) && num(g(d, 'reliability.readErrors', 0)) === 0; });
+      var allOdd = T.rows.every(function (r) { return r.kind === 'virtual' || r.kind === 'gone' || r.kind === 'usb' || r.kind === 'unknown'; });
+      var line = T.rows.map(function (r) { return 'Disk ' + r.number + ': ' + (r.kind === 'virtual' ? 'virtual disk, ' : (r.kind === 'gone' ? 'not connected now, ' : (r.kind === 'usb' ? 'USB drive, ' : (r.kind === 'physical' ? 'physical drive, ' : '')))) + (r.label || (T.virtPresent && !T.haveMap ? 'a virtual disk is present on this PC' : '')); }).join(' | ');
+      return F('stab-disk-where', 'Stability', 'info', 'The drive errors point to ' + (allOdd && T.virtPresent ? 'a virtual or removable disk' : 'specific disks') + ' (' + nums + ')',
+        'The Windows log names the disk number each error came from. This page matches those numbers with the drives that are in this PC. ' + (allOdd && T.virtPresent ? 'The errors are about a disk that is virtual or not always connected (for example a virtual machine disk, a mounted disk image or a USB drive), not about your internal drives. Your internal drives report ' + (healthy ? 'good health with no read errors.' : 'their own status in the Hardware tab.') : 'Check the Hardware tab for the drive health of those disks.'),
+        [S('Open Disk Management to see which disk is "Disk ' + T.rows[0].number + '" (press the Windows key, type "Create and format hard disk partitions", press Enter). Look at the numbers on the left. Nothing changes if you only look.'),
+         S('If it is a virtual disk or a disk image (VMware, Hyper-V, Windows Sandbox, a .vhd or .vhdx file), detach it when you are not using it: right-click it in Disk Management and choose Detach VHD.'),
+         S('If it is a USB drive, try another cable or port, and back up what is on it.')],
+        line + (T.unnumbered ? ' | ' + T.unnumbered + ' events had no disk number' : ''));
+    });
+    R(function () {
+      var P = (EX.more6 || {}).ports || {}; var n = evCount('system', /Tcpip/, [4266, 4231]);
+      if (n < 1 || P.tcpTotal == null) return null;
+      var top = arr(P.top).filter(function (x) { return x.process; });
+      var tw = num(g(P, 'states.TimeWait', 0));
+      var range = P.dynNum ? P.dynNum : null;
+      var vpn = arr(g(D, 'extras.more2.vpn', [])).length;
+      var virtNics = arr(g(D, 'network.adapters', [])).filter(function (a) { return /vmware|virtualbox|hyper-v|vethernet|wireguard|tap-|openvpn/i.test(String(a.name || a.description || '')); }).length;
+      return F('net-ports-who', 'Network', 'info', 'Who holds your network connections (' + (top[0] ? top[0].process : 'program names') + ' had the most when scanned)',
+        'Windows ran out of free "doors" (ports) ' + n + ' times lately. The scan counted the connections open at the moment it ran: ' + P.tcpTotal + ' in total, ' + tw + ' of them waiting to close. A program that opens connections and never closes them is the usual cause, and VPNs and virtual machines that share your connection make it more likely.',
+        [S('See which program holds the most connections right now (it only reads).', 'Get-NetTCPConnection | Group-Object OwningProcess | Sort-Object Count -Descending | Select-Object -First 5 Count, @{n=\'Process\';e={(Get-Process -Id $_.Name -ErrorAction SilentlyContinue).ProcessName}}'),
+         S('Restart or update the programs at the top of the list, then check the VPN clients and virtual machines. A browser with very many tabs can also do this.'),
+         S('Only if it keeps happening: a technician can widen the range of ports Windows may use. This is a system change, so ask first.')],
+        'Open connections at scan time: ' + P.tcpTotal + ' (waiting to close: ' + tw + '). Ports Windows may use: ' + (range == null ? 'unknown' : range) + '. Top programs: ' + top.map(function (x) { return x.process + ' ' + x.n; }).join(', ') + '. VPN or virtual network cards: ' + (virtNics + vpn) + '.');
+    });
+    R(function () {
+      var bs = browserPriv(); if (!bs.length) return null;
+      var bad = bs.filter(function (b) { return b.safe === false; });
+      if (!bad.length) return null;
+      return F('priv-browser', 'Privacy', 'low', 'Safe Browsing is switched off in ' + bad.map(function (b) { return b.browser; }).join(', '),
+        'Safe Browsing warns you before you open a dangerous site or download. It checks addresses against a list; with the standard setting it does not send your browsing history. If it is off on purpose, ignore this.',
+        [S('Open the browser, then Settings > Privacy and security > Security (Chrome and Brave) or Privacy, search, and services > Security (Edge), and choose Standard protection.')],
+        bad.map(function (b) { return b.browser + ': Safe Browsing off'; }).join('; '));
+    });
     function V_findingsNow() { return out; }
 
     // expose helpers that need the data and the findings of this scan
-    RT = { privAll: privAll, settingsRows: settingsRows, wideApps: wideApps, hardList: hardList, hardScore: hardScore, privList: privList, basicList: basicList, hwAge: hwAge, unusedApps: unusedApps, HCHK: HCHK };
+    RT = { startupState: startupState, diskTargets: diskTargets, browserPriv: browserPriv, privAll: privAll, settingsRows: settingsRows, wideApps: wideApps, hardList: hardList, hardScore: hardScore, privList: privList, basicList: basicList, hwAge: hwAge, unusedApps: unusedApps, HCHK: HCHK };
     out.sort(function (a, b) { return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });
     return out;
   }
@@ -3423,7 +3504,10 @@ var I18N = (function (V) {
     'upd-gpu': { t: function (f) { return 'Ο driver γραφικών είναι ' + (f.title.match(/(\d+)/) || [])[1] + ' μηνών'; }, w: 'Τα νέα παιχνίδια και οι εκδόσεις των Windows χρειάζονται συχνά νεότερο driver.', s: ['Ενημέρωσε από το NVIDIA App, το AMD Software ή το Intel Driver and Support Assistant.'] },
     'upd-devices': { t: '{0} καταχωρίσεις συσκευών αναφέρουν πρόβλημα', w: 'Η Διαχείριση συσκευών δείχνει συσκευές με σφάλματα ή υποβαθμισμένη κατάσταση. Συχνά λείπει ή είναι ασύμβατος ένας driver, ή έχουν μείνει υπολείμματα αφαιρεμένου λογισμικού.', s: ['Άνοιξε τη Διαχείριση συσκευών και ψάξε για κίτρινα σημάδια.', 'Ενημέρωσε τον driver από τον κατασκευαστή ή απεγκατέστησε την καταχώριση αν το υλικό δεν υπάρχει πια.'] },
     'perf-boot': { t: 'Τα Windows χρειάζονται περίπου {0} δευτερόλεπτα για να ξεκινήσουν', w: 'Τα Windows μετρούν κάθε εκκίνηση. Σε υπολογιστή με SSD, κάτω από 40 δευτερόλεπτα είναι τυπικό. Οι αργές εκκινήσεις οφείλονται κυρίως σε προγράμματα που ξεκινούν με τα Windows.', s: ['Απενεργοποίησε προγράμματα εκκίνησης που δεν χρειάζεσαι (δες το επόμενο εύρημα και την καρτέλα Λογισμικό).', 'Τα προγράμματα που επιβράδυναν τις πρόσφατες εκκινήσεις αναφέρονται παρακάτω ως τεκμήριο.'] },
-    'perf-startup': { t: '{0} προγράμματα ξεκινούν με τα Windows', w: 'Καθένα χρησιμοποιεί μνήμη, επεξεργαστή και δίσκο κατά την εκκίνηση, και τα περισσότερα συνεχίζουν να τρέχουν στο παρασκήνιο.', s: ['Άνοιξε τη Διαχείριση εργασιών, Εφαρμογές εκκίνησης (Ctrl+Shift+Esc) και απενεργοποίησε ό,τι δεν χρειάζεσαι στη σύνδεση: launchers παιχνιδιών, updaters και εφαρμογές συνομιλίας είναι οι συνηθισμένοι ένοχοι.', 'Τα προγράμματα δουλεύουν κανονικά. Απλώς δεν ξεκινούν πριν τα ανοίξεις.'] },
+    'stab-disk-where': { t: function (f) { return f.title.replace('The drive errors point to a virtual or removable disk', 'Τα σφάλματα δίσκου δείχνουν έναν εικονικό ή αφαιρούμενο δίσκο').replace('The drive errors point to specific disks', 'Τα σφάλματα δίσκου δείχνουν συγκεκριμένους δίσκους'); }, w: 'Το αρχείο καταγραφής των Windows γράφει από ποιον αριθμό δίσκου ήρθε κάθε σφάλμα. Εδώ οι αριθμοί αυτοί ταιριάζουν με τους δίσκους που υπάρχουν στον υπολογιστή. Αν είναι εικονικός ή δεν είναι πάντα συνδεδεμένος (π.χ. δίσκος εικονικής μηχανής, δίσκος-εικόνα που έχεις «φορτώσει», USB), τα σφάλματα δεν αφορούν τους εσωτερικούς σου δίσκους. Αν οι εσωτερικοί δίσκοι δείχνουν καλή υγεία, δεν υπάρχει λόγος ανησυχίας γι’ αυτούς.', s: ['Άνοιξε τη Διαχείριση δίσκων για να δεις ποιος είναι ο «Disk» με τον αριθμό που γράφει εδώ (πάτα το πλήκτρο Windows, γράψε «Δημιουργία και μορφοποίηση κατατμήσεων σκληρού δίσκου», Enter). Κοίτα τους αριθμούς αριστερά. Αν απλώς κοιτάς, δεν αλλάζει τίποτα.', 'Αν είναι εικονικός δίσκος ή δίσκος-εικόνα (VMware, Hyper-V, Windows Sandbox, αρχείο .vhd ή .vhdx), αποσύνδεσέ τον όταν δεν τον χρησιμοποιείς: δεξί κλικ πάνω του στη Διαχείριση δίσκων και «Detach VHD».', 'Αν είναι USB δίσκος, δοκίμασε άλλο καλώδιο ή θύρα, και κράτα αντίγραφο ασφαλείας από ό,τι έχει μέσα.'] },
+    'net-ports-who': { t: function (f) { var m = /\(([^)]*?) had the most/.exec(f.title); return 'Ποιος κρατά τις συνδέσεις δικτύου σου' + (m && m[1] !== 'program names' ? ' (' + m[1] + ' είχε τις περισσότερες τη στιγμή της σάρωσης)' : ''); }, w: 'Τα Windows έμειναν από ελεύθερες «πόρτες» (θύρες) αρκετές φορές πρόσφατα. Η σάρωση μέτρησε τις συνδέσεις που ήταν ανοιχτές τη στιγμή που έτρεξε. Συνήθως φταίει ένα πρόγραμμα που ανοίγει συνδέσεις και δεν τις κλείνει, και τα VPN και οι εικονικές μηχανές που μοιράζονται τη σύνδεσή σου το κάνουν πιο πιθανό.', s: ['Δες ποιο πρόγραμμα κρατά τις περισσότερες συνδέσεις αυτή τη στιγμή (μόνο διαβάζει).', 'Κάνε επανεκκίνηση ή ενημέρωση στα προγράμματα που είναι πρώτα στη λίστα, και μετά έλεγξε τα VPN και τις εικονικές μηχανές. Ένας browser με πάρα πολλές καρτέλες μπορεί επίσης να το προκαλέσει.', 'Μόνο αν συνεχίσει να συμβαίνει: ένας τεχνικός μπορεί να μεγαλώσει το εύρος των θυρών. Είναι αλλαγή συστήματος, οπότε ρώτα πρώτα.'] },
+    'priv-browser': { t: function (f) { return f.title.replace('Safe Browsing is switched off in', 'Η Ασφαλής περιήγηση είναι κλειστή στον/στους'); }, w: 'Η Ασφαλής περιήγηση (Safe Browsing) σε προειδοποιεί πριν ανοίξεις επικίνδυνη σελίδα ή κατεβάσεις επικίνδυνο αρχείο. Ελέγχει διευθύνσεις σε μια λίστα· με την τυπική ρύθμιση δεν στέλνει το ιστορικό περιήγησής σου. Αν το έκλεισες επίτηδες, αγνόησέ το.', s: ['Άνοιξε τον browser και πήγαινε Ρυθμίσεις > Απόρρητο και ασφάλεια > Ασφάλεια (Chrome, Brave) ή Απόρρητο, αναζήτηση και υπηρεσίες > Ασφάλεια (Edge) και διάλεξε «Τυπική προστασία».'] },
+    'perf-startup': { t: function (f) { var m = /^(\d+) programs start with Windows(?: \((\d+) running now\))?/.exec(f.title) || []; return (m[1] || '') + ' προγράμματα ξεκινούν με τα Windows' + (m[2] != null ? ' (' + m[2] + ' τρέχουν τώρα)' : ''); }, w: 'Καθένα χρησιμοποιεί μνήμη, επεξεργαστή και δίσκο κατά την εκκίνηση, και τα περισσότερα συνεχίζουν να τρέχουν στο παρασκήνιο.', s: ['Άνοιξε τη Διαχείριση εργασιών, Εφαρμογές εκκίνησης (Ctrl+Shift+Esc) και απενεργοποίησε ό,τι δεν χρειάζεσαι στη σύνδεση: launchers παιχνιδιών, updaters και εφαρμογές συνομιλίας είναι οι συνηθισμένοι ένοχοι.', 'Τα προγράμματα δουλεύουν κανονικά. Απλώς δεν ξεκινούν πριν τα ανοίξεις.'] },
     'perf-ram': { t: function (f) { return f.title.replace('Very little memory', 'Πολύ λίγη μνήμη').replace('Limited memory', 'Περιορισμένη μνήμη'); }, w: 'Τα Windows 11 και οι σύγχρονοι browsers χρειάζονται αρκετά περισσότερη μνήμη. Όταν η RAM δεν φτάνει, τα Windows χρησιμοποιούν τον δίσκο και όλα γίνονται αργά.', s: ['Πρόσθεσε RAM. Στόχος τα 16 GB.'] },
     'perf-ramfull': { t: 'Η μνήμη ήταν σχεδόν γεμάτη κατά τη σάρωση', w: 'Η ελεύθερη μνήμη ήταν πολύ λίγη. Όταν γεμίζει η RAM, ο υπολογιστής γίνεται αργός.', s: ['Δες τους μεγαλύτερους καταναλωτές μνήμης στην καρτέλα Λογισμικό.'] },
     'perf-xmp': { t: 'Η RAM τρέχει πιο αργά από την ονομαστική της ταχύτητα ({0} από {1} MT/s)', w: 'Οι μονάδες υποστηρίζουν υψηλότερη ταχύτητα, αλλά το XMP/EXPO/DOCP δεν είναι ενεργό στο BIOS.', s: ['Μπες στο BIOS και ενεργοποίησε το προφίλ XMP (Intel) ή EXPO/DOCP (AMD).'] },
@@ -4717,6 +4801,38 @@ var TOOLS = (function (V, AI, CMP) {
     return ascii(L.join('\r\n'));
   }
 
+  function wingetScript() {
+    var o = arr(g(D, 'apps.outdated', []));
+    var L = [];
+    L.push('# VEAGLE PC Check - program update script for ' + g(D, 'meta.computer', 'this PC'));
+    L.push('# Made ' + new Date().toISOString().slice(0, 10) + ' from your scan. Nothing in this file runs yet.');
+    L.push('#');
+    L.push('# EVERY command below is switched OFF (it starts with "# ").');
+    L.push('# HOW TO USE IT:');
+    L.push('#  1. Read the list. Skip anything you do not use or do not want to change.');
+    L.push('#  2. To switch a line ON, delete the "# " in front of it.');
+    L.push('#  3. Press the Windows key, type PowerShell, right-click it, choose Run as administrator.');
+    L.push('#  4. Type:  Set-ExecutionPolicy -Scope Process Bypass   and press Enter (this only lasts for this window).');
+    L.push('#  5. Type the path of this file, for example  & "C:\\Users\\You\\Downloads\\veagle-update-script.ps1"');
+    L.push('#');
+    L.push('# Close the programs first. Each update may ask you to confirm. A few updates need a restart.');
+    L.push('# Note: "winget upgrade" installs the newest version the maker published. If a program stops working, install the old one again from its maker.');
+    L.push('');
+    if (!o.length) { L.push('# No program with an available update was found in this scan.'); return ascii(L.join('\r\n')); }
+    var sec = /vcredist|redistributable|\.net|powershell|windowsdesktop|adobe|acrobat|anydesk|openvpn|notepad\+\+|github|chrome|firefox|brave|edge|7-zip|winrar|vlc|java|openssl|python|steam/i;
+    var first = o.filter(function (x) { return sec.test(String(x.id) + ' ' + String(x.name)); }), rest = o.filter(function (x) { return first.indexOf(x) < 0; });
+    function line(x) {
+      var src = /msstore/i.test(String(x.source)) ? ' --source msstore' : '';
+      L.push('# ' + x.name + ': ' + x.version + ' -> ' + x.available);
+      L.push('# winget upgrade --id "' + x.id + '" --exact' + src + ' --accept-package-agreements --accept-source-agreements');
+    }
+    if (first.length) { L.push('# ' + new Array(60).join('=')); L.push('# Programs that are often attack targets or runtimes other programs need (do these first)'); first.forEach(line); L.push(''); }
+    if (rest.length) { L.push('# ' + new Array(60).join('=')); L.push('# Everything else'); rest.forEach(line); L.push(''); }
+    L.push('# ' + new Array(60).join('='));
+    L.push('# To update everything at once (only if you are sure): winget upgrade --all');
+    return ascii(L.join('\r\n'));
+  }
+
   function csvCell(v) { v = String(v == null ? '' : v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
   function findingsCsv() {
     var rows = [['No', 'Severity', 'Area', 'Title', 'Why', 'Evidence', 'Steps', 'Minutes', 'Difficulty', 'Risk']];
@@ -4813,6 +4929,11 @@ var TOOLS = (function (V, AI, CMP) {
       '</div><p class="sub" id="profileNote" style="margin-top:10px">' + esc(V.PROFILES[V.profile].note) + '</p></div></div>';
 
     if (V.readiness && V.readiness.rows.length && !V.readiness.alreadyWin11) { h += sect(I('Moving from Windows 10 to Windows 11', 'Μετάβαση από Windows 10 σε Windows 11'), I('what to do for your PC', 'τι να κάνεις για τον δικό σου υπολογιστή')); h += box('windows11_guide.txt', V.readiness.verdict, VIZ.win11Html()); }
+    if (arr(g(D, 'apps.outdated', [])).length) {
+      h += sect(I('Update your programs', 'Ενημέρωσε τα προγράμματά σου'), I('a script you read first; every command stays switched off', 'ένα script που διαβάζεις πρώτα· κάθε εντολή μένει κλειστή'));
+      h += box('veagle-update-script.ps1', I('safe by design', 'ασφαλές εκ σχεδιασμού'), '<p class="sub">' + I('The programs that have a newer version, with the winget command for each. <b>Nothing runs by itself:</b> every line starts switched off and you switch on only what you want.', 'Τα προγράμματα που έχουν νεότερη έκδοση, με την εντολή winget για το καθένα. <b>Τίποτα δεν τρέχει μόνο του:</b> κάθε γραμμή ξεκινά κλειστή και ανοίγεις μόνο όσες θέλεις.') + '</p>' +
+        '<textarea id="wgText" class="mono" rows="10" readonly style="width:100%;margin-top:10px"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="wgCopy">' + I('Copy', 'Αντιγραφή') + '</button><button class="btn sm" type="button" id="wgSave">' + I('Save as file', 'Αποθήκευση ως αρχείο') + '</button></div>');
+    }
     h += sect(I('Message for someone who helps you', 'Μήνυμα για κάποιον που σε βοηθά'), I('copy and paste into an email or ticket', 'αντίγραψε και επικόλλησε σε email ή ticket'));
     h += box('ticket.txt', I('short summary', 'σύντομη σύνοψη'), '<textarea id="ticketText" class="mono" rows="12" readonly style="width:100%"></textarea><div class="btns" style="margin-top:10px"><button class="btn sm" type="button" id="tkCopy">' + I('Copy summary', 'Αντιγραφή σύνοψης') + '</button></div><p class="sub" style="margin-top:8px">' + I('It contains the PC name. Remove that line if you do not want to share it.', 'Περιέχει το όνομα του PC. Σβήσε αυτή τη γραμμή αν δεν θέλεις να το μοιραστείς.') + '</p>');
 
@@ -4855,6 +4976,7 @@ var TOOLS = (function (V, AI, CMP) {
   function refreshTexts() {
     var a = $('#ticketText'); if (a) a.value = ticket();
     var b = $('#fixText'); if (b) b.value = fixScript();
+    var wg = $('#wgText'); if (wg) wg.value = wingetScript();
     var root = g(D, 'meta.root', '') || 'C:\\path\\to\\VEAGLE-PC-Check';
     var rq = String(root).replace(/'/g, "''");
     var on = $('#schOn'); if (on) on.value = "$a = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File \"" + rq + "\\app\\collector.ps1\" -Quick -NoOpen'\r\n$t = New-ScheduledTaskTrigger -Weekly -WeeksInterval 4 -DaysOfWeek Sunday -At 8pm\r\n$s = New-ScheduledTaskSettingsSet -StartWhenAvailable\r\nRegister-ScheduledTask -TaskName 'VEAGLE PC Check monthly' -Action $a -Trigger $t -Settings $s -RunLevel Highest -Description 'Quick read-only PC health scan (VEAGLE PC Check)'";
@@ -4868,6 +4990,8 @@ var TOOLS = (function (V, AI, CMP) {
     function on(id, fn) { var el = $(id); if (el) el.addEventListener('click', fn); }
     on('#tkCopy', function () { AI.toast(AI.copyText($('#ticketText').value) ? 'Summary copied.' : 'Copy failed. Select the text and press Ctrl+C.'); });
     on('#fxCopy', function () { AI.toast(AI.copyText($('#fixText').value) ? 'Fix script copied.' : 'Copy failed. Select the text and press Ctrl+C.'); });
+    on('#wgCopy', function () { AI.toast(AI.copyText($('#wgText').value) ? 'Update script copied.' : 'Copy failed. Select the text and press Ctrl+C.'); });
+    on('#wgSave', function () { saveFile('veagle-update-script.ps1', $('#wgText').value, 'text/plain', true); AI.toast('Saved veagle-update-script.ps1. All commands inside are switched off.'); });
     on('#fxSave', function () { saveFile('veagle-fix-script.ps1', $('#fixText').value, 'text/plain', true); AI.toast('Saved veagle-fix-script.ps1. All commands inside are switched off.'); });
     on('#schOnCopy', function () { AI.toast(AI.copyText($('#schOn').value) ? 'Copied. Paste it into PowerShell (as administrator).' : 'Copy failed.'); });
     on('#schOffCopy', function () { AI.toast(AI.copyText($('#schOff').value) ? 'Copied. Paste it into PowerShell (as administrator).' : 'Copy failed.'); });
@@ -5182,7 +5306,7 @@ var PRO = (function (V, AI) {
 
   /* ---------- steps of the scan that may be incomplete (1.1.0) ---------- */
   /* 2.5.0: what the scan could and could not read (meta.coverage, meta.stepTimes, events.capped, extras.more4.logs) */
-  var COVN = { bitlocker: ['Drive encryption (BitLocker)', 'Κρυπτογράφηση δίσκου (BitLocker)'], features: ['Optional Windows features', 'Προαιρετικές λειτουργίες των Windows'], outdated: ['Programs that have updates (winget)', 'Προγράμματα με διαθέσιμες ενημερώσεις (winget)'], oldDrivers: ['Old drivers', 'Παλιοί οδηγοί'], dism: ['Health of the Windows files (DISM)', 'Υγεία των αρχείων των Windows (DISM)'], restore: ['Restore points', 'Σημεία επαναφοράς'], winre: ['Windows recovery environment', 'Περιβάλλον αποκατάστασης των Windows'], space: ['Where the disk space went', 'Πού πήγε ο χώρος του δίσκου'], signatures: ['Digital signatures of start-up programs', 'Ψηφιακές υπογραφές των προγραμμάτων εκκίνησης'], dnsSpeed: ['DNS speed comparison', 'Σύγκριση ταχύτητας DNS'], perf: ['10-second performance sample', 'Δείγμα απόδοσης 10 δευτερολέπτων'], secpol: ['Security policy settings', 'Ρυθμίσεις πολιτικής ασφαλείας'], sfc: ['Last system file check', 'Τελευταίος έλεγχος αρχείων συστήματος'], traces: ['Security traces (sign-ins, cleared logs)', 'Ίχνη ασφαλείας (συνδέσεις, σβησμένα αρχεία καταγραφής)'] };
+  var COVN = { bitlocker: ['Drive encryption (BitLocker)', 'Κρυπτογράφηση δίσκου (BitLocker)'], features: ['Optional Windows features', 'Προαιρετικές λειτουργίες των Windows'], outdated: ['Programs that have updates (winget)', 'Προγράμματα με διαθέσιμες ενημερώσεις (winget)'], oldDrivers: ['Old drivers', 'Παλιοί οδηγοί'], dism: ['Health of the Windows files (DISM)', 'Υγεία των αρχείων των Windows (DISM)'], restore: ['Restore points', 'Σημεία επαναφοράς'], winre: ['Windows recovery environment', 'Περιβάλλον αποκατάστασης των Windows'], space: ['Where the disk space went', 'Πού πήγε ο χώρος του δίσκου'], signatures: ['Digital signatures of start-up programs', 'Ψηφιακές υπογραφές των προγραμμάτων εκκίνησης'], dnsSpeed: ['DNS speed comparison', 'Σύγκριση ταχύτητας DNS'], perf: ['10-second performance sample', 'Δείγμα απόδοσης 10 δευτερολέπτων'], secpol: ['Security policy settings', 'Ρυθμίσεις πολιτικής ασφαλείας'], sfc: ['Last system file check', 'Τελευταίος έλεγχος αρχείων συστήματος'], startupState: ['Which start-up programs are really active', 'Ποια προγράμματα εκκίνησης είναι πραγματικά ενεργά'], browserPriv: ['Privacy switches of your browsers', 'Διακόπτες απορρήτου των browsers σου'], traces: ['Security traces (sign-ins, cleared logs)', 'Ίχνη ασφαλείας (συνδέσεις, σβησμένα αρχεία καταγραφής)'] };
   function covWord(st) {
     return st === 'quick' ? I('Not checked: the quick scan skips it (run VEAGLE-PC-Check.bat for the full scan)', 'Δεν ελέγχθηκε: η γρήγορη σάρωση το παραλείπει (τρέξε το VEAGLE-PC-Check.bat για πλήρη σάρωση)') : st === 'admin' ? I('Not checked: needs "Run as administrator"', 'Δεν ελέγχθηκε: θέλει «Εκτέλεση ως διαχειριστής»') : st === 'na' ? I('Not available on this PC', 'Δεν υπάρχει σε αυτόν τον υπολογιστή') : I('Checked', 'Ελέγχθηκε');
   }
@@ -5825,6 +5949,7 @@ var INV = (function (V, AI) {
           tbl([I('Network', 'Δίκτυο'), I('Times', 'Φορές'), I('Last', 'Τελευταία'), I('Type', 'Τύπος')], nets.map(function (x) { return [x.name, x.count, when(x.last), String(x.category) === '0' ? I('public', 'δημόσιο') : (String(x.category) === '2' ? I('domain', 'domain') : I('private', 'ιδιωτικό'))]; })) + '</div></div>';
       }
     }
+    if (typeof V3 !== 'undefined') h += V3.insightsHtml();
     h += '</div>';
     el.insertAdjacentHTML('beforeend', h);
   }
@@ -5953,10 +6078,176 @@ var PRIV = (function (V) {
       [I('Screen turns off after (plugged in)', 'Η οθόνη σβήνει μετά από (στην πρίζα)'), P.acDisplayMin == null ? '' : (P.acDisplayMin === 0 ? I('never', 'ποτέ') : P.acDisplayMin + ' min')],
       [I('Lock the PC yourself', 'Κλείδωσε μόνος σου τον υπολογιστή'), I('hold the Windows key and press L', 'κράτα πατημένο το πλήκτρο Windows και πάτα L')]
     ])) + '</div></div>';
+    if (typeof V3 !== 'undefined') h += V3.privacyHtml();
     el.innerHTML = h;
     var b = el.querySelector('[data-area-go]'); if (b) b.addEventListener('click', function () { if (typeof VIZ2 !== 'undefined' && VIZ2.goArea) VIZ2.goArea('Privacy'); });
   }
   return { render: render };
+})(V);
+
+/* VEAGLE PC Check 3.0: start-up programs that are really active, gaming and protection checks, folders, unsigned downloads, browsers, who talks to the internet. Read-only: nothing here changes anything. */
+var V3 = (function (V) {
+  'use strict';
+  var esc = V.esc, arr = V.arr, num = V.num, g = V.g, D = V.D;
+  function I(en, el) { return V.I(en, el); }
+  var EX = (D && D.extras) || {}, M6 = EX.more6 || {}, M7 = EX.more7 || {}, X1 = EX.more || {}, X5 = EX.more5 || {};
+  function sect(t, n) { return '<div class="sect"><h2>' + esc(t) + '</h2><span>' + esc(n || '') + '</span></div>'; }
+  function tag(cls, t) { return '<span class="tag ' + cls + '">' + esc(t) + '</span>'; }
+  function tbl(heads, rows) {
+    return '<div class="tbl"><table><thead><tr>' + heads.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + (c && c.html != null ? c.html : esc(c == null ? '' : c)) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+  }
+  function win(title, st, inner) { return '<div class="win"><header><span>' + esc(title) + '</span><span class="st">' + esc(st || '') + '</span></header><div class="body">' + inner + '</div></div>'; }
+  function kv(p) { return '<dl class="kv">' + p.filter(function (x) { return x[1] !== '' && x[1] != null; }).map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>'; }
+  function tile(big, label, col) { return '<div class="win" style="flex:1 1 200px;margin:0"><div class="body"><div style="font-size:28px;font-weight:700;' + (col ? 'color:' + col : '') + '">' + esc(big) + '</div><div class="muted" style="margin-top:4px">' + esc(label) + '</div></div></div>'; }
+  function yn(b) { return b == null ? '' : (b ? I('yes', 'ναι') : I('no', 'όχι')); }
+  function onoff(b) { return b == null ? '' : (b ? I('on', 'ανοιχτό') : I('off', 'κλειστό')); }
+
+  /* ---- start-up programs: active now, allowed but not running, switched off in Windows ---- */
+  function startupHtml() {
+    var SS = V.RT.startupState ? V.RT.startupState() : { known: false, list: [] };
+    if (!SS.list.length) return '';
+    var L = SS.list, c = { active: 0, idle: 0, off: 0, unknown: 0 };
+    L.forEach(function (x) { c[x.state] = (c[x.state] || 0) + 1; });
+    var h = sect(I('Programs that start with Windows', 'Προγράμματα που ξεκινούν με τα Windows'), I('all of them are listed, and the ones that are really active are marked', 'αναφέρονται όλα, και επισημαίνονται όσα είναι πραγματικά ενεργά'));
+    if (SS.known) {
+      h += '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:10px">' +
+        tile(String(c.active), I('active now: they started with Windows and are running', 'ενεργά τώρα: ξεκίνησαν με τα Windows και τρέχουν'), c.active > 10 ? '#f5b44a' : '#3ddc84') +
+        tile(String(c.idle), I('allowed to start, but not running when scanned', 'επιτρέπεται να ξεκινούν, αλλά δεν έτρεχαν όταν έγινε η σάρωση')) +
+        tile(String(c.off), I('registered, but switched off in Windows', 'είναι καταχωρημένα, αλλά κλειστά από τα Windows')) + '</div>';
+    } else {
+      h += '<div class="muted" style="margin-bottom:8px">' + esc(I('This scan could not tell which of them are active. Run the 3.0 scan again to see it.', 'Αυτή η σάρωση δεν μπόρεσε να πει ποια είναι ενεργά. Τρέξε ξανά τη σάρωση 3.0 για να το δεις.')) + '</div>';
+    }
+    var chip = { active: tag('medium', I('active now', 'ενεργό τώρα')), idle: tag('info', I('allowed, not running', 'επιτρέπεται, δεν τρέχει')), off: tag('info', I('switched off', 'κλειστό')), unknown: tag('info', I('unknown', 'άγνωστο')) };
+    h += '<div class="win"><div class="body">' + tbl([I('Program', 'Πρόγραμμα'), I('State', 'Κατάσταση'), I('Kind', 'Είδος'), I('For', 'Για')], L.map(function (x) {
+      return [x.name, { html: chip[x.state] || '' }, x.launcher ? I('launcher, updater or chat app', 'launcher, updater ή εφαρμογή συνομιλίας') : '', x.scope === 'system' ? I('system accounts', 'λογαριασμούς συστήματος') : (x.scope === 'machine' ? I('everyone', 'όλους τους χρήστες') : (x.scope === 'user' ? I('you', 'εσένα') : ''))];
+    })) + '<p class="sub" style="margin:8px 0 0">' + esc(I('To switch one off: press Ctrl+Shift+Esc, open "Startup apps" and use the switch. The program still works, it just does not start before you open it. The list reads the places Windows keeps, so a program can also start from a scheduled task or a service, which are listed in the Software tab.', 'Για να κλείσεις ένα: πάτα Ctrl+Shift+Esc, άνοιξε τις «Εφαρμογές εκκίνησης» και χρησιμοποίησε τον διακόπτη. Το πρόγραμμα δουλεύει κανονικά, απλώς δεν ξεκινά πριν το ανοίξεις. Η λίστα διαβάζει τα μέρη που κρατούν τα Windows, οπότε ένα πρόγραμμα μπορεί να ξεκινά και από προγραμματισμένη εργασία ή υπηρεσία, που φαίνονται στην καρτέλα Software.')) + '</p></div></div>';
+    return h;
+  }
+
+  /* ---- Windows protection ---- */
+  function protectionHtml() {
+    var S = g(D, 'security', null); if (!S) return '';
+    var DX = M7.defenderExtra || {};
+    var vbs = S.vbsStatus == null ? '' : (S.vbsStatus === 2 ? I('running', 'τρέχει') : (S.vbsStatus === 1 ? I('on, not running', 'ενεργοποιημένο, δεν τρέχει') : I('off', 'κλειστό')));
+    var hv = S.hvci == null ? '' : onoff(Number(S.hvci) === 1);
+    var cfa = DX.controlledFolders == null ? '' : (DX.controlledFolders === 1 ? I('on', 'ανοιχτό') : (DX.controlledFolders === 2 ? I('audit only', 'μόνο καταγραφή') : I('off', 'κλειστό')));
+    var np = DX.networkProtection == null ? '' : (DX.networkProtection === 1 ? I('on', 'ανοιχτό') : (DX.networkProtection === 2 ? I('audit only', 'μόνο καταγραφή') : I('off', 'κλειστό')));
+    var rows = [
+      [I('Secure Boot', 'Secure Boot'), S.secureBoot == null ? '' : onoff(S.secureBoot)],
+      [I('TPM chip', 'Τσιπ TPM'), S.tpm ? (S.tpm.ready ? I('ready', 'έτοιμο') : (S.tpm.present ? I('present, not ready', 'υπάρχει, δεν είναι έτοιμο') : I('not found', 'δεν βρέθηκε'))) : ''],
+      [I('Core isolation: memory integrity (HVCI)', 'Απομόνωση πυρήνα: ακεραιότητα μνήμης (HVCI)'), hv],
+      [I('Virtualization-based security', 'Ασφάλεια με εικονικοποίηση (VBS)'), vbs],
+      [I('Defender: ransomware folder protection', 'Defender: προστασία φακέλων από ransomware'), cfa],
+      [I('Defender: network protection', 'Defender: προστασία δικτύου'), np],
+      [I('Defender: attack surface rules', 'Defender: κανόνες μείωσης επιφάνειας επίθεσης'), DX.asrRules == null ? '' : String(DX.asrRules)],
+      [I('Defender: blocks unwanted programs', 'Defender: μπλοκάρει ανεπιθύμητα προγράμματα'), DX.pua == null ? '' : (DX.pua === 1 ? I('on', 'ανοιχτό') : (DX.pua === 2 ? I('audit only', 'μόνο καταγραφή') : I('off', 'κλειστό')))],
+      [I('Defender: cloud protection', 'Defender: προστασία από το cloud'), DX.cloud == null ? '' : (DX.cloud > 0 ? I('on', 'ανοιχτό') : I('off', 'κλειστό'))]
+    ];
+    var h = win(I('Windows protection at a glance', 'Η προστασία των Windows με μια ματιά'), '', kv(rows) + '<p class="sub" style="margin:8px 0 0">' + esc(I('These are optional extras of Windows. "Off" is not a fault: ransomware folder protection and attack surface rules are for people who want a stricter setup, and can block some programs. Memory integrity can block some old drivers.', 'Αυτά είναι προαιρετικά πρόσθετα των Windows. Το «κλειστό» δεν είναι βλάβη: η προστασία φακέλων από ransomware και οι κανόνες επιφάνειας επίθεσης είναι για όσους θέλουν αυστηρότερη ρύθμιση και μπορεί να μπλοκάρουν κάποια προγράμματα. Η ακεραιότητα μνήμης μπορεί να μπλοκάρει παλιούς οδηγούς.')) + '</p>');
+    return h;
+  }
+
+  /* ---- gaming checks ---- */
+  function launcherCount() { var SS = V.RT.startupState ? V.RT.startupState() : { list: [] }; return SS.list.filter(function (x) { return x.launcher && x.state === 'active'; }).length; }
+  function gamingHtml() {
+    var gp = arr(g(D, 'gpus', []))[0];
+    var gameish = launcherCount() > 0 || (gp && /geforce|radeon|rtx|gtx|rx\s?\d/i.test(String(gp.name)));
+    if (!gameish) return '';
+    var st = g(D, 'settings', {}) || {}, mods = arr(g(D, 'system.ram.modules', []));
+    var m0 = mods[0], ramTxt = '';
+    if (m0) {
+      var cfg = num(m0.configuredMHz), rated = num(m0.speedMHz);
+      ramTxt = mods.length + ' x ' + m0.gb + ' GB ' + (m0.type || '') + ' at ' + cfg + ' MHz' + (rated && cfg < rated - 100 ? I(' (rated ' + rated + ' MHz: it may be running slower than it can)', ' (η ονομαστική είναι ' + rated + ' MHz: ίσως τρέχει πιο αργά απ’ ό,τι μπορεί)') : '');
+    }
+    var boots = arr(g(D, 'boot.history', [])).slice(0, 5), bavg = boots.length ? Math.round(boots.reduce(function (a, b) { return a + num(b.seconds || b.sec || b.s || 0); }, 0) / boots.length) : 0;
+    var pred = V.active().filter(function (f) { return f.id === 'pred-disk'; })[0];
+    var mouse = M7.mouse || {};
+    var rows = [
+      [I('Screen', 'Οθόνη'), gp && gp.width ? gp.width + ' x ' + gp.height + (gp.refreshHz ? ' at ' + gp.refreshHz + ' Hz' : '') : ''],
+      [I('Graphics card and driver', 'Κάρτα γραφικών και οδηγός'), gp ? gp.name + ', ' + I('driver ', 'οδηγός ') + (gp.driverFriendly || gp.driverVersion) : ''],
+      [I('Memory (RAM)', 'Μνήμη (RAM)'), ramTxt],
+      [I('Hardware-accelerated GPU scheduling', 'Επιτάχυνση χρονοπρογραμματισμού GPU (HAGS)'), onoff(st.gpuScheduling)],
+      [I('Game Mode', 'Game Mode'), onoff(st.gameMode)],
+      [I('Fast Startup', 'Γρήγορη εκκίνηση (Fast Startup)'), onoff(st.fastStartup)],
+      [I('Mouse pointer precision (acceleration)', 'Ακρίβεια δείκτη ποντικιού (επιτάχυνση)'), mouse.speed == null ? '' : (mouse.speed > 0 ? I('on (many gamers switch it off)', 'ανοιχτή (πολλοί gamers την κλείνουν)') : I('off', 'κλειστή'))],
+      [I('Power plan', 'Σχέδιο ενέργειας'), st.powerPlan],
+      [I('Launchers and chat apps running from start-up', 'Launchers και εφαρμογές συνομιλίας που τρέχουν από την εκκίνηση'), String(launcherCount())],
+      [I('Average start-up time', 'Μέσος χρόνος εκκίνησης'), bavg ? bavg + ' s' : ''],
+      [I('Drive space outlook', 'Πρόβλεψη χώρου δίσκου'), pred ? pred.title : '']
+    ];
+    return win(I('Gaming checks', 'Έλεγχοι για gaming'), '', kv(rows) + '<p class="sub" style="margin:8px 0 0">' + esc(I('Only readings. Whether to change any of these is your choice: they are common tuning options, not faults.', 'Μόνο ενδείξεις. Το αν θα αλλάξεις κάποιο είναι δική σου επιλογή: είναι συνηθισμένες ρυθμίσεις βελτιστοποίησης, όχι βλάβες.')) + '</p>');
+  }
+
+  /* ---- folders ---- */
+  function foldersHtml() {
+    var F = M7.folders || {}, ds = F.desktop || {}, dl = F.downloads || {};
+    if (ds.items == null && dl.items == null && M7.hiberfilMB == null) return '';
+    var rows = [
+      [I('Items on the Desktop', 'Στοιχεία στην Επιφάνεια εργασίας'), ds.items == null ? '' : ds.items],
+      [I('Files in Downloads', 'Αρχεία στο Downloads'), dl.files == null ? '' : dl.files + ' (' + V.fmtGB((dl.mb || 0) / 1024) + ')'],
+      [I('Downloads files older than 6 months', 'Αρχεία Downloads παλαιότερα των 6 μηνών'), dl.old == null ? '' : dl.old],
+      [I('Hibernation file', 'Αρχείο αδρανοποίησης'), M7.hiberfilMB == null ? '' : V.fmtGB(M7.hiberfilMB / 1024)]
+    ];
+    return win(I('Desktop, Downloads and hibernation file', 'Επιφάνεια εργασίας, Downloads και αρχείο αδρανοποίησης'), '', kv(rows) + '<p class="sub" style="margin:8px 0 0">' + esc(I('Only counted, never opened. Old files in Downloads are the easiest place to free space: look through them yourself and delete what you no longer need.', 'Μόνο μετρήθηκαν, δεν ανοίχτηκαν. Τα παλιά αρχεία στο Downloads είναι ο πιο εύκολος τρόπος να ελευθερώσεις χώρο: κοίτα τα εσύ και σβήσε όσα δεν χρειάζεσαι.')) + '</p>');
+  }
+
+  /* ---- unsigned downloads: check them yourself on VirusTotal (opens only when you click) ---- */
+  function unsignedHtml() {
+    var dl = arr(g(D, 'extras.forensics.downloads', [])).filter(function (x) { return x.sig && x.sig !== 'Valid' && /\.(exe|msi|dll|scr|ps1|cpl|msix|appx)$/i.test(String(x.name)); });
+    if (!dl.length) return '';
+    var h = sect(I('Downloaded programs without a valid signature', 'Προγράμματα που κατέβηκαν χωρίς έγκυρη υπογραφή'), I('check them yourself; nothing is sent from this page', 'έλεγξέ τα εσύ· από αυτή τη σελίδα δεν στέλνεται τίποτα'));
+    h += '<div class="win"><div class="body">' + tbl([I('File', 'Αρχείο'), I('From', 'Από'), I('Signature', 'Υπογραφή'), I('Check', 'Έλεγχος')], dl.slice(0, 20).map(function (x) {
+      var link = x.sha256 ? '<a class="btn" target="_blank" rel="noopener noreferrer" href="https://www.virustotal.com/gui/file/' + encodeURIComponent(x.sha256) + '">' + esc(I('Look it up on VirusTotal', 'Αναζήτηση στο VirusTotal')) + '</a>' : esc(I('no fingerprint', 'χωρίς αποτύπωμα'));
+      return [x.name, x.host || '', String(x.sig), { html: link }];
+    })) + '<p class="sub" style="margin:8px 0 0">' + esc(I('The button opens the VirusTotal site in a new tab and asks about the fingerprint (SHA-256) of the file, not the file itself, so nothing is uploaded. "Not found" does not mean safe, and a few warnings from rarely used engines are common for small programs. An unsigned program is not always bad: many small free tools are unsigned.', 'Το κουμπί ανοίγει το VirusTotal σε νέα καρτέλα και ρωτά για το αποτύπωμα (SHA-256) του αρχείου, όχι για το ίδιο το αρχείο, άρα δεν ανεβαίνει τίποτα. Το «δεν βρέθηκε» δεν σημαίνει ασφαλές, και λίγες προειδοποιήσεις από σπάνιες μηχανές είναι συνηθισμένες σε μικρά προγράμματα. Ένα πρόγραμμα χωρίς υπογραφή δεν είναι πάντα κακό: πολλά μικρά δωρεάν εργαλεία δεν έχουν.')) + '</p></div></div>';
+    return h;
+  }
+
+  function insightsHtml() {
+    var parts = [startupHtml(), unsignedHtml()];
+    var cards = [protectionHtml(), gamingHtml(), foldersHtml()].filter(Boolean);
+    if (cards.length) parts.push(sect(I('Checks at a glance', 'Έλεγχοι με μια ματιά'), I('read only', 'μόνο ανάγνωση')) + '<div class="grid">' + cards.map(function (c) { return '<div class="s6">' + c + '</div>'; }).join('') + '</div>');
+    return parts.join('');
+  }
+
+  /* ---- Privacy tab extras: browsers, who talks to the internet, saved Wi-Fi ---- */
+  function browsersHtml() {
+    var bs = V.RT.browserPriv ? V.RT.browserPriv() : []; if (!bs.length) return '';
+    var dohTxt = function (b) { if (b.doh == null || b.doh === '') return ''; var v = String(b.doh).toLowerCase(); if (b.engine === 'gecko') return v === '2' || v === '3' ? I('on', 'ανοιχτό') : I('off', 'κλειστό'); return v === 'secure' ? I('on', 'ανοιχτό') : (v === 'automatic' ? I('automatic', 'αυτόματο') : I('off', 'κλειστό')); };
+    var rows = bs.map(function (b) {
+      return [b.browser,
+        b.signedIn == null ? '' : yn(b.signedIn),
+        b.safe == null ? '' : onoff(b.safe) + (b.enhanced ? I(' (enhanced)', ' (ενισχυμένη)') : ''),
+        b.cookies3p == null ? (b.tracking == null ? '' : onoff(b.tracking)) : (b.cookies3p === 1 ? I('blocked', 'μπλοκαρισμένα') : (b.cookies3p === 2 ? I('blocked in private windows', 'μπλοκαρισμένα σε ιδιωτικά παράθυρα') : I('allowed', 'επιτρέπονται'))),
+        b.dnt == null ? '' : onoff(b.dnt),
+        b.suggest == null ? '' : onoff(b.suggest),
+        dohTxt(b),
+        b.passwords == null ? '' : onoff(b.passwords)];
+    });
+    return sect(I('Your browsers', 'Οι browsers σου'), I('only on/off switches were read, never sites, names or passwords', 'διαβάστηκαν μόνο διακόπτες ναι/όχι, ποτέ σελίδες, ονόματα ή κωδικοί')) +
+      '<div class="win"><div class="body">' + tbl([I('Browser', 'Browser'), I('Sync account', 'Συγχρονισμός'), I('Safe Browsing', 'Ασφ. περιήγηση'), I('3rd-party cookies', 'Cookies τρίτων'), I('Do Not Track', 'Do Not Track'), I('Suggestions', 'Προτάσεις'), I('Encrypted DNS', 'Κρυπτ. DNS'), I('Saves passwords', 'Κωδικοί')], rows) +
+      '<p class="sub" style="margin:8px 0 0">' + esc(I('Search suggestions send what you type to the search engine while you type. Signing in to sync copies bookmarks and history to your account. Both are normal and useful, just good to know. Change them in the browser: Settings > Privacy and security.', 'Οι προτάσεις αναζήτησης στέλνουν στη μηχανή αναζήτησης αυτό που γράφεις καθώς το γράφεις. Η σύνδεση για συγχρονισμό αντιγράφει σελιδοδείκτες και ιστορικό στον λογαριασμό σου. Και τα δύο είναι φυσιολογικά και χρήσιμα, απλώς καλό είναι να τα ξέρεις. Άλλαξέ τα στον browser: Ρυθμίσεις > Απόρρητο και ασφάλεια.')) + '</p></div></div>';
+  }
+  function talkersHtml() {
+    var cn = arr(X1.connections); if (!cn.length) return '';
+    var own = {}; arr(M6.connOwners).forEach(function (o) { own[String(o.process).toLowerCase()] = o; });
+    var rows = cn.slice().sort(function (a, b) { return num(b.n) - num(a.n); }).map(function (c) {
+      var o = own[String(c.process).toLowerCase()] || {};
+      return [c.process, o.company || o.product || '', c.n, arr(c.remotes).length];
+    });
+    return sect(I('Who is talking to the internet', 'Ποιος μιλά με το internet'), I('the connections that were open when the scan ran', 'οι συνδέσεις που ήταν ανοιχτές όταν έτρεξε η σάρωση')) +
+      '<div class="win"><div class="body">' + tbl([I('Program', 'Πρόγραμμα'), I('Made by', 'Φτιάχτηκε από'), I('Open connections', 'Ανοιχτές συνδέσεις'), I('Different servers', 'Διαφορετικοί διακομιστές')], rows) +
+      '<p class="sub" style="margin:8px 0 0">' + esc(I('Most programs talk to the internet for a good reason: updates, sync, chat, your browser. Look for a program you do not know. The scan saw only what was open at that moment and did not look at what was sent.', 'Τα περισσότερα προγράμματα μιλούν με το internet για καλό λόγο: ενημερώσεις, συγχρονισμός, συνομιλία, ο browser σου. Ψάξε για κάποιο πρόγραμμα που δεν γνωρίζεις. Η σάρωση είδε μόνο όσα ήταν ανοιχτά εκείνη τη στιγμή και δεν κοίταξε τι στάλθηκε.')) + '</p></div></div>';
+  }
+  function wifiHtml() {
+    var w = arr(X1.wifiSaved); if (!w.length) return '';
+    var open = w.filter(function (x) { return /open|none|wep/i.test(String(x.auth)); }).length;
+    return win(I('Saved Wi-Fi networks', 'Αποθηκευμένα δίκτυα Wi-Fi'), w.length + '', kv([[I('Networks this PC remembers', 'Δίκτυα που θυμάται ο υπολογιστής'), w.length], [I('Open or weak (no password or WEP)', 'Ανοιχτά ή αδύναμα (χωρίς κωδικό ή WEP)'), open]]) + '<p class="sub" style="margin:8px 0 0">' + esc(I('Names are not shown here. A remembered open network can be joined automatically in a cafe, so it is worth forgetting the ones you no longer use: Settings > Network & internet > Wi-Fi > Manage known networks.', 'Τα ονόματα δεν εμφανίζονται εδώ. Ένα θυμημένο ανοιχτό δίκτυο μπορεί να συνδεθεί μόνο του σε καφέ, οπότε αξίζει να ξεχάσεις όσα δεν χρησιμοποιείς: Ρυθμίσεις > Δίκτυο και internet > Wi-Fi > Διαχείριση γνωστών δικτύων.')) + '</p>');
+  }
+  function privacyHtml() { return browsersHtml() + talkersHtml() + (wifiHtml() ? sect(I('Wi-Fi', 'Wi-Fi'), '') + wifiHtml() : ''); }
+
+  return { insightsHtml: insightsHtml, privacyHtml: privacyHtml };
 })(V);
 
 /* VEAGLE PC Check 0.6.1 - visual layer: PC map, KPI tiles with gauges and sparklines, area tiles, findings overview */
@@ -6652,7 +6943,7 @@ var SHARE = (function (V, AI) {
         (fx.servicesNew || []).forEach(function (x) { x.path = x.path ? '<PATH>' : ''; x.account = /^(localsystem|nt |local service|network service)/i.test(String(x.account || '')) ? x.account : '<ACCOUNT>'; });
         (fx.bam || []).forEach(function (x) { x.path = String(x.path || '').replace(/\\Users\\[^\\]+\\/i, '\\Users\\<user>\\'); });
         ((fx.shimcache || {}).sus || []).forEach(function (x) { x.path = String(x.path || '').replace(/\\Users\\[^\\]+\\/i, '\\Users\\<user>\\'); });
-        (fx.downloads || []).forEach(function (x, i) { x.name = '<FILE ' + (i + 1) + '>' + (/\.[A-Za-z0-9]{2,5}$/.exec(x.name) || [''])[0]; x.host = x.host ? '<SITE>' : ''; x.signer = x.signer ? '<SIGNER>' : ''; });
+        (fx.downloads || []).forEach(function (x, i) { x.name = '<FILE ' + (i + 1) + '>' + (/\.[A-Za-z0-9]{2,5}$/.exec(x.name) || [''])[0]; x.host = x.host ? '<SITE>' : ''; x.sha256 = x.sha256 ? '<HASH>' : ''; x.signer = x.signer ? '<SIGNER>' : ''; });
         var dfx = fx.defender || {};
         dfx.exclPaths = (dfx.exclPaths || []).map(function (x, i) { return '<PATH ' + (i + 1) + '>'; });
         dfx.exclProcs = (dfx.exclProcs || []).map(function (x, i) { return '<PROGRAM ' + (i + 1) + '>'; });

@@ -3979,7 +3979,19 @@
      "zone": 3,
      "host": "github.com",
      "sig": "Valid",
-     "signer": "ShareX Team"
+     "signer": "ShareX Team",
+     "sha256": ""
+    },
+    {
+     "name": "setup_tool.exe",
+     "folder": "Downloads",
+     "t": "2026-10-29T16:35:00",
+     "sizeKB": 3100,
+     "zone": 3,
+     "host": "example-files.net",
+     "sig": "NotSigned",
+     "signer": "",
+     "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     }
    ],
    "defender": {
@@ -4230,6 +4242,360 @@
     "status": "InProgress",
     "hasError": false
    }
+  },
+  "more6": {
+   "startup": [
+    {
+     "name": "GoogleDriveFS",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "googledrivefs",
+     "hasCmd": true
+    },
+    {
+     "name": "OneDrive",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "onedrive",
+     "hasCmd": true
+    },
+    {
+     "name": "Discord",
+     "scope": "user",
+     "enabled": true,
+     "running": false,
+     "proc": "discord",
+     "hasCmd": true
+    },
+    {
+     "name": "EpicGamesLauncher",
+     "scope": "user",
+     "enabled": false,
+     "running": true,
+     "proc": "epicgameslauncher",
+     "hasCmd": true
+    },
+    {
+     "name": "CCXProcess",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "ccxprocess",
+     "hasCmd": true
+    },
+    {
+     "name": "BraveSoftware Update",
+     "scope": "user",
+     "enabled": true,
+     "running": false,
+     "proc": "bravesoftware update",
+     "hasCmd": true
+    },
+    {
+     "name": "Adobe Acrobat Synchronizer",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "adobe acrobat synchronizer",
+     "hasCmd": true
+    },
+    {
+     "name": "Agent Tray",
+     "scope": "user",
+     "enabled": false,
+     "running": true,
+     "proc": "agent tray",
+     "hasCmd": true
+    },
+    {
+     "name": "ACDSeeCommanderFree",
+     "scope": "user",
+     "enabled": true,
+     "running": false,
+     "proc": "acdseecommanderfree",
+     "hasCmd": true
+    },
+    {
+     "name": "Wargaming.net Game Center",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "wargaming.net game center",
+     "hasCmd": true
+    },
+    {
+     "name": "Studio.QuickLook",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "studio.quicklook",
+     "hasCmd": true
+    },
+    {
+     "name": "EADM",
+     "scope": "user",
+     "enabled": false,
+     "running": false,
+     "proc": "eadm",
+     "hasCmd": true
+    },
+    {
+     "name": "FilmoraTray",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "filmoratray",
+     "hasCmd": true
+    },
+    {
+     "name": "NVIDIA Broadcast",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "nvidia broadcast",
+     "hasCmd": true
+    },
+    {
+     "name": "GogGalaxy",
+     "scope": "user",
+     "enabled": true,
+     "running": false,
+     "proc": "goggalaxy",
+     "hasCmd": true
+    },
+    {
+     "name": "MicrosoftEdgeAutoLaunch",
+     "scope": "user",
+     "enabled": false,
+     "running": true,
+     "proc": "microsoftedgeautolaunch",
+     "hasCmd": true
+    },
+    {
+     "name": "AnyDesk",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "anydesk",
+     "hasCmd": true
+    },
+    {
+     "name": "SecurityHealth",
+     "scope": "user",
+     "enabled": true,
+     "running": false,
+     "proc": "securityhealth",
+     "hasCmd": true
+    },
+    {
+     "name": "RtkAudUService",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "rtkauduservice",
+     "hasCmd": true
+    },
+    {
+     "name": "SteelSeriesGG",
+     "scope": "user",
+     "enabled": false,
+     "running": true,
+     "proc": "steelseriesgg",
+     "hasCmd": true
+    },
+    {
+     "name": "Bdagent",
+     "scope": "user",
+     "enabled": true,
+     "running": false,
+     "proc": "bdagent",
+     "hasCmd": true
+    },
+    {
+     "name": "ACFW02EN",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "acfw02en",
+     "hasCmd": true
+    },
+    {
+     "name": "BdVpnApp",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "bdvpnapp",
+     "hasCmd": true
+    },
+    {
+     "name": "Steam",
+     "scope": "user",
+     "enabled": false,
+     "running": false,
+     "proc": "steam",
+     "hasCmd": true
+    },
+    {
+     "name": "Viber",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "viber",
+     "hasCmd": true
+    },
+    {
+     "name": "Spotify",
+     "scope": "user",
+     "enabled": true,
+     "running": true,
+     "proc": "spotify",
+     "hasCmd": true
+    },
+    {
+     "name": "Zoom",
+     "scope": "user",
+     "enabled": true,
+     "running": false,
+     "proc": "zoom",
+     "hasCmd": true
+    },
+    {
+     "name": "Dropbox",
+     "scope": "user",
+     "enabled": false,
+     "running": true,
+     "proc": "dropbox",
+     "hasCmd": true
+    }
+   ],
+   "browserPrivacy": [
+    {
+     "browser": "Chrome",
+     "engine": "chromium",
+     "signedIn": true,
+     "dnt": false,
+     "safe": true,
+     "enhanced": false,
+     "passwords": true,
+     "cookies3p": 2,
+     "suggest": true,
+     "doh": "automatic"
+    },
+    {
+     "browser": "Edge",
+     "engine": "chromium",
+     "signedIn": false,
+     "dnt": false,
+     "safe": true,
+     "enhanced": false,
+     "passwords": true,
+     "cookies3p": 0,
+     "suggest": true,
+     "doh": "off"
+    },
+    {
+     "browser": "Firefox",
+     "engine": "gecko",
+     "dnt": false,
+     "tracking": true,
+     "blockLevel": "standard",
+     "telemetry": true,
+     "doh": "0"
+    }
+   ],
+   "ports": {
+    "tcpTotal": 412,
+    "states": {
+     "Established": 96,
+     "TimeWait": 233,
+     "Listen": 44
+    },
+    "top": [
+     {
+      "process": "chrome",
+      "n": 88
+     },
+     {
+      "process": "vmware-vmx",
+      "n": 54
+     }
+    ],
+    "udpTotal": 120,
+    "udpTop": [
+     {
+      "process": "svchost",
+      "n": 40
+     }
+    ],
+    "dynStart": 49152,
+    "dynNum": 16384
+   },
+   "connOwners": [
+    {
+     "process": "chrome",
+     "company": "Google LLC",
+     "product": "Google Chrome"
+    },
+    {
+     "process": "Teams",
+     "company": "Microsoft Corporation",
+     "product": "Microsoft Teams"
+    },
+    {
+     "process": "OneDrive",
+     "company": "Microsoft Corporation",
+     "product": "Microsoft OneDrive"
+    }
+   ],
+   "diskMap": [
+    {
+     "number": 0,
+     "name": "Samsung SSD 860 EVO 1TB",
+     "bus": "SATA",
+     "sizeGB": 932,
+     "offline": false,
+     "style": "GPT"
+    },
+    {
+     "number": 1,
+     "name": "Msft Virtual Disk",
+     "bus": "File Backed Virtual",
+     "sizeGB": 64,
+     "offline": false,
+     "style": "GPT"
+    }
+   ]
+  },
+  "more7": {
+   "defenderExtra": {
+    "controlledFolders": 0,
+    "networkProtection": 0,
+    "asrRules": 0,
+    "pua": 1,
+    "cloud": 2,
+    "sampleConsent": 1
+   },
+   "mouse": {
+    "speed": 1,
+    "sensitivity": 10
+   },
+   "folders": {
+    "desktop": {
+     "items": 38,
+     "files": 30,
+     "mb": 420,
+     "old": 12
+    },
+    "downloads": {
+     "items": 210,
+     "files": 190,
+     "mb": 24800,
+     "old": 140
+    }
+   },
+   "hiberfilMB": 12800
   },
   "more5": {
    "power": {

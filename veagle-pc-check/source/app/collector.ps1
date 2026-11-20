@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.6.1'
+$script:Version = '2.7.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
@@ -267,7 +267,7 @@ catch {
 $raw = Join-Path $out 'raw'
 New-Item -ItemType Directory -Force -Path $raw | Out-Null
 
-$TOTAL = 23
+$TOTAL = 25
 
 # msinfo32 takes a minute or two, so it starts in the background and is collected at the end.
 $msinfoProc = $null
@@ -2023,7 +2023,7 @@ if ($fxFull) {
             }
         }
         $sel = @($cand | Sort-Object { $_.f.LastWriteTime } -Descending | Select-Object -First 70)
-        $sigN = 0
+        $sigN = 0; $hashN = 0
         foreach ($c in $sel) {
             $f = $c.f; $zone = $null; $host1 = ''
             try {
@@ -2038,7 +2038,9 @@ if ($fxFull) {
                 $sigN++
                 try { $sa = Get-AuthenticodeSignature -LiteralPath $f.FullName -ErrorAction Stop; $sg = [string]$sa.Status; if ($sa.SignerCertificate) { $signer = ([string]$sa.SignerCertificate.Subject) -replace '^.*?CN=([^,]+).*$', '$1' } } catch { }
             }
-            $dl += [pscustomobject]@{ name = $f.Name; folder = $c.folder; t = Iso $f.LastWriteTime; sizeKB = [int]($f.Length / 1KB); zone = $zone; host = $host1; sig = $sg; signer = $signer }
+            $sh = ''
+            if ($sg -and $sg -ne 'Valid' -and $hashN -lt 12) { $hashN++; try { $sh = [string](Get-FileHash -LiteralPath $f.FullName -Algorithm SHA256 -ErrorAction Stop).Hash } catch { } }
+            $dl += [pscustomobject]@{ name = $f.Name; folder = $c.folder; t = Iso $f.LastWriteTime; sizeKB = [int]($f.Length / 1KB); zone = $zone; host = $host1; sig = $sg; signer = $signer; sha256 = $sh }
         }
     } catch { }
 }
@@ -2605,6 +2607,181 @@ $m5['privacy2'] = [pscustomobject]@{
 }
 $extras | Add-Member -NotePropertyName more5 -NotePropertyValue ([pscustomobject]$m5) -Force
 
+# ---------------------------------------------------------------- 24. what really starts, browser privacy, ports and disks (read-only)
+Step 24 $TOTAL 'Start-up programs that are really active, browser privacy switches, network ports, disk numbers (read-only)'
+$m6 = [ordered]@{}
+# ---- 24a. start-up programs: registered, allowed by Windows, and running right now
+$runProcs = @{}; $runPaths = @{}
+foreach ($pp in @(Get-Process -ErrorAction SilentlyContinue)) {
+    $runProcs[([string]$pp.Name).ToLower()] = 1
+    try { if ($pp.Path) { $runPaths[([string]$pp.Path).ToLower()] = 1 } } catch { }
+}
+$suOut = @()
+$apprBase = '\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\'
+foreach ($it in @($startup.items)) {
+    $loc = [string]$it.location; $nm = [string]$it.name; $cmd = [string]$it.command
+    $scope = 'other'; $apprKey = $null
+    if ($loc -match '(?i)^HKLM\\.*WOW6432Node') { $scope = 'machine'; $apprKey = 'HKLM:' + $apprBase + 'Run32' }
+    elseif ($loc -match '(?i)^HKLM\\') { $scope = 'machine'; $apprKey = 'HKLM:' + $apprBase + 'Run' }
+    elseif ($loc -match '(?i)^HKU\\([^\\]+)\\') {
+        $sid = $Matches[1]
+        if ($sid -match '^S-1-5-21-') { $scope = 'user' } else { $scope = 'system' }
+        $apprKey = 'Registry::HKEY_USERS\' + $sid + $apprBase + 'Run'
+    }
+    elseif ($loc -match '(?i)startup') { $scope = 'folder' }
+    $enabled = $true
+    if ($apprKey) {
+        try {
+            $pv = (Get-ItemProperty -LiteralPath $apprKey -ErrorAction Stop).PSObject.Properties[$nm]
+            if ($pv -and $pv.Value -is [byte[]] -and $pv.Value.Length -gt 0 -and (($pv.Value[0] -band 1) -eq 1)) { $enabled = $false }
+        } catch { }
+    }
+    $ep = Get-ExePath $cmd
+    $leaf = ''
+    if ($ep) { try { $leaf = [IO.Path]::GetFileNameWithoutExtension($ep).ToLower() } catch { } }
+    $running = $false
+    if ($ep -and $runPaths.ContainsKey($ep.ToLower())) { $running = $true }
+    elseif ($leaf -and $runProcs.ContainsKey($leaf)) { $running = $true }
+    if (-not $running -and $cmd -match '(?i)--processStart\s+"?([^\s"]+?)(\.exe)?"?(\s|$)') { if ($runProcs.ContainsKey($Matches[1].ToLower())) { $running = $true } }
+    $suOut += [pscustomobject]@{ name = $nm; scope = $scope; enabled = $enabled; running = $running; proc = $leaf; hasCmd = [bool]$cmd }
+}
+$m6['startup'] = @($suOut)
+
+# ---- 24b. browser privacy switches (only on/off values, never sites, names or passwords)
+function Pj($o, [string]$path) {
+    $cur = $o
+    foreach ($seg in $path.Split('.')) {
+        if ($null -eq $cur) { return $null }
+        $pr = $cur.PSObject.Properties[$seg]
+        if (-not $pr) { return $null }
+        $cur = $pr.Value
+    }
+    return $cur
+}
+function Bv($v) { if ($null -eq $v) { return $null } try { return [bool]$v } catch { return $null } }
+$bpOut = @()
+$chromium = @(
+    @{ n = 'Chrome'; p = (Join-Path $env:LOCALAPPDATA 'Google\Chrome\User Data') },
+    @{ n = 'Edge';   p = (Join-Path $env:LOCALAPPDATA 'Microsoft\Edge\User Data') },
+    @{ n = 'Brave';  p = (Join-Path $env:LOCALAPPDATA 'BraveSoftware\Brave-Browser\User Data') }
+)
+foreach ($cb in $chromium) {
+    try {
+        $pf = Join-Path $cb.p 'Default\Preferences'
+        if (-not (Test-Path -LiteralPath $pf)) { continue }
+        $j = Get-Content -Raw -Encoding UTF8 -LiteralPath $pf | ConvertFrom-Json
+        $dohMode = $null
+        try { $ls = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $cb.p 'Local State') | ConvertFrom-Json; $dohMode = [string](Pj $ls 'dns_over_https.mode') } catch { }
+        $ai = Pj $j 'account_info'
+        $cc = Pj $j 'profile.cookie_controls_mode'
+        $bpOut += [pscustomobject]@{
+            browser = $cb.n; engine = 'chromium'
+            signedIn = [bool]($ai -and @($ai).Count -gt 0)
+            dnt = (Bv (Pj $j 'enable_do_not_track'))
+            safe = (Bv (Pj $j 'safebrowsing.enabled')); enhanced = (Bv (Pj $j 'safebrowsing.enhanced'))
+            passwords = (Bv (Pj $j 'credentials_enable_service'))
+            cookies3p = $(if ($null -ne $cc) { [int]$cc } else { $null })
+            suggest = (Bv (Pj $j 'search.suggest_enabled'))
+            doh = $dohMode
+        }
+    } catch { }
+}
+try {
+    $ffRoot = Join-Path $env:APPDATA 'Mozilla\Firefox\Profiles'
+    if (Test-Path -LiteralPath $ffRoot) {
+        $ffp = @(Get-ChildItem -LiteralPath $ffRoot -Directory -ErrorAction Stop | Sort-Object { if ($_.Name -match 'default-release') { 0 } else { 1 } }) | Select-Object -First 1
+        if ($ffp) {
+            $txt = ''
+            foreach ($fn in @('prefs.js', 'user.js')) { $fp = Join-Path $ffp.FullName $fn; if (Test-Path -LiteralPath $fp) { $txt += (Get-Content -Raw -Encoding UTF8 -LiteralPath $fp) + "`n" } }
+            function Fpref([string]$k) { $m = [regex]::Match($txt, 'user_pref\("' + [regex]::Escape($k) + '",\s*([^)]+?)\);'); if ($m.Success) { return $m.Groups[1].Value.Trim() } return $null }
+            $trr = Fpref 'network.trr.mode'; $tp = Fpref 'privacy.trackingprotection.enabled'; $fdnt = Fpref 'privacy.donottrackheader.enabled'; $tel = Fpref 'datareporting.healthreport.uploadEnabled'; $cbk = Fpref 'browser.contentblocking.category'
+            $bpOut += [pscustomobject]@{
+                browser = 'Firefox'; engine = 'gecko'
+                dnt = $(if ($fdnt) { $fdnt -eq 'true' } else { $null })
+                tracking = $(if ($tp) { $tp -eq 'true' } else { $null })
+                blockLevel = $(if ($cbk) { ($cbk -replace '"', '') } else { $null })
+                telemetry = $(if ($tel) { $tel -eq 'true' } else { $null })
+                doh = $(if ($trr) { [string]$trr } else { $null })
+            }
+        }
+    }
+} catch { }
+$m6['browserPrivacy'] = @($bpOut)
+
+# ---- 24c. network ports: how many are in use and who holds them (counts and program names only)
+$np = [ordered]@{ tcpTotal = $null; states = $null; top = @(); udpTotal = $null; udpTop = @(); dynStart = $null; dynNum = $null }
+try {
+    $pmap = @{}
+    foreach ($pp in @(Get-Process -ErrorAction SilentlyContinue)) { $pmap[[int]$pp.Id] = [string]$pp.Name }
+    $tc = @(Get-NetTCPConnection -ErrorAction Stop)
+    $np.tcpTotal = $tc.Count
+    $st = [ordered]@{}
+    foreach ($g in @($tc | Group-Object State)) { $st[[string]$g.Name] = [int]$g.Count }
+    $np.states = [pscustomobject]$st
+    $np.top = @($tc | Group-Object OwningProcess | Sort-Object Count -Descending | Select-Object -First 6 | ForEach-Object { [pscustomobject]@{ process = [string]$pmap[[int]$_.Name]; n = [int]$_.Count } })
+    $ue = @(Get-NetUDPEndpoint -ErrorAction Stop)
+    $np.udpTotal = $ue.Count
+    $np.udpTop = @($ue | Group-Object OwningProcess | Sort-Object Count -Descending | Select-Object -First 4 | ForEach-Object { [pscustomobject]@{ process = [string]$pmap[[int]$_.Name]; n = [int]$_.Count } })
+} catch { }
+try { $ts = Get-NetTCPSetting -SettingName Internet -ErrorAction Stop; $np.dynStart = [int]$ts.DynamicPortRangeStartPort; $np.dynNum = [int]$ts.DynamicPortRangeNumberOfPorts } catch { }
+$m6['ports'] = [pscustomobject]$np
+
+# ---- 24d. who the programs that talk to the internet belong to (company name from the program file)
+$cmp = @()
+try {
+    foreach ($cn in @($extras.more.connections)) {
+        $co = ''; $pr = ''
+        try { $gp = Get-Process -Name ([string]$cn.process) -ErrorAction Stop | Select-Object -First 1; $co = [string]$gp.Company; $pr = [string]$gp.Product } catch { }
+        $cmp += [pscustomobject]@{ process = [string]$cn.process; company = $co; product = $pr }
+    }
+} catch { }
+$m6['connOwners'] = @($cmp)
+
+# ---- 24e. disk numbers: so that "Disk 3" in the Windows logs can be matched to a real drive
+$dm = @()
+try {
+    $dm = @(Get-Disk -ErrorAction Stop | ForEach-Object { [pscustomobject]@{ number = [int]$_.Number; name = [string]$_.FriendlyName; bus = [string]$_.BusType; sizeGB = [int]($_.Size / 1GB); offline = [bool]$_.IsOffline; style = [string]$_.PartitionStyle } })
+} catch { }
+$m6['diskMap'] = @($dm)
+$extras | Add-Member -NotePropertyName more6 -NotePropertyValue ([pscustomobject]$m6) -Force
+
+# ---------------------------------------------------------------- 25. extra protection switches, mouse, folders (read-only)
+Step 25 $TOTAL 'Extra Defender switches, mouse setting, size of Desktop and Downloads (read-only)'
+$m7 = [ordered]@{}
+try {
+    $mp7 = Get-MpPreference -ErrorAction Stop
+    $m7['defenderExtra'] = [pscustomobject]@{
+        controlledFolders = $(if ($null -ne $mp7.EnableControlledFolderAccess) { [int]$mp7.EnableControlledFolderAccess } else { $null })
+        networkProtection = $(if ($null -ne $mp7.EnableNetworkProtection) { [int]$mp7.EnableNetworkProtection } else { $null })
+        asrRules = @($mp7.AttackSurfaceReductionRules_Ids | Where-Object { $_ }).Count
+        pua = $(if ($null -ne $mp7.PUAProtection) { [int]$mp7.PUAProtection } else { $null })
+        cloud = $(if ($null -ne $mp7.MAPSReporting) { [int]$mp7.MAPSReporting } else { $null })
+        sampleConsent = $(if ($null -ne $mp7.SubmitSamplesConsent) { [int]$mp7.SubmitSamplesConsent } else { $null })
+    }
+} catch { $m7['defenderExtra'] = $null }
+$m7['mouse'] = [pscustomobject]@{ speed = (ToIntOrNull (Rg 'HKCU:\Control Panel\Mouse' 'MouseSpeed')); sensitivity = (ToIntOrNull (Rg 'HKCU:\Control Panel\Mouse' 'MouseSensitivity')) }
+function Top-Level-Size([string]$p) {
+    $r = [pscustomobject]@{ items = $null; files = $null; mb = $null; old = $null }
+    try {
+        if (-not (Test-Path -LiteralPath $p)) { return $r }
+        $all = @(Get-ChildItem -LiteralPath $p -Force -ErrorAction Stop)
+        $fl = @($all | Where-Object { -not $_.PSIsContainer })
+        $r.items = $all.Count; $r.files = $fl.Count
+        $r.mb = [int]((($fl | Measure-Object Length -Sum).Sum) / 1MB)
+        $cut = (Get-Date).AddDays(-180)
+        $r.old = @($fl | Where-Object { $_.LastWriteTime -lt $cut }).Count
+    } catch { }
+    return $r
+}
+$m7['folders'] = [pscustomobject]@{
+    desktop = (Top-Level-Size ([Environment]::GetFolderPath('Desktop')))
+    downloads = (Top-Level-Size (Join-Path $env:USERPROFILE 'Downloads'))
+}
+$hib = $null
+try { $hf = Get-Item -LiteralPath (Join-Path $env:SystemDrive 'hiberfil.sys') -Force -ErrorAction Stop; $hib = [int]($hf.Length / 1MB) } catch { }
+$m7['hiberfilMB'] = $hib
+$extras | Add-Member -NotePropertyName more7 -NotePropertyValue ([pscustomobject]$m7) -Force
+
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }
 
@@ -2650,6 +2827,8 @@ $covItems += Add-Cov 'secpol' $true $false ''
 $covItems += Add-Cov 'sfc' $false $true ''
 $covItems += Add-Cov 'traces' $true $false ''
 $covItems += Add-Cov 'settings' $false $false ''
+$covItems += Add-Cov 'startupState' $false $false ''
+$covItems += Add-Cov 'browserPriv' $false $false ''
 $covItems += Add-Cov 'rebar' $false $true $(if (-not $m5['rebar'].checked -and -not $Quick) { 'na' } else { '' })
 $stepTimes = @()
 foreach ($sk in @($script:StepSec.Keys | Sort-Object)) {

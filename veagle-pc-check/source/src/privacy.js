@@ -90,6 +90,7 @@ var PRIV = (function (V) {
       [I('Screen turns off after (plugged in)', 'Η οθόνη σβήνει μετά από (στην πρίζα)'), P.acDisplayMin == null ? '' : (P.acDisplayMin === 0 ? I('never', 'ποτέ') : P.acDisplayMin + ' min')],
       [I('Lock the PC yourself', 'Κλείδωσε μόνος σου τον υπολογιστή'), I('hold the Windows key and press L', 'κράτα πατημένο το πλήκτρο Windows και πάτα L')]
     ])) + '</div></div>';
+    if (typeof V3 !== 'undefined') h += V3.privacyHtml();
     el.innerHTML = h;
     var b = el.querySelector('[data-area-go]'); if (b) b.addEventListener('click', function () { if (typeof VIZ2 !== 'undefined' && VIZ2.goArea) VIZ2.goArea('Privacy'); });
   }

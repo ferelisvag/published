@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v3.2.2
+VEAGLE PC CHECK  v3.3.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,11 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 3.3.0
+- New tab "Live": explains Veagle Eye (a separate free program for live sensors) and opens its page in a new browser tab, only when you press the button. For live data the black Veagle Eye window must stay open; if you close it, the live data stops.
+- New file VEAGLE-PC-Check-Live.bat: starts VeagleEye.exe if it is in the same folder. It explains first and asks before it starts anything.
+- New box in the Help & AI tab: "How to open a ticket with your technician", step by step, with a ready text you can copy (no name, no serial numbers, no Wi-Fi, no accounts).
 
 NEW IN 3.2.2
 - New file VEAGLE-PC-Check-NoNetwork.bat: the same scan with no internet traffic at all (no winget, no DNS lookups). Only the 5 pings to your own router remain. The report says which checks were skipped.

@@ -246,9 +246,62 @@ var HELP = (function (V, UI, AI, SHARE, XLSX) {
       '<div>' + box('hbSend', 'Send the report to your IT helper', 'Στείλε την αναφορά στον τεχνικό σου', sendHtml(), o('hbSend', true)) + '</div>' +
       '<div>' + box('hbSym', 'What is wrong? Pick what bothers you', 'Τι δεν πάει καλά; Διάλεξε τι σε ενοχλεί', symptomsHtml(), o('hbSym', true)) +
       box('hbSince', 'Since when? What changed before the problem', 'Από πότε; Τι άλλαξε πριν το πρόβλημα', sinceHtml(), o('hbSince', false)) +
+      box('hbTicket', 'How to open a ticket with your technician', 'Πώς ανοίγω ένα ticket με τον τεχνικό', ticketHtml(), o('hbTicket', false)) +
       box('hbRemote', 'Can my helper connect to this PC?', 'Μπορεί ο τεχνικός να συνδεθεί σε αυτόν τον υπολογιστή;', remoteHtml(), o('hbRemote', false)) +
       box('hbDev', 'Devices: sound, camera, Bluetooth, printers', 'Συσκευές: ήχος, κάμερα, Bluetooth, εκτυπωτές', devicesHtml(), o('hbDev', false)) +
       box('hbSens', 'Who used the camera, microphone or location?', 'Ποιος χρησιμοποίησε κάμερα, μικρόφωνο ή τοποθεσία;', sensorsHtml(), o('hbSens', false)) + '</div></div>';
+  }
+
+
+  /* ---------------- οδηγός ticket ---------------- */
+  function ticketText() {
+    var o = g(D, 'system.os', {}) || {}, L = [], open = V.openList ? V.openList() : [], i, f, t;
+    L.push(I('Subject: [short title of the problem] - Windows PC', 'Θέμα: [σύντομος τίτλος του προβλήματος] - υπολογιστής Windows'));
+    L.push('');
+    L.push(I('1. What is wrong (in my own words):', '1. Τι δεν πάει καλά (με δικά μου λόγια):'));
+    L.push(st.problem ? st.problem : '   ...');
+    L.push('');
+    L.push(I('2. Since when / what changed before it started:', '2. Από πότε / τι άλλαξε πριν ξεκινήσει:'));
+    L.push(st.since ? st.since : '   ...');
+    L.push('');
+    L.push(I('3. How often it happens (every time / sometimes / once):', '3. Πόσο συχνά συμβαίνει (κάθε φορά / μερικές φορές / μία φορά):'));
+    L.push(st.often ? st.often : '   ...');
+    L.push('');
+    L.push(I('4. What I already tried:', '4. Τι έχω ήδη δοκιμάσει:'));
+    L.push(st.tried ? st.tried : '   ...');
+    L.push('');
+    L.push(I('5. How urgent it is (I cannot work / it bothers me / it can wait):', '5. Πόσο επείγον είναι (δεν μπορώ να δουλέψω / με ενοχλεί / μπορεί να περιμένει):'));
+    L.push('   ...');
+    L.push('');
+    L.push(I('6. My computer (from the PC Check scan):', '6. Ο υπολογιστής μου (από τη σάρωση PC Check):'));
+    L.push('   ' + (o.productName || o.caption || 'Windows') + (o.displayVersion ? ' ' + o.displayVersion : '') + (o.build ? ', build ' + o.build : '') + (o.arch ? ', ' + o.arch : ''));
+    if (V.score && V.score.overall != null) L.push('   ' + I('PC Check score: ', 'Βαθμός PC Check: ') + V.score.overall + '/100');
+    L.push('   ' + I('Scan date: ', 'Ημερομηνία σάρωσης: ') + String(g(D, 'meta.generated', '')).slice(0, 10));
+    if (open.length) {
+      L.push('   ' + I('Main findings:', 'Κύρια ευρήματα:'));
+      for (i = 0; i < open.length && i < 6; i++) { f = open[i]; t = V.tf ? V.tf(f) : f; L.push('   - ' + t.title); }
+    }
+    L.push('');
+    L.push(I('7. When and how I can be reached / when I am available:', '7. Πότε και πώς μπορείτε να με βρείτε / πότε είμαι διαθέσιμος:'));
+    L.push('   ...');
+    L.push('');
+    L.push(I('The full PC Check report is attached as a .zip file.', 'Επισυνάπτεται η πλήρης αναφορά PC Check σε αρχείο .zip.'));
+    return L.join('\n');
+  }
+  function ticketHtml() {
+    var sp = supportInfo(), who = sp.name ? esc(sp.name) : esc(I('your technician', 'ο τεχνικός σου'));
+    var h = '<p class="sub">' + esc(I('A "ticket" is just a written request for help. A good one gets solved faster, because the technician does not have to ask you ten questions first.', 'Το «ticket» είναι απλώς ένα γραπτό αίτημα βοήθειας. Ένα καλό ticket λύνεται πιο γρήγορα, γιατί ο τεχνικός δεν χρειάζεται να σε ρωτήσει δέκα ερωτήσεις πρώτα.')) + '</p><ol>' +
+      '<li><b>' + esc(I('Write what is wrong in plain words.', 'Γράψε τι δεν πάει καλά με απλά λόγια.')) + '</b> ' + esc(I('Say what you see ("the screen goes black"), not what you think the cause is.', 'Πες τι βλέπεις («η οθόνη γίνεται μαύρη»), όχι τι νομίζεις ότι φταίει.')) + '</li>' +
+      '<li><b>' + esc(I('Say since when, and what changed.', 'Πες από πότε και τι άλλαξε.')) + '</b> ' + esc(I('A new program, an update, a power cut, moving the PC: all useful.', 'Ένα νέο πρόγραμμα, μια ενημέρωση, μια διακοπή ρεύματος, μετακίνηση του υπολογιστή: όλα βοηθούν.')) + '</li>' +
+      '<li><b>' + esc(I('Say what you already tried.', 'Πες τι έχεις ήδη δοκιμάσει.')) + '</b> ' + esc(I('Restart, other cable, other program. This avoids repeating the same steps.', 'Επανεκκίνηση, άλλο καλώδιο, άλλο πρόγραμμα. Έτσι δεν επαναλαμβάνονται τα ίδια βήματα.')) + '</li>' +
+      '<li><b>' + esc(I('Say how urgent it is.', 'Πες πόσο επείγον είναι.')) + '</b> ' + esc(I('"I cannot work" is different from "it bothers me".', 'Το «δεν μπορώ να δουλέψω» είναι άλλο από το «με ενοχλεί».')) + '</li>' +
+      '<li><b>' + esc(I('Attach the report.', 'Επισύναψε την αναφορά.')) + '</b> ' + esc(I('Use the box "Send the report to your IT helper" above: it makes one .zip file. Attach it to your message to ', 'Χρησιμοποίησε το κουτί «Στείλε την αναφορά στον τεχνικό σου» παραπάνω: φτιάχνει ένα αρχείο .zip. Επισύναψέ το στο μήνυμά σου προς ')) + who + '.</li>' +
+      '<li><b>' + esc(I('Never write passwords or card numbers in a ticket.', 'Ποτέ μη γράφεις κωδικούς ή αριθμούς καρτών σε ticket.')) + '</b> ' + esc(I('A real technician will never ask for them in a message.', 'Ένας πραγματικός τεχνικός δεν θα τους ζητήσει ποτέ σε μήνυμα.')) + '</li>' +
+      '<li><b>' + esc(I('Send it, then wait for the answer.', 'Στείλ’ το και περίμενε την απάντηση.')) + '</b> ' + esc(I('You press send yourself. If it is urgent, also make a phone call.', 'Το στέλνεις εσύ. Αν είναι επείγον, κάνε και ένα τηλεφώνημα.')) + '</li></ol>' +
+      '<p class="sub">' + esc(I('Below is a ready text. Press the button to copy it, paste it in your e-mail or message, and fill in the "..." places. Nothing is sent from here. It contains no name, no serial number, no Wi-Fi and no account details.', 'Παρακάτω είναι ένα έτοιμο κείμενο. Πάτα το κουμπί για να το αντιγράψεις, επικόλλησέ το στο email ή στο μήνυμά σου και συμπλήρωσε τα σημεία «...». Τίποτα δεν στέλνεται από εδώ. Δεν περιέχει όνομα, σειριακούς αριθμούς, Wi-Fi ή στοιχεία λογαριασμών.')) + '</p>' +
+      '<textarea id="hTicketTxt" class="ticketbox" rows="16" readonly aria-label="' + esc(I('Ready ticket text', 'Έτοιμο κείμενο ticket')) + '" style="width:100%;font:12px/1.5 var(--mono,monospace)">' + esc(ticketText()) + '</textarea>' +
+      '<div class="btns"><button class="btn primary" type="button" id="hTicketCopy">' + esc(I('Copy the ticket text', 'Αντιγραφή του κειμένου')) + '</button></div>';
+    return h;
   }
 
   function init() {
@@ -258,6 +311,7 @@ var HELP = (function (V, UI, AI, SHARE, XLSX) {
       var t;
       if ((t = e.target.closest('[data-hseg]'))) { st.seg = t.getAttribute('data-hseg'); render(); return; }
       if ((t = e.target.closest('[data-hsym]'))) { var k = t.getAttribute('data-hsym'); st.sym = st.sym === k ? '' : k; render(); return; }
+      if (e.target.closest('#hTicketCopy')) { var tx = $('#hTicketTxt'); AI.toast(AI.copyText(tx ? tx.value : ticketText()) ? I('Copied. Paste it in your message.', 'Αντιγράφηκε. Επικόλλησέ το στο μήνυμά σου.') : I('Could not copy. Select the text and press Ctrl+C.', 'Δεν αντιγράφηκε. Σημάδεψε το κείμενο και πάτα Ctrl+C.')); return; }
       if (e.target.closest('#hMake')) { make(); return; }
       if (e.target.closest('#hSaveAs') && st.done) { saveAs(st.done.file, st.done.bytes, 'application/zip', '.zip', 'ZIP'); return; }
       if (e.target.closest('#hSaveFull')) { var f = SHARE.buildFull().html, nm = (String(g(D, 'meta.computer', 'PC')).replace(/[\\\/:*?"<>|]+/g, '-').trim() || 'PC') + '.html'; saveAs(nm, new TextEncoder().encode(f), 'text/html', '.html', 'HTML'); return; }

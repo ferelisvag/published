@@ -831,7 +831,6 @@ body.th-fable #scanCov, body.th-fable #scanCov > details { border-radius: 18px; 
       <button role="tab" data-tab="events" aria-selected="false">Events</button>
       <button role="tab" data-tab="compare" aria-selected="false">Compare</button>
       <button role="tab" data-tab="tools" aria-selected="false">Tools</button>
-      <button role="tab" data-tab="live" aria-selected="false">Live</button>
       <button role="tab" data-tab="ai" aria-selected="false">Help &amp; AI</button>
     </nav>
     <div class="topright">
@@ -915,8 +914,6 @@ body.th-fable #scanCov, body.th-fable #scanCov > details { border-radius: 18px; 
   <section class="tabpane" id="tab-compare" role="tabpanel" aria-label="Compare scans"></section>
 
   <section class="tabpane" id="tab-tools" role="tabpanel" aria-label="Tools"></section>
-
-  <section class="tabpane" id="tab-live" role="tabpanel" aria-label="Live"></section>
 
   <section class="tabpane" id="tab-ai" role="tabpanel" aria-label="Help &amp; AI">
     <div id="helpTop"></div>
@@ -3738,7 +3735,7 @@ var I18N = (function (V) {
 
   /* ---- static UI text: exact English -> Greek ---- */
   var UI = {
-    'Menu': 'Μενού', 'Summary': 'Σύνοψη', 'Period': 'Περίοδος', 'Insights': 'Ανάλυση', 'Equipment': 'Εξοπλισμός', 'Dashboard': 'Πίνακας', 'Findings': 'Ευρήματα', 'Hardware': 'Υλικό', 'Software': 'Λογισμικό', 'Events': 'Συμβάντα', 'Compare': 'Σύγκριση', 'Tools': 'Εργαλεία', 'Live': 'Ζωντανά', 'AI help': 'Βοήθεια AI', 'Help & AI': 'Βοήθεια & AI',
+    'Menu': 'Μενού', 'Summary': 'Σύνοψη', 'Period': 'Περίοδος', 'Insights': 'Ανάλυση', 'Equipment': 'Εξοπλισμός', 'Dashboard': 'Πίνακας', 'Findings': 'Ευρήματα', 'Hardware': 'Υλικό', 'Software': 'Λογισμικό', 'Events': 'Συμβάντα', 'Compare': 'Σύγκριση', 'Tools': 'Εργαλεία', 'AI help': 'Βοήθεια AI', 'Help & AI': 'Βοήθεια & AI',
     'Share-safe copy': 'Αντίγραφο για κοινοποίηση', 'Print / PDF': 'Εκτύπωση / PDF', 'PC type': 'Τύπος PC', 'Home PC': 'Σπίτι', 'Work or clinic PC': 'Δουλειά ή ιατρείο', 'Gaming PC': 'Gaming',
     'HIGH': 'ΥΨΗΛΟ', 'MEDIUM': 'ΜΕΤΡΙΟ', 'LOW': 'ΧΑΜΗΛΟ', 'INFO': 'ΣΥΜΒΟΥΛΗ', 'In plain words': 'Με απλά λόγια', 'What we found': 'Τι βρήκαμε', 'Ask an AI about this': 'Ρώτα ένα AI γι’ αυτό',
     'Easy': 'Εύκολο', 'Medium': 'Μέτριο', 'Ask a pro': 'Ρώτα ειδικό', 'Safe': 'Ασφαλές', 'Back up first': 'Πρώτα αντίγραφο ασφαλείας', 'Careful': 'Προσοχή', 'raised for your PC type': 'ανεβασμένο για τον τύπο PC σου',
@@ -5370,7 +5367,7 @@ var PRO = (function (V, AI) {
     var LN = { System: ['System', 'Σύστημα'], Application: ['Application', 'Εφαρμογές'], Security: ['Security', 'Ασφάλεια'] };
     var h = '<details class="howto' + (miss.length ? ' on' : '') + '" id="scanCov"><summary>' + esc(miss.length ? I('What this scan checked: ' + okN + ' of ' + cv.length + ' deeper checks. ' + miss.length + ' could not be done', 'Τι έλεγξε αυτή η σάρωση: ' + okN + ' από τους ' + cv.length + ' βαθύτερους ελέγχους. ' + miss.length + ' δεν έγιναν') : I('What this scan checked: all the deeper checks were done', 'Τι έλεγξε αυτή η σάρωση: έγιναν όλοι οι βαθύτεροι έλεγχοι')) + '</summary><div>';
     h += '<p>' + esc(I('When a check could not be done, this report does not know the answer for it. That is different from "everything is fine". The list shows exactly which checks were done and which were not, and why.', 'Όταν ένας έλεγχος δεν μπόρεσε να γίνει, η αναφορά δεν ξέρει την απάντηση. Αυτό είναι διαφορετικό από το «όλα καλά». Η λίστα δείχνει ακριβώς ποιοι έλεγχοι έγιναν, ποιοι όχι, και γιατί.')) + '</p>';
-    if (cv.length) h += '<div class="tbl"><table><tr><th>' + esc(I('Check', 'Έλεγχος')) + '</th><th>' + esc(I('Result', 'Αποτέλεσμα')) + '</th></tr>' + cv.map(function (x) { return '<tr' + (x.status !== 'ok' ? ' class="hot"' : '') + '><td>' + esc(I(COVN[x.key][0], COVN[x.key][1])) + '</td><td>' + (x.status === 'ok' ? '&#10003; ' : '&#9888; ') + esc(x.status === 'na' && (x.key === 'outdated' || x.key === 'dnsSpeed') && g(V.RAW, 'meta.noNetwork', false) ? I('Not checked: you chose the no-internet scan', 'Δεν ελέγχθηκε: διάλεξες τη σάρωση χωρίς internet') : covWord(x.status)) + '</td></tr>'; }).join('') + '</table></div>';
+    if (cv.length) h += '<div class="tbl"><table><tr><th>' + esc(I('Check', 'Έλεγχος')) + '</th><th>' + esc(I('Result', 'Αποτέλεσμα')) + '</th></tr>' + cv.map(function (x) { return '<tr' + (x.status !== 'ok' ? ' class="hot"' : '') + '><td>' + esc(I(COVN[x.key][0], COVN[x.key][1])) + '</td><td>' + (x.status === 'ok' ? '&#10003; ' : '&#9888; ') + esc(x.status === 'na' && (x.key === 'outdated' || x.key === 'dnsSpeed') && g(V.RAW, 'meta.noNetwork', false) ? (g(V.RAW, 'meta.noNetworkAuto', false) ? I('Not checked: no network connection was found, so the check ran without internet', 'Δεν ελέγχθηκε: δεν βρέθηκε σύνδεση δικτύου, οπότε η σάρωση έτρεξε χωρίς internet') : I('Not checked: you chose the no-internet scan', 'Δεν ελέγχθηκε: διάλεξες τη σάρωση χωρίς internet')) : covWord(x.status)) + '</td></tr>'; }).join('') + '</table></div>';
     if (miss.some(function (x) { return x.status === 'admin'; })) h += '<p class="sub">' + esc(I('To get the checks that need an administrator: close this report, right-click "VEAGLE-PC-Check.bat" in the folder of the tool and choose "Run as administrator".', 'Για τους ελέγχους που θέλουν διαχειριστή: κλείσε την αναφορά, κάνε δεξί κλικ στο «VEAGLE-PC-Check.bat» στον φάκελο του εργαλείου και διάλεξε «Εκτέλεση ως διαχειριστής».')) + '</p>';
     lg = lg.filter(function (x) { return x && LN[x.name]; });
     if (lg.length) h += '<p class="sub"><b>' + esc(I('How far back Windows remembers: ', 'Πόσο πίσω θυμούνται τα Windows: ')) + '</b>' + lg.map(function (x) { return esc(I(LN[x.name][0], LN[x.name][1])) + ' ' + esc(x.readable && x.oldestDays != null ? I(x.oldestDays + ' days', x.oldestDays + ' ημέρες') : I('could not be read', 'δεν διαβάστηκε')); }).join(' · ') + '</p>';
@@ -7069,7 +7066,6 @@ var SIDE = (function (V, UI) {
     events: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     compare: '<path d="M8 3v18M16 3v18M3 8h5M16 16h5"/>',
     tools: '<path d="M14 6a4 4 0 105 5l-9 9-3-3 9-9z"/>',
-    live: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
     ai: '<path d="M4 5h16v11H9l-5 4z"/>'
   };
   var pref = 'side', printing = false, ready = false;
@@ -8010,63 +8006,6 @@ var HELP = (function (V, UI, AI, SHARE, XLSX) {
   return { init: init, render: render, code: code };
 })(V, UI, AI, SHARE, XLSX);
 
-/* VEAGLE PC Check: καρτέλα Live. Εξηγεί το Veagle Eye (ξεχωριστό πρόγραμμα, ζωντανοί αισθητήρες)
-   και ανοίγει τη σελίδα του ΜΟΝΟ όταν πατήσεις το κουμπί. Τίποτα αυτόματο, καμία κλήση στο internet από εδώ.
-   Η διεύθυνση (127.0.0.1 + κωδικός) δεν αποθηκεύεται πουθενά. Ανοίγει σε νέα καρτέλα, γιατί το Veagle Eye
-   δεν επιτρέπει ενσωμάτωση μέσα σε τοπικό αρχείο (δική του πολιτική ασφαλείας). */
-var LIVE = (function (V) {
-  'use strict';
-  var $ = V.$, esc = V.esc;
-  function I(en, el) { return V.I(en, el); }
-  var st = { addr: '', msg: '' };
-  /* δέχεται: http://127.0.0.1:8765/?t=ΚΩΔΙΚΟΣ  ή  μόνο θύρα και κωδικό */
-  function parse(txt) {
-    txt = String(txt || '').trim();
-    var m = txt.match(/^https?:\/\/(?:127\.0\.0\.1|localhost):(\d{2,5})\/?\?t=([A-Za-z0-9_-]{8,})/);
-    if (m) return { port: +m[1], token: m[2] };
-    return null;
-  }
-  function html() {
-    var h = '<div class="sect"><h2>' + esc(I('Live', 'Ζωντανά')) + '</h2><span>' + esc(I('real-time sensors with Veagle Eye', 'αισθητήρες σε πραγματικό χρόνο με το Veagle Eye')) + '</span></div>';
-    h += '<div class="win"><h3>' + esc(I('What is this?', 'Τι είναι αυτό;')) + '</h3><div class="body">' +
-      '<p>' + esc(I('The PC Check report is a photo of your computer at one moment. For live numbers (processor, memory, disk, network, temperatures moving in real time) there is a second, separate free program: Veagle Eye.', 'Η αναφορά του PC Check είναι μια φωτογραφία του υπολογιστή σου μια συγκεκριμένη στιγμή. Για ζωντανά νούμερα (επεξεργαστής, μνήμη, δίσκος, δίκτυο, θερμοκρασίες που αλλάζουν την ώρα που τις βλέπεις) υπάρχει ένα δεύτερο, ξεχωριστό και δωρεάν πρόγραμμα: το Veagle Eye.')) + '</p>' +
-      '<p class="sub">' + esc(I('Veagle Eye listens only on your own computer (address 127.0.0.1) and asks for a secret code. Nothing goes to the internet.', 'Το Veagle Eye ακούει μόνο στον δικό σου υπολογιστή (διεύθυνση 127.0.0.1) και ζητά μυστικό κωδικό. Τίποτα δεν πάει στο internet.')) + '</p></div></div>';
-    h += '<div class="win"><h3>' + esc(I('How to see live data, step by step', 'Πώς βλέπεις ζωντανά δεδομένα, βήμα-βήμα')) + '</h3><div class="body"><ol>' +
-      '<li>' + esc(I('Download Veagle Eye (button below) and save it in a folder you can find.', 'Κατέβασε το Veagle Eye (κουμπί παρακάτω) και αποθήκευσέ το σε ένα φάκελο που θα βρίσκεις.')) + '</li>' +
-      '<li>' + esc(I('Double-click VeagleEye.exe. A black window opens. IMPORTANT: this black window must stay open for as long as you want live data. If you close it, the live data stops.', 'Κάνε διπλό κλικ στο VeagleEye.exe. Ανοίγει ένα μαύρο παράθυρο. ΣΗΜΑΝΤΙΚΟ: αυτό το μαύρο παράθυρο πρέπει να μένει ανοιχτό όσο θέλεις να βλέπεις ζωντανά δεδομένα. Αν το κλείσεις, σταματούν.')) + '</li>' +
-      '<li>' + esc(I('In the black window find the line that says "Address" and copy it (select it with the mouse, then right-click).', 'Στο μαύρο παράθυρο βρες τη γραμμή «Διεύθυνση / Address» και αντίγραψέ την (σημάδεψέ την με το ποντίκι και κάνε δεξί κλικ).')) + '</li>' +
-      '<li>' + esc(I('Paste it in the box below and press "Open live view". It opens in a new browser tab.', 'Επικόλλησέ την στο κουτί παρακάτω και πάτα «Άνοιγμα ζωντανής προβολής». Ανοίγει σε νέα καρτέλα του browser.')) + '</li>' +
-      '<li>' + esc(I('When you are done, close the black window. That stops it completely.', 'Όταν τελειώσεις, κλείσε το μαύρο παράθυρο. Έτσι σταματά εντελώς.')) + '</li></ol>' +
-      '<p class="sub">' + esc(I('Shortcut: the file VEAGLE-PC-Check-Live.bat (next to this report\'s program) starts Veagle Eye for you if VeagleEye.exe is in the same folder. It asks first.', 'Συντόμευση: το αρχείο VEAGLE-PC-Check-Live.bat (στον ίδιο φάκελο με το πρόγραμμα) ξεκινά το Veagle Eye για σένα αν το VeagleEye.exe είναι στον ίδιο φάκελο. Ρωτά πρώτα.')) + '</p></div></div>';
-    h += '<div class="win"><h3>' + esc(I('Open the live view', 'Άνοιγμα ζωντανής προβολής')) + '</h3><div class="body">' +
-      '<div class="field"><label class="lbl" for="liveAddr">' + esc(I('Address from the black window', 'Διεύθυνση από το μαύρο παράθυρο')) + '</label>' +
-      '<input id="liveAddr" type="text" autocomplete="off" spellcheck="false" placeholder="http://127.0.0.1:8765/?t=..." value="' + esc(st.addr) + '"></div>' +
-      '<div class="btns"><button class="btn primary" type="button" id="liveGo">' + esc(I('Open live view', 'Άνοιγμα ζωντανής προβολής')) + '</button>' +
-      '<a class="btn" target="_blank" rel="noopener noreferrer" href="https://ferelisvag.github.io/published/veagle-eye/">' + esc(I('Get Veagle Eye (opens a web page)', 'Κατέβασε το Veagle Eye (ανοίγει σελίδα)')) + '</a></div>' +
-      '<p class="sub" id="liveMsg" role="status">' + esc(st.msg) + '</p></div></div>';
-    return h;
-  }
-  function render() { var t = $('#tab-live'); if (t) t.innerHTML = html(); }
-  function open() {
-    var inp = $('#liveAddr'); st.addr = inp ? inp.value : '';
-    var c = parse(st.addr);
-    if (!c) { st.msg = I('I did not understand the address. It must look like http://127.0.0.1:8765/?t=... Copy the whole line from the black window.', 'Δεν κατάλαβα τη διεύθυνση. Πρέπει να μοιάζει με http://127.0.0.1:8765/?t=... Αντίγραψε ολόκληρη τη γραμμή από το μαύρο παράθυρο.'); render(); return; }
-    st.msg = I('Opening in a new tab. If it stays empty, Veagle Eye is not running: start it and keep its black window open.', 'Ανοίγει σε νέα καρτέλα. Αν μείνει κενή, το Veagle Eye δεν τρέχει: ξεκίνα το και άφησε ανοιχτό το μαύρο παράθυρό του.');
-    st.addr = ''; render();
-    window.open('http://127.0.0.1:' + c.port + '/?t=' + c.token, '_blank', 'noopener');
-  }
-  function init() {
-    var t = $('#tab-live'); if (!t) return;
-    if (!t.getAttribute('data-live')) {
-      t.setAttribute('data-live', '1');
-      t.addEventListener('click', function (e) { if (e.target.closest('#liveGo')) open(); });
-      t.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'liveAddr') open(); });
-    }
-    render();
-  }
-  return { init: init, render: render, parse: parse };
-})(V);
-
 /* VEAGLE PC Check - main: boot intro, tabs, events */
 (function (V, UI, AI) {
   'use strict';
@@ -8109,13 +8048,13 @@ var LIVE = (function (V) {
     $('#btnTheme').addEventListener('click', function () { VIZ.toggle('light'); });
     $('#btnBig').addEventListener('click', function () { VIZ.toggle('big'); });
     document.addEventListener('change', function (e) { var c = e.target && e.target.getAttribute && e.target.getAttribute('data-chk'); if (!c) return; var p = c.split('|'); var f0 = findFinding(p[0]), was = f0 && VIZ.findingDone(f0); VIZ.chkSet(p[0], +p[1], e.target.checked); var li = e.target.closest('li'); if (li) li.classList.toggle('done', e.target.checked); var fi = e.target.closest('.finding'); var f = findFinding(p[0]); if (fi && f) fi.classList.toggle('fdone', VIZ.findingDone(f)); var st = VIZ.chkStats(), tx = $('#progTxt'); if (tx) tx.textContent = V.I('You have done ' + st.done + ' of ' + st.total + ' steps', 'Έχεις κάνει ' + st.done + ' από ' + st.total + ' βήματα'); var pb = $('.pbar i'); if (pb) pb.style.width = Math.round(st.done / Math.max(1, st.total) * 100) + '%'; if (f0 && was !== VIZ.findingDone(f0)) refreshScore(); });
-    $('#btnLang').addEventListener('click', function () { I18N.set(V.lang === 'el' ? 'en' : 'el'); UI.renderAll(); CMP.init(); TOOLS.init(); LIVE.init(); THEMES.relabel(); VIZ.applyPrefs(); I18N.apply(); });
+    $('#btnLang').addEventListener('click', function () { I18N.set(V.lang === 'el' ? 'en' : 'el'); UI.renderAll(); CMP.init(); TOOLS.init(); THEMES.relabel(); VIZ.applyPrefs(); I18N.apply(); });
     $('#btnShare').addEventListener('click', function () { SHARE.download(); });
     document.addEventListener('keydown', function (e) {
       if (e.target && /^(input|textarea)$/i.test(e.target.tagName)) return;
       if (e.key === '/') { e.preventDefault(); go('findings'); $('#findQ').focus(); }
     });
-    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (/^(summary|dashboard|findings|insights|privacy|inventory|hardware|software|events|compare|tools|live|ai)$/.test(h)) go(h, true); });
+    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (/^(summary|dashboard|findings|insights|privacy|inventory|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true); });
   }
 
   /* ---------- boot intro ---------- */
@@ -8156,9 +8095,9 @@ var LIVE = (function (V) {
       sel.addEventListener('change', function () { try { localStorage.setItem('veagle.pccheck.period', sel.value); } catch (e) { } try { if (typeof THEMES !== 'undefined') THEMES.keepOnce(); } catch (e) { } location.reload(); });
       chip.firstChild.nodeValue = V.I('Period ', 'Περίοδος ');
     })();
-    wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init(); LIVE.init(); THEMES.init(); SIDE.init(); HELP.init();
+    wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init(); THEMES.init(); SIDE.init(); HELP.init();
     var h = location.hash.replace('#', '');
-    if (/^(summary|dashboard|findings|insights|privacy|inventory|hardware|software|events|compare|tools|live|ai)$/.test(h)) go(h, true);
+    if (/^(summary|dashboard|findings|insights|privacy|inventory|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true);
     var dm = g(D, 'meta.isAdmin', true) === false; if (dm) { var chip = document.createElement('span'); chip.className = 'chip warn'; chip.textContent = 'not run as admin: partial'; $('.topright').insertBefore(chip, $('#btnPrint')); }
     if (g(D, 'meta.mode', 'full') === 'quick') { var qc = document.createElement('span'); qc.className = 'chip warn'; qc.textContent = 'quick scan'; $('.topright').insertBefore(qc, $('#btnShare')); }
     if (g(D, 'meta.shareSafe', false)) { var sc = document.createElement('span'); sc.className = 'chip'; sc.textContent = 'share-safe copy: personal details removed'; $('.topright').insertBefore(sc, $('#btnShare')); var sb = $('#btnShare'); if (sb) sb.style.display = 'none'; }

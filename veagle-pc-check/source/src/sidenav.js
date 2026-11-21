@@ -16,7 +16,6 @@ var SIDE = (function (V, UI) {
     events: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     compare: '<path d="M8 3v18M16 3v18M3 8h5M16 16h5"/>',
     tools: '<path d="M14 6a4 4 0 105 5l-9 9-3-3 9-9z"/>',
-    live: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
     ai: '<path d="M4 5h16v11H9l-5 4z"/>'
   };
   var pref = 'side', printing = false, ready = false;

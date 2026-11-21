@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v3.3.0
+VEAGLE PC CHECK  v3.3.1
 =======================
 VEAGLE - ferelis.gr
 
@@ -54,13 +54,16 @@ READING THE REPORT
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
 
+NEW IN 3.3.1
+- No internet? The check now notices it by itself (it only reads Windows network settings, it sends nothing) and runs without the winget and DNS checks, which is also faster. The report says so. You can force this with the option -NoNetwork when you run collector.ps1 yourself.
+- Windows cannot always read the install date of one update; this is harmless and no longer shows up as a scan note.
+- The folder now has only two start files again: VEAGLE-PC-Check.bat and VEAGLE-PC-Check-Quick.bat.
+
 NEW IN 3.3.0
-- New tab "Live": explains Veagle Eye (a separate free program for live sensors) and opens its page in a new browser tab, only when you press the button. For live data the black Veagle Eye window must stay open; if you close it, the live data stops.
-- New file VEAGLE-PC-Check-Live.bat: starts VeagleEye.exe if it is in the same folder. It explains first and asks before it starts anything.
 - New box in the Help & AI tab: "How to open a ticket with your technician", step by step, with a ready text you can copy (no name, no serial numbers, no Wi-Fi, no accounts).
 
 NEW IN 3.2.2
-- New file VEAGLE-PC-Check-NoNetwork.bat: the same scan with no internet traffic at all (no winget, no DNS lookups). Only the 5 pings to your own router remain. The report says which checks were skipped.
+- A scan with no internet traffic at all (called the no-internet scan; since 3.3.1 it starts by itself when there is no network) (no winget, no DNS lookups). Only the 5 pings to your own router remain. The report says which checks were skipped.
 - The temperature box now says clearly that it shows a motherboard thermal zone, not the processor.
 - After the scan the data file is read back to check that it is valid, and the nesting depth was raised so deep data is never turned into text.
 

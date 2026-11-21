@@ -2,7 +2,7 @@
 # READ-ONLY: this script only reads system information. It does not change any setting,
 # install anything or send your data anywhere. The only network actions: winget asks what is outdated,
 # 5 pings to your own router, one DNS lookup of www.microsoft.com, and (full scan) 12 small DNS lookups
-# (3 website names) against your DNS server, Cloudflare, Google and Quad9. -NoNetwork skips everything except the pings to your own router.
+# (3 website names) against your DNS server, Cloudflare, Google and Quad9. -NoNetwork skips everything except the pings to your own router. It is also switched on by itself when no connected network card with a gateway is found (this check sends nothing).
 # Output: Reports\<timestamp>\report.html, data.json and a raw\ folder with the exported files.
 # -Quick skips the slow parts (msinfo32, winget, DISM, optional features, old drivers, folder sizes).
 
@@ -10,7 +10,16 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify, [switch]$NoNetwork)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '3.3.0'
+$script:Version = '3.3.1'
+# Automatic no-internet mode: only reads Windows settings (is there a connected network card with a gateway?). It sends no packet.
+# With no connection the network steps (winget, DNS) would only wait and time out, so they are skipped and the report says so.
+$script:NoNetAuto = $false
+if (-not $NoNetwork) {
+  try {
+    $nc = @(Get-NetIPConfiguration -ErrorAction Stop | Where-Object { $_.IPv4DefaultGateway -or $_.IPv6DefaultGateway } | Where-Object { $_.NetAdapter -and $_.NetAdapter.Status -eq 'Up' })
+    if ($nc.Count -eq 0) { $NoNetwork = [switch]$true; $script:NoNetAuto = $true }
+  } catch { }
+}
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
@@ -48,7 +57,7 @@ function Flush-StepErrors {
             if ($cnt -gt 0) {
                 # "does not exist / not found" is normal (a setting nobody set, a file Windows does not have): not counted.
                 # Only real failures (access denied, not allowed, operation failed...) are kept.
-                $benign = 'Cannot find path|does not exist|No matching .* objects|No MSFT_|Cannot find a process|Cannot find drive|Cannot find an object|Property .* cannot be found|was not found|No events were found|0x800106ba|Requested registry access is not allowed|There is not an event log|unauthorized operation|Must be an administrator|Could not find a part of the path|Could not find file|Could not find a file|alternate data stream'
+                $benign = 'Exception getting "InstalledOn"|String was not recognized as a valid DateTime|Cannot find path|does not exist|No matching .* objects|No MSFT_|Cannot find a process|Cannot find drive|Cannot find an object|Property .* cannot be found|was not found|No events were found|0x800106ba|Requested registry access is not allowed|There is not an event log|unauthorized operation|Must be an administrator|Could not find a part of the path|Could not find file|Could not find a file|alternate data stream'
                 $real = 0
                 $msgs = New-Object System.Collections.ArrayList
                 $take = [math]::Min($cnt, 300)
@@ -275,6 +284,8 @@ $msinfoProc = $null
 if (-not $Quick) { try {
     $msinfoProc = Start-Process -FilePath (Join-Path $env:windir 'System32\msinfo32.exe') -ArgumentList ('/report "' + (Join-Path $raw 'msinfo32.txt') + '"') -PassThru -WindowStyle Hidden -ErrorAction Stop
 } catch { Warn ('msinfo32: ' + $_.Exception.Message) } }
+
+if ($script:NoNetAuto) { Write-Host '    No connected network found: running in no-internet mode (winget and DNS checks skipped).' -ForegroundColor Yellow }
 
 # ---------------------------------------------------------------- 1. system
 Step 1 $TOTAL 'System, CPU, memory, board'
@@ -2909,6 +2920,7 @@ foreach ($sk in @($script:StepSec.Keys | Sort-Object)) {
 $meta = [ordered]@{
     schema     = 'veagle-pccheck/2'
     noNetwork  = [bool]$NoNetwork
+    noNetworkAuto = [bool]$script:NoNetAuto
     tool       = 'VEAGLE PC Check'
     version    = $script:Version
     generated  = Iso (Get-Date)

@@ -40,13 +40,13 @@
     $('#btnTheme').addEventListener('click', function () { VIZ.toggle('light'); });
     $('#btnBig').addEventListener('click', function () { VIZ.toggle('big'); });
     document.addEventListener('change', function (e) { var c = e.target && e.target.getAttribute && e.target.getAttribute('data-chk'); if (!c) return; var p = c.split('|'); var f0 = findFinding(p[0]), was = f0 && VIZ.findingDone(f0); VIZ.chkSet(p[0], +p[1], e.target.checked); var li = e.target.closest('li'); if (li) li.classList.toggle('done', e.target.checked); var fi = e.target.closest('.finding'); var f = findFinding(p[0]); if (fi && f) fi.classList.toggle('fdone', VIZ.findingDone(f)); var st = VIZ.chkStats(), tx = $('#progTxt'); if (tx) tx.textContent = V.I('You have done ' + st.done + ' of ' + st.total + ' steps', 'Έχεις κάνει ' + st.done + ' από ' + st.total + ' βήματα'); var pb = $('.pbar i'); if (pb) pb.style.width = Math.round(st.done / Math.max(1, st.total) * 100) + '%'; if (f0 && was !== VIZ.findingDone(f0)) refreshScore(); });
-    $('#btnLang').addEventListener('click', function () { I18N.set(V.lang === 'el' ? 'en' : 'el'); UI.renderAll(); CMP.init(); TOOLS.init(); LIVE.init(); THEMES.relabel(); VIZ.applyPrefs(); I18N.apply(); });
+    $('#btnLang').addEventListener('click', function () { I18N.set(V.lang === 'el' ? 'en' : 'el'); UI.renderAll(); CMP.init(); TOOLS.init(); THEMES.relabel(); VIZ.applyPrefs(); I18N.apply(); });
     $('#btnShare').addEventListener('click', function () { SHARE.download(); });
     document.addEventListener('keydown', function (e) {
       if (e.target && /^(input|textarea)$/i.test(e.target.tagName)) return;
       if (e.key === '/') { e.preventDefault(); go('findings'); $('#findQ').focus(); }
     });
-    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (/^(summary|dashboard|findings|insights|privacy|inventory|hardware|software|events|compare|tools|live|ai)$/.test(h)) go(h, true); });
+    window.addEventListener('hashchange', function () { var h = location.hash.replace('#', ''); if (/^(summary|dashboard|findings|insights|privacy|inventory|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true); });
   }
 
   /* ---------- boot intro ---------- */
@@ -87,9 +87,9 @@
       sel.addEventListener('change', function () { try { localStorage.setItem('veagle.pccheck.period', sel.value); } catch (e) { } try { if (typeof THEMES !== 'undefined') THEMES.keepOnce(); } catch (e) { } location.reload(); });
       chip.firstChild.nodeValue = V.I('Period ', 'Περίοδος ');
     })();
-    wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init(); LIVE.init(); THEMES.init(); SIDE.init(); HELP.init();
+    wire(); UI.renderAll(); AI.init(); CMP.init(); TOOLS.init(); THEMES.init(); SIDE.init(); HELP.init();
     var h = location.hash.replace('#', '');
-    if (/^(summary|dashboard|findings|insights|privacy|inventory|hardware|software|events|compare|tools|live|ai)$/.test(h)) go(h, true);
+    if (/^(summary|dashboard|findings|insights|privacy|inventory|hardware|software|events|compare|tools|ai)$/.test(h)) go(h, true);
     var dm = g(D, 'meta.isAdmin', true) === false; if (dm) { var chip = document.createElement('span'); chip.className = 'chip warn'; chip.textContent = 'not run as admin: partial'; $('.topright').insertBefore(chip, $('#btnPrint')); }
     if (g(D, 'meta.mode', 'full') === 'quick') { var qc = document.createElement('span'); qc.className = 'chip warn'; qc.textContent = 'quick scan'; $('.topright').insertBefore(qc, $('#btnShare')); }
     if (g(D, 'meta.shareSafe', false)) { var sc = document.createElement('span'); sc.className = 'chip'; sc.textContent = 'share-safe copy: personal details removed'; $('.topright').insertBefore(sc, $('#btnShare')); var sb = $('#btnShare'); if (sb) sb.style.display = 'none'; }

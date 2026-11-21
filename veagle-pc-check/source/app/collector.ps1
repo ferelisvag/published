@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '3.1.0'
+$script:Version = '3.2.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
@@ -1596,8 +1596,7 @@ try {
             $sf2 = Join-Path $raw 'secpol.cfg'
             & secedit.exe /export /cfg $sf2 /quiet 2>&1 | Out-Null
             foreach ($ln in @(Get-Content -LiteralPath $sf2 -ErrorAction Stop)) { $mm = [regex]::Match($ln, '^\s*(MinimumPasswordLength|PasswordComplexity|MaximumPasswordAge|LockoutBadCount)\s*=\s*(-?\d+)'); if ($mm.Success) { $sec[$mm.Groups[1].Value] = [int]$mm.Groups[2].Value } }
-            Remove-Item -LiteralPath $sf2 -Force -ErrorAction SilentlyContinue
-        } catch { }
+        } catch { } finally { Remove-Item -LiteralPath $sf2 -Force -ErrorAction SilentlyContinue }
     }
     $hard['pwLen'] = $(if ($sec.ContainsKey('MinimumPasswordLength')) { $sec['MinimumPasswordLength'] } else { $null })
     $hard['pwComplex'] = $(if ($sec.ContainsKey('PasswordComplexity')) { $sec['PasswordComplexity'] } else { $null })
@@ -2939,7 +2938,7 @@ try {
     $bootAvg = $null; if (@($boots).Count -gt 0) { $bootAvg = [math]::Round((@($boots | Select-Object -First 5 | ForEach-Object { [double]$_.seconds }) | Measure-Object -Average).Average, 1) }
     $crashTot = 0; foreach ($cc in $crashList) { $crashTot += [int]$cc.count }
     $startN = $null; try { $startN = @($startup.items | ForEach-Object { $_.name } | Select-Object -Unique).Count } catch { }
-    $ssdWear = $null; try { $ww = @($disks | Where-Object { $null -ne $_.wearPercent } | ForEach-Object { [int]$_.wearPercent }); if ($ww.Count -gt 0) { $ssdWear = ($ww | Measure-Object -Maximum).Maximum } } catch { }
+    $ssdWear = $null; try { $ww = @($disks | Where-Object { $_.reliability -and $null -ne $_.reliability.wearPercent } | ForEach-Object { [int]$_.reliability.wearPercent }); if ($ww.Count -gt 0) { $ssdWear = ($ww | Measure-Object -Maximum).Maximum } } catch { }
     $batWear = $null; try { if ($battery -and $battery.present) { $batWear = $battery.wearPercent } } catch { }
     $tempMax = $null; try { $tempMax = $extras.more.thermal.tempC } catch { }
     $hl = [ordered]@{

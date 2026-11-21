@@ -3314,15 +3314,33 @@ function Engine(RAW) {
   }
 
   /* ---------------- scoring ---------------- */
+  /* Score v2 (3.2.0). Each area starts at 100 and every open finding keeps only a share of what is left (high 80%, medium 92%, low 97%), so many small findings can never add up to a disaster, and a real problem still counts. The overall score mixes the average of the areas (weighted) with the worst area, so one broken area cannot hide behind eight healthy ones. Every finding gets its own cost, worked out by leaving it out and measuring the difference. */
+  var SC = {
+    keep: { high: 0.80, medium: 0.92, low: 0.97, info: 1 },
+    weight: { Stability: 1.6, Storage: 1.3, Security: 1.3, Updates: 1.0, Privacy: 0.8, Network: 0.8, Backup: 0.8, Performance: 0.8, Software: 0.6 },
+    worst: 0.35
+  };
+  function areaVal(findings, area, skip) {
+    var k = 1; findings.forEach(function (f) { if (f.area === area && f !== skip) k *= (SC.keep[f.sev] != null ? SC.keep[f.sev] : 1); });
+    return 100 * k;
+  }
+  function overallVal(findings, skip) {
+    var sw = 0, sa = 0, mn = 100;
+    AREAS.forEach(function (a) { var v = areaVal(findings, a, skip), w = SC.weight[a] || 1; sw += w; sa += w * v; if (v < mn) mn = v; });
+    return (1 - SC.worst) * (sa / sw) + SC.worst * mn;
+  }
   function score(findings) {
-    var pen = 0; findings.forEach(function (f) { pen += PEN[f.sev] || 0; });
-    var s = Math.max(0, Math.round(100 - pen));
-    var areas = AREAS.map(function (a) {
-      var p = 0; findings.forEach(function (f) { if (f.area === a) p += (f.sev === 'high' ? 20 : f.sev === 'medium' ? 8 : f.sev === 'low' ? 3 : 0); });
-      return { name: a, score: Math.max(0, Math.round(100 - p)) };
+    var total = overallVal(findings, null), s = Math.max(0, Math.min(100, Math.round(total)));
+    var areas = AREAS.map(function (a) { return { name: a, score: Math.max(0, Math.round(areaVal(findings, a, null))) }; });
+    var explain = [];
+    findings.forEach(function (f) {
+      if (f.sev === 'info' || !SC.keep[f.sev] || SC.keep[f.sev] >= 1) return;
+      var d = overallVal(findings, f) - total, da = areaVal(findings, f.area, f) - areaVal(findings, f.area, null);
+      explain.push({ id: f.id, area: f.area, sev: f.sev, points: Math.round(d * 10) / 10, areaPoints: Math.round(da * 10) / 10 });
     });
+    explain.sort(function (a, b) { return b.points - a.points; });
     var label = s >= 85 ? 'In good shape' : (s >= 60 ? 'Needs attention' : 'Needs work');
-    return { score: s, label: label, areas: areas };
+    return { score: s, label: label, areas: areas, explain: explain, exact: Math.round(total * 10) / 10, model: 'v2' };
   }
 
   /* ---------------- Windows 11 readiness ---------------- */
@@ -3388,7 +3406,7 @@ function Engine(RAW) {
     evGroups: evGroups, evCount: evCount, RE: RE, findings: findings, good: good, score: sc, counts: counts,
     SEV_ORDER: SEV_ORDER, AREAS: AREAS, readiness: readiness(), battery: g(D, 'battery', null),
     days: num(g(D, 'events.days', 30), 30), periodChoice: !!(D.events && D.events.availableDays),
-    RT: RT, withProfile: withProfile, scoreOf: score, META: META, noiseFor: noiseFor, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
+    RT: RT, withProfile: withProfile, scoreOf: score, SCORE_MODEL: SC, META: META, noiseFor: noiseFor, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
   };
 }
 /* ---------- period of the Event Viewer data: 7, 30 or 60 days (the scan collects 60 and the report narrows it down) ---------- */
@@ -6369,6 +6387,7 @@ var ASSIST = (function (V) {
     out.forEach(function (e) { var a = e.last ? V.ageDays(e.last) : null; e.age = a; e.recent = a == null || a <= 60; });
     return out;
   }
+  function bugVaried() { var L = bugList().filter(function (b) { return b.recent; }), n = 0; L.forEach(function (b) { n += b.n; }); return L.length >= 3 && n >= 3; }
   function bugName(k) { var b = V.BUGCODES && V.BUGCODES[k]; return b ? b[0] : (BC_EXTRA[k] || ''); }
   function bugText(k) { var b = V.BUGCODES && V.BUGCODES[k]; return b ? b[1] : ''; }
   function bugCount(cats, old) { var n = 0; bugList().forEach(function (b) { if (cats.indexOf(b.cat) >= 0 && (old ? !b.recent : b.recent)) n += b.n; }); return n; }
@@ -6377,7 +6396,7 @@ var ASSIST = (function (V) {
   /* ---------------- likely causes ---------------- */
   function conf(sum) { return sum >= 4 ? 'high' : (sum >= 2 ? 'medium' : 'low'); }
   function causes() {
-    var out = [], whea = cnt('system', /WHEA-Logger/), kp = cnt('system', /Kernel-Power/, [41]);
+    var out = [], whea = cnt('system', /WHEA-Logger/), wheaFatal = cnt('system', /WHEA-Logger/, [1, 18, 20]), kp = cnt('system', /Kernel-Power/, [41]);
     var stor = cnt('system', /stornvme|storahci|storport|iastor|nvme/i), disk = cnt('system', /^disk$/i, [7, 11, 15, 51, 52, 153, 154]), ntfs = cnt('system', /^ntfs$/i, [55, 98, 137, 140]);
     var gpu = cnt('system', /^(nvlddmkm|amdkmdag|amdwddmg|atikmpag|igfx.*|Display)$/i, [13, 14, 141, 153, 4101]);
     var hwB = bugCount(['hw']), memB = bugCount(['mem']), drvB = bugCount(['drv']), storB = bugCount(['stor', 'sys']), gpuB = bugCount(['gpu']), pwB = bugCount(['power']);
@@ -6394,11 +6413,13 @@ var ASSIST = (function (V) {
     /* A: hardware instability */
     var evA = cl([
       whea > 0 ? E(I(whea + ' hardware error reports (WHEA)', whea + ' αναφορές σφάλματος υλικού (WHEA)'), whea >= 5 ? 2 : 1.5) : null,
+      wheaFatal > 0 ? E(I(wheaFatal + ' of them are uncorrected (fatal) hardware errors', wheaFatal + ' από αυτές είναι μη διορθωμένα (σοβαρά) σφάλματα υλικού'), 1.5) : null,
+      bugVaried() ? E(I('Several different blue-screen codes in a row (typical of memory or hardware, not one driver)', 'Πολλοί διαφορετικοί κωδικοί μπλε οθόνης στη σειρά (τυπικό μνήμης ή υλικού, όχι ενός οδηγού)'), 1.5) : null,
       kp > 0 ? E(I(kp + ' unexpected shutdowns (Kernel-Power 41)', kp + ' απρόσμενοι τερματισμοί (Kernel-Power 41)'), 1) : null,
       hwB > 0 ? E(I('Blue screen codes that point to hardware: ' + bugIds(['hw']), 'Κωδικοί μπλε οθόνης που δείχνουν υλικό: ' + bugIds(['hw'])), 2) : null,
       fE('stab-memdiag', 1), fE('perf-throttle', 0.5)
     ]);
-    if (whea > 0 || hwB > 0) add('hw', 'high', I('Likely hardware instability', 'Πιθανή αστάθεια υλικού'), evA,
+    if (whea > 0 || hwB > 0 || bugVaried()) add('hw', 'high', I('Likely hardware instability', 'Πιθανή αστάθεια υλικού'), evA,
       I('Hardware reports, unexpected shutdowns and crash dumps that appear together usually mean the CPU, the memory or the power delivery is not completely stable.', 'Όταν αναφορές υλικού, απρόσμενοι τερματισμοί και dump κρασαρισμάτων εμφανίζονται μαζί, συνήθως ο επεξεργαστής, η μνήμη ή η τροφοδοσία δεν είναι απόλυτα σταθερά.'),
       [I('CPU instability', 'Αστάθεια επεξεργαστή'), I('RAM instability (often the XMP/EXPO speed)', 'Αστάθεια RAM (συχνά η ταχύτητα XMP/EXPO)'), I('Memory controller', 'Ελεγκτής μνήμης'), I('An overclock', 'Overclock'), I('A BIOS issue', 'Πρόβλημα BIOS'), I('Power supply', 'Τροφοδοτικό')],
       [I('Reset the BIOS to default settings (no overclock) and use the PC for a few days.', 'Επανάφερε το BIOS στις προεπιλογές (χωρίς overclock) και χρησιμοποίησε τον υπολογιστή μερικές ημέρες.'), I('If the errors continue, turn XMP/EXPO off for a test.', 'Αν τα σφάλματα συνεχίζονται, κλείσε προσωρινά το XMP/EXPO για δοκιμή.'), I('Test the memory (Windows Memory Diagnostic, or MemTest86 for a longer test).', 'Έλεγξε τη μνήμη (Windows Memory Diagnostic ή MemTest86 για πιο μακρύ τεστ).'), I('Update the BIOS only if the maker has a newer stable version.', 'Ενημέρωσε το BIOS μόνο αν ο κατασκευαστής έχει νεότερη σταθερή έκδοση.')]);
@@ -6562,19 +6583,19 @@ var ASSIST = (function (V) {
   }
 
   /* ---------------- score explained ---------------- */
-  var PEN = { high: 8, medium: 3, low: 0.8 };
+  function expl() { var m = {}; ((V.score && V.score.explain) || []).forEach(function (e) { m[e.id] = e; }); return m; }
   function scoreHtml() {
-    var list = V.active().filter(function (f) { return f.sev !== 'info'; }).slice().sort(function (a, b) { return (V.SEV_ORDER[a.sev] - V.SEV_ORDER[b.sev]); });
-    var tot = 0; list.forEach(function (f) { tot += PEN[f.sev] || 0; });
-    var h = '<p style="margin:0 0 8px">' + esc(I('The score starts at 100. Every finding that is still open takes points off, and the reason is always the finding itself: 8 for a high one, 3 for a medium one, about 1 for a low one. Findings of the type "info" take nothing off.', 'Ο βαθμός ξεκινά από 100. Κάθε εύρημα που είναι ακόμα ανοιχτό αφαιρεί πόντους και ο λόγος είναι πάντα το ίδιο το εύρημα: 8 για υψηλό, 3 για μεσαίο, περίπου 1 για χαμηλό. Τα ευρήματα τύπου «info» δεν αφαιρούν τίποτα.')) + '</p>';
-    h += '<p style="margin:0 0 8px"><b>' + esc(I('100 - ' + V.fmtNum(tot, 1) + ' = ' + V.score.score + ' / 100', '100 - ' + V.fmtNum(tot, 1) + ' = ' + V.score.score + ' / 100')) + '</b></p>';
-    if (list.length) h += tbl([I('Points', 'Πόντοι'), I('Area', 'Περιοχή'), I('Reason', 'Λόγος')], list.map(function (f) { return ['-' + V.fmtNum(PEN[f.sev] || 0, 1), areaName(f.area), T(f)]; }));
+    var EX = expl();
+    var list = V.active().filter(function (f) { return f.sev !== 'info' && EX[f.id]; }).slice().sort(function (a, b) { return EX[b.id].points - EX[a.id].points; });
+    var h = '<p style="margin:0 0 8px">' + esc(I('The score starts at 100. Each area (Stability, Storage, Security...) starts at 100 too. Every open finding keeps only part of its area: high keeps 80%, medium 92%, low 97%. The overall score is a weighted average of the areas (Stability counts most), pulled a little towards the worst area, so one serious problem cannot hide behind many fine areas. Findings of the type "info" take nothing off. The points below are exact: how much higher the score would be if only that finding was fixed.', 'Ο βαθμός ξεκινά από 100. Κάθε περιοχή (Σταθερότητα, Αποθήκευση, Ασφάλεια...) ξεκινά κι αυτή από 100. Κάθε ανοιχτό εύρημα κρατά μόνο ένα μέρος της περιοχής του: το υψηλό 80%, το μεσαίο 92%, το χαμηλό 97%. Ο συνολικός βαθμός είναι σταθμισμένος μέσος όρος των περιοχών (η Σταθερότητα μετρά περισσότερο), τραβηγμένος λίγο προς τη χειρότερη περιοχή, ώστε ένα σοβαρό πρόβλημα να μην κρύβεται πίσω από πολλές καλές περιοχές. Τα ευρήματα τύπου «info» δεν αφαιρούν τίποτα. Οι πόντοι παρακάτω είναι ακριβείς: πόσο ψηλότερος θα ήταν ο βαθμός αν διορθωνόταν μόνο εκείνο το εύρημα.')) + '</p>';
+    h += '<p style="margin:0 0 8px"><b>' + V.score.score + ' / 100</b></p>';
+    if (list.length) h += tbl([I('Points', 'Πόντοι'), I('Area', 'Περιοχή'), I('Reason', 'Λόγος')], list.map(function (f) { return ['-' + V.fmtNum(EX[f.id].points, 1), areaName(f.area), T(f)]; }));
     else h += '<p class="sub">' + esc(I('Nothing is taking points off right now.', 'Τίποτα δεν αφαιρεί πόντους αυτή τη στιγμή.')) + '</p>';
     var rows = V.score.areas.map(function (a) {
-      var rs = list.filter(function (f) { return f.area === a.name; }).map(function (f) { return '-' + (f.sev === 'high' ? 20 : (f.sev === 'medium' ? 8 : 3)) + ': ' + T(f); });
+      var rs = list.filter(function (f) { return f.area === a.name; }).map(function (f) { return '-' + V.fmtNum(EX[f.id].areaPoints, 1) + ': ' + T(f); });
       return [areaName(a.name), a.score + ' / 100', rs.length ? { html: '<div class="sub">' + rs.map(esc).join('<br>') + '</div>' } : I('nothing', 'τίποτα')];
     });
-    h += '<div class="lbl" style="margin-top:12px">' + esc(I('Score by area (an area counts 20 / 8 / 3 points per high / medium / low finding)', 'Βαθμός ανά περιοχή (η περιοχή μετρά 20 / 8 / 3 πόντους ανά υψηλό / μεσαίο / χαμηλό εύρημα)')) + '</div>' + tbl([I('Area', 'Περιοχή'), I('Score', 'Βαθμός'), I('Why', 'Γιατί')], rows);
+    h += '<div class="lbl" style="margin-top:12px">' + esc(I('Score by area', 'Βαθμός ανά περιοχή')) + '</div>' + tbl([I('Area', 'Περιοχή'), I('Score', 'Βαθμός'), I('Why', 'Γιατί')], rows);
     return h;
   }
 
@@ -6775,22 +6796,27 @@ var ASSIST = (function (V) {
   }
 
   /* ---------------- top 5 ---------------- */
+  var RISKW = { 'Safe': 1, 'Careful': 1.6, 'Back up first': 2.2 };
+  function value(f) {
+    var e = expl()[f.id], m = V.META[f.id] || [30, 'Medium', 'Safe'];
+    var gain = (e ? e.points : 0.3) + (f.sev === 'high' ? 1 : 0);
+    return gain / (Math.sqrt(Math.max(m[0], 2)) * (RISKW[m[2]] || 1.5));
+  }
   function top5() {
-    var L = V.openList().slice().sort(function (a, b) {
-      var d = V.SEV_ORDER[a.sev] - V.SEV_ORDER[b.sev]; if (d) return d;
-      var ma = V.META[a.id], mb = V.META[b.id]; return (ma ? ma[0] : 60) - (mb ? mb[0] : 60);
-    });
+    var L = V.openList().slice().sort(function (a, b) { return value(b) - value(a); });
     return L.slice(0, 5);
   }
+  function needsBackup(f) { var m = V.META[f.id]; return !!(m && m[2] === 'Back up first'); }
+  function backupOpen() { return V.openList().some(function (f) { return f.area === 'Backup' && f.sev !== 'info'; }); }
   function top5Html() {
     var L = top5();
     if (!L.length) return sect(I('Top 5 recommended actions', 'Οι 5 σημαντικότερες ενέργειες'), '') + '<div class="win"><div class="body">' + esc(I('Nothing needs fixing right now.', 'Τίποτα δεν χρειάζεται διόρθωση τώρα.')) + '</div></div>';
-    return sect(I('Top 5 recommended actions', 'Οι 5 σημαντικότερες ενέργειες'), I('ranked by how much they help, then by how quick they are', 'ταξινομημένες κατά το πόσο βοηθούν, και μετά κατά το πόσο γρήγορες είναι')) +
+    return sect(I('Top 5 recommended actions', 'Οι 5 σημαντικότερες ενέργειες'), I('ranked by how much each one raises the score, divided by the time and risk it needs', 'ταξινομημένες κατά το πόσο ανεβάζει ο καθένας το βαθμό, διά του χρόνου και του ρίσκου που θέλει')) +
       '<div class="win"><div class="body"><ol style="margin:0 0 0 18px;padding:0">' + L.map(function (f) {
-        var m = V.META[f.id], p = PEN[f.sev] || 0;
-        return '<li style="margin-bottom:10px"><b>' + esc(T(f)) + '</b> ' + tag(f.sev === 'high' ? 'high' : (f.sev === 'medium' ? 'medium' : 'low'), '+' + Math.max(1, Math.round(p)) + I(' points', ' πόντοι')) +
+        var m = V.META[f.id], p = (expl()[f.id] || {}).points || 0;
+        return '<li style="margin-bottom:10px"><b>' + esc(T(f)) + '</b> ' + tag(f.sev === 'high' ? 'high' : (f.sev === 'medium' ? 'medium' : 'low'), '+' + V.fmtNum(Math.max(0.1, p), 1) + I(' points', ' πόντοι')) +
           (m ? ' <span class="sub">' + esc('~' + m[0] + I(' min, ', ' λεπτά, ') + mw(m[1]) + ', ' + mw(m[2])) + '</span>' : '') +
-          (step1(f) ? '<div class="sub" style="margin-top:2px">' + esc(step1(f)) + '</div>' : '') + '</li>';
+          (needsBackup(f) && backupOpen() ? '<div class="sub" style="margin-top:2px"><b>' + esc(I('Do first: make a backup (see the Backup findings).', 'Κάνε πρώτα: αντίγραφο ασφαλείας (δες τα ευρήματα Backup).')) + '</b></div>' : '') + (step1(f) ? '<div class="sub" style="margin-top:2px">' + esc(step1(f)) + '</div>' : '') + '</li>';
       }).join('') + '</ol></div></div>';
   }
 
@@ -6852,7 +6878,7 @@ var ASSIST = (function (V) {
     var t = document.createElement('div'); t.setAttribute('data-assist', 'top5'); t.innerHTML = top5Html();
     var btns = el.querySelector('.btns:last-child'); if (btns) el.insertBefore(t, btns); else el.appendChild(t);
   }
-  return { render: render, insightsHtml: insightsHtml, causes: function () { return compute().C; }, trends: trends, gaming: gaming, memory: memory, drivers: drivers, security: security, updates: updates, top5: top5 };
+  return { use: function (v) { V = v; cache = null; }, render: render, insightsHtml: insightsHtml, causes: function () { return compute().C; }, trends: trends, gaming: gaming, memory: memory, drivers: drivers, security: security, updates: updates, top5: top5 };
 })(V);
 
 /* VEAGLE PC Check 0.6.1 - visual layer: PC map, KPI tiles with gauges and sparklines, area tiles, findings overview */

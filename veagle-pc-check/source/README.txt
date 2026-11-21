@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v3.1.0
+VEAGLE PC CHECK  v3.2.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,13 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 3.2.0
+- A new, fairer score. Each area (Stability, Storage, Security...) is scored on its own and the overall score is a weighted average that is pulled a little towards the worst area. The Insights page shows exactly how many points each finding costs. The number can look different from the previous version for the same PC. This is normal, the formula changed, not your PC, so do not compare it with old scans.
+- Hardware errors (WHEA) that could not be corrected, and several different blue screen codes in a row, now count as evidence of hardware or memory instability.
+- The 5 most useful actions are now ranked by how much each one raises the score, divided by the time and risk it needs. Actions that need a backup first say so.
+- Two small fixes in the scan: the SSD wear number in the history file was always empty (now read from the right place), and the temporary security-policy file is always deleted, even if the scan is stopped.
+- Nothing new is collected and nothing is changed or sent anywhere.
 
 NEW IN 3.1.0
 - The report is now a troubleshooting assistant. On the Summary page you get a plain summary and the likely causes, each with the evidence and a confidence level (High, Medium, Low). It is an estimate from rules, never a certain diagnosis.

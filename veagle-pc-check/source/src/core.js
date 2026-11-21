@@ -2327,15 +2327,33 @@ function Engine(RAW) {
   }
 
   /* ---------------- scoring ---------------- */
+  /* Score v2 (3.2.0). Each area starts at 100 and every open finding keeps only a share of what is left (high 80%, medium 92%, low 97%), so many small findings can never add up to a disaster, and a real problem still counts. The overall score mixes the average of the areas (weighted) with the worst area, so one broken area cannot hide behind eight healthy ones. Every finding gets its own cost, worked out by leaving it out and measuring the difference. */
+  var SC = {
+    keep: { high: 0.80, medium: 0.92, low: 0.97, info: 1 },
+    weight: { Stability: 1.6, Storage: 1.3, Security: 1.3, Updates: 1.0, Privacy: 0.8, Network: 0.8, Backup: 0.8, Performance: 0.8, Software: 0.6 },
+    worst: 0.35
+  };
+  function areaVal(findings, area, skip) {
+    var k = 1; findings.forEach(function (f) { if (f.area === area && f !== skip) k *= (SC.keep[f.sev] != null ? SC.keep[f.sev] : 1); });
+    return 100 * k;
+  }
+  function overallVal(findings, skip) {
+    var sw = 0, sa = 0, mn = 100;
+    AREAS.forEach(function (a) { var v = areaVal(findings, a, skip), w = SC.weight[a] || 1; sw += w; sa += w * v; if (v < mn) mn = v; });
+    return (1 - SC.worst) * (sa / sw) + SC.worst * mn;
+  }
   function score(findings) {
-    var pen = 0; findings.forEach(function (f) { pen += PEN[f.sev] || 0; });
-    var s = Math.max(0, Math.round(100 - pen));
-    var areas = AREAS.map(function (a) {
-      var p = 0; findings.forEach(function (f) { if (f.area === a) p += (f.sev === 'high' ? 20 : f.sev === 'medium' ? 8 : f.sev === 'low' ? 3 : 0); });
-      return { name: a, score: Math.max(0, Math.round(100 - p)) };
+    var total = overallVal(findings, null), s = Math.max(0, Math.min(100, Math.round(total)));
+    var areas = AREAS.map(function (a) { return { name: a, score: Math.max(0, Math.round(areaVal(findings, a, null))) }; });
+    var explain = [];
+    findings.forEach(function (f) {
+      if (f.sev === 'info' || !SC.keep[f.sev] || SC.keep[f.sev] >= 1) return;
+      var d = overallVal(findings, f) - total, da = areaVal(findings, f.area, f) - areaVal(findings, f.area, null);
+      explain.push({ id: f.id, area: f.area, sev: f.sev, points: Math.round(d * 10) / 10, areaPoints: Math.round(da * 10) / 10 });
     });
+    explain.sort(function (a, b) { return b.points - a.points; });
     var label = s >= 85 ? 'In good shape' : (s >= 60 ? 'Needs attention' : 'Needs work');
-    return { score: s, label: label, areas: areas };
+    return { score: s, label: label, areas: areas, explain: explain, exact: Math.round(total * 10) / 10, model: 'v2' };
   }
 
   /* ---------------- Windows 11 readiness ---------------- */
@@ -2401,7 +2419,7 @@ function Engine(RAW) {
     evGroups: evGroups, evCount: evCount, RE: RE, findings: findings, good: good, score: sc, counts: counts,
     SEV_ORDER: SEV_ORDER, AREAS: AREAS, readiness: readiness(), battery: g(D, 'battery', null),
     days: num(g(D, 'events.days', 30), 30), periodChoice: !!(D.events && D.events.availableDays),
-    RT: RT, withProfile: withProfile, scoreOf: score, META: META, noiseFor: noiseFor, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
+    RT: RT, withProfile: withProfile, scoreOf: score, SCORE_MODEL: SC, META: META, noiseFor: noiseFor, PROFILES: PROFILES, BUGCODES: BUGCODES, bugKey: bugKey, baseFindings: findings, profile: 'home'
   };
 }
 /* ---------- period of the Event Viewer data: 7, 30 or 60 days (the scan collects 60 and the report narrows it down) ---------- */

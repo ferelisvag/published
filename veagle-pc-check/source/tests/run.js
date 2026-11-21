@@ -97,6 +97,26 @@ function fixtures() {
     ok(!as.err && as.main && as.top5, 'assistant blocks render ' + (as.err || ''));
     ok(as.greek && as.insGreek, 'assistant is fully Greek in Greek');
     ok(as.causesOk && as.dup && as.insEn > 500, 'assistant causes are complete and not duplicated');
+    // synthetic scenarios (3.2): the right cause must come out on top
+    const sc = await page.evaluate(() => {
+      const out = {}, keep = V, raw = JSON.parse(JSON.stringify(V.RAW));
+      const ago = d => new Date(Date.now() - d * 864e5).toISOString();
+      function run(mod) {
+        const d = JSON.parse(JSON.stringify(raw)); d.extras = d.extras || {}; d.events = d.events || {}; d.events.system = d.events.system || {}; d.events.system.groups = [];
+        d.extras.dumps = []; mod(d); V = Engine(d); Object.keys(keep).forEach(k => { if (!(k in V)) V[k] = keep[k]; }); ASSIST.use(V);
+        return { top: ASSIST.causes().map(c => c.key), conf: (ASSIST.causes()[0] || {}).conf, score: V.score.score, expl: V.score.explain.length };
+      }
+      try {
+        out.hw = run(d => { d.events.system.groups.push({ provider: 'Microsoft-Windows-WHEA-Logger', id: 18, level: 'Error', count: 6 }); d.extras.dumps = ['0x124', '0x1a', '0x50'].map((c, i) => ({ file: i + '.dmp', time: ago(3 + i), code: c })); });
+        out.clean = run(d => {});
+        out.disk = run(d => { d.events.system.groups.push({ provider: 'disk', id: 7, level: 'Error', count: 12 }); });
+      } catch (e) { out.err = String(e); }
+      V = keep; ASSIST.use(keep);
+      return out;
+    });
+    ok(!sc.err, 'scenarios run ' + (sc.err || ''));
+    ok(sc.hw && sc.hw.top[0] === 'hw' && sc.hw.score < sc.clean.score, 'scenario: WHEA + varied blue screens -> hardware first, lower score');
+    ok(sc.clean && !sc.clean.top.includes('hw') && sc.clean.expl >= 0, 'scenario: clean data gives no hardware cause');
     // views
     await page.evaluate(() => UI.setView('simple'));
     ok(await page.evaluate(() => document.body.classList.contains('view-simple')), 'simple view on');

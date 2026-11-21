@@ -58,7 +58,7 @@ outdated = [
 ] + [('Sample app %d'%i,'Vendor.App%d'%i,'1.%d'%i,'2.%d'%i,'winget') for i in range(17)]
 startup_names = ['GoogleDriveFS','OneDrive','Discord','EpicGamesLauncher','CCXProcess','BraveSoftware Update','Adobe Acrobat Synchronizer','Agent Tray','ACDSeeCommanderFree','Wargaming.net Game Center','Studio.QuickLook','EADM','FilmoraTray','NVIDIA Broadcast','GogGalaxy','MicrosoftEdgeAutoLaunch','AnyDesk','SecurityHealth','RtkAudUService','SteelSeriesGG','Bdagent','ACFW02EN','BdVpnApp','Steam','Viber','Spotify','Zoom','Dropbox']
 data = {
- 'meta': dict(mode='full', tool='VEAGLE PC Check', version='3.3.6', generated=iso(now), isAdmin=True, psVersion='5.1.26100.9549', user='demo', computer='DEMO-PC', domain='DEMO-PC', durationSec=214, warnings=['winget: first run may be slow']),
+ 'meta': dict(mode='full', tool='VEAGLE PC Check', version='3.3.7', generated=iso(now), isAdmin=True, psVersion='5.1.26100.9549', user='demo', computer='DEMO-PC', domain='DEMO-PC', durationSec=214, warnings=['winget: first run may be slow']),
  'system': dict(manufacturer='Gigabyte Technology Co., Ltd.', model='Z590 AORUS PRO AX', chassis='Desktop', isLaptop=False, firmware='UEFI',
    board=dict(manufacturer='Gigabyte Technology Co., Ltd.', product='Z590 AORUS PRO AX'),
    bios=dict(vendor='American Megatrends International, LLC.', version='ALASKA - 1072009', date='2025-06-10T00:00:00', smbios='3.4'),

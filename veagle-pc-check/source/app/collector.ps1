@@ -10,7 +10,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify, [switch]$NoNetwork)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '3.3.6'
+$script:Version = '3.3.7'
 # Automatic no-internet mode: only reads Windows settings (is there a connected network card with a gateway?). It sends no packet.
 # With no connection the network steps (winget, DNS) would only wait and time out, so they are skipped and the report says so.
 $script:NoNetAuto = $false
@@ -82,32 +82,32 @@ function Flush-StepErrors {
 
 # the eagle: one row of the logo is drawn on every step line (26 steps, 26 rows)
 $script:LogoRows = @(
-    '         -=                             ',
-    '         @%                             ',
-    '        +@@.                            ',
-    '  :     @@@#                            ',
-    '  ##   .@@@@:.=++**########**++==-:.    ',
-    '  @@-  .@@@@@ @@@@@@@@@@@@@@@@@@@@@@@@@%',
-    '  @@@:  @@@@@+.=---::::::::---==+*#%@@@@',
-    '  #@@@. *@@@@@-                      @@@',
-    '  :@@@@. @@@@@@:      :#@@@@#.      .@@@',
-    '   #@@@@::@@@@@@-    +@@@@@@@@%.    :@@%',
-    '    %@@@@+.%@@@@@+  *@@@@@@@*=*-    +@@*',
-    ' :   #@@@@%.=@@@@@%-+@@@@@@@.       %@@-',
-    ' -#.  -@@@@@*.=@@@@@+.+@@@@@.      .@@@ ',
-    '  -@+   =@@@@@*.:*@@@@+.*@@@@      +@@# ',
-    '   :@@*.  -#@@@@#- :+%@@*-+@@-     @@@: ',
-    '-:   *@@@+.  :*%@@@#-. .-++-=:    *@@#  ',
-    ' +%-  .*@@@@#=.  .-+*#*+-.       :@@@.  ',
-    '  :%@*:  -#@@@@@%#+-:            @@@-   ',
-    '    -%@@%*-:.-=+****=-          @@@*    ',
-    '      .=%@@@@@@%#*=.           %@@#     ',
-    '          .:-==-:            .@@@#      ',
-    '              *#%*          =@@@*       ',
-    '              :@@@@=      -@@@@-        ',
-    '                +@@@@+. =@@@@*          ',
-    '                  +@@@@@@@@*.           ',
-    '                    -#@@#-              '
+    '         .#*                                ',
+    '        .:::                                ',
+    '        *#*#*                               ',
+    '  ::    *****                               ',
+    '  **    *****..***********************.. . .',
+    ' :##*   #**#*#:*##*##*##*#*#*###*#*#*#*#*#*#',
+    ' .::::  *::*:::.:.               *:::::::*:*',
+    '  #@###.*##@#@@#:         :::::         *@#@',
+    '  :::::: .:::::::.      :*::::::       .:*::',
+    '  .###@#@**@#@@#@@.   *@#@#@###@#@.    **@#@',
+    '    ::*:*::.:::::::* .:::*:::::..*.    .:*:*',
+    '*:  .:#*#**#:******#**:**#****:       .#*#*.',
+    ' **:  .:*******.***#**::*#*****.      .#*#*.',
+    '  :**.. .:******:::*************      .*:*: ',
+    '   :###**..:###*##***.:#*@*#####.     ##*@. ',
+    '*    .:::::.  .::::*:::.  ::::::.    .:::.  ',
+    '.#@*: .:@##@#@:::::*:::##@*:        *@#@*.  ',
+    '  .::::   :::::::::*:::.           .::::    ',
+    '    ::#*##*:.*#**::*::::.         :###*.    ',
+    '      . *********::*:            ::***      ',
+    '           .::::**:            .*#***.      ',
+    '              .:****          :**#*#.       ',
+    '               .:::*:.       ::*:*.         ',
+    '                 :#@@#@*:**@##@@:.          ',
+    '                   ::::::*::::.             ',
+    '                    .::##@#*:.              '
 )
 
 function Step([int]$n, [int]$total, [string]$label) {
@@ -123,9 +123,9 @@ function Step([int]$n, [int]$total, [string]$label) {
     try { $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check {0} - {1}% - {2} s' -f $script:Version, $pct, $sec) } catch { }
     $cols = 92
     try { $cols = [int]$Host.UI.RawUI.WindowSize.Width } catch { }
-    $logo = ($cols -ge 112) -and ($n -ge 1) -and ($n -le $script:LogoRows.Count)
+    $logo = ($cols -ge 126) -and ($n -ge 1) -and ($n -le $script:LogoRows.Count)
     $room = $cols - 44
-    if ($logo) { $room = 29 }
+    if ($logo) { $room = 38 }
     if ($room -lt 20) { $room = 20 }
     if ($label.Length -gt $room) { $label = $label.Substring(0, $room - 3) + '...' }
     if ($logo) { $label = $label.PadRight($room + 1) }
@@ -287,9 +287,9 @@ $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIden
 try {
     $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check ' + $script:Version)
     $sz = $Host.UI.RawUI.WindowSize
-    if ($sz.Width -lt 112) {
-        $bs = $Host.UI.RawUI.BufferSize; $bs.Width = 112; if ($bs.Height -lt 300) { $bs.Height = 300 }; $Host.UI.RawUI.BufferSize = $bs
-        $sz.Width = 112; $Host.UI.RawUI.WindowSize = $sz
+    if ($sz.Width -lt 126) {
+        $bs = $Host.UI.RawUI.BufferSize; $bs.Width = 126; if ($bs.Height -lt 300) { $bs.Height = 300 }; $Host.UI.RawUI.BufferSize = $bs
+        $sz.Width = 126; $Host.UI.RawUI.WindowSize = $sz
     }
 } catch { }
 Write-Host ''

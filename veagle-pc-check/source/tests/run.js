@@ -75,6 +75,28 @@ function fixtures() {
       for (const id of want) ok(ids2.includes(id), 'finding ' + id + ' appears');
     }
     ok(!!(await page.$('#scanCov')) === !!(data.meta && (data.meta.coverage || data.meta.stepTimes)), 'coverage box matches the data');
+    // troubleshooting assistant (3.1)
+    const as = await page.evaluate(() => {
+      const out = {};
+      try {
+        ASSIST.render();
+        out.main = !!document.querySelector('[data-assist="main"]'); out.top5 = !!document.querySelector('[data-assist="top5"]');
+        out.endsWithTop5 = (() => { const t = document.querySelector('[data-assist="top5"]'); return !!t; })();
+        out.insEn = ASSIST.insightsHtml().length;
+        V.lang = 'el'; ASSIST.render();
+        const el = [...document.querySelectorAll('[data-assist]')].map(e => e.innerText).join(' ');
+        out.greek = /[\u0370-\u03ff]/.test(el) && !/Confidence:|Suggested next steps|Evidence/.test(el);
+        const ins = document.createElement('div'); ins.innerHTML = ASSIST.insightsHtml(); const it = ins.innerText || ins.textContent;
+        out.insGreek = /Βοηθός/.test(it) && !/Gaming readiness|Update health|Security risk/.test(it);
+        V.lang = 'en'; ASSIST.render();
+        const c = ASSIST.causes(); out.causesOk = c.every(x => x.title && x.ev.length && ['high','medium','low'].includes(x.conf));
+        out.dup = document.querySelectorAll('[data-assist="main"]').length === 1 && document.querySelectorAll('[data-assist="top5"]').length === 1;
+      } catch (e) { out.err = String(e); }
+      return out;
+    });
+    ok(!as.err && as.main && as.top5, 'assistant blocks render ' + (as.err || ''));
+    ok(as.greek && as.insGreek, 'assistant is fully Greek in Greek');
+    ok(as.causesOk && as.dup && as.insEn > 500, 'assistant causes are complete and not duplicated');
     // views
     await page.evaluate(() => UI.setView('simple'));
     ok(await page.evaluate(() => document.body.classList.contains('view-simple')), 'simple view on');

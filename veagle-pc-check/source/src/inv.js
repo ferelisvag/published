@@ -217,6 +217,7 @@ var INV = (function (V, AI) {
       }
     }
     if (typeof V3 !== 'undefined') h += V3.insightsHtml();
+    if (typeof ASSIST !== 'undefined') h += ASSIST.insightsHtml();
     h += '</div>';
     el.insertAdjacentHTML('beforeend', h);
   }

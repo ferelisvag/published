@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v3.0.0
+VEAGLE PC CHECK  v3.1.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,12 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 3.1.0
+- The report is now a troubleshooting assistant. On the Summary page you get a plain summary and the likely causes, each with the evidence and a confidence level (High, Medium, Low). It is an estimate from rules, never a certain diagnosis.
+- Why the score is what it is: every point has a reason. The Insights page also has a gaming readiness score, a memory stability check, driver age and risk, a security risk list, update health, blue screen codes explained and Improving / Stable / Degrading labels for every measure.
+- The Summary page now ends with the 5 most useful actions.
+- Nothing new is collected and nothing is changed or sent anywhere. No cloud AI is used.
 
 NEW IN 3.0.0
 - Privacy page: a "Check your accounts" part with two links (your Microsoft devices, and a data-leak check). They open only when you click.

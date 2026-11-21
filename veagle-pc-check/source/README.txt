@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v3.3.5
+VEAGLE PC CHECK  v3.3.6
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,9 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 3.3.6
+- The report has fewer looks: Cockpit, Bento, Cyber, IQON and Compass were removed. The looks that stay are Veagle OS, Classic, Clean and Step by step.
 
 NEW IN 3.3.5
 - The scan window now draws the Veagle eagle in 26 lines, one more line with every step, so the eagle is complete when the scan ends. The window is a little wider and taller for this.
@@ -197,9 +200,6 @@ PC is touched, and the report remembers your choice in your browser. You can swi
   Classic (Veagle OS) - the dark look from before. This one opens first.
   Clean               - light and simple, easy to read.
   Step by step        - big text, one finding at a time with Back and Next buttons. Good if you are new to this.
-  Cockpit             - black and red, with a big radar of the 9 areas.
-  Bento               - dark, with soft round cards.
-  Cyber               - a turning sphere with one dot for every finding. Drag it, point at a dot, press it to open.
 In the Classic theme the sun button switches to a light theme. "Aa" makes everything bigger in every theme. Both are remembered on your PC.
 In every problem you can tick each step when you have done it, and the Summary page counts your progress
 (this only marks your progress, nothing is run).

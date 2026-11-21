@@ -13,7 +13,12 @@ VEAGLE EYE - ζωντανή παρακολούθηση του υπολογιστ
 
 import argparse
 import bisect
+import collections
+import concurrent.futures
 import gzip
+import re
+import shutil
+import subprocess
 import struct
 import ipaddress
 import json
@@ -33,13 +38,16 @@ from urllib.parse import parse_qs, urlparse
 import psutil
 
 APP_NAME = "Veagle Eye"
-APP_VERSION = "0.2.0"
+APP_VERSION = "21.11 · 23:13"
 HOST = "127.0.0.1"          # ΜΟΝΟ αυτός ο υπολογιστής. Κανείς άλλος στο δίκτυο δεν το βλέπει.
 DEFAULT_PORT = 8765
 SAMPLE_SECONDS = 1.0         # κάθε πότε διαβάζονται τα στοιχεία
 TOP_PROCESSES = 40
 MAX_CONNECTIONS = 300
 HOME_CC = ""                 # προαιρετικά: χώρα του PC στον χάρτη (--home GR)
+IS_WIN = os.name == "nt"
+DEMO = os.environ.get("VEAGLE_EYE_DEMO") == "1"   # μόνο για δοκιμές εμφάνισης: ψεύτικα δεδομένα υλικού
+HISTORY_SECONDS = 3600       # ιστορικό της τελευταίας ώρας: ΜΟΝΟ στη μνήμη, δεν γράφεται ποτέ στον δίσκο
 
 
 def resource_dir() -> Path:
@@ -111,6 +119,337 @@ def classify_address(ip: str) -> str:
     return "internet"
 
 
+
+# ----------------------------------------------------------------------------
+#  ΒΟΗΘΗΤΙΚΑ: εντολές ΜΟΝΟ-ΑΝΑΓΝΩΣΗΣ του λειτουργικού (τίποτα δεν αλλάζει στον υπολογιστή)
+# ----------------------------------------------------------------------------
+def run_cmd(args, timeout: float = 12.0) -> str:
+    """Τρέχει μια εντολή που ΜΟΝΟ διαβάζει πληροφορίες και επιστρέφει το κείμενό της (ή "" αν αποτύχει)."""
+    try:
+        kw = {"creationflags": 0x08000000} if IS_WIN else {}      # χωρίς να εμφανιστεί μαύρο παράθυρο
+        r = subprocess.run(args, capture_output=True, timeout=timeout, **kw)
+        return (r.stdout or b"").decode("utf-8", errors="replace")
+    except Exception:
+        return ""
+
+
+def ps_json(script: str, timeout: float = 25.0):
+    """Windows: τρέχει μια εντολή PowerShell που ΜΟΝΟ διαβάζει και επιστρέφει λίστα από αντικείμενα."""
+    if not IS_WIN:
+        return None
+    full = ("[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;$ProgressPreference='SilentlyContinue';"
+            + script + " | ConvertTo-Json -Compress -Depth 3")
+    out = run_cmd(["powershell", "-NoProfile", "-NonInteractive", "-Command", full], timeout).strip()
+    if not out:
+        return None
+    try:
+        v = json.loads(out)
+    except Exception:
+        return None
+    return v if isinstance(v, list) else [v]
+
+
+def own_ipv4() -> list:
+    ips = []
+    try:
+        for addrs in psutil.net_if_addrs().values():
+            for a in addrs:
+                if a.family == socket.AF_INET and not a.address.startswith("127.") and not a.address.startswith("169.254."):
+                    ips.append(a.address)
+    except Exception:
+        pass
+    return ips
+
+
+SUSPICIOUS_DIRS = ("\\temp\\", "/tmp/", "\\appdata\\local\\temp", "\\downloads\\", "/downloads/", "\\$recycle.bin", "\\users\\public\\")
+VPN_WORDS = re.compile(r"vpn|\btap\b|tap-|\btun\d|wireguard|\bwg\d|openvpn|nord|proton|expressvpn|pptp|l2tp|ikev2|zerotier|tailscale|hamachi|cisco anyconnect|forticlient|globalprotect", re.I)
+
+
+def demo_extra() -> dict:
+    """Ψεύτικα δεδομένα ΜΟΝΟ για δοκιμή της εμφάνισης (VEAGLE_EYE_DEMO=1). Δεν χρησιμοποιείται στο κανονικό πρόγραμμα."""
+    return {
+        "gpu": [{"name": "NVIDIA GeForce RTX 4060", "util": 37, "mem_used": 2210, "mem_total": 8188, "temp": 58, "fan": 34}],
+        "temps": [{"name": "Επεξεργαστής", "label": "CPU Package", "c": 56.0, "high": 95.0},
+                  {"name": "Επεξεργαστής", "label": "Core 0", "c": 53.0, "high": 95.0},
+                  {"name": "NVMe δίσκος", "label": "Composite", "c": 41.0, "high": 75.0}],
+        "fans": [{"label": "CPU Fan", "rpm": 1180}, {"label": "Case Fan", "rpm": 860}],
+        "lan": [{"ip": "192.168.1.1", "mac": "A4-2B-B0-11-22-33", "state": "reachable"},
+                {"ip": "192.168.1.14", "mac": "3C-22-FB-44-55-66", "state": "stale"},
+                {"ip": "192.168.1.23", "mac": "F0-18-98-77-88-99", "state": "stale"},
+                {"ip": "192.168.1.40", "mac": "B8-27-EB-AA-BB-CC", "state": "reachable"}],
+        "wifi": {"ssid": "HOME-WIFI", "signal": 78, "auth": "WPA2-Personal", "radio": "802.11ac", "channel": "44", "rx": "433", "tx": "433"},
+        "firewall": [{"name": "Domain", "on": True}, {"name": "Private", "on": True}, {"name": "Public", "on": False}],
+        "dns": [{"iface": "Wi-Fi", "servers": ["192.168.1.1", "1.1.1.1"]}],
+        "vpn": {"adapters": [], "connections": []},
+        "gateway": "192.168.1.1",
+        "disks_health": [{"name": "Samsung SSD 980 1TB", "media": "SSD", "health": "Healthy", "status": "OK", "size": 1000204886016},
+                         {"name": "WDC WD20EZAZ", "media": "HDD", "health": "Healthy", "status": "OK", "size": 2000398934016}],
+        "monitors": [{"name": "NVIDIA GeForce RTX 4060", "w": 2560, "h": 1440, "hz": 144}],
+        "usb": [{"name": "USB Composite Device", "cls": "USB"}, {"name": "Logitech USB Receiver", "cls": "HIDClass"}, {"name": "USB Mass Storage Device", "cls": "USB"}],
+        "startup": [{"name": "OneDrive", "cmd": "C:\\Program Files\\Microsoft OneDrive\\OneDrive.exe /background", "where": "HKCU\\...\\Run"},
+                    {"name": "Steam", "cmd": "C:\\Program Files (x86)\\Steam\\steam.exe -silent", "where": "HKCU\\...\\Run"},
+                    {"name": "Discord", "cmd": "C:\\Users\\you\\AppData\\Local\\Discord\\Update.exe --processStart Discord.exe", "where": "HKCU\\...\\Run"}],
+        "demo": True,
+    }
+
+
+class Extras(threading.Thread):
+    """Αργή συλλογή στο παρασκήνιο: υλικό, Wi-Fi, τείχος προστασίας, εκκίνηση κ.λπ.
+    Όλα είναι εντολές ΜΟΝΟ-ΑΝΑΓΝΩΣΗΣ. Αν κάτι δεν υπάρχει στον υπολογιστή σου, απλώς λείπει από τη σελίδα."""
+
+    def __init__(self) -> None:
+        super().__init__(daemon=True)
+        self.lock = threading.Lock()
+        self.data: dict = {}
+        self.sig: dict = {}                  # διαδρομή αρχείου -> "signed" / "unsigned" / "invalid"
+        self.want_sig: set = set()
+        self.ok_scan = threading.Event()
+        self.memtrend: dict = {}
+
+    # --- μικρές εργασίες (κάθε μία σε try: αν αποτύχει, δεν επηρεάζει τις άλλες)
+    @staticmethod
+    def t_gpu():
+        exe = shutil.which("nvidia-smi")
+        if not exe:
+            return None
+        out = run_cmd([exe, "--query-gpu=name,utilization.gpu,memory.used,memory.total,temperature.gpu,fan.speed",
+                       "--format=csv,noheader,nounits"], 6)
+        res = []
+        for line in out.strip().splitlines():
+            parts = [x.strip() for x in line.split(",")]
+            if len(parts) < 6:
+                continue
+
+            def num(x):
+                try:
+                    return float(x)
+                except ValueError:
+                    return None
+            res.append({"name": parts[0], "util": num(parts[1]), "mem_used": num(parts[2]), "mem_total": num(parts[3]),
+                        "temp": num(parts[4]), "fan": num(parts[5])})
+        return res or None
+
+    @staticmethod
+    def t_temps():
+        res = []
+        try:
+            st = psutil.sensors_temperatures()          # Linux και λίγα άλλα συστήματα
+            for name, arr in (st or {}).items():
+                for e in arr[:4]:
+                    res.append({"name": name, "label": e.label or name, "c": round(e.current, 1),
+                                "high": e.high if e.high else None})
+        except Exception:
+            pass
+        if not res and IS_WIN:
+            rows = ps_json("Get-CimInstance -Namespace root/wmi -ClassName MSAcpi_ThermalZoneTemperature -ErrorAction SilentlyContinue | Select-Object InstanceName,CurrentTemperature", 15)
+            for r in rows or []:
+                try:
+                    c = round(float(r.get("CurrentTemperature")) / 10.0 - 273.15, 1)
+                    if -20 < c < 150:
+                        res.append({"name": "ACPI", "label": str(r.get("InstanceName", "ACPI")).split("\\")[-1], "c": c, "high": None})
+                except (TypeError, ValueError):
+                    pass
+        return res or None
+
+    @staticmethod
+    def t_fans():
+        try:
+            st = psutil.sensors_fans()
+        except Exception:
+            return None
+        res = [{"label": e.label or name, "rpm": e.current} for name, arr in (st or {}).items() for e in arr]
+        return res or None
+
+    @staticmethod
+    def t_lan():
+        out = run_cmd(["arp", "-a"], 8) if IS_WIN else (run_cmd(["ip", "neigh"], 6) or run_cmd(["arp", "-an"], 6))
+        res = []
+        for line in out.splitlines():
+            m = re.search(r"(\d{1,3}(?:\.\d{1,3}){3})\s+(?:dev \S+ lladdr\s+)?([0-9a-fA-F]{2}[-:][0-9a-fA-F]{2}[-:][0-9a-fA-F]{2}[-:][0-9a-fA-F]{2}[-:][0-9a-fA-F]{2}[-:][0-9a-fA-F]{2})", line) \
+                or re.search(r"\((\d{1,3}(?:\.\d{1,3}){3})\) at ([0-9a-fA-F:]{17})", line)
+            if not m:
+                continue
+            ip, mac = m.group(1), m.group(2).upper().replace(":", "-")
+            try:
+                a = ipaddress.ip_address(ip)
+            except ValueError:
+                continue
+            if not a.is_private or a.is_multicast or ip.endswith(".255") or mac.startswith("FF-FF") or mac.startswith("01-00-5E"):
+                continue
+            state = "dynamic" if re.search(r"dynamic|δυναμ", line, re.I) else ""
+            for w in ("REACHABLE", "STALE", "DELAY", "PROBE"):
+                if w in line:
+                    state = w.lower()
+            res.append({"ip": ip, "mac": mac, "state": state})
+        uniq = {r["ip"]: r for r in res}
+        return sorted(uniq.values(), key=lambda r: tuple(int(x) for x in r["ip"].split("."))) or None
+
+    @staticmethod
+    def t_wifi():
+        if IS_WIN:
+            out = run_cmd(["netsh", "wlan", "show", "interfaces"], 8)
+            vals, started = [], False
+            for line in out.splitlines():
+                if ":" not in line:
+                    continue
+                k, v = line.split(":", 1)
+                k, v = k.strip(), v.strip()
+                if not started:
+                    if re.fullmatch(r"SSID(\s+\d+)?", k):      # «SSID» είναι ίδιο σε κάθε γλώσσα των Windows
+                        started = True
+                        vals.append(v)
+                    continue
+                if k.upper().startswith("BSSID"):
+                    continue
+                vals.append(v)
+            # σειρά πεδίων: ssid, network type, radio type, authentication, cipher, connection mode, channel, rx, tx, signal
+            if len(vals) >= 10:
+                sig = next((int(re.sub(r"\D", "", x)) for x in vals if x.endswith("%") and re.sub(r"\D", "", x)), None)
+                return {"ssid": vals[0], "radio": vals[2], "auth": vals[3], "channel": vals[6], "rx": vals[7], "tx": vals[8], "signal": sig}
+            return None
+        out = run_cmd(["nmcli", "-t", "-f", "ACTIVE,SSID,SIGNAL,SECURITY", "dev", "wifi"], 6) if shutil.which("nmcli") else ""
+        for line in out.splitlines():
+            parts = line.split(":")
+            if parts and parts[0] == "yes" and len(parts) >= 4:
+                try:
+                    sg = int(parts[2])
+                except ValueError:
+                    sg = None
+                return {"ssid": parts[1], "signal": sg, "auth": parts[3], "radio": "", "channel": "", "rx": "", "tx": ""}
+        return None
+
+    @staticmethod
+    def t_firewall():
+        rows = ps_json("Get-NetFirewallProfile | Select-Object Name,Enabled", 15)
+        if not rows:
+            return None
+        res = []
+        for r in rows:
+            en = r.get("Enabled")
+            res.append({"name": str(r.get("Name")), "on": bool(en) if not isinstance(en, str) else en.lower() in ("true", "1")})
+        return res
+
+    @staticmethod
+    def t_dns():
+        rows = ps_json("Get-DnsClientServerAddress -AddressFamily IPv4 | Where-Object { $_.ServerAddresses } | Select-Object InterfaceAlias,ServerAddresses", 15)
+        if rows:
+            return [{"iface": str(r.get("InterfaceAlias")), "servers": r["ServerAddresses"] if isinstance(r.get("ServerAddresses"), list) else [str(r.get("ServerAddresses"))]} for r in rows]
+        if not IS_WIN:
+            try:
+                ns = [l.split()[1] for l in open("/etc/resolv.conf", encoding="utf-8").read().splitlines() if l.startswith("nameserver") and len(l.split()) > 1]
+                return [{"iface": "system", "servers": ns}] if ns else None
+            except Exception:
+                return None
+        return None
+
+    @staticmethod
+    def t_vpn():
+        adapters = []
+        try:
+            stats = psutil.net_if_stats()
+            for name, st in stats.items():
+                if st.isup and VPN_WORDS.search(name):
+                    adapters.append(name)
+        except Exception:
+            pass
+        conns = []
+        rows = ps_json("Get-VpnConnection -ErrorAction SilentlyContinue | Select-Object Name,ServerAddress,ConnectionStatus", 15)
+        for r in rows or []:
+            conns.append({"name": str(r.get("Name")), "server": str(r.get("ServerAddress")), "status": str(r.get("ConnectionStatus"))})
+        return {"adapters": adapters, "connections": conns}
+
+    @staticmethod
+    def t_gateway():
+        if IS_WIN:
+            rows = ps_json("Get-NetRoute -DestinationPrefix '0.0.0.0/0' -ErrorAction SilentlyContinue | Sort-Object RouteMetric | Select-Object -First 1 NextHop", 12)
+            return str(rows[0].get("NextHop")) if rows and rows[0].get("NextHop") not in (None, "0.0.0.0") else None
+        m = re.search(r"default via (\d+\.\d+\.\d+\.\d+)", run_cmd(["ip", "route"], 5))
+        return m.group(1) if m else None
+
+    @staticmethod
+    def t_disks_health():
+        rows = ps_json("Get-PhysicalDisk -ErrorAction SilentlyContinue | Select-Object FriendlyName,MediaType,HealthStatus,OperationalStatus,Size", 20)
+        if not rows:
+            return None
+        return [{"name": str(r.get("FriendlyName")), "media": str(r.get("MediaType")), "health": str(r.get("HealthStatus")),
+                 "status": str(r.get("OperationalStatus")), "size": r.get("Size")} for r in rows]
+
+    @staticmethod
+    def t_monitors():
+        rows = ps_json("Get-CimInstance Win32_VideoController | Select-Object Name,CurrentHorizontalResolution,CurrentVerticalResolution,CurrentRefreshRate", 20)
+        if not rows:
+            return None
+        return [{"name": str(r.get("Name")), "w": r.get("CurrentHorizontalResolution"), "h": r.get("CurrentVerticalResolution"),
+                 "hz": r.get("CurrentRefreshRate")} for r in rows if r.get("CurrentHorizontalResolution")]
+
+    @staticmethod
+    def t_usb():
+        rows = ps_json("Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue | Where-Object { $_.InstanceId -like 'USB\\*' } | Select-Object -First 40 FriendlyName,Class", 25)
+        if not rows:
+            return None
+        return [{"name": str(r.get("FriendlyName") or "?"), "cls": str(r.get("Class") or "")} for r in rows]
+
+    @staticmethod
+    def t_startup():
+        rows = ps_json("Get-CimInstance Win32_StartupCommand | Select-Object Name,Command,Location", 20)
+        if not rows:
+            return None
+        return [{"name": str(r.get("Name")), "cmd": str(r.get("Command"))[:200], "where": str(r.get("Location"))} for r in rows]
+
+    def t_signatures(self):
+        if not IS_WIN:
+            return
+        todo = [x for x in list(self.want_sig) if x not in self.sig][:25]
+        if not todo:
+            return
+        arr = ",".join("'" + x.replace("'", "''") + "'" for x in todo)
+        rows = ps_json("@(" + arr + ") | ForEach-Object { [pscustomobject]@{ p = $_; s = (Get-AuthenticodeSignature -LiteralPath $_ -ErrorAction SilentlyContinue).Status.ToString() } }", 60)
+        got = {}
+        for r in rows or []:
+            st = str(r.get("s"))
+            got[str(r.get("p"))] = "signed" if st == "Valid" else ("unsigned" if st == "NotSigned" else "invalid")
+        for x in todo:
+            self.sig[x] = got.get(x, "unknown")
+
+    def _put(self, key, fn):
+        try:
+            v = fn()
+        except Exception:
+            v = None
+        with self.lock:
+            self.data[key] = v
+
+    def run(self) -> None:
+        if DEMO:
+            with self.lock:
+                self.data.update(demo_extra())
+        n = 0
+        while True:
+            started = time.time()
+            if not DEMO:
+                if n % 5 == 0:                                   # κάθε ~5 δευτερόλεπτα
+                    self._put("gpu", self.t_gpu)
+                    self._put("temps", self.t_temps)
+                    self._put("fans", self.t_fans)
+                if n % 20 == 0:                                  # κάθε ~20 δευτερόλεπτα
+                    for key, fn in (("lan", self.t_lan), ("wifi", self.t_wifi), ("firewall", self.t_firewall), ("dns", self.t_dns),
+                                    ("vpn", self.t_vpn), ("gateway", self.t_gateway), ("disks_health", self.t_disks_health),
+                                    ("monitors", self.t_monitors), ("usb", self.t_usb), ("startup", self.t_startup)):
+                        self._put(key, fn)
+                try:
+                    self.t_signatures()
+                except Exception:
+                    pass
+            n += 1
+            time.sleep(max(0.2, 1.0 - (time.time() - started)))
+
+    def snapshot(self) -> dict:
+        with self.lock:
+            d = dict(self.data)
+        d["sig_count"] = len(self.sig)
+        d["memtrend"] = {k: list(v) for k, v in self.memtrend.items()}
+        return d
+
 # ----------------------------------------------------------------------------
 #  ΣΥΛΛΟΓΗ ΣΤΟΙΧΕΙΩΝ
 # ----------------------------------------------------------------------------
@@ -126,6 +465,14 @@ class Collector(threading.Thread):
         self._last_net_nic = {}
         self._last_disk = None
         self._last_t = None
+        self.extras = Extras()
+        self.history = collections.deque(maxlen=HISTORY_SECONDS)     # μόνο στη μνήμη
+        self.events = collections.deque(maxlen=200)                  # νέες συνδέσεις
+        self._prev_keys = None
+        self._last_io = {}
+        self._exe = {}
+        self.known_ips = set()
+        self._tick = 0
         self._static_info = self._read_static_info()
         # η πρώτη κλήση "ζεσταίνει" τους μετρητές CPU
         psutil.cpu_percent(percpu=True)
@@ -151,6 +498,19 @@ class Collector(threading.Thread):
             "python": platform.python_version(),
         }
         return info
+
+    def _exe_path(self, pid: int) -> str:
+        if pid in self._exe:
+            return self._exe[pid]
+        path = ""
+        try:
+            path = psutil.Process(pid).exe() or ""
+        except (psutil.Error, OSError):
+            path = ""
+        if len(self._exe) > 4000:
+            self._exe.clear()
+        self._exe[pid] = path
+        return path
 
     def _pid_names(self) -> dict:
         names = {}
@@ -230,31 +590,80 @@ class Collector(threading.Thread):
 
         # ---- διεργασίες
         procs = []
-        for p in psutil.process_iter(["pid", "name", "memory_info", "num_threads"]):
+        io_now = {}
+        for p in psutil.process_iter(["pid", "name", "memory_info", "num_threads", "io_counters"]):
             try:
                 cpu = p.cpu_percent(None)
                 mi = p.info["memory_info"]
+                pid = p.info["pid"]
+                rd = wr = 0.0
+                ioc = p.info.get("io_counters")
+                if ioc is not None:
+                    io_now[pid] = (ioc.read_bytes, ioc.write_bytes)
+                    last = self._last_io.get(pid)
+                    if last and dt:
+                        rd = max(0.0, (ioc.read_bytes - last[0]) / dt)
+                        wr = max(0.0, (ioc.write_bytes - last[1]) / dt)
                 procs.append({
-                    "pid": p.info["pid"],
+                    "pid": pid,
                     "name": p.info["name"] or "?",
                     "cpu": round(cpu / max(1, psutil.cpu_count(logical=True)), 1),
                     "mem": mi.rss if mi else 0,
                     "threads": p.info["num_threads"] or 0,
+                    "rd": rd, "wr": wr,
                 })
             except (psutil.Error, OSError):
                 continue
+        self._last_io = io_now
         total_procs = len(procs)
+        # ποια προγράμματα γράφουν/διαβάζουν περισσότερο στον δίσκο (ανεξάρτητα από τον επεξεργαστή)
+        io_group = {}
+        for x in procs:
+            g = io_group.setdefault(x["name"], [0.0, 0.0])
+            g[0] += x["rd"]
+            g[1] += x["wr"]
+        io_top = sorted(({"name": k, "rd": v[0], "wr": v[1]} for k, v in io_group.items() if v[0] + v[1] > 1024),
+                        key=lambda x: x["rd"] + x["wr"], reverse=True)[:8]
+        # μνήμη ανά πρόγραμμα με ιστορικό: κάθε 5 δευτερόλεπτα (για να φαίνεται ποιο «διογκώνεται»)
+        if self._tick % 5 == 0:
+            mem_group = {}
+            for x in procs:
+                mem_group[x["name"]] = mem_group.get(x["name"], 0) + x["mem"]
+            for name, val in sorted(mem_group.items(), key=lambda kv: kv[1], reverse=True)[:12]:
+                dq = self.extras.memtrend.setdefault(name, collections.deque(maxlen=120))
+                dq.append(val)
         procs.sort(key=lambda x: (x["cpu"], x["mem"]), reverse=True)
         procs = procs[:TOP_PROCESSES]
+        for x in procs:                                   # πού βρίσκεται το αρχείο κάθε προγράμματος
+            x["exe"] = self._exe_path(x["pid"])
 
-        # ---- συνδέσεις δικτύου (ποιο πρόγραμμα μιλά με ποιον)
-        conns = []
+        # ---- συνδέσεις δικτύου (ποιο πρόγραμμα μιλά με ποιον) + θύρες που «ακούνε»
+        conns, listen, states, top3, conn_note = [], [], {}, [], ""
         try:
             names = self._pid_names()
-            for c in psutil.net_connections(kind="inet"):
+            allc = psutil.net_connections(kind="inet")
+            per_pid = {}
+            lmerge = {}
+            keys_now = set()
+            for c in allc:
+                if c.type == socket.SOCK_STREAM:
+                    states[c.status] = states.get(c.status, 0) + 1
+                # θύρες που ακούνε: TCP LISTEN ή UDP χωρίς συγκεκριμένο συνομιλητή
+                if c.laddr and ((c.type == socket.SOCK_STREAM and c.status == "LISTEN") or (c.type == socket.SOCK_DGRAM and not c.raddr)):
+                    ip = c.laddr.ip
+                    exposed = ip not in ("127.0.0.1", "::1")
+                    lk = (c.pid or 0, "TCP" if c.type == socket.SOCK_STREAM else "UDP", c.laddr.port)
+                    if lk in lmerge:
+                        lmerge[lk]["exposed"] = lmerge[lk]["exposed"] or exposed
+                    else:
+                        lmerge[lk] = {"pid": lk[0], "name": names.get(c.pid, "—") if c.pid else "—", "proto": lk[1], "port": lk[2],
+                                      "addr": ip, "exposed": exposed, "what": PORT_NAMES.get(lk[2], ""),
+                                      "exe": self._exe_path(c.pid) if c.pid else ""}
                 if not c.raddr:
                     continue                       # μόνο ενεργές συνδέσεις προς κάποιον
                 rip, rport = c.raddr.ip, c.raddr.port
+                per_pid[c.pid or 0] = per_pid.get(c.pid or 0, 0) + 1
+                keys_now.add((c.pid or 0, "TCP" if c.type == socket.SOCK_STREAM else "UDP", rip, rport))
                 conns.append({
                     "pid": c.pid or 0,
                     "name": names.get(c.pid, "—") if c.pid else "—",
@@ -279,7 +688,27 @@ class Collector(threading.Thread):
             conns = list(merged.values())
             conns.sort(key=lambda x: ({"internet": 0, "lan": 1, "local": 2}[x["scope"]], x["name"].lower()))
             conns = conns[:MAX_CONNECTIONS]
-            conn_note = ""
+            for c in conns:                                    # αρχείο προγράμματος και πιθανά «κόκκινα σημάδια»
+                exe = self._exe_path(c["pid"]) if c["pid"] else ""
+                c["exe"] = exe
+                low = exe.lower()
+                c["susp"] = bool(exe) and any(w in low for w in SUSPICIOUS_DIRS)
+                c["sig"] = self.extras.sig.get(exe, "") if exe else ""
+                if exe and c["scope"] == "internet":
+                    self.extras.want_sig.add(exe)
+            self.known_ips = {c["raddr"] for c in conns}
+            # νέες συνδέσεις από το προηγούμενο δευτερόλεπτο (ζωντανή ροή)
+            if self._prev_keys is not None:
+                info = {(c["pid"], c["proto"], c["raddr"], c["rport"]): c for c in conns}
+                for k in keys_now - self._prev_keys:
+                    c = info.get(k)
+                    if c:
+                        self.events.append({"t": now, "name": c["name"], "pid": c["pid"], "proto": c["proto"], "raddr": c["raddr"],
+                                            "rport": c["rport"], "scope": c["scope"], "cc": c["cc"], "what": c["what"]})
+            self._prev_keys = keys_now
+            listen = sorted(lmerge.values(), key=lambda x: (not x["exposed"], x["port"]))[:200]
+            top3 = [{"pid": pid, "name": names.get(pid, "—") if pid else "—", "count": n}
+                    for pid, n in sorted(per_pid.items(), key=lambda kv: kv[1], reverse=True)[:3]]
         except (psutil.AccessDenied, PermissionError):
             conn_note = "denied"
         except Exception:
@@ -295,6 +724,9 @@ class Collector(threading.Thread):
         except Exception:
             pass
 
+        self._tick += 1
+        self.history.append({"t": round(now), "cpu": round(cpu_total, 1), "mem": vm.percent, "down": round(net_down), "up": round(net_up),
+                             "conns": len(conns), "dio": round(disk_read + disk_write)})
         return {
             "t": now,
             "info": self._static_info,
@@ -307,10 +739,13 @@ class Collector(threading.Thread):
             "net": {"down": net_down, "up": net_up, "nics": nics},
             "procs": procs, "proc_count": total_procs,
             "conns": conns, "conn_note": conn_note,
+            "listen": listen, "states": states, "top3": top3, "io_top": io_top,
+            "events": list(self.events)[-60:],
             "battery": battery,
         }
 
     def run(self) -> None:
+        self.extras.start()
         while True:
             started = time.time()
             try:
@@ -327,6 +762,66 @@ class Collector(threading.Thread):
 # ----------------------------------------------------------------------------
 #  ΤΟΠΙΚΟΣ SERVER
 # ----------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------
+#  ΠΡΟΑΙΡΕΤΙΚΑ ΕΡΓΑΛΕΙΑ (τρέχουν ΜΟΝΟ όταν πατήσεις εσύ το αντίστοιχο κουμπί)
+# ----------------------------------------------------------------------------
+COMMON_PORTS = sorted(set(list(PORT_NAMES) + [21, 22, 23, 25, 53, 69, 80, 88, 110, 111, 113, 119, 135, 137, 138, 139, 143, 161, 179, 389, 427, 443,
+                       445, 465, 500, 514, 515, 543, 548, 554, 587, 631, 636, 873, 902, 989, 990, 993, 995, 1080, 1194, 1433, 1521,
+                       1701, 1723, 1900, 2049, 2082, 2083, 2181, 2375, 2376, 3000, 3128, 3306, 3389, 3690, 4000, 4444, 4567, 5000,
+                       5060, 5357, 5432, 5555, 5672, 5900, 5985, 5986, 6000, 6379, 6443, 7000, 7070, 8000, 8008, 8080, 8081, 8088,
+                       8443, 8888, 9000, 9090, 9200, 9300, 10000, 11211, 15672, 27017, 27015, 49152]))
+
+
+def scan_own_device(full: bool) -> dict:
+    """Σαρώνει ΜΟΝΟ τον ίδιο τον υπολογιστή (127.0.0.1 και τις δικές του διευθύνσεις). Ποτέ άλλη συσκευή."""
+    targets = ["127.0.0.1"] + own_ipv4()
+    ports = list(range(1, 1025)) if full else COMMON_PORTS
+    t0 = time.time()
+    out = []
+
+    def probe(args):
+        ip, port = args
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sck:
+            sck.settimeout(0.35)
+            return port if sck.connect_ex((ip, port)) == 0 else None
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=96) as ex:
+        for ip in targets[:4]:
+            found = [r for r in ex.map(probe, [(ip, pt) for pt in ports]) if r]
+            out.append({"ip": ip, "open": [{"port": pt, "what": PORT_NAMES.get(pt, "")} for pt in found]})
+    return {"targets": out, "tested": len(ports), "full": full, "secs": round(time.time() - t0, 1)}
+
+
+def reverse_dns(ip: str) -> dict:
+    """Ρωτά τον DNS του υπολογιστή σου «ποιο όνομα έχει αυτή η διεύθυνση;». ΜΟΝΟ για IP που ήδη επικοινωνεί μαζί σου."""
+    res = {"ip": ip, "name": ""}
+
+    def work():
+        try:
+            res["name"] = socket.gethostbyaddr(ip)[0]
+        except Exception:
+            res["name"] = ""
+    th = threading.Thread(target=work, daemon=True)
+    th.start()
+    th.join(3.0)
+    return res
+
+
+def ping_gateway(gw: str) -> dict:
+    """Στέλνει 4 μικρά ping ΜΟΝΟ στο router του σπιτιού/γραφείου σου και δίνει τους χρόνους."""
+    if not gw:
+        return {"error": "nogw"}
+    try:
+        ipaddress.ip_address(gw)
+    except ValueError:
+        return {"error": "nogw"}
+    cmd = ["ping", "-n", "4", "-w", "1500", gw] if IS_WIN else ["ping", "-c", "4", "-W", "2", gw]
+    out = run_cmd(cmd, 15)
+    times = [float(x) for line in out.splitlines() if "TTL" in line.upper() or "ttl" in line for x in re.findall(r"[=<]\s*([\d.]+)\s*ms", line)]
+    return {"gw": gw, "times": times, "sent": 4}
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "VeagleEye"
     protocol_version = "HTTP/1.1"
@@ -390,6 +885,22 @@ class Handler(BaseHTTPRequestHandler):
             return self._stream()
         if path == "/api/snapshot":
             return self._send(200, self.collector.snapshot_json, "application/json; charset=utf-8")
+        jt = "application/json; charset=utf-8"
+        if path == "/api/extra":
+            return self._send(200, json.dumps(self.collector.extras.snapshot(), ensure_ascii=False).encode("utf-8"), jt)
+        if path == "/api/history":
+            return self._send(200, json.dumps(list(self.collector.history)).encode("utf-8"), jt)
+        if path == "/api/scan":
+            full = (query.get("range") or [""])[0] == "full"
+            return self._send(200, json.dumps(scan_own_device(full)).encode("utf-8"), jt)
+        if path == "/api/rdns":
+            ip = (query.get("ip") or [""])[0]
+            if ip not in self.collector.known_ips:          # μόνο διευθύνσεις που ήδη μιλούν με τον υπολογιστή σου
+                return self._send(400, b"{}", jt)
+            return self._send(200, json.dumps(reverse_dns(ip)).encode("utf-8"), jt)
+        if path == "/api/ping":
+            gw = (self.collector.extras.snapshot().get("gateway") or "")
+            return self._send(200, json.dumps(ping_gateway(gw)).encode("utf-8"), jt)
 
         rel = "index.html" if path in ("/", "") else path.lstrip("/")
         target = (STATIC / rel).resolve()

@@ -8,7 +8,7 @@
   const HIST = 120;
   const MODE_VIEWS = ["world", "cyber", "orbit", "mindmap"];
   const ORDER = ["dash", "world", "cyber", "orbit", "wall", "mindmap"];
-  const PAGES = ["dash", "procs", "net", "sys", "about"];
+  const PAGES = ["dash", "procs", "net", "sys", "about", "sec", "live", "lan", "hw", "tools", "guide"];
 
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
   function fmtBytes(n) {
@@ -39,7 +39,7 @@
   }
   /* Θέμα HUD (Jarvis): αλλάζει ΜΟΝΟ όταν πατήσεις το κουμπί, και το θυμάται μόνο ως προτίμηση εμφάνισης. */
   const HUDSVG = '<svg id="hudfx" viewBox="0 0 600 600" aria-hidden="true" focusable="false" fill="none" stroke="#19e3ff"><g class="r r1"><circle cx="300" cy="300" r="286" stroke-width="1" stroke-dasharray="2 6" opacity=".7"/><circle cx="300" cy="300" r="276" stroke-width="10" stroke-dasharray="1 11.2" opacity=".5"/></g><g class="r r2"><circle cx="300" cy="300" r="238" stroke-width="2" stroke-dasharray="120 40 18 40" opacity=".8"/><circle cx="300" cy="300" r="226" stroke="#ffb020" stroke-width="3" stroke-dasharray="60 520" opacity=".85"/></g><g class="r r3"><circle cx="300" cy="300" r="190" stroke-width="1.5" stroke-dasharray="4 10" opacity=".8"/><path d="M300 98v26M300 476v26M98 300h26M476 300h26" stroke-width="2.5" opacity=".9"/></g><g class="r r4"><circle cx="300" cy="300" r="150" stroke-width="5" stroke-dasharray="90 30" opacity=".55"/><circle cx="300" cy="300" r="132" stroke-width="1" opacity=".7"/></g><g class="core"><circle cx="300" cy="300" r="86" stroke-width="2" opacity=".9"/><path d="M300 236l55 96h-110z" stroke-width="2.5" opacity=".9"/><circle cx="300" cy="300" r="20" fill="#19e3ff" fill-opacity=".25" stroke-width="2"/></g></svg>';
-  const THEMES = { classic: "#050708", hud: "#02070d", matrix: "#010a04", amber: "#0b0602", synth: "#0a0414" };
+  const THEMES = { classic: "#050708", hud: "#02070d", matrix: "#010a04", amber: "#0b0602", synth: "#0a0414", daylight: "#eef2f7", ice: "#06121c", forest: "#07100a" };
   function setTheme(id, save) {
     if (!THEMES[id]) id = "classic";
     const root = document.documentElement, fx = document.getElementById("hudfx");
@@ -98,6 +98,7 @@
     G = [...map.values()].sort((a, b) => (b.cpu - a.cpu) || (b.mem - a.mem));
     if (!S.cores.length) { S.cpu = T.cpu; S.mem = T.mem; S.cores = T.cores.slice(); S.nd = T.nd; S.nu = T.nu; }
     render();
+    if (window.Extra) window.Extra.tick(d);
   }
   function smooth(dt) {
     const k = 1 - Math.pow(0.0015, dt);
@@ -245,6 +246,7 @@
     $("host").textContent = d.info.hostname;
     if (view === "dash") renderDash(); else if (view === "procs") renderProcs(); else if (view === "net") renderNet();
     else if (view === "sys") renderSys(); else if (view === "wall") renderWall();
+    else if (window.Extra && window.Extra.has(view)) window.Extra.render(view);
   }
 
   /* ---------- όψεις (canvas) ---------- */
@@ -289,6 +291,7 @@
     document.querySelectorAll("[data-view]").forEach((b) => b.classList.toggle("on", b.dataset.view === v));
     if (!noHash) { try { history.replaceState(null, "", location.search + "#" + v); } catch (_) {} }
     modeTexts(); render(); if (v === "wall" && d) renderWall();
+    if (window.Extra) window.Extra.viewChanged(v);
   }
   document.querySelectorAll("button[data-view]").forEach((b) => b.addEventListener("click", () => go(b.dataset.view)));
   $("p-head").addEventListener("click", (e) => { const k = e.target.dataset && e.target.dataset.k; if (!k) return; if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = k === "name" ? 1 : -1; } renderProcs(); });
@@ -299,7 +302,7 @@
   function applyLang(l) {
     setLang(l); $("lang").textContent = t("lang.switch");
     document.querySelectorAll("#modes button:not([data-i18n])").forEach((b) => { /* ονόματα όψεων: ίδια σε όλες τις γλώσσες */ });
-    setLiveState(); modeTexts(); if (d) { lastPaintLang = l; render(); if (view === "wall") renderWall(); }
+    setLiveState(); modeTexts(); if (window.Extra) window.Extra.lang(); if (d) { lastPaintLang = l; render(); if (view === "wall") renderWall(); }
   }
   let lastPaintLang = "";
   $("lang").addEventListener("click", () => applyLang(LANG === "el" ? "en" : "el"));
@@ -326,6 +329,7 @@
     if (k === "f") toggleFull(); else if (k === " ") { e.preventDefault(); setPaused(!paused); } else if (k === "l" || k === "λ") applyLang(LANG === "el" ? "en" : "el");
     else if (/^[1-6]$/.test(k)) go(ORDER[+k - 1]);
   });
+  window.VE = { get d() { return d; }, get paused() { return paused; }, get view() { return view; }, go, setTheme, THEMES, esc, fmtBytes, fmtRate, fmtDur, hist, setPaused, applyLang, fit, toggleFull, rerender: () => { if (d) render(); } };
   window.addEventListener("hashchange", () => go(location.hash.slice(1), true));
 
   /* ---------- ζωντανή σύνδεση ---------- */
@@ -363,6 +367,7 @@
   setLiveState("conn");
   boot();
   go(location.hash.slice(1) || "dash", true);
+  if (window.Extra) window.Extra.init();
   connect();
   requestAnimationFrame(modeFrame);
   window.addEventListener("resize", () => { if (d) render(); });

@@ -12,6 +12,7 @@
 <canvas id="netbg" aria-hidden="true"></canvas>
 <div id="boot"><pre id="bootlog"></pre></div>
 
+<div class="fxbg" aria-hidden="true"></div>
 <div class="os" id="os">
   <header class="bar">
     <div class="start"><img src="eagle-white.png" alt="Veagle"><span>VEAGLE <b>EYE</b></span></div>
@@ -25,7 +26,13 @@
     </nav>
     <div class="live" id="live"><span class="dot"></span><span id="livetxt">…</span></div>
     <span id="host"></span>
-    <button class="pill" id="theme" type="button" aria-pressed="false" aria-label="HUD">HUD</button>
+    <select id="theme" aria-label="Theme / Θέμα" title="Theme / Θέμα">
+      <option value="classic">Classic</option>
+      <option value="hud">HUD</option>
+      <option value="matrix">Matrix</option>
+      <option value="amber">Amber</option>
+      <option value="synth">Synthwave</option>
+    </select>
     <button class="pill" id="lang" type="button">EN</button>
     <span id="clk">--:--:--</span>
   </header>

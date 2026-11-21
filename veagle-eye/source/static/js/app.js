@@ -39,18 +39,20 @@
   }
   /* Θέμα HUD (Jarvis): αλλάζει ΜΟΝΟ όταν πατήσεις το κουμπί, και το θυμάται μόνο ως προτίμηση εμφάνισης. */
   const HUDSVG = '<svg id="hudfx" viewBox="0 0 600 600" aria-hidden="true" focusable="false" fill="none" stroke="#19e3ff"><g class="r r1"><circle cx="300" cy="300" r="286" stroke-width="1" stroke-dasharray="2 6" opacity=".7"/><circle cx="300" cy="300" r="276" stroke-width="10" stroke-dasharray="1 11.2" opacity=".5"/></g><g class="r r2"><circle cx="300" cy="300" r="238" stroke-width="2" stroke-dasharray="120 40 18 40" opacity=".8"/><circle cx="300" cy="300" r="226" stroke="#ffb020" stroke-width="3" stroke-dasharray="60 520" opacity=".85"/></g><g class="r r3"><circle cx="300" cy="300" r="190" stroke-width="1.5" stroke-dasharray="4 10" opacity=".8"/><path d="M300 98v26M300 476v26M98 300h26M476 300h26" stroke-width="2.5" opacity=".9"/></g><g class="r r4"><circle cx="300" cy="300" r="150" stroke-width="5" stroke-dasharray="90 30" opacity=".55"/><circle cx="300" cy="300" r="132" stroke-width="1" opacity=".7"/></g><g class="core"><circle cx="300" cy="300" r="86" stroke-width="2" opacity=".9"/><path d="M300 236l55 96h-110z" stroke-width="2.5" opacity=".9"/><circle cx="300" cy="300" r="20" fill="#19e3ff" fill-opacity=".25" stroke-width="2"/></g></svg>';
+  const THEMES = { classic: "#050708", hud: "#02070d", matrix: "#010a04", amber: "#0b0602", synth: "#0a0414" };
   function setTheme(id, save) {
-    const hud = id === "hud", root = document.documentElement, fx = document.getElementById("hudfx");
-    if (hud) root.setAttribute("data-theme", "hud"); else root.removeAttribute("data-theme");
-    if (hud && !fx) document.body.insertAdjacentHTML("afterbegin", HUDSVG); else if (!hud && fx) fx.remove();
-    const b = document.getElementById("theme"); if (b) b.setAttribute("aria-pressed", hud ? "true" : "false");
-    const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = hud ? "#02070d" : "#050708";
-    if (save) { try { localStorage.setItem("veagleeye.theme", hud ? "hud" : "classic"); } catch (_) {} }
+    if (!THEMES[id]) id = "classic";
+    const root = document.documentElement, fx = document.getElementById("hudfx");
+    if (id === "classic") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", id);
+    if (id === "hud" && !fx) document.body.insertAdjacentHTML("afterbegin", HUDSVG); else if (id !== "hud" && fx) fx.remove();
+    const b = document.getElementById("theme"); if (b) b.value = id;
+    const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = THEMES[id];
+    if (save) { try { localStorage.setItem("veagleeye.theme", id); } catch (_) {} }
     readColors();
   }
   readColors();
-  try { if (localStorage.getItem("veagleeye.theme") === "hud") setTheme("hud", false); } catch (_) {}
-  document.getElementById("theme").addEventListener("click", () => setTheme(document.documentElement.getAttribute("data-theme") === "hud" ? "classic" : "hud", true));
+  try { const th = localStorage.getItem("veagleeye.theme"); if (th && THEMES[th]) setTheme(th, false); else setTheme("classic", false); } catch (_) {}
+  document.getElementById("theme").addEventListener("change", (e) => setTheme(e.target.value, true));
 
   /* ---------- canvas ---------- */
   function fit(cv) {

@@ -133,9 +133,9 @@ label.chk input{accent-color:var(--accent)}
 .chip.on{border-color:var(--accent);color:#fff;background:rgba(var(--ar),.16)}
 .tw{flex:1;min-height:0;overflow:auto;border:1px solid var(--line);border-radius:14px;background:var(--glass)}
 table{width:100%;border-collapse:collapse;font-size:.92rem}
-th{position:sticky;top:0;background:#0d1115;text-align:left;padding:.5rem .8rem;font:500 .72rem var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line2);white-space:nowrap;user-select:none;z-index:1}
+th{position:sticky;top:0;background:var(--th,#0d1115);text-align:left;padding:.5rem .8rem;font:500 .72rem var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line2);white-space:nowrap;user-select:none;z-index:1}
 th.s{cursor:pointer}th.s:hover{color:#fff}th.on{color:var(--accent2)}
-td{padding:.38rem .8rem;border-bottom:1px solid #12161b;white-space:nowrap}
+td{padding:.38rem .8rem;border-bottom:1px solid var(--tdl,#12161b);white-space:nowrap}
 tr:hover td{background:rgba(var(--ar),.06)}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 .tag{display:inline-block;padding:.05rem .55rem;font-size:.72rem;letter-spacing:.08em;border:1px solid var(--line2);border-radius:999px;color:var(--dim)}
@@ -225,11 +225,10 @@ html[data-theme="hud"] .card::before,html[data-theme="hud"] .card::after{content
 html[data-theme="hud"] .card::before{bottom:-1px;left:-1px;border-right:0;border-top:0}
 html[data-theme="hud"] .card::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
 html[data-theme="hud"] .card h3{color:var(--accent2);text-shadow:0 0 8px rgba(var(--ar),.4)}
-html[data-theme="hud"] th{background:#061824}
-html[data-theme="hud"] td{border-bottom-color:#0c2a3a}
+html[data-theme="hud"]{--th:#061824;--tdl:#0c2a3a}
 html[data-theme="hud"] .ring .rp{filter:drop-shadow(0 0 5px rgba(var(--ar),.7))}
 html[data-theme="hud"] .coresbar div i,html[data-theme="hud"] .mini i{box-shadow:0 0 8px rgba(var(--ar),.6)}
-html[data-theme="hud"] #theme{border-color:var(--accent);color:var(--accent2);box-shadow:0 0 10px rgba(var(--ar),.35)}
+
 #hudfx{position:fixed;left:50%;top:50%;width:min(80vmin,780px);height:min(80vmin,780px);transform:translate(-50%,-50%);z-index:0;pointer-events:none;opacity:.5}
 #hudfx .r{transform-origin:300px 300px}
 #hudfx .r1{animation:hudspin 70s linear infinite}#hudfx .r2{animation:hudspin 46s linear infinite reverse}#hudfx .r3{animation:hudspin 26s linear infinite}#hudfx .r4{animation:hudspin 14s linear infinite reverse}
@@ -237,3 +236,45 @@ html[data-theme="hud"] #theme{border-color:var(--accent);color:var(--accent2);bo
 @keyframes hudspin{to{transform:rotate(360deg)}}
 @keyframes hudpulse{50%{transform:scale(1.08);opacity:.7}}
 @media (prefers-reduced-motion:reduce){html[data-theme="hud"] body::after,#hudfx .r,#hudfx .core{animation:none}}
+
+/* ---------- Επιλογέας θέματος και επιπλέον θέματα ---------- */
+#theme{background:transparent;color:var(--text);font:inherit;font-size:.82rem;letter-spacing:.08em;padding:.15rem .6rem;border:1px solid var(--line2);border-radius:999px;cursor:pointer;appearance:none;-webkit-appearance:none;text-align:center}
+#theme:hover,#theme:focus-visible{border-color:var(--accent)}
+#theme option{background:#0b0e12;color:#e7ecf3}
+html:not([data-theme="classic"]):not([data-theme=""]) #theme{border-color:rgba(var(--ar),.6)}
+.fxbg{position:fixed;inset:0;z-index:0;pointer-events:none;display:none}
+html[data-theme="matrix"] .fxbg,html[data-theme="amber"] .fxbg,html[data-theme="synth"] .fxbg{display:block}
+
+/* MATRIX: πράσινο τερματικό */
+html[data-theme="matrix"]{
+  --bg:#010a04; --bg2:#04120a; --line:#0b2a14; --line2:#14502a; --text:#c8ffd8; --dim:#5fae7a;
+  --accent:#2bff6a; --accent2:#8dffb0; --ok:#2bff6a; --warn:#d6ff3a; --glass:rgba(2,14,7,.78);
+  --ar:43,255,106; --fr:140,255,176; --br:1,10,4; --ic1:#0a2814; --ic2:#06180d; --th:#04160a; --tdl:#0b2a14;
+  --disp:"IBM Plex Mono",ui-monospace,Consolas,monospace; --body:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+html[data-theme="matrix"] .fxbg{background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px),radial-gradient(ellipse at 50% 40%,rgba(43,255,106,.10),transparent 65%)}
+html[data-theme="matrix"] .card{border-radius:2px;border-color:rgba(var(--ar),.35)}
+html[data-theme="matrix"] .card h3,html[data-theme="matrix"] .start{text-shadow:0 0 8px rgba(var(--ar),.6)}
+html[data-theme="matrix"] .ring .rp,html[data-theme="matrix"] .mini i,html[data-theme="matrix"] .coresbar div i{filter:drop-shadow(0 0 4px rgba(var(--ar),.7))}
+
+/* AMBER: ρετρό τερματικό κεχριμπαρί */
+html[data-theme="amber"]{
+  --bg:#0b0602; --bg2:#140c04; --line:#2c1c08; --line2:#55360f; --text:#ffe2b0; --dim:#b08850;
+  --accent:#ffa21a; --accent2:#ffc766; --ok:#9be15a; --warn:#ff6a2a; --glass:rgba(18,10,3,.8);
+  --ar:255,162,26; --fr:255,210,140; --br:11,6,2; --ic1:#2a1a08; --ic2:#1a1004; --th:#1a1005; --tdl:#2c1c08;
+  --disp:"IBM Plex Mono",ui-monospace,Consolas,monospace; --body:"IBM Plex Sans",system-ui,sans-serif;
+}
+html[data-theme="amber"] .fxbg{background:repeating-linear-gradient(0deg,rgba(0,0,0,.3) 0 1px,transparent 1px 3px),radial-gradient(ellipse at 50% 45%,rgba(255,162,26,.09),transparent 65%);box-shadow:inset 0 0 160px rgba(0,0,0,.65)}
+html[data-theme="amber"] .card{border-radius:6px;border-color:rgba(var(--ar),.3)}
+html[data-theme="amber"] .say{color:#ffe2b0}
+
+/* SYNTHWAVE: μωβ-ματζέντα με κυανό */
+html[data-theme="synth"]{
+  --bg:#0a0414; --bg2:#12081f; --line:#2a1244; --line2:#4a1f78; --text:#f3e6ff; --dim:#a98ac9;
+  --accent:#ff2bd6; --accent2:#5ef2ff; --ok:#5ef2ff; --warn:#ffd23a; --glass:rgba(16,6,30,.78);
+  --ar:255,43,214; --fr:255,170,240; --br:10,4,20; --ic1:#26103f; --ic2:#180a2a; --th:#150a26; --tdl:#2a1244;
+}
+html[data-theme="synth"] .fxbg{background:linear-gradient(180deg,transparent 55%,rgba(255,43,214,.16) 100%),repeating-linear-gradient(90deg,rgba(94,242,255,.07) 0 1px,transparent 1px 64px),repeating-linear-gradient(0deg,rgba(255,43,214,.07) 0 1px,transparent 1px 48px);-webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.35),#000 85%);mask-image:linear-gradient(180deg,rgba(0,0,0,.35),#000 85%)}
+html[data-theme="synth"] .card{border-radius:10px;border-color:rgba(var(--ar),.35);box-shadow:0 0 18px rgba(var(--ar),.12)}
+html[data-theme="synth"] .start b,html[data-theme="synth"] .card h3{text-shadow:0 0 10px rgba(var(--ar),.55)}
+html[data-theme="synth"] .ring .rp{filter:drop-shadow(0 0 6px rgba(var(--ar),.8))}

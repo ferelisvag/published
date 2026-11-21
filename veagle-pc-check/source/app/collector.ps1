@@ -10,7 +10,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify, [switch]$NoNetwork)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '3.3.4'
+$script:Version = '3.3.5'
 # Automatic no-internet mode: only reads Windows settings (is there a connected network card with a gateway?). It sends no packet.
 # With no connection the network steps (winget, DNS) would only wait and time out, so they are skipped and the report says so.
 $script:NoNetAuto = $false
@@ -80,6 +80,36 @@ function Flush-StepErrors {
     $script:ErrMark = $Error.Count
 }
 
+# the eagle: one row of the logo is drawn on every step line (26 steps, 26 rows)
+$script:LogoRows = @(
+    '         -=                             ',
+    '         @%                             ',
+    '        +@@.                            ',
+    '  :     @@@#                            ',
+    '  ##   .@@@@:.=++**########**++==-:.    ',
+    '  @@-  .@@@@@ @@@@@@@@@@@@@@@@@@@@@@@@@%',
+    '  @@@:  @@@@@+.=---::::::::---==+*#%@@@@',
+    '  #@@@. *@@@@@-                      @@@',
+    '  :@@@@. @@@@@@:      :#@@@@#.      .@@@',
+    '   #@@@@::@@@@@@-    +@@@@@@@@%.    :@@%',
+    '    %@@@@+.%@@@@@+  *@@@@@@@*=*-    +@@*',
+    ' :   #@@@@%.=@@@@@%-+@@@@@@@.       %@@-',
+    ' -#.  -@@@@@*.=@@@@@+.+@@@@@.      .@@@ ',
+    '  -@+   =@@@@@*.:*@@@@+.*@@@@      +@@# ',
+    '   :@@*.  -#@@@@#- :+%@@*-+@@-     @@@: ',
+    '-:   *@@@+.  :*%@@@#-. .-++-=:    *@@#  ',
+    ' +%-  .*@@@@#=.  .-+*#*+-.       :@@@.  ',
+    '  :%@*:  -#@@@@@%#+-:            @@@-   ',
+    '    -%@@%*-:.-=+****=-          @@@*    ',
+    '      .=%@@@@@@%#*=.           %@@#     ',
+    '          .:-==-:            .@@@#      ',
+    '              *#%*          =@@@*       ',
+    '              :@@@@=      -@@@@-        ',
+    '                +@@@@+. =@@@@*          ',
+    '                  +@@@@@@@@*.           ',
+    '                    -#@@#-              '
+)
+
 function Step([int]$n, [int]$total, [string]$label) {
     Flush-StepErrors
     $script:CurStep = $n
@@ -93,16 +123,24 @@ function Step([int]$n, [int]$total, [string]$label) {
     try { $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check {0} - {1}% - {2} s' -f $script:Version, $pct, $sec) } catch { }
     $cols = 92
     try { $cols = [int]$Host.UI.RawUI.WindowSize.Width } catch { }
+    $logo = ($cols -ge 112) -and ($n -ge 1) -and ($n -le $script:LogoRows.Count)
     $room = $cols - 44
+    if ($logo) { $room = 29 }
     if ($room -lt 20) { $room = 20 }
     if ($label.Length -gt $room) { $label = $label.Substring(0, $room - 3) + '...' }
+    if ($logo) { $label = $label.PadRight($room + 1) }
     Write-Host '   ' -NoNewline
     Write-Host ('{0,2}/{1}' -f $n, $total) -NoNewline -ForegroundColor Cyan
     Write-Host ('  {0,3}%  ' -f $pct) -NoNewline -ForegroundColor DarkGray
     Write-Host ($full * $f) -NoNewline -ForegroundColor Red
     Write-Host ($empty * ($w - $f)) -NoNewline -ForegroundColor DarkGray
     Write-Host ('  {0}:{1:00}  ' -f [int][math]::Floor($sec / 60), ($sec % 60)) -NoNewline -ForegroundColor DarkGray
-    Write-Host $label -ForegroundColor White
+    if ($logo) {
+        Write-Host $label -NoNewline -ForegroundColor White
+        Write-Host $script:LogoRows[$n - 1] -ForegroundColor Red
+    } else {
+        Write-Host $label -ForegroundColor White
+    }
 }
 
 function Iso($d) {
@@ -249,9 +287,9 @@ $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIden
 try {
     $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check ' + $script:Version)
     $sz = $Host.UI.RawUI.WindowSize
-    if ($sz.Width -lt 92) {
-        $bs = $Host.UI.RawUI.BufferSize; $bs.Width = 92; $Host.UI.RawUI.BufferSize = $bs
-        $sz.Width = 92; $Host.UI.RawUI.WindowSize = $sz
+    if ($sz.Width -lt 112) {
+        $bs = $Host.UI.RawUI.BufferSize; $bs.Width = 112; if ($bs.Height -lt 300) { $bs.Height = 300 }; $Host.UI.RawUI.BufferSize = $bs
+        $sz.Width = 112; $Host.UI.RawUI.WindowSize = $sz
     }
 } catch { }
 Write-Host ''
@@ -1012,81 +1050,8 @@ $backup = [pscustomobject]@{ restorePoints = $restore; fileHistory = $fileHistor
 
 $extras = [pscustomobject]@{ reliability = $reliability; securityMore = $securityMore; networkTest = $networkTest; backup = $backup }
 
-# ---------------------------------------------------------------- 15. where the disk space went
-Step 15 $TOTAL 'Where the disk space went (read-only, can take a few minutes)'
-$spaceInfo = $null
-$gaming = [pscustomobject]@{ gameDvr = $null; gameMode = $settings.gameMode; hags = $settings.gpuScheduling }
-try { $gd = Read-Reg 'HKCU:\System\GameConfigStore' 'GameDVR_Enabled'; if ($null -ne $gd) { $gaming.gameDvr = ([int]$gd -eq 1) } } catch { }
-if (-not $Quick) {
-    try {
-        $script:bigFiles = New-Object System.Collections.ArrayList
-        function Measure-Dir([string]$p, [int]$maxSec, [bool]$trackBig) {
-            $sw = [Diagnostics.Stopwatch]::StartNew(); $sum = [long]0; $partial = $false
-            try {
-                $stack = New-Object System.Collections.Stack; $stack.Push($p)
-                while ($stack.Count -gt 0) {
-                    if ($sw.Elapsed.TotalSeconds -gt $maxSec) { $partial = $true; break }
-                    $d = [string]$stack.Pop()
-                    try {
-                        foreach ($f in [IO.Directory]::EnumerateFiles($d)) {
-                            try {
-                                $fi = New-Object IO.FileInfo $f
-                                $sum += $fi.Length
-                                if ($trackBig -and $fi.Length -gt 300MB) { [void]$script:bigFiles.Add([pscustomobject]@{ path = $f; mb = [int]($fi.Length / 1MB); modified = Iso $fi.LastWriteTime }) }
-                            } catch { }
-                        }
-                    } catch { }
-                    try {
-                        foreach ($s in [IO.Directory]::EnumerateDirectories($d)) {
-                            try { $a = [IO.File]::GetAttributes($s); if (($a -band [IO.FileAttributes]::ReparsePoint) -eq 0) { $stack.Push($s) } } catch { }
-                        }
-                    } catch { }
-                }
-            } catch { }
-            return [pscustomobject]@{ mb = [int]($sum / 1MB); partial = $partial }
-        }
-        $up = $env:USERPROFILE
-        $targets = @(
-            @('Downloads', (Join-Path $up 'Downloads'), $true), @('Documents', (Join-Path $up 'Documents'), $true), @('Desktop', (Join-Path $up 'Desktop'), $true),
-            @('Pictures', (Join-Path $up 'Pictures'), $false), @('Videos', (Join-Path $up 'Videos'), $true), @('Music', (Join-Path $up 'Music'), $false),
-            @('OneDrive', (Join-Path $up 'OneDrive'), $false), @('AppData Local', (Join-Path $up 'AppData\Local'), $false),
-            @('Temp (user)', $env:TEMP, $false), @('Temp (Windows)', (Join-Path $env:windir 'Temp'), $false),
-            @('Windows Update downloads', (Join-Path $env:windir 'SoftwareDistribution\Download'), $false),
-            @('Windows.old', (Join-Path $env:SystemDrive 'Windows.old'), $false),
-            @('Program Files', $env:ProgramFiles, $false), @('ProgramData', $env:ProgramData, $false)
-        )
-        $folders = @(); $swAll = [Diagnostics.Stopwatch]::StartNew()
-        foreach ($t in $targets) {
-            if (-not (Test-Path -LiteralPath $t[1])) { continue }
-            if ($swAll.Elapsed.TotalSeconds -gt 240) { Warn 'space analysis stopped early (time limit)'; break }
-            $m = Measure-Dir $t[1] 30 $t[2]
-            $folders += [pscustomobject]@{ name = [string]$t[0]; path = [string]$t[1]; mb = $m.mb; partial = $m.partial }
-        }
-        $sys = @()
-        foreach ($n in @('hiberfil.sys', 'pagefile.sys', 'swapfile.sys')) {
-            try { $fi = Get-Item -LiteralPath (Join-Path $env:SystemDrive $n) -Force -ErrorAction Stop; $sys += [pscustomobject]@{ name = $n; mb = [int]($fi.Length / 1MB) } } catch { }
-        }
-        $installers = [pscustomobject]@{ count = 0; mb = 0 }
-        try {
-            $old = @(Get-ChildItem -LiteralPath (Join-Path $up 'Downloads') -File -Force -ErrorAction Stop | Where-Object { $_.Extension -match '^\.(exe|msi|iso|zip|7z|rar|msix)$' -and $_.LastWriteTime -lt (Get-Date).AddDays(-60) })
-            $installers = [pscustomobject]@{ count = $old.Count; mb = [int](($old | Measure-Object Length -Sum).Sum / 1MB) }
-        } catch { }
-        $recycle = $null
-        try { $rb = Measure-Dir (Join-Path $env:SystemDrive '$Recycle.Bin') 20 $false; $recycle = $rb.mb } catch { }
-        $spaceInfo = [pscustomobject]@{
-            folders = @($folders | Sort-Object mb -Descending)
-            systemFiles = $sys
-            bigFiles = @($script:bigFiles | Sort-Object mb -Descending | Select-Object -First 10)
-            oldInstallers = $installers
-            recycleBinMB = $recycle
-        }
-    } catch { Warn ('space analysis: ' + $_.Exception.Message) }
-}
-$extras | Add-Member -NotePropertyName storage -NotePropertyValue $spaceInfo -Force
-$extras | Add-Member -NotePropertyName gaming -NotePropertyValue $gaming -Force
-
-# ---------------------------------------------------------------- 16. crash dump codes and the event timeline
-Step 16 $TOTAL 'Crash dump files and the timeline of events'
+# ---------------------------------------------------------------- 15. crash dump codes and the event timeline
+Step 15 $TOTAL 'Crash dump files and the timeline of events'
 $dumps = @()
 try {
     $dfiles = @(Get-ChildItem -LiteralPath (Join-Path $env:windir 'Minidump') -Filter *.dmp -File -ErrorAction Stop | Sort-Object LastWriteTime -Descending | Select-Object -First 10)
@@ -1150,8 +1115,8 @@ $timeline = @($tl | Sort-Object t -Descending | Select-Object -First 1500 | Sort
 $extras | Add-Member -NotePropertyName dumps -NotePropertyValue $dumps -Force
 $extras | Add-Member -NotePropertyName timeline -NotePropertyValue $timeline -Force
 
-# ---------------------------------------------------------------- 17. accounts, signatures, browser add-ons, licences, certificates, updates, network, temperature
-Step 17 $TOTAL 'Accounts, signatures, add-ons, licences, updates, network, temperature'
+# ---------------------------------------------------------------- 16. accounts, signatures, browser add-ons, licences, certificates, updates, network, temperature
+Step 16 $TOTAL 'Accounts, signatures, add-ons, licences, updates, network, temperature'
 
 function Get-ExePath([string]$cmd) {
     if (-not $cmd) { return $null }
@@ -1462,8 +1427,8 @@ $extras | Add-Member -NotePropertyName more -NotePropertyValue ([pscustomobject]
     oneDrive = $oneDriveInfo; slowStart = $slowStart; dnsSpeed = $dnsSpeed; connections = $conns
 }) -Force
 
-# ---------------------------------------------------------------- 18. inventory details, performance sample, hardening, privacy (all read-only)
-Step 18 $TOTAL 'Equipment, hardening, privacy, performance sample'
+# ---------------------------------------------------------------- 17. inventory details, performance sample, hardening, privacy (all read-only)
+Step 17 $TOTAL 'Equipment, hardening, privacy, performance sample'
 
 # --- monitors (what each screen reports about itself)
 $monitors = @()
@@ -1702,8 +1667,8 @@ $extras | Add-Member -NotePropertyName more2 -NotePropertyValue ([pscustomobject
     usbHistory = $usbHist; persistence = $persist; hardening = [pscustomobject]$hard; privacy = [pscustomobject]$priv; caches = $caches; recentRuns = $ran
 }) -Force
 
-# ---------------------------------------------------------------- 19. readiness, tasks, services, memory test, system files, print queue, runtimes
-Step 19 $TOTAL 'Windows 11 readiness, tasks and services, memory test, system files, print queue, runtimes'
+# ---------------------------------------------------------------- 18. readiness, tasks, services, memory test, system files, print queue, runtimes
+Step 18 $TOTAL 'Windows 11 readiness, tasks and services, memory test, system files, print queue, runtimes'
 
 # --- is this PC ready for Windows 11 (only reading; the CPU list of Microsoft cannot be checked offline)
 $w11 = $null
@@ -1836,8 +1801,8 @@ $extras | Add-Member -NotePropertyName more3 -NotePropertyValue ([pscustomobject
     win11 = $w11; taskDetail = $taskDetail; svcDetail = $svcDetail; memDiag = $memDiag; sfcLast = $sfcLast; printQueue = $printQueue; dotnet = $dotnet; gpo = $gpoNames
 }) -Force
 
-# ---------------------------------------------------------------- 20. forensic traces: who signed in, what was cleared or added, what ran, what was downloaded (read-only)
-Step 20 $TOTAL 'Traces: sign-ins, cleared logs, new accounts, programs that ran, downloads, Defender, firewall'
+# ---------------------------------------------------------------- 19. forensic traces: who signed in, what was cleared or added, what ran, what was downloaded (read-only)
+Step 19 $TOTAL 'Traces: sign-ins, cleared logs, new accounts, programs that ran, downloads, Defender, firewall'
 
 function Fx-Ev($filter, [int]$max) { try { return @(Get-WinEvent -FilterHashtable $filter -MaxEvents $max -ErrorAction Stop) } catch { return @() } }
 function Fx-Leaf([string]$p) { try { return [IO.Path]::GetFileName(($p.Trim('"'))) } catch { return $p } }
@@ -2315,7 +2280,7 @@ try {
 $extras | Add-Member -NotePropertyName forensics -NotePropertyValue ([pscustomobject]$fx) -Force
 
 # ---------------------------------------------------------------- step 21
-Step 21 $TOTAL 'Help: remote help readiness, sound/camera/Bluetooth devices, camera and microphone use'
+Step 20 $TOTAL 'Help: remote help readiness, sound/camera/Bluetooth devices, camera and microphone use'
 $hp = [ordered]@{}
 # ---- remote help readiness (reads settings only, nothing is switched on)
 $rmt = [ordered]@{}
@@ -2412,8 +2377,8 @@ $pu['user'] = [string]$env:USERNAME
 $hp['sensors'] = [pscustomobject]$pu
 $extras | Add-Member -NotePropertyName help -NotePropertyValue ([pscustomobject]$hp) -Force
 
-# ---------------------------------------------------------------- 22. drive check flag, log sizes, Secure Boot certificates
-Step 22 $TOTAL 'Drive check flag, size of the Windows logs, Secure Boot certificates'
+# ---------------------------------------------------------------- 21. drive check flag, log sizes, Secure Boot certificates
+Step 21 $TOTAL 'Drive check flag, size of the Windows logs, Secure Boot certificates'
 $m4 = [ordered]@{}
 # --- "dirty" flag: Windows itself marked a drive as needing a check at the next start (read-only, nothing is scheduled)
 $dirtyVols = @()
@@ -2447,7 +2412,7 @@ $sbErr = Read-Reg 'HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\Servicing' 
 $m4['secureBootCa'] = [pscustomobject]@{ secureBoot = $secureBoot; status = $(if ($null -ne $sbStatus) { [string]$sbStatus } else { $null }); hasError = ($null -ne $sbErr -and "$sbErr" -ne '' -and "$sbErr" -ne '0') }
 $extras | Add-Member -NotePropertyName more4 -NotePropertyValue ([pscustomobject]$m4) -Force
 
-Step 23 $TOTAL 'Windows settings: power, screen, updates, sign-in, privacy, network, language (read-only)'
+Step 22 $TOTAL 'Windows settings: power, screen, updates, sign-in, privacy, network, language (read-only)'
 $m5 = [ordered]@{}
 function Rg([string]$p, [string]$n) { try { return Read-Reg $p $n } catch { return $null } }
 function ToIntOrNull($v) { if ($null -eq $v -or "$v" -eq '') { return $null } try { return [int]$v } catch { return $null } }
@@ -2632,8 +2597,8 @@ $m5['privacy2'] = [pscustomobject]@{
 }
 $extras | Add-Member -NotePropertyName more5 -NotePropertyValue ([pscustomobject]$m5) -Force
 
-# ---------------------------------------------------------------- 24. what really starts, browser privacy, ports and disks (read-only)
-Step 24 $TOTAL 'Start-up programs that are really active, browser privacy switches, network ports, disk numbers (read-only)'
+# ---------------------------------------------------------------- 23. what really starts, browser privacy, ports and disks (read-only)
+Step 23 $TOTAL 'Start-up programs that are really active, browser privacy switches, network ports, disk numbers (read-only)'
 $m6 = [ordered]@{}
 # ---- 24a. start-up programs: registered, allowed by Windows, and running right now
 $runProcs = @{}; $runPaths = @{}
@@ -2787,8 +2752,8 @@ try {
 $m6['diskMap'] = @($dm)
 $extras | Add-Member -NotePropertyName more6 -NotePropertyValue ([pscustomobject]$m6) -Force
 
-# ---------------------------------------------------------------- 25. extra protection switches, mouse, folders (read-only)
-Step 25 $TOTAL 'Extra Defender switches, mouse setting, size of Desktop and Downloads (read-only)'
+# ---------------------------------------------------------------- 24. extra protection switches, mouse, folders (read-only)
+Step 24 $TOTAL 'Extra Defender switches, mouse setting, size of Desktop and Downloads (read-only)'
 $m7 = [ordered]@{}
 try {
     $mp7 = Get-MpPreference -ErrorAction Stop
@@ -2824,7 +2789,7 @@ try { $hf = New-Object System.IO.FileInfo (Join-Path $env:SystemDrive 'hiberfil.
 $m7['hiberfilMB'] = $hib
 $extras | Add-Member -NotePropertyName more7 -NotePropertyValue ([pscustomobject]$m7) -Force
 
-Step 26 $TOTAL 'Where your games are installed, maximum screen refresh rate (read-only)'
+Step 25 $TOTAL 'Where your games are installed, maximum screen refresh rate (read-only)'
 $m8 = [ordered]@{}
 $games = @()
 try {
@@ -2875,6 +2840,79 @@ $maxHz = $null
 try { $vc8 = @(Get-CimInstance Win32_VideoController -ErrorAction Stop | Where-Object { $_.MaxRefreshRate } | Select-Object -First 1); if ($vc8.Count -gt 0) { $maxHz = [int]$vc8[0].MaxRefreshRate } } catch { }
 $m8['maxRefreshHz'] = $maxHz
 $extras | Add-Member -NotePropertyName more8 -NotePropertyValue ([pscustomobject]$m8) -Force
+
+# ---------------------------------------------------------------- 26. where the disk space went
+Step 26 $TOTAL 'Where the disk space went (read-only, can take a few minutes)'
+$spaceInfo = $null
+$gaming = [pscustomobject]@{ gameDvr = $null; gameMode = $settings.gameMode; hags = $settings.gpuScheduling }
+try { $gd = Read-Reg 'HKCU:\System\GameConfigStore' 'GameDVR_Enabled'; if ($null -ne $gd) { $gaming.gameDvr = ([int]$gd -eq 1) } } catch { }
+if (-not $Quick) {
+    try {
+        $script:bigFiles = New-Object System.Collections.ArrayList
+        function Measure-Dir([string]$p, [int]$maxSec, [bool]$trackBig) {
+            $sw = [Diagnostics.Stopwatch]::StartNew(); $sum = [long]0; $partial = $false
+            try {
+                $stack = New-Object System.Collections.Stack; $stack.Push($p)
+                while ($stack.Count -gt 0) {
+                    if ($sw.Elapsed.TotalSeconds -gt $maxSec) { $partial = $true; break }
+                    $d = [string]$stack.Pop()
+                    try {
+                        foreach ($f in [IO.Directory]::EnumerateFiles($d)) {
+                            try {
+                                $fi = New-Object IO.FileInfo $f
+                                $sum += $fi.Length
+                                if ($trackBig -and $fi.Length -gt 300MB) { [void]$script:bigFiles.Add([pscustomobject]@{ path = $f; mb = [int]($fi.Length / 1MB); modified = Iso $fi.LastWriteTime }) }
+                            } catch { }
+                        }
+                    } catch { }
+                    try {
+                        foreach ($s in [IO.Directory]::EnumerateDirectories($d)) {
+                            try { $a = [IO.File]::GetAttributes($s); if (($a -band [IO.FileAttributes]::ReparsePoint) -eq 0) { $stack.Push($s) } } catch { }
+                        }
+                    } catch { }
+                }
+            } catch { }
+            return [pscustomobject]@{ mb = [int]($sum / 1MB); partial = $partial }
+        }
+        $up = $env:USERPROFILE
+        $targets = @(
+            @('Downloads', (Join-Path $up 'Downloads'), $true), @('Documents', (Join-Path $up 'Documents'), $true), @('Desktop', (Join-Path $up 'Desktop'), $true),
+            @('Pictures', (Join-Path $up 'Pictures'), $false), @('Videos', (Join-Path $up 'Videos'), $true), @('Music', (Join-Path $up 'Music'), $false),
+            @('OneDrive', (Join-Path $up 'OneDrive'), $false), @('AppData Local', (Join-Path $up 'AppData\Local'), $false),
+            @('Temp (user)', $env:TEMP, $false), @('Temp (Windows)', (Join-Path $env:windir 'Temp'), $false),
+            @('Windows Update downloads', (Join-Path $env:windir 'SoftwareDistribution\Download'), $false),
+            @('Windows.old', (Join-Path $env:SystemDrive 'Windows.old'), $false),
+            @('Program Files', $env:ProgramFiles, $false), @('ProgramData', $env:ProgramData, $false)
+        )
+        $folders = @(); $swAll = [Diagnostics.Stopwatch]::StartNew()
+        foreach ($t in $targets) {
+            if (-not (Test-Path -LiteralPath $t[1])) { continue }
+            if ($swAll.Elapsed.TotalSeconds -gt 240) { Warn 'space analysis stopped early (time limit)'; break }
+            $m = Measure-Dir $t[1] 30 $t[2]
+            $folders += [pscustomobject]@{ name = [string]$t[0]; path = [string]$t[1]; mb = $m.mb; partial = $m.partial }
+        }
+        $sys = @()
+        foreach ($n in @('hiberfil.sys', 'pagefile.sys', 'swapfile.sys')) {
+            try { $fi = Get-Item -LiteralPath (Join-Path $env:SystemDrive $n) -Force -ErrorAction Stop; $sys += [pscustomobject]@{ name = $n; mb = [int]($fi.Length / 1MB) } } catch { }
+        }
+        $installers = [pscustomobject]@{ count = 0; mb = 0 }
+        try {
+            $old = @(Get-ChildItem -LiteralPath (Join-Path $up 'Downloads') -File -Force -ErrorAction Stop | Where-Object { $_.Extension -match '^\.(exe|msi|iso|zip|7z|rar|msix)$' -and $_.LastWriteTime -lt (Get-Date).AddDays(-60) })
+            $installers = [pscustomobject]@{ count = $old.Count; mb = [int](($old | Measure-Object Length -Sum).Sum / 1MB) }
+        } catch { }
+        $recycle = $null
+        try { $rb = Measure-Dir (Join-Path $env:SystemDrive '$Recycle.Bin') 20 $false; $recycle = $rb.mb } catch { }
+        $spaceInfo = [pscustomobject]@{
+            folders = @($folders | Sort-Object mb -Descending)
+            systemFiles = $sys
+            bigFiles = @($script:bigFiles | Sort-Object mb -Descending | Select-Object -First 10)
+            oldInstallers = $installers
+            recycleBinMB = $recycle
+        }
+    } catch { Warn ('space analysis: ' + $_.Exception.Message) }
+}
+$extras | Add-Member -NotePropertyName storage -NotePropertyValue $spaceInfo -Force
+$extras | Add-Member -NotePropertyName gaming -NotePropertyValue $gaming -Force
 
 # ---------------------------------------------------------------- finish
 if (-not $Quick) { try { (& systeminfo 2>&1 | Out-String) | Out-File -Encoding UTF8 -FilePath (Join-Path $raw 'systeminfo.txt') } catch { } }

@@ -2,7 +2,7 @@
 setlocal
 title VEAGLE PC Check (quick scan)
 cd /d "%~dp0"
-mode con cols=92 lines=40
+mode con cols=112 lines=52
 color 0F
 
 net session >nul 2>&1

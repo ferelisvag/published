@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v3.3.4
+VEAGLE PC CHECK  v3.3.5
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,10 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 3.3.5
+- The scan window now draws the Veagle eagle in 26 lines, one more line with every step, so the eagle is complete when the scan ends. The window is a little wider and taller for this.
+- The check of where the disk space went (the longest one) is now the last step, so the first 25 steps finish quickly.
 
 NEW IN 3.3.4
 - The scan window: long step names no longer wrap onto the next line, and the time now sits before the step name.

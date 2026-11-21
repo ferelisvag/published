@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '3.2.0'
+$script:Version = '3.2.1'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
@@ -415,7 +415,7 @@ $gpus = @(Get-CimInstance Win32_VideoController | ForEach-Object {
         status        = [string]$_.Status
     }
 })
-if ($gpus.Count -eq 0) { $gpus = @(Get-CimInstance Win32_VideoController) | Out-Null; $gpus = @() }
+if ($gpus.Count -eq 0) { $gpus = @() }
 
 # ---------------------------------------------------------------- 3. storage
 Step 3 $TOTAL 'Storage'
@@ -2688,7 +2688,24 @@ foreach ($cb in $chromium) {
 try {
     $ffRoot = Join-Path $env:APPDATA 'Mozilla\Firefox\Profiles'
     if (Test-Path -LiteralPath $ffRoot) {
-        $ffp = @(Get-ChildItem -LiteralPath $ffRoot -Directory -ErrorAction Stop | Sort-Object { if ($_.Name -match 'default-release') { 0 } else { 1 } }) | Select-Object -First 1
+        $ffDef = $null
+        try {
+            $ini = Join-Path $env:APPDATA 'Mozilla\Firefox\profiles.ini'
+            if (Test-Path -LiteralPath $ini) {
+                $lines = @(Get-Content -LiteralPath $ini -ErrorAction Stop)
+                $inst = $lines | Where-Object { $_ -match '^Default=Profiles[/\\](.+)$' } | Select-Object -First 1
+                if ($inst) { $ffDef = ($inst -replace '^Default=Profiles[/\\]', '').Trim() }
+                else {
+                    $path = $null
+                    foreach ($ln in $lines) {
+                        if ($ln -match '^\[Profile') { $path = $null }
+                        elseif ($ln -match '^Path=(.+)$') { $path = $Matches[1].Trim() -replace '^Profiles[/\\]', '' }
+                        elseif ($ln -match '^Default=1') { if ($path) { $ffDef = $path } }
+                    }
+                }
+            }
+        } catch { }
+        $ffp = @(Get-ChildItem -LiteralPath $ffRoot -Directory -ErrorAction Stop | Sort-Object { if ($ffDef -and $_.Name -eq $ffDef) { 0 } elseif ($_.Name -match 'default-release') { 1 } else { 2 } }) | Select-Object -First 1
         if ($ffp) {
             $txt = ''
             foreach ($fn in @('prefs.js', 'user.js')) { $fp = Join-Path $ffp.FullName $fn; if (Test-Path -LiteralPath $fp) { $txt += (Get-Content -Raw -Encoding UTF8 -LiteralPath $fp) + "`n" } }

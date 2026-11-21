@@ -617,7 +617,9 @@ function Engine(RAW) {
       if (!outdated.length) return null;
       var sec = outdated.filter(function (o) { return RE.secApp.test(o.name); });
       var remote = outdated.filter(function (o) { return RE.remoteTools.test(o.name); });
-      var sev = remote.length ? 'high' : ((outdated.length >= 25 || sec.length >= 4) ? 'medium' : 'low');
+      var mm = function (v) { var m = String(v || '').match(/(\d+)\.(\d+)/); return m ? m[1] + '.' + m[2] : String(v || ''); };
+      var remoteBig = remote.filter(function (o) { return mm(o.version) !== mm(o.available); });
+      var sev = remoteBig.length ? 'high' : (remote.length || outdated.length >= 25 || sec.length >= 4) ? 'medium' : 'low';
       var steps = [];
       (remote.concat(sec.filter(function (x) { return remote.indexOf(x) < 0; }))).slice(0, 5).forEach(function (o) {
         steps.push(S('Update ' + o.name + ' (' + o.version + ' to ' + o.available + ').', 'winget upgrade --id ' + o.id + (o.source === 'msstore' ? ' --source msstore' : '')));
@@ -2037,7 +2039,7 @@ function Engine(RAW) {
         seen.slice(0, 14).map(function (x) { return fmtDT(x.t) + ' - ' + (x.ran ? 'ran' : 'seen') + ' - ' + x.p + ' (' + x.w + ')'; }).join('\n'));
     });
     R(function () {
-      var d = arr(FX.downloads).filter(function (x) { return (x.zone === 3 || x.host) && /(NotSigned|HashMismatch|NotTrusted|UnknownError)/.test(String(x.sig || '')) && /\.(exe|msi|dll|scr|ps1|cpl|msix|appx)$/i.test(x.name); }); if (!d.length) return null;
+      var d = arr(FX.downloads).filter(function (x) { return !/(^|\.)(ferelis\.gr|ferelisvag\.github\.io)$/i.test(String(x.host || '')) && (x.zone === 3 || x.host) && /(NotSigned|HashMismatch|NotTrusted|UnknownError)/.test(String(x.sig || '')) && /\.(exe|msi|dll|scr|ps1|cpl|msix|appx)$/i.test(x.name); }); if (!d.length) return null;
       var ran = d.filter(function (x) { return FXRAN[String(x.name).toLowerCase()]; });
       return F('for-downloads', 'Security', ran.length ? 'medium' : 'low', d.length + ' program' + (d.length === 1 ? '' : 's') + ' downloaded from the internet without a valid signature' + (ran.length ? ', and ' + ran.length + ' of them ran' : ''),
         'Honest software makers digitally sign their programs, so Windows can tell who made them. A program without a signature is not always bad (small tools, old installers), but it is the usual shape of unwanted software. This list is based on files in Downloads, Desktop and Temp from the last 90 days.',

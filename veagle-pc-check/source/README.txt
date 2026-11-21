@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v3.2.0
+VEAGLE PC CHECK  v3.2.1
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,12 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 3.2.1
+- New box on the Insights page: "Care plan: what to do and when". Weekly, monthly and yearly habits for a healthy PC, with numbers from your own scan (free space, programs waiting for updates), and a short list of when to ask a technician.
+- The finding about programs needing updates is now "high" only when a remote-access program (AnyDesk, RustDesk...) is a whole version behind. One small patch behind is "medium".
+- Programs you downloaded from the author's own sites (ferelis.gr, ferelisvag.github.io) are no longer listed as "downloaded without a valid signature".
+- The scan now reads Firefox's profiles.ini to find the profile you really use, and skips one useless query when no graphics card is found.
 
 NEW IN 3.2.0
 - A new, fairer score. Each area (Stability, Storage, Security...) is scored on its own and the overall score is a weighted average that is pulled a little towards the worst area. The Insights page shows exactly how many points each finding costs. The number can look different from the previous version for the same PC. This is normal, the formula changed, not your PC, so do not compare it with old scans.

@@ -1604,7 +1604,9 @@ function Engine(RAW) {
       if (!outdated.length) return null;
       var sec = outdated.filter(function (o) { return RE.secApp.test(o.name); });
       var remote = outdated.filter(function (o) { return RE.remoteTools.test(o.name); });
-      var sev = remote.length ? 'high' : ((outdated.length >= 25 || sec.length >= 4) ? 'medium' : 'low');
+      var mm = function (v) { var m = String(v || '').match(/(\d+)\.(\d+)/); return m ? m[1] + '.' + m[2] : String(v || ''); };
+      var remoteBig = remote.filter(function (o) { return mm(o.version) !== mm(o.available); });
+      var sev = remoteBig.length ? 'high' : (remote.length || outdated.length >= 25 || sec.length >= 4) ? 'medium' : 'low';
       var steps = [];
       (remote.concat(sec.filter(function (x) { return remote.indexOf(x) < 0; }))).slice(0, 5).forEach(function (o) {
         steps.push(S('Update ' + o.name + ' (' + o.version + ' to ' + o.available + ').', 'winget upgrade --id ' + o.id + (o.source === 'msstore' ? ' --source msstore' : '')));
@@ -3024,7 +3026,7 @@ function Engine(RAW) {
         seen.slice(0, 14).map(function (x) { return fmtDT(x.t) + ' - ' + (x.ran ? 'ran' : 'seen') + ' - ' + x.p + ' (' + x.w + ')'; }).join('\n'));
     });
     R(function () {
-      var d = arr(FX.downloads).filter(function (x) { return (x.zone === 3 || x.host) && /(NotSigned|HashMismatch|NotTrusted|UnknownError)/.test(String(x.sig || '')) && /\.(exe|msi|dll|scr|ps1|cpl|msix|appx)$/i.test(x.name); }); if (!d.length) return null;
+      var d = arr(FX.downloads).filter(function (x) { return !/(^|\.)(ferelis\.gr|ferelisvag\.github\.io)$/i.test(String(x.host || '')) && (x.zone === 3 || x.host) && /(NotSigned|HashMismatch|NotTrusted|UnknownError)/.test(String(x.sig || '')) && /\.(exe|msi|dll|scr|ps1|cpl|msix|appx)$/i.test(x.name); }); if (!d.length) return null;
       var ran = d.filter(function (x) { return FXRAN[String(x.name).toLowerCase()]; });
       return F('for-downloads', 'Security', ran.length ? 'medium' : 'low', d.length + ' program' + (d.length === 1 ? '' : 's') + ' downloaded from the internet without a valid signature' + (ran.length ? ', and ' + ran.length + ' of them ran' : ''),
         'Honest software makers digitally sign their programs, so Windows can tell who made them. A program without a signature is not always bad (small tools, old installers), but it is the usual shape of unwanted software. This list is based on files in Downloads, Desktop and Temp from the last 90 days.',
@@ -6854,6 +6856,40 @@ var ASSIST = (function (V) {
     return sect(I('Troubleshooting assistant', 'Βοηθός αντιμετώπισης'), I('what the findings add up to, and what is the likely cause', 'τι σημαίνουν τα ευρήματα μαζί, και ποια είναι η πιθανή αιτία')) +
       summaryHtml(k.C, k.T0) + sect(I('Likely causes', 'Πιθανές αιτίες'), I('findings that point to the same thing, with the evidence and a confidence level', 'ευρήματα που δείχνουν το ίδιο πράγμα, με αποδείξεις και επίπεδο βεβαιότητας')) + causesHtml(k.C);
   }
+
+  /* ---------------- care plan (3.2.1) ---------------- */
+  function careHtml() {
+    var k = cache || compute(), C = k.C, open = V.openList();
+    function has(re) { return open.some(function (f) { return re.test(f.id); }); }
+    var vol = arr(D().volumes).filter(function (v) { return /^C:?$/i.test(String(v.letter || '')); })[0], free = null;
+    if (vol && num(vol.sizeGB) > 0) free = Math.round(100 * num(vol.freeGB) / num(vol.sizeGB));
+    var apps = act('upd-apps');
+    function row(when, items) { return '<div class="lbl" style="margin-top:10px">' + esc(when) + '</div>' + ul(items); }
+    var week = [
+      I('Restart the PC at least once a week. Windows finishes many updates only on restart.', 'Κάνε επανεκκίνηση τουλάχιστον μία φορά την εβδομάδα. Τα Windows ολοκληρώνουν πολλές ενημερώσεις μόνο με επανεκκίνηση.'),
+      I('If Windows asks to update, let it. Do not keep postponing.', 'Αν τα Windows ζητήσουν ενημέρωση, άφησέ τα. Μην την αναβάλλεις συνεχώς.')];
+    var month = [
+      I('Run VEAGLE PC Check again and compare with last time (Compare tab). The "Is it getting better or worse?" box needs a few scans to show a trend.', 'Τρέξε ξανά το VEAGLE PC Check και σύγκρινε με την προηγούμενη φορά (καρτέλα Compare). Το κουτί «Βελτιώνεται ή χειροτερεύει;» θέλει μερικές σαρώσεις για να δείξει τάση.'),
+      apps ? I('Update your programs: ' + T(apps) + '. The finding has the exact commands.', 'Ενημέρωσε τα προγράμματά σου: ' + T(apps) + '. Το εύρημα έχει τις ακριβείς εντολές.') : I('Check that your programs are up to date (winget upgrade lists them, it changes nothing).', 'Έλεγξε ότι τα προγράμματά σου είναι ενημερωμένα (το winget upgrade τα εμφανίζει και δεν αλλάζει τίποτα).'),
+      free != null ? I('Free space on C: is about ' + free + '% now. Below 15% Windows slows down and updates can fail.', 'Ο ελεύθερος χώρος στο C: είναι τώρα περίπου ' + free + '%. Κάτω από 15% τα Windows γίνονται αργά και οι ενημερώσεις μπορεί να αποτύχουν.') : I('Keep at least 15% of the system drive free.', 'Κράτα ελεύθερο τουλάχιστον το 15% του δίσκου συστήματος.')];
+    var year = [
+      I('Test your backup: restore one file and open it. A backup you never tested is only a hope.', 'Δοκίμασε το αντίγραφο ασφαλείας: επανάφερε ένα αρχείο και άνοιξέ το. Ένα αντίγραφο που δεν δοκίμασες είναι απλώς ελπίδα.'),
+      I('Look through the installed programs and the start-up list. Remove what you no longer use.', 'Πέρασε τη λίστα με τα εγκατεστημένα προγράμματα και την εκκίνηση. Αφαίρεσε ό,τι δεν χρησιμοποιείς πια.'),
+      I('Check the maker\'s site for a BIOS and chipset update. Only update if it fixes something you have, and never while the PC is unstable.', 'Δες στο site του κατασκευαστή για ενημέρωση BIOS και chipset. Ενημέρωσε μόνο αν διορθώνει κάτι που έχεις, και ποτέ όσο ο υπολογιστής είναι ασταθής.'),
+      I('Change the password of your email and bank accounts if you reused it anywhere, and turn on two-step sign-in.', 'Άλλαξε τον κωδικό του email και της τράπεζας αν τον έχεις χρησιμοποιήσει αλλού, και ενεργοποίησε την επαλήθευση σε δύο βήματα.')];
+    var help = [];
+    var hw = C.filter(function (c) { return c.key === 'hw' && c.conf !== 'low'; })[0];
+    if (hw) help.push(I('The report points to hardware or memory instability (' + hw.title + '). Test the memory and the power supply, or ask a technician.', 'Η αναφορά δείχνει αστάθεια υλικού ή μνήμης (' + hw.title + '). Έλεγξε τη μνήμη και το τροφοδοτικό, ή ρώτα έναν τεχνικό.'));
+    if (bugCount(['hw', 'mem', 'drv', 'stor', 'sys', 'gpu', 'power']) >= 2) help.push(I('Two or more recent blue screens. Send the report to a technician before it gets worse.', 'Δύο ή περισσότερες πρόσφατες μπλε οθόνες. Στείλε την αναφορά σε τεχνικό πριν χειροτερέψει.'));
+    if (has(/^(sto-diskhealth|pred-disk|pred-ssd|stab-disk)$/) && act('sto-diskhealth')) help.push(I('A drive reports health problems. Back up first, then replace it.', 'Ένας δίσκος αναφέρει προβλήματα υγείας. Κάνε πρώτα αντίγραφο, μετά αντικατάστησέ τον.'));
+    if (has(/^bak-/)) help.push(I('There is no recent working backup. This is the one thing that cannot be fixed afterwards.', 'Δεν υπάρχει πρόσφατο αντίγραφο ασφαλείας. Είναι το μόνο πράγμα που δεν διορθώνεται εκ των υστέρων.'));
+    if (V.openList().some(function (f) { return f.sev === 'high' && f.area === 'Security'; })) help.push(I('A high security finding is open. Treat it as urgent.', 'Υπάρχει ανοιχτό υψηλό εύρημα ασφάλειας. Αντιμετώπισέ το ως επείγον.'));
+    var h = '<p style="margin:0 0 8px">' + esc(I('A PC stays healthy with a few small habits. This list is the same for everyone; the lines with numbers come from your own scan.', 'Ένας υπολογιστής μένει υγιής με λίγες μικρές συνήθειες. Η λίστα είναι ίδια για όλους· οι γραμμές με αριθμούς βγαίνουν από τη δική σου σάρωση.')) + '</p>';
+    h += row(I('Every week', 'Κάθε εβδομάδα'), week) + row(I('Every month', 'Κάθε μήνα'), month) + row(I('Once or twice a year', 'Μία ή δύο φορές το χρόνο'), year);
+    h += '<div class="lbl" style="margin-top:10px">' + esc(I('When to ask for help', 'Πότε να ζητήσεις βοήθεια')) + '</div>';
+    h += help.length ? ul(help) : '<p class="sub" style="margin:4px 0 0">' + esc(I('Nothing in this scan needs a technician right now. Ask for help if the PC starts blue-screening, restarting by itself or losing files.', 'Τίποτα σε αυτή τη σάρωση δεν χρειάζεται τεχνικό τώρα. Ζήτησε βοήθεια αν ο υπολογιστής αρχίσει να κάνει μπλε οθόνες, να ξαναξεκινά μόνος του ή να χάνει αρχεία.')) + '</p>';
+    return h;
+  }
   function insightsHtml() {
     var k = cache || compute(), bug = bugHtml();
     var h = sect(I('Assistant: the detail', 'Βοηθός: οι λεπτομέρειες'), I('the numbers behind the summary, all rule-based and read-only', 'οι αριθμοί πίσω από τη σύνοψη, όλα με κανόνες και μόνο ανάγνωση'));
@@ -6865,6 +6901,7 @@ var ASSIST = (function (V) {
     h += win(I('Security risk', 'Ρίσκο ασφάλειας'), I('read-only checklist', 'λίστα μόνο ανάγνωσης'), securityHtml(security()));
     h += win(I('Update health', 'Υγεία ενημερώσεων'), '', updatesHtml(updates()));
     h += win(I('Is it getting better or worse?', 'Βελτιώνεται ή χειροτερεύει;'), k.T0.scans + I(' scans', ' σαρώσεις'), trendsHtml(k.T0));
+    h += win(I('Care plan: what to do and when', 'Πρόγραμμα φροντίδας: τι να κάνεις και πότε'), I('simple habits', 'απλές συνήθειες'), careHtml());
     return h;
   }
   function render() {

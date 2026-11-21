@@ -10,7 +10,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify, [switch]$NoNetwork)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '3.3.1'
+$script:Version = '3.3.2'
 # Automatic no-internet mode: only reads Windows settings (is there a connected network card with a gateway?). It sends no packet.
 # With no connection the network steps (winget, DNS) would only wait and time out, so they are skipped and the report says so.
 $script:NoNetAuto = $false

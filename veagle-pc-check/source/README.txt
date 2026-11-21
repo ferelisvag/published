@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v3.3.7
+VEAGLE PC CHECK  v3.3.8
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,9 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 3.3.8
+- Fixed: the sizes of the cache folders (browser, shader, Windows error reports) were not measured since 3.3.5 because of a wrong order inside the scan.
 
 NEW IN 3.3.7
 - The eagle in the scan window now follows the shape of the Veagle logo, and the window is wider so the step names are cut less.

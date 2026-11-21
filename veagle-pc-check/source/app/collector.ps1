@@ -10,7 +10,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify, [switch]$NoNetwork)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '3.3.7'
+$script:Version = '3.3.8'
 # Automatic no-internet mode: only reads Windows settings (is there a connected network card with a gateway?). It sends no packet.
 # With no connection the network steps (winget, DNS) would only wait and time out, so they are skipped and the report says so.
 $script:NoNetAuto = $false
@@ -141,6 +141,34 @@ function Step([int]$n, [int]$total, [string]$label) {
     } else {
         Write-Host $label -ForegroundColor White
     }
+}
+
+# folder size with a time limit (used by the cache sizes and by the disk space analysis)
+$script:bigFiles = New-Object System.Collections.ArrayList
+function Measure-Dir([string]$p, [int]$maxSec, [bool]$trackBig) {
+    $sw = [Diagnostics.Stopwatch]::StartNew(); $sum = [long]0; $partial = $false
+    try {
+        $stack = New-Object System.Collections.Stack; $stack.Push($p)
+        while ($stack.Count -gt 0) {
+            if ($sw.Elapsed.TotalSeconds -gt $maxSec) { $partial = $true; break }
+            $d = [string]$stack.Pop()
+            try {
+                foreach ($f in [IO.Directory]::EnumerateFiles($d)) {
+                    try {
+                        $fi = New-Object IO.FileInfo $f
+                        $sum += $fi.Length
+                        if ($trackBig -and $fi.Length -gt 300MB) { [void]$script:bigFiles.Add([pscustomobject]@{ path = $f; mb = [int]($fi.Length / 1MB); modified = Iso $fi.LastWriteTime }) }
+                    } catch { }
+                }
+            } catch { }
+            try {
+                foreach ($s in [IO.Directory]::EnumerateDirectories($d)) {
+                    try { $a = [IO.File]::GetAttributes($s); if (($a -band [IO.FileAttributes]::ReparsePoint) -eq 0) { $stack.Push($s) } } catch { }
+                }
+            } catch { }
+        }
+    } catch { }
+    return [pscustomobject]@{ mb = [int]($sum / 1MB); partial = $partial }
 }
 
 function Iso($d) {
@@ -2849,31 +2877,6 @@ try { $gd = Read-Reg 'HKCU:\System\GameConfigStore' 'GameDVR_Enabled'; if ($null
 if (-not $Quick) {
     try {
         $script:bigFiles = New-Object System.Collections.ArrayList
-        function Measure-Dir([string]$p, [int]$maxSec, [bool]$trackBig) {
-            $sw = [Diagnostics.Stopwatch]::StartNew(); $sum = [long]0; $partial = $false
-            try {
-                $stack = New-Object System.Collections.Stack; $stack.Push($p)
-                while ($stack.Count -gt 0) {
-                    if ($sw.Elapsed.TotalSeconds -gt $maxSec) { $partial = $true; break }
-                    $d = [string]$stack.Pop()
-                    try {
-                        foreach ($f in [IO.Directory]::EnumerateFiles($d)) {
-                            try {
-                                $fi = New-Object IO.FileInfo $f
-                                $sum += $fi.Length
-                                if ($trackBig -and $fi.Length -gt 300MB) { [void]$script:bigFiles.Add([pscustomobject]@{ path = $f; mb = [int]($fi.Length / 1MB); modified = Iso $fi.LastWriteTime }) }
-                            } catch { }
-                        }
-                    } catch { }
-                    try {
-                        foreach ($s in [IO.Directory]::EnumerateDirectories($d)) {
-                            try { $a = [IO.File]::GetAttributes($s); if (($a -band [IO.FileAttributes]::ReparsePoint) -eq 0) { $stack.Push($s) } } catch { }
-                        }
-                    } catch { }
-                }
-            } catch { }
-            return [pscustomobject]@{ mb = [int]($sum / 1MB); partial = $partial }
-        }
         $up = $env:USERPROFILE
         $targets = @(
             @('Downloads', (Join-Path $up 'Downloads'), $true), @('Documents', (Join-Path $up 'Documents'), $true), @('Desktop', (Join-Path $up 'Desktop'), $true),

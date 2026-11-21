@@ -179,7 +179,7 @@ var INV = (function (V, AI) {
     if (FXD) {
       var LG = FXD.logons || {}, DF = FXD.defender || {}, FWD = FXD.firewall || {}, PSD = FXD.powershell || {}, NW = FXD.network || {};
       function when(iso) { return iso ? V.fmtDT(iso) : ''; }
-      h += sect(I('Traces: who did what and when', 'Ίχνη: ποιος έκανε τι και πότε'), I('read from the Windows logs; nothing was changed. Clues, not proof.', 'διαβασμένα από τα logs των Windows· δεν άλλαξε τίποτα. Ενδείξεις, όχι αποδείξεις.'));
+      h += sect(I('Traces: who did what and when', 'Ίχνη: ποιος έκανε τι και πότε'), I('read from the Windows logs; nothing was changed. These are clues, not proof, and most items here are normal everyday activity.', 'διαβασμένα από τα logs των Windows· δεν άλλαξε τίποτα. Είναι ενδείξεις, όχι αποδείξεις, και τα περισσότερα εδώ είναι φυσιολογική καθημερινή δραστηριότητα.'));
       h += '<div class="grid">';
       h += '<div class="s4">' + card(I('Sign-ins, last 30 days', 'Συνδέσεις, τελευταίες 30 ημέρες'), LG.readable ? I('Security log read', 'διαβάστηκε το Security log') : I('needs administrator', 'θέλει διαχειριστή'),
         LG.readable ? kv([[I('Successful', 'Επιτυχείς'), LG.success30], [I('Failed', 'Αποτυχημένες'), LG.failed30], [I('Most failures in one hour', 'Περισσότερες αποτυχίες σε μία ώρα'), LG.failedBurst],

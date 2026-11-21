@@ -5939,7 +5939,7 @@ var INV = (function (V, AI) {
     if (FXD) {
       var LG = FXD.logons || {}, DF = FXD.defender || {}, FWD = FXD.firewall || {}, PSD = FXD.powershell || {}, NW = FXD.network || {};
       function when(iso) { return iso ? V.fmtDT(iso) : ''; }
-      h += sect(I('Traces: who did what and when', 'Ίχνη: ποιος έκανε τι και πότε'), I('read from the Windows logs; nothing was changed. Clues, not proof.', 'διαβασμένα από τα logs των Windows· δεν άλλαξε τίποτα. Ενδείξεις, όχι αποδείξεις.'));
+      h += sect(I('Traces: who did what and when', 'Ίχνη: ποιος έκανε τι και πότε'), I('read from the Windows logs; nothing was changed. These are clues, not proof, and most items here are normal everyday activity.', 'διαβασμένα από τα logs των Windows· δεν άλλαξε τίποτα. Είναι ενδείξεις, όχι αποδείξεις, και τα περισσότερα εδώ είναι φυσιολογική καθημερινή δραστηριότητα.'));
       h += '<div class="grid">';
       h += '<div class="s4">' + card(I('Sign-ins, last 30 days', 'Συνδέσεις, τελευταίες 30 ημέρες'), LG.readable ? I('Security log read', 'διαβάστηκε το Security log') : I('needs administrator', 'θέλει διαχειριστή'),
         LG.readable ? kv([[I('Successful', 'Επιτυχείς'), LG.success30], [I('Failed', 'Αποτυχημένες'), LG.failed30], [I('Most failures in one hour', 'Περισσότερες αποτυχίες σε μία ώρα'), LG.failedBurst],
@@ -6294,7 +6294,17 @@ var V3 = (function (V) {
     var open = w.filter(function (x) { return /open|none|wep/i.test(String(x.auth)); }).length;
     return win(I('Saved Wi-Fi networks', 'Αποθηκευμένα δίκτυα Wi-Fi'), w.length + '', kv([[I('Networks this PC remembers', 'Δίκτυα που θυμάται ο υπολογιστής'), w.length], [I('Open or weak (no password or WEP)', 'Ανοιχτά ή αδύναμα (χωρίς κωδικό ή WEP)'), open]]) + '<p class="sub" style="margin:8px 0 0">' + esc(I('Names are not shown here. A remembered open network can be joined automatically in a cafe, so it is worth forgetting the ones you no longer use: Settings > Network & internet > Wi-Fi > Manage known networks.', 'Τα ονόματα δεν εμφανίζονται εδώ. Ένα θυμημένο ανοιχτό δίκτυο μπορεί να συνδεθεί μόνο του σε καφέ, οπότε αξίζει να ξεχάσεις όσα δεν χρησιμοποιείς: Ρυθμίσεις > Δίκτυο και internet > Wi-Fi > Διαχείριση γνωστών δικτύων.')) + '</p>');
   }
-  function privacyHtml() { return browsersHtml() + talkersHtml() + (wifiHtml() ? sect(I('Wi-Fi', 'Wi-Fi'), '') + wifiHtml() : ''); }
+  /* ---- check your accounts (links open only when clicked) ---- */
+  function accountsHtml() {
+    var lnk = function (u, t) { return '<a href="' + u + '" target="_blank" rel="noopener noreferrer">' + esc(t) + '</a>'; };
+    var rows = [
+      [I('Devices signed in to your Microsoft account', 'Συσκευές συνδεδεμένες στον λογαριασμό Microsoft'), { html: lnk('https://account.microsoft.com/devices', I('open account.microsoft.com/devices', 'άνοιξε το account.microsoft.com/devices')) }],
+      [I('Has your email appeared in a data leak?', 'Έχει εμφανιστεί το email σου σε διαρροή δεδομένων;'), { html: lnk('https://haveibeenpwned.com/', I('open haveibeenpwned.com', 'άνοιξε το haveibeenpwned.com')) }]
+    ];
+    return sect(I('Check your accounts', 'Έλεγξε τους λογαριασμούς σου'), I('these links open a website only when you click them. This report sends nothing and never asks for a password.', 'αυτοί οι σύνδεσμοι ανοίγουν ιστοσελίδα μόνο όταν τους πατήσεις. Η αναφορά δεν στέλνει τίποτα και δεν ζητά ποτέ κωδικό.')) +
+      '<div class="win"><div class="body">' + tbl([I('What', 'Τι'), I('Where', 'Πού')], rows) + '<p class="sub" style="margin:8px 0 0">' + esc(I('On the Microsoft page, remove devices you no longer own or recognise. On the leak page, type only your email address (never a password). If it appears, change the password of that site and turn on two-step sign-in.', 'Στη σελίδα της Microsoft αφαίρεσε συσκευές που δεν έχεις πια ή δεν αναγνωρίζεις. Στη σελίδα διαρροών γράψε μόνο το email σου (ποτέ κωδικό). Αν εμφανιστεί, άλλαξε τον κωδικό σε εκείνο το site και άναψε την επαλήθευση σε δύο βήματα.')) + '</p></div></div>';
+  }
+  function privacyHtml() { return accountsHtml() + browsersHtml() + talkersHtml() + (wifiHtml() ? sect(I('Wi-Fi', 'Wi-Fi'), '') + wifiHtml() : ''); }
 
   return { insightsHtml: insightsHtml, privacyHtml: privacyHtml };
 })(V);

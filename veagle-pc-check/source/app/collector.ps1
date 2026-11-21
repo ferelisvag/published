@@ -9,7 +9,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '2.8.1'
+$script:Version = '3.0.0'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
@@ -2778,7 +2778,7 @@ $m7['folders'] = [pscustomobject]@{
     downloads = (Top-Level-Size (Join-Path $env:USERPROFILE 'Downloads'))
 }
 $hib = $null
-try { $hf = Get-Item -LiteralPath (Join-Path $env:SystemDrive 'hiberfil.sys') -Force -ErrorAction Stop; $hib = [int]($hf.Length / 1MB) } catch { }
+try { $hf = New-Object System.IO.FileInfo (Join-Path $env:SystemDrive 'hiberfil.sys'); if ($hf.Exists) { $hib = [int]($hf.Length / 1MB) } } catch { }
 $m7['hiberfilMB'] = $hib
 $extras | Add-Member -NotePropertyName more7 -NotePropertyValue ([pscustomobject]$m7) -Force
 

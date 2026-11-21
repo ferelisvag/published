@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.8.1
+VEAGLE PC CHECK  v3.0.0
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,17 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 3.0.0
+- Privacy page: a "Check your accounts" part with two links (your Microsoft devices, and a data-leak check). They open only when you click.
+- The size of the hibernation file is now read correctly.
+- The "Traces" part explains that most items are normal everyday activity.
+- Together with 2.7 and 2.8: active start-up programs, other start-up places, disk mapping, browser privacy, VirusTotal links, winget script, games on slow disks, screen refresh rate.
+
+ΣΤΑ ΕΛΛΗΝΙΚΑ (συντομία)
+1. Κατέβασε το ZIP, κάνε δεξί κλικ και «Εξαγωγή όλων». Μην το τρέξεις μέσα από το ZIP.
+2. Διπλό κλικ στο VEAGLE-PC-Check.bat (πλήρης σάρωση) ή στο VEAGLE-PC-Check-Quick.bat (γρήγορη, χωρίς τα αργά μέρη).
+3. Όταν τελειώσει, ανοίγει η αναφορά. Η εφαρμογή δεν αλλάζει τίποτα στον υπολογιστή και δεν στέλνει τίποτα πουθενά. Η αναφορά έχει κουμπί ΕΛ/EN πάνω δεξιά.
 
 NEW IN 2.8.1
 - Start-up programs: a new part shows where programs start from besides Task Manager: Windows services and scheduled tasks that run at sign-in (non-Microsoft only), with how to stop each one.

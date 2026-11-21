@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v3.3.2
+VEAGLE PC CHECK  v3.3.3
 =======================
 VEAGLE - ferelis.gr
 
@@ -54,8 +54,9 @@ READING THE REPORT
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
 
-NEW IN 3.3.2
-- The start files (VEAGLE-PC-Check.bat and VEAGLE-PC-Check-Quick.bat) look better: a clear first screen with the VEAGLE logo, what will happen in 3 steps, and a "press any key" so nothing starts before you say so. At the end a short "what next" screen tells you where the report is.
+NEW IN 3.3.3
+- The scan window looks better: a cleaner header (FULL or QUICK, read-only, administrator or not), and every step shows its number, the percent, a progress bar and the time since the start. The finished box shows how long it took.
+- The start files go straight to the Windows question again (no extra key press). At the end a short "what next" screen tells you where the report is.
 
 NEW IN 3.3.1
 - No internet? The check now notices it by itself (it only reads Windows network settings, it sends nothing) and runs without the winget and DNS checks, which is also faster. The report says so. You can force this with the option -NoNetwork when you run collector.ps1 yourself.

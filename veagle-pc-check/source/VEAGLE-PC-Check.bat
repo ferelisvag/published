@@ -7,32 +7,12 @@ color 0F
 
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-  cls
   echo.
-  echo      __     _______    _    ____ _     _____
-  echo      \ \   / ^| ____^|  / \  / ___^| ^|   ^| ____^|
-  echo       \ \ / /^|  _^|   / _ \^| ^|  _^| ^|   ^|  _^|
-  echo        \ V / ^| ^|___ / ___ ^| ^|_^| ^| ^|___^| ^|___
-  echo         \_/  ^|_____/_/   \_\____^|_____^|_____^|
+  echo  VEAGLE PC Check
+  echo  ---------------
+  echo  Windows will now ask: "Do you want to allow this app to make changes?"
+  echo  Click YES. The check only reads things, it changes nothing.
   echo.
-  echo   P C   C H E C K                          ferelis.gr
-  echo   ------------------------------------------------------------
-  echo    FULL SCAN  ^(about 3-5 minutes^)
-  echo   ------------------------------------------------------------
-  echo.
-  echo    What happens now:
-  echo.
-  echo      1. Windows asks: "Do you want to allow this app to make
-  echo         changes?"   Click  YES.
-  echo      2. A new window opens and checks your PC.
-  echo      3. When it finishes, the report opens in your browser.
-  echo.
-  echo    Safe to run: the check only READS information.
-  echo    Nothing is changed on your PC and nothing is uploaded.
-  echo.
-  echo   ------------------------------------------------------------
-  echo   Press any key to continue, or close this window to cancel.
-  pause >nul
   powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
   exit /b
 )

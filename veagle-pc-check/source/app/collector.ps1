@@ -10,7 +10,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify, [switch]$NoNetwork)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '3.3.2'
+$script:Version = '3.3.3'
 # Automatic no-internet mode: only reads Windows settings (is there a connected network card with a gateway?). It sends no packet.
 # With no connection the network steps (winget, DNS) would only wait and time out, so they are skipped and the report says so.
 $script:NoNetAuto = $false
@@ -84,17 +84,20 @@ function Step([int]$n, [int]$total, [string]$label) {
     Flush-StepErrors
     $script:CurStep = $n
     $script:CurLabel = $label
-    $w = 20
+    $w = 24
     $f = [int][math]::Floor($w * ($n - 1) / $total)
-    $bar = ('#' * $f) + ('-' * ($w - $f))
     $pct = [int][math]::Floor(100 * ($n - 1) / $total)
     $sec = [int]$swTotal.Elapsed.TotalSeconds
+    $full = [string][char]0x2588
+    $empty = [string][char]0x2591
     try { $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check {0} - {1}% - {2} s' -f $script:Version, $pct, $sec) } catch { }
-    Write-Host '  ' -NoNewline
-    Write-Host ('[{0,2}/{1}] ' -f $n, $total) -NoNewline -ForegroundColor Cyan
-    Write-Host $bar.Substring(0, $f) -NoNewline -ForegroundColor Red
-    Write-Host $bar.Substring($f) -NoNewline -ForegroundColor DarkGray
-    Write-Host ('  {0}' -f $label) -ForegroundColor White
+    Write-Host '   ' -NoNewline
+    Write-Host ('{0,2}/{1}' -f $n, $total) -NoNewline -ForegroundColor Cyan
+    Write-Host ('  {0,3}%  ' -f $pct) -NoNewline -ForegroundColor DarkGray
+    Write-Host ($full * $f) -NoNewline -ForegroundColor Red
+    Write-Host ($empty * ($w - $f)) -NoNewline -ForegroundColor DarkGray
+    Write-Host ('  {0}' -f $label) -NoNewline -ForegroundColor White
+    Write-Host ('   {0}:{1:00}' -f [int][math]::Floor($sec / 60), ($sec % 60)) -ForegroundColor DarkGray
 }
 
 function Iso($d) {
@@ -253,13 +256,19 @@ Write-Host '    \ \ / /|  _|   / _ \| |  _| |   |  _|' -ForegroundColor Red
 Write-Host '     \ V / | |___ / ___ | |_| | |___| |___' -ForegroundColor DarkRed
 Write-Host '      \_/  |_____/_/   \_\____|_____|_____|' -ForegroundColor DarkRed
 Write-Host ''
+$hl = '   ' + ([string][char]0x2500 * 62)
 Write-Host '   P C   C H E C K' -NoNewline -ForegroundColor White
-Write-Host ('   version ' + $script:Version) -NoNewline -ForegroundColor Yellow
-Write-Host '   |   ferelis.gr' -ForegroundColor DarkGray
-Write-Host '   ------------------------------------------------' -ForegroundColor DarkGray
-if ($Quick) { Write-Host '   QUICK scan. Read-only: nothing is changed or sent.' -ForegroundColor Green } else { Write-Host '   Read-only scan: nothing is changed or sent.' -ForegroundColor Green }
-Write-Host '   Please wait. It takes 2-3 minutes. You can keep working.' -ForegroundColor Gray
-Write-Host '   ------------------------------------------------' -ForegroundColor DarkGray
+Write-Host ('      version ' + $script:Version) -NoNewline -ForegroundColor Yellow
+Write-Host '      ferelis.gr' -ForegroundColor DarkGray
+Write-Host $hl -ForegroundColor DarkGray
+Write-Host '   ' -NoNewline
+if ($Quick) { Write-Host ([string][char]0x25CF + ' QUICK scan') -NoNewline -ForegroundColor Cyan } else { Write-Host ([string][char]0x25CF + ' FULL scan') -NoNewline -ForegroundColor Cyan }
+Write-Host '   |   ' -NoNewline -ForegroundColor DarkGray
+Write-Host 'read-only: nothing is changed or sent' -NoNewline -ForegroundColor Green
+Write-Host '   |   ' -NoNewline -ForegroundColor DarkGray
+if ($isAdmin) { Write-Host 'administrator' -ForegroundColor Green } else { Write-Host 'NOT administrator' -ForegroundColor Yellow }
+if ($Quick) { Write-Host '   Please wait. It takes about 1 minute. You can keep working.' -ForegroundColor Gray } else { Write-Host '   Please wait. It takes 3-5 minutes. You can keep working.' -ForegroundColor Gray }
+Write-Host $hl -ForegroundColor DarkGray
 Write-Host ''
 if (-not $isAdmin) {
     Write-Host '  Not running as Administrator: some checks (BitLocker, SMART, DISM) will be skipped.' -ForegroundColor Yellow
@@ -3021,14 +3030,18 @@ if (Test-Path $templatePath) {
 }
 
 Write-Host ''
-Write-Host ('  [{0}/{0}] ' -f $TOTAL) -NoNewline -ForegroundColor Cyan
-Write-Host ('#' * 20) -NoNewline -ForegroundColor Green
+Write-Host '   ' -NoNewline
+Write-Host ('{0}/{0}' -f $TOTAL) -NoNewline -ForegroundColor Cyan
+Write-Host '  100%  ' -NoNewline -ForegroundColor DarkGray
+Write-Host ([string][char]0x2588 * 24) -NoNewline -ForegroundColor Green
 Write-Host '  Finished' -ForegroundColor White
 try { $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check ' + $script:Version + ' - done') } catch { }
 Write-Host ''
-Write-Host '   ================================================' -ForegroundColor Green
-Write-Host ('    DONE in {0} s   |   VEAGLE PC Check {1}' -f [int]$swTotal.Elapsed.TotalSeconds, $script:Version) -ForegroundColor Green
-Write-Host '   ================================================' -ForegroundColor Green
+$doneLine = '   ' + ([string][char]0x2550 * 62)
+Write-Host $doneLine -ForegroundColor Green
+$doneSec = [int]$swTotal.Elapsed.TotalSeconds
+Write-Host ('    DONE in {0}:{1:00}   |   VEAGLE PC Check {2}' -f [int][math]::Floor($doneSec / 60), ($doneSec % 60), $script:Version) -ForegroundColor Green
+Write-Host $doneLine -ForegroundColor Green
 Write-Host ('   Report: ' + (Join-Path $out 'report.html')) -ForegroundColor White
 if ($script:Warnings.Count -gt 0) { Write-Host ('   {0} small warning(s) are listed inside the report.' -f $script:Warnings.Count) -ForegroundColor Yellow }
 Write-Host '   Nothing was changed on this PC and nothing was uploaded.' -ForegroundColor Gray

@@ -10,7 +10,7 @@ param([switch]$Quick, [switch]$NoOpen, [switch]$Notify, [switch]$NoNetwork)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '3.3.3'
+$script:Version = '3.3.4'
 # Automatic no-internet mode: only reads Windows settings (is there a connected network card with a gateway?). It sends no packet.
 # With no connection the network steps (winget, DNS) would only wait and time out, so they are skipped and the report says so.
 $script:NoNetAuto = $false
@@ -84,20 +84,25 @@ function Step([int]$n, [int]$total, [string]$label) {
     Flush-StepErrors
     $script:CurStep = $n
     $script:CurLabel = $label
-    $w = 24
+    $w = 16
     $f = [int][math]::Floor($w * ($n - 1) / $total)
     $pct = [int][math]::Floor(100 * ($n - 1) / $total)
     $sec = [int]$swTotal.Elapsed.TotalSeconds
     $full = [string][char]0x2588
     $empty = [string][char]0x2591
     try { $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check {0} - {1}% - {2} s' -f $script:Version, $pct, $sec) } catch { }
+    $cols = 92
+    try { $cols = [int]$Host.UI.RawUI.WindowSize.Width } catch { }
+    $room = $cols - 44
+    if ($room -lt 20) { $room = 20 }
+    if ($label.Length -gt $room) { $label = $label.Substring(0, $room - 3) + '...' }
     Write-Host '   ' -NoNewline
     Write-Host ('{0,2}/{1}' -f $n, $total) -NoNewline -ForegroundColor Cyan
     Write-Host ('  {0,3}%  ' -f $pct) -NoNewline -ForegroundColor DarkGray
     Write-Host ($full * $f) -NoNewline -ForegroundColor Red
     Write-Host ($empty * ($w - $f)) -NoNewline -ForegroundColor DarkGray
-    Write-Host ('  {0}' -f $label) -NoNewline -ForegroundColor White
-    Write-Host ('   {0}:{1:00}' -f [int][math]::Floor($sec / 60), ($sec % 60)) -ForegroundColor DarkGray
+    Write-Host ('  {0}:{1:00}  ' -f [int][math]::Floor($sec / 60), ($sec % 60)) -NoNewline -ForegroundColor DarkGray
+    Write-Host $label -ForegroundColor White
 }
 
 function Iso($d) {
@@ -3033,7 +3038,7 @@ Write-Host ''
 Write-Host '   ' -NoNewline
 Write-Host ('{0}/{0}' -f $TOTAL) -NoNewline -ForegroundColor Cyan
 Write-Host '  100%  ' -NoNewline -ForegroundColor DarkGray
-Write-Host ([string][char]0x2588 * 24) -NoNewline -ForegroundColor Green
+Write-Host ([string][char]0x2588 * 16) -NoNewline -ForegroundColor Green
 Write-Host '  Finished' -ForegroundColor White
 try { $Host.UI.RawUI.WindowTitle = ('VEAGLE PC Check ' + $script:Version + ' - done') } catch { }
 Write-Host ''

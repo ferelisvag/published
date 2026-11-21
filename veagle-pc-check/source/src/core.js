@@ -2190,7 +2190,7 @@ function Engine(RAW) {
       var seen = {}, list = [];
       st.forEach(function (x) {
         var k = String(x.name).toLowerCase() + '|' + x.scope; if (seen[k]) return; seen[k] = 1;
-        var state = !x.enabled ? 'off' : (x.running ? 'active' : (x.hasCmd === false ? 'unknown' : 'idle'));
+        var state = !x.enabled ? 'off' : (x.running ? 'active' : ((x.hasCmd === false || x.scope === 'system') ? 'unknown' : 'idle'));
         list.push({ name: x.name, state: state, scope: x.scope, proc: x.proc, launcher: RE.launcher.test(x.name) });
       });
       list.sort(function (a, b) { var o = { active: 0, idle: 1, unknown: 2, off: 3 }; return (o[a.state] - o[b.state]) || String(a.name).localeCompare(String(b.name)); });

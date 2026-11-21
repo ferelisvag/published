@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v2.8.0
+VEAGLE PC CHECK  v2.8.1
 =======================
 VEAGLE - ferelis.gr
 
@@ -53,6 +53,10 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 2.8.1
+- Start-up programs: a new part shows where programs start from besides Task Manager: Windows services and scheduled tasks that run at sign-in (non-Microsoft only), with how to stop each one.
+- A start-up item that belongs to a service account is shown as "unknown" instead of "allowed, not running".
 
 NEW IN 2.8.0
 - Games: the scan finds where Steam and Epic games are installed. If they are on a slow hard disk while the PC has an SSD, the report says so and explains how to move them (nothing is moved for you).

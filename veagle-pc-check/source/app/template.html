@@ -3177,7 +3177,7 @@ function Engine(RAW) {
       var seen = {}, list = [];
       st.forEach(function (x) {
         var k = String(x.name).toLowerCase() + '|' + x.scope; if (seen[k]) return; seen[k] = 1;
-        var state = !x.enabled ? 'off' : (x.running ? 'active' : (x.hasCmd === false ? 'unknown' : 'idle'));
+        var state = !x.enabled ? 'off' : (x.running ? 'active' : ((x.hasCmd === false || x.scope === 'system') ? 'unknown' : 'idle'));
         list.push({ name: x.name, state: state, scope: x.scope, proc: x.proc, launcher: RE.launcher.test(x.name) });
       });
       list.sort(function (a, b) { var o = { active: 0, idle: 1, unknown: 2, off: 3 }; return (o[a.state] - o[b.state]) || String(a.name).localeCompare(String(b.name)); });
@@ -6149,6 +6149,28 @@ var V3 = (function (V) {
     h += '<div class="win"><div class="body">' + tbl([I('Program', 'Πρόγραμμα'), I('State', 'Κατάσταση'), I('Kind', 'Είδος'), I('For', 'Για')], L.map(function (x) {
       return [x.name, { html: chip[x.state] || '' }, x.launcher ? I('launcher, updater or chat app', 'launcher, updater ή εφαρμογή συνομιλίας') : '', x.scope === 'system' ? I('system accounts', 'λογαριασμούς συστήματος') : (x.scope === 'machine' ? I('everyone', 'όλους τους χρήστες') : (x.scope === 'user' ? I('you', 'εσένα') : ''))];
     })) + '<p class="sub" style="margin:8px 0 0">' + esc(I('To switch one off: press Ctrl+Shift+Esc, open "Startup apps" and use the switch. The program still works, it just does not start before you open it. The list reads the places Windows keeps, so a program can also start from a scheduled task or a service, which are listed in the Software tab.', 'Για να κλείσεις ένα: πάτα Ctrl+Shift+Esc, άνοιξε τις «Εφαρμογές εκκίνησης» και χρησιμοποίησε τον διακόπτη. Το πρόγραμμα δουλεύει κανονικά, απλώς δεν ξεκινά πριν το ανοίξεις. Η λίστα διαβάζει τα μέρη που κρατούν τα Windows, οπότε ένα πρόγραμμα μπορεί να ξεκινά και από προγραμματισμένη εργασία ή υπηρεσία, που φαίνονται στην καρτέλα Software.')) + '</p></div></div>';
+    return h + otherStartHtml();
+  }
+
+  /* ---- other places programs start from (not shown in Task Manager) ---- */
+  function otherStartHtml() {
+    var M3 = (D && D.extras && D.extras.more3) || {};
+    var tasks = (M3.taskDetail || []).filter(function (t) { return /Logon|Boot|SessionStateChange|Event|Registration/i.test(String(t.trigger || '')) && String(t.path || ''); });
+    var svcs = (M3.svcDetail || []).filter(function (s) { return s && s.name; });
+    if (!tasks.length && !svcs.length) return '';
+    var h = sect(I('Other places programs start from', 'Άλλα σημεία από τα οποία ξεκινούν προγράμματα'), I('Task Manager shows only part of what starts by itself. These two lists are things it does not show: scheduled tasks that run at sign-in and programs that run as Windows services. Only non-Microsoft items are listed.', 'Ο Διαχειριστής εργασιών δείχνει μόνο ένα μέρος από όσα ξεκινούν μόνα τους. Αυτές οι δύο λίστες είναι όσα δεν δείχνει: προγραμματισμένες εργασίες που τρέχουν με τη σύνδεση και προγράμματα που τρέχουν ως υπηρεσίες των Windows. Μπαίνουν μόνο όσα δεν είναι της Microsoft.'));
+    var short = function (p) { p = String(p || ''); var i = p.lastIndexOf('\\'); return i >= 0 ? p.slice(i + 1) : p; };
+    if (svcs.length) {
+      var run = svcs.filter(function (s) { return /running/i.test(s.state); }).length;
+      h += '<div class="win"><div class="head">' + esc(I('Programs that start as services', 'Προγράμματα που ξεκινούν ως υπηρεσίες')) + ' (' + svcs.length + ', ' + run + ' ' + esc(I('running', 'τρέχουν')) + ')</div><div class="body">' + tbl([I('Service', 'Υπηρεσία'), I('State', 'Κατάσταση'), I('Runs', 'Τρέχει'), I('Note', 'Σημείωση')], svcs.map(function (s) {
+        return [s.display || s.name, { html: /running/i.test(s.state) ? tag('medium', I('running', 'τρέχει')) : tag('info', I('stopped', 'σταματημένη')) }, short(s.path), s.unusual ? I(s.unusual, ({'runs from a user profile folder': 'τρέχει από φάκελο χρήστη', 'runs from a temporary or shared folder': 'τρέχει από προσωρινό ή κοινό φάκελο'})[s.unusual] || s.unusual) : ''];
+      })) + '<p class="sub" style="margin:8px 0 0">' + esc(I('These start before you sign in, even if you never open the program. To stop one: press the Windows key, type Services, find it, open it and set "Startup type" to Manual. Ask first if you are not sure what it does.', 'Αυτές ξεκινούν πριν συνδεθείς, ακόμα κι αν δεν ανοίξεις ποτέ το πρόγραμμα. Για να σταματήσεις μία: πάτα το πλήκτρο Windows, γράψε Υπηρεσίες (Services), βρες την, άνοιξέ την και βάλε το «Τύπος εκκίνησης» σε Χειροκίνητη. Ρώτα πρώτα αν δεν ξέρεις τι κάνει.')) + '</p></div></div>';
+    }
+    if (tasks.length) {
+      h += '<div class="win"><div class="head">' + esc(I('Scheduled tasks that run at sign-in', 'Προγραμματισμένες εργασίες που τρέχουν με τη σύνδεση')) + ' (' + tasks.length + ')</div><div class="body">' + tbl([I('Task', 'Εργασία'), I('When', 'Πότε'), I('Runs', 'Τρέχει'), I('As', 'Ως')], tasks.map(function (t) {
+        return [String(t.name).replace(/[_{].*$/, '').replace(/S-1-5-[\d-]+/, ''), String(t.trigger), short(t.path), t.runAs || ''];
+      })) + '<p class="sub" style="margin:8px 0 0">' + esc(I('Most of these are updaters (Adobe, Brave, Edge, NVIDIA). They are normal. To stop one: press the Windows key, type Task Scheduler, find the task and use "Disable". Nothing is deleted.', 'Οι περισσότερες είναι ενημερωτές (Adobe, Brave, Edge, NVIDIA). Είναι φυσιολογικές. Για να σταματήσεις μία: πάτα το πλήκτρο Windows, γράψε Task Scheduler (Προγραμματιστής εργασιών), βρες την εργασία και πάτα «Απενεργοποίηση». Δεν σβήνεται τίποτα.')) + '</p></div></div>';
+    }
     return h;
   }
 

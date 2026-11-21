@@ -15,6 +15,7 @@ out = dist / (f'VEAGLE-PC-Check-v{version}' + (('-' + args.tag) if args.tag else
 files = {
     'VEAGLE-PC-Check.bat': root / 'VEAGLE-PC-Check.bat',
     'VEAGLE-PC-Check-Quick.bat': root / 'VEAGLE-PC-Check-Quick.bat',
+    'VEAGLE-PC-Check-NoNetwork.bat': root / 'VEAGLE-PC-Check-NoNetwork.bat',
     'README.txt': root / 'README.txt',
     'SAMPLE-REPORT.html': root / 'tools' / 'sample-report.html',
     'app/collector.ps1': root / 'app' / 'collector.ps1',

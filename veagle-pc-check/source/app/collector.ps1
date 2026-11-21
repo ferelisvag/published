@@ -1,15 +1,16 @@
 # VEAGLE PC Check - collector
 # READ-ONLY: this script only reads system information. It does not change any setting,
 # install anything or send your data anywhere. The only network actions: winget asks what is outdated,
-# one ping to your own router, and one DNS lookup of www.microsoft.com.
+# 5 pings to your own router, one DNS lookup of www.microsoft.com, and (full scan) 12 small DNS lookups
+# (3 website names) against your DNS server, Cloudflare, Google and Quad9. -NoNetwork skips everything except the pings to your own router.
 # Output: Reports\<timestamp>\report.html, data.json and a raw\ folder with the exported files.
 # -Quick skips the slow parts (msinfo32, winget, DISM, optional features, old drivers, folder sizes).
 
-param([switch]$Quick, [switch]$NoOpen, [switch]$Notify)
+param([switch]$Quick, [switch]$NoOpen, [switch]$Notify, [switch]$NoNetwork)
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
-$script:Version = '3.2.1'
+$script:Version = '3.2.2'
 $script:Warnings = New-Object System.Collections.ArrayList
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 # A stuck Windows information service (WMI) must not hang the scan: every CIM question gives up after 90 seconds.
@@ -736,7 +737,7 @@ try { $storeCount = @(Get-AppxPackage | Where-Object { -not $_.IsFramework -and 
 if ($Quick) { Step 10 $TOTAL 'Outdated applications (skipped in quick scan)' } else { Step 10 $TOTAL 'Outdated applications (winget)' }
 $wingetText = $null
 $wingetAvailable = [bool](Get-Command winget -ErrorAction SilentlyContinue)
-if ($wingetAvailable -and -not $Quick) {
+if ($wingetAvailable -and -not $Quick -and -not $NoNetwork) {
     try {
         $job = Start-Job -ScriptBlock {
             [Console]::OutputEncoding = [Text.Encoding]::UTF8
@@ -923,12 +924,12 @@ if ($gateway) {
     } catch { }
 }
 $dnsTest = $null
-try {
+if (-not $NoNetwork) { try {
     $sw = [Diagnostics.Stopwatch]::StartNew()
     $ips = @([System.Net.Dns]::GetHostAddresses('www.microsoft.com'))
     $sw.Stop()
     $dnsTest = [pscustomobject]@{ ok = ($ips.Count -gt 0); ms = [int]$sw.ElapsedMilliseconds }
-} catch { $dnsTest = [pscustomobject]@{ ok = $false; ms = $null } }
+} catch { $dnsTest = [pscustomobject]@{ ok = $false; ms = $null } } }
 $timeSync = $null
 try {
     $w32 = Get-Service -Name w32time -ErrorAction Stop
@@ -1400,7 +1401,7 @@ try {
 
 # --- DNS speed: the DNS of this PC against three well-known public ones (12 small lookups, full scan only)
 $dnsSpeed = @()
-if (-not $Quick) {
+if (-not $Quick -and -not $NoNetwork) {
     try {
         $cur = [string](@(Get-DnsClientServerAddress -AddressFamily IPv4 | Where-Object { $_.ServerAddresses } | ForEach-Object { $_.ServerAddresses } | Select-Object -First 1))
         $cands = @(); if ($cur) { $cands += , @('This PC', $cur) }
@@ -2882,14 +2883,14 @@ function Add-Cov([string]$key, [bool]$needAdmin, [bool]$fullOnly, [string]$force
 }
 $covItems += Add-Cov 'bitlocker' $true $false ''
 $covItems += Add-Cov 'features' $true $true ''
-$covItems += Add-Cov 'outdated' $false $true $(if (-not $wingetAvailable) { 'na' } else { '' })
+$covItems += Add-Cov 'outdated' $false $true $(if (-not $wingetAvailable -or $NoNetwork) { 'na' } else { '' })
 $covItems += Add-Cov 'oldDrivers' $false $true ''
 $covItems += Add-Cov 'dism' $true $true ''
 $covItems += Add-Cov 'restore' $true $false ''
 $covItems += Add-Cov 'winre' $true $false ''
 $covItems += Add-Cov 'space' $false $true ''
 $covItems += Add-Cov 'signatures' $false $true ''
-$covItems += Add-Cov 'dnsSpeed' $false $true ''
+$covItems += Add-Cov 'dnsSpeed' $false $true $(if ($NoNetwork) { 'na' } else { '' })
 $covItems += Add-Cov 'perf' $false $true ''
 $covItems += Add-Cov 'secpol' $true $false ''
 $covItems += Add-Cov 'sfc' $false $true ''
@@ -2907,6 +2908,7 @@ foreach ($sk in @($script:StepSec.Keys | Sort-Object)) {
 
 $meta = [ordered]@{
     schema     = 'veagle-pccheck/2'
+    noNetwork  = [bool]$NoNetwork
     tool       = 'VEAGLE PC Check'
     version    = $script:Version
     generated  = Iso (Get-Date)
@@ -2975,11 +2977,13 @@ try {
     $trendRaw = '[' + ($all -join ',') + ']'
 } catch { Warn ('history: ' + $_.Exception.Message) }
 
-$json = $data | ConvertTo-Json -Depth 9 -Compress
+$json = $data | ConvertTo-Json -Depth 12 -Compress
 $json = $json.Substring(0, $json.Length - 1) + ',"trend":' + $trendRaw + '}'
 $json = $json.Replace('</', '<\/')
 $utf8 = New-Object System.Text.UTF8Encoding($false)
 [IO.File]::WriteAllText((Join-Path $out 'data.json'), $json, $utf8)
+try { [void]($json | ConvertFrom-Json -ErrorAction Stop) } catch { Write-Host '  WARNING: data.json could not be read back as valid JSON.' -ForegroundColor Yellow }
+if ($json -match '"(System\.Collections|System\.Object\[\]|@\{)') { Write-Host '  WARNING: some deep data was written as text (nesting too deep).' -ForegroundColor Yellow }
 
 # The report also carries your PREVIOUS scan (as raw text, so dates stay intact) to show what changed. data.json stays without it.
 $jsonHtml = $json

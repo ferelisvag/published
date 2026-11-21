@@ -1,4 +1,4 @@
-VEAGLE PC CHECK  v3.2.1
+VEAGLE PC CHECK  v3.2.2
 =======================
 VEAGLE - ferelis.gr
 
@@ -12,8 +12,8 @@ IT IS SAFE
 ----------
 - It only LOOKS. It does not change, install or delete anything on your PC.
 - It does not send your files, passwords or personal data anywhere. The report stays on your PC.
-- The only things it asks the internet: which of your programs have updates (winget), one
-  "ping" to your own router, and a few lookups of website names (www.microsoft.com, and in the
+- The only things it asks the internet: which of your programs have updates (winget), 5 small
+  "pings" to your own router, and a few lookups of website names (www.microsoft.com, and in the
   full scan a speed comparison of DNS servers: yours, Cloudflare, Google and Quad9).
 - The 10-second performance snapshot and the list of network neighbours only read what the PC already knows.
   Nothing on your network is scanned. If the NVIDIA driver installed nvidia-smi, it is asked for temperature and load.
@@ -53,6 +53,11 @@ READING THE REPORT
 
 NEW IN 2.5.2
 - The new look (first called Fable52) is now named "Veagle OS" and is the look the report opens with. The earlier dark look is now called "Classic". You can change the look at any time in the "Theme" box at the top. From 2.5.3 the choice lasts only while the report is open: the next time, the report opens with Veagle OS again.
+
+NEW IN 3.2.2
+- New file VEAGLE-PC-Check-NoNetwork.bat: the same scan with no internet traffic at all (no winget, no DNS lookups). Only the 5 pings to your own router remain. The report says which checks were skipped.
+- The temperature box now says clearly that it shows a motherboard thermal zone, not the processor.
+- After the scan the data file is read back to check that it is valid, and the nesting depth was raised so deep data is never turned into text.
 
 NEW IN 3.2.1
 - New box on the Insights page: "Care plan: what to do and when". Weekly, monthly and yearly habits for a healthy PC, with numbers from your own scan (free space, programs waiting for updates), and a short list of when to ask a technician.

@@ -99,6 +99,16 @@ summary::after { content:"+"; float:right; color:var(--redtext); }
 details[open] summary::after { content:"\2212"; }
 details > div { padding:0 18px 16px; color:#d4d4d8; }
 
+
+/* quiet version history */
+.hist-sec { padding:32px 0 0; }
+details.hist { border:0; background:none; margin:0 0 10px; }
+details.hist summary { font:400 12px var(--mono); color:var(--dim); padding:6px 0; display:inline-block; }
+details.hist summary::after { content:" +"; float:none; color:var(--dim); } details.hist[open] summary::after { content:" \2212"; }
+details.hist > div { padding:4px 0 0; }
+ul.hl { margin:0; padding:0; list-style:none; font-size:11.5px; line-height:1.5; color:var(--dim); max-height:320px; overflow:auto; border-left:1px solid var(--line2); padding-left:14px; }
+ul.hl li { margin:3px 0; } ul.hl b { color:var(--muted); font-weight:500; margin-right:6px; }
+.credit { font-size:12px; color:var(--dim); }
 footer.foot { margin-top:60px; border-top:1px solid var(--line); padding:26px 0 40px; font-size:12.5px; color:var(--dim); }
 footer.foot .wrap { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; }
 .app-foot a { color:inherit; }
@@ -161,7 +171,7 @@ footer.foot .wrap { display:flex; flex-wrap:wrap; justify-content:space-between;
         </div>
         <ul class="facts"><li>{{L:f1}}</li><li>{{L:f2}}</li><li>{{L:f3}}</li><li>{{L:f4}}</li></ul>
       </div>
-      <div class="shot">{{IMG:dash}}</div>
+      <div class="shot">{{IMG:hero}}</div>
     </div>
   </div>
 
@@ -176,13 +186,16 @@ footer.foot .wrap { display:flex; flex-wrap:wrap; justify-content:space-between;
 
   <section id="features">
     <h2>{{L:feat_h}}</h2>
-    <div class="feat"><div class="txt"><h3>{{L:ft1_h}}</h3><p>{{L:ft1_p}}</p></div><div class="shot">{{IMG:dash2}}</div></div>
-    <div class="feat flip"><div class="shot">{{IMG:findings}}</div><div class="txt"><h3>{{L:ft2_h}}</h3><p>{{L:ft2_p}}</p></div></div>
+    <div class="feat"><div class="txt"><h3>{{L:ft1_h}}</h3><p>{{L:ft1_p}}</p></div><div class="shot">{{IMG:dash}}</div></div>
+    <div class="feat flip"><div class="shot">{{IMG:assist}}</div><div class="txt"><h3>{{L:ft8_h}}</h3><p>{{L:ft8_p}}</p></div></div>
+    <div class="feat"><div class="txt"><h3>{{L:ft2_h}}</h3><p>{{L:ft2_p}}</p></div><div class="shot">{{IMG:findings}}</div></div>
+    <div class="feat flip"><div class="shot">{{IMG:insights}}</div><div class="txt"><h3>{{L:ft9_h}}</h3><p>{{L:ft9_p}}</p></div></div>
+    <div class="feat"><div class="txt"><h3>{{L:ft10_h}}</h3><p>{{L:ft10_p}}</p></div><div class="shot">{{IMG:privacy}}</div></div>
+    <div class="feat flip"><div class="shot">{{IMG:timeline}}</div><div class="txt"><h3>{{L:ft7_h}}</h3><p>{{L:ft7_p}}</p></div></div>
     <div class="feat"><div class="txt"><h3>{{L:ft3_h}}</h3><p>{{L:ft3_p}}</p></div><div class="shot">{{IMG:ai}}</div></div>
     <div class="feat flip"><div class="shot">{{IMG:compare}}</div><div class="txt"><h3>{{L:ft4_h}}</h3><p>{{L:ft4_p}}</p></div></div>
     <div class="feat"><div class="txt"><h3>{{L:ft5_h}}</h3><p>{{L:ft5_p}}</p></div><div class="shot">{{IMG:win11}}</div></div>
-    <div class="feat flip"><div class="shot">{{IMG:timeline}}</div><div class="txt"><h3>{{L:ft7_h}}</h3><p>{{L:ft7_p}}</p></div></div>
-    <div class="feat"><div class="shot">{{IMG:tools}}</div><div class="txt"><h3>{{L:ft6_h}}</h3><p>{{L:ft6_p}}</p></div></div>
+    <div class="feat flip"><div class="shot">{{IMG:tools}}</div><div class="txt"><h3>{{L:ft6_h}}</h3><p>{{L:ft6_p}}</p></div></div>
     <p>{{L:extras}}</p>
   </section>
 
@@ -230,12 +243,12 @@ footer.foot .wrap { display:flex; flex-wrap:wrap; justify-content:space-between;
     <details><summary>{{L:q7}}</summary><div>{{L:a7}}</div></details>
     <details><summary>{{L:q8}}</summary><div>{{L:a8}}</div></details>
     <details><summary>{{L:q9}}</summary><div>{{L:a9}}</div></details>
+    <details><summary>{{L:q10}}</summary><div>{{L:a10}}</div></details>
   </section>
 
-  <section id="changelog">
-    <h2>{{L:log_h}}</h2>
-    {{LOGD}}
-    <p style="color:var(--muted)">{{L:credit}}</p>
+  <section id="changelog" class="hist-sec">
+    <details class="hist"><summary>{{L:log_h}}</summary><div><div class="en">{{LOGEN}}</div><div class="el">{{LOGEL}}</div></div></details>
+    <p class="credit">{{L:credit}}</p>
   </section>
 
 </div>

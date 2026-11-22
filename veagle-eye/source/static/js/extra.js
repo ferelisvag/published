@@ -2,11 +2,11 @@
 /* Veagle Eye: οι νέες οθόνες (Ασφάλεια, Ζωντανά, Το δίκτυό μου, Υλικό, Εργαλεία, Οδηγός).
    Διαβάζει ΜΟΝΟ από τον τοπικό πράκτορα (127.0.0.1). Ό,τι είναι προαιρετικό τρέχει μόνο όταν το πατήσεις εσύ. */
 (function () {
-  const VERSION = "21.11 · 23:13";
+  const VERSION = "2211 2205";
   const REPO = "https://github.com/ferelisvag/published/tree/main/veagle-eye";
   const SITE = "https://ferelis.gr";
   const PCCHECK = "https://ferelisvag.github.io/published/veagle-pc-check/";
-  const VIEWS = ["sec", "live", "lan", "hw", "tools", "guide"];
+  const VIEWS = ["home", "sec", "live", "lan", "hw", "tools", "guide"];
   const $ = (id) => document.getElementById(id);
   const V = () => window.VE;
   const esc = (s) => V().esc(s);
@@ -18,7 +18,7 @@
     ex: {}, hist: [], names: false, rdns: {}, rdnsBusy: false, scan: null, scanBusy: false, ping: null, pingBusy: false,
     soundConn: false, soundCpu: false, openPath: {}, snapA: null, snapB: null, lastEv: 0, cpuHi: 0, lastBeep: 0, lastCpuBeep: 0,
     ticks: 0, pip: null, quiz: null, dictQ: "", cache: {}, ac: null, tickHist: 0, tickEx: 0,
-    prefs: { big: false, simple: false, hide: [] }
+    prefs: { big: false, simple: false, hide: [], adv: false }
   };
   try { const p = JSON.parse(localStorage.getItem("veagleeye.prefs") || "{}"); if (p && typeof p === "object") S.prefs = Object.assign(S.prefs, p); } catch (_) {}
   function savePrefs() { try { localStorage.setItem("veagleeye.prefs", JSON.stringify(S.prefs)); } catch (_) {} }
@@ -80,7 +80,6 @@
     $("x-tools").innerHTML = "<div class=\"xgrid\">" +
       "<div class=\"card xc wide\"><h3><span>" + esc(x("tl.look")) + "</span></h3><p class=\"muted\">" + esc(x("tl.theme.h")) + "</p><div class=\"sws\">" + sw + "</div>" +
       "<label class=\"chk\"><input type=\"checkbox\" id=\"cb-big\"" + (S.prefs.big ? " checked" : "") + "><span><b>" + esc(x("tl.big")) + "</b> · " + esc(x("tl.big.h")) + "</span></label>" +
-      "<label class=\"chk\"><input type=\"checkbox\" id=\"cb-simple\"" + (S.prefs.simple ? " checked" : "") + "><span><b>" + esc(x("tl.simple")) + "</b> · " + esc(x("tl.simple.h")) + "</span></label>" +
       "<h4>" + esc(x("tl.cards")) + "</h4><div class=\"chks\">" + cards + "</div><div class=\"tools\"><button class=\"chip\" type=\"button\" id=\"b-reset\">" + esc(x("tl.reset")) + "</button></div></div>" +
       "<div class=\"card xc\"><h3><span>" + esc(x("tl.kiosk")) + "</span></h3><p class=\"muted\">" + esc(x("tl.kiosk.h")) + "</p><button class=\"chip on\" type=\"button\" id=\"b-kiosk\">" + esc(x("tl.kiosk.b")) + "</button>" +
       "<h3 style=\"margin-top:1rem\"><span>" + esc(x("tl.pip")) + "</span></h3><p class=\"muted\">" + esc(x("tl.pip.h")) + "</p><button class=\"chip on\" type=\"button\" id=\"b-pip\">" + esc(x("tl.pip.b")) + "</button> <span class=\"muted\" id=\"pip-msg\"></span></div>" +
@@ -118,21 +117,74 @@
   }
 
   /* ---------- περιεχόμενο καρτών ---------- */
-  function renderWhy(d) {
-    const msgs = [], ex = S.ex, pr = d.procs.slice();
-    const topCpu = pr.sort((a, b) => b.cpu - a.cpu)[0], topMem = d.procs.slice().sort((a, b) => b.mem - a.mem)[0];
+  function whyList(d) {
+    const out = [], ex = S.ex, topCpu = d.procs.slice().sort((a, b) => b.cpu - a.cpu)[0], topMem = d.procs.slice().sort((a, b) => b.mem - a.mem)[0];
     const disk = d.disks.find((k) => k.percent >= 90);
     const maxT = (ex.temps || []).reduce((m, k) => Math.max(m, k.c || 0), 0) || (ex.gpu || []).reduce((m, k) => Math.max(m, k.temp || 0), 0);
     const io = (d.disk_io.read || 0) + (d.disk_io.write || 0), net = (d.net.down || 0) + (d.net.up || 0);
-    if (d.cpu.total >= 85) msgs.push(x("why.cpu", { x: Math.round(d.cpu.total), p: topCpu ? topCpu.name : "?" }));
-    if (d.mem.percent >= 85) msgs.push(x("why.mem", { x: Math.round(d.mem.percent), p: topMem ? topMem.name : "?" }));
-    if (disk) msgs.push(x("why.full", { x: disk.mount }));
-    if (io > 60 * 1048576) { const t0 = (d.io_top || [])[0]; msgs.push(x("why.disk", { x: V().fmtRate(io).replace("/s", ""), p: t0 ? t0.name : "?" })); }
-    if (maxT >= 85) msgs.push(x("why.temp", { x: Math.round(maxT) }));
-    if (net > 8 * 1048576) msgs.push(x("why.net", { x: V().fmtRate(net).replace("/s", "") }));
-    if ((ex.startup || []).length > 12) msgs.push(x("why.start", { n: ex.startup.length }));
+    if (d.cpu.total >= 85) out.push(["why.cpu", { x: Math.round(d.cpu.total), p: topCpu ? topCpu.name : "?" }, "procs", "warn"]);
+    if (d.mem.percent >= 85) out.push(["why.mem", { x: Math.round(d.mem.percent), p: topMem ? topMem.name : "?" }, "procs", "warn"]);
+    if (disk) out.push(["why.full", { x: disk.mount }, "hw", "warn"]);
+    if (io > 60 * 1048576) { const t0 = (d.io_top || [])[0]; out.push(["why.disk", { x: V().fmtRate(io).replace("/s", ""), p: t0 ? t0.name : "?" }, "live", "warn"]); }
+    if (maxT >= 85) out.push(["why.temp", { x: Math.round(maxT) }, "hw", "warn"]);
+    if (net > 8 * 1048576) out.push(["why.net", { x: V().fmtRate(net).replace("/s", "") }, "net", "warn"]);
+    if ((ex.startup || []).length > 12) out.push(["why.start", { n: ex.startup.length }, "hw", "warn"]);
+    return out;
+  }
+  function renderWhy(d) {
+    const msgs = whyList(d).map((m) => x(m[0], m[1]));
     const html = msgs.length ? msgs.slice(0, 3).map((m) => "<div class=\"say warn\">" + esc(m) + "</div>").join("") : "<div class=\"say ok\">" + esc(x("why.ok")) + "</div>";
     setHTML("b-why1", html); setHTML("b-why2", html);
+  }
+  function riskList(d) {
+    const seen = new Map();
+    d.conns.filter((c) => c.scope === "internet").forEach((c) => {
+      let p = 0; if (c.susp) p += 3; if (c.sig === "unsigned") p += 2; else if (c.sig === "invalid") p += 3; if (!COMMON_OK.has(c.rport)) p += 1;
+      const k = c.name + "|" + c.raddr + "|" + c.rport; if (!seen.has(k)) seen.set(k, { c, p });
+    });
+    return [...seen.values()];
+  }
+  /* ---------- Σύνοψη (απλή λειτουργία): όλα στο πιάτο ---------- */
+  function findings(d) {
+    const f = [], ex = S.ex, ls = d.listen || [];
+    whyList(d).forEach((m) => f.push({ lvl: m[3], text: x(m[0], m[1]), view: m[2] }));
+    const rd = d.conns.filter((c) => c.lport === 3389 && c.status === "ESTABLISHED").map((c) => c.raddr);
+    if (rd.length) f.unshift({ lvl: "bad", text: x("sec.rdp.on", { x: rd.join(", ") }), view: "sec" });
+    const rk = riskList(d), red = rk.filter((r) => r.p >= 3), yel = rk.filter((r) => r.p >= 1 && r.p < 3);
+    if (red.length) f.unshift({ lvl: "bad", text: x("home.f.red", { n: red.length, p: [...new Set(red.map((r) => r.c.name))].slice(0, 3).join(", ") }), view: "sec" });
+    else if (yel.length) f.push({ lvl: "info", text: x("home.f.yel", { n: yel.length }), view: "sec" });
+    const exp = ls.filter((k) => k.exposed);
+    if (exp.length) f.push({ lvl: "info", text: x("home.f.exp", { n: exp.length }), view: "sec" });
+    if ((ex.firewall || []).some((q) => !q.on)) f.push({ lvl: "warn", text: x("sec.fw.warn"), view: "sec" });
+    (ex.disks_health || []).forEach((k) => { if (!/healthy/i.test(k.health || "")) f.unshift({ lvl: "bad", text: x("home.f.disk", { n: k.name }), view: "hw" }); });
+    const w = ex.wifi; if (w && w.signal != null && w.signal < 40) f.push({ lvl: "warn", text: x("lan.weak"), view: "lan" });
+    if (w && /open|wep/i.test(w.auth || "")) f.push({ lvl: "warn", text: x("lan.unsafe"), view: "lan" });
+    const ord = { bad: 0, warn: 1, info: 2 }; f.sort((a, b) => ord[a.lvl] - ord[b.lvl]);
+    return f;
+  }
+  function renderHome(d) {
+    const f = findings(d), bad = f.filter((q) => q.lvl === "bad").length, warn = f.filter((q) => q.lvl === "warn").length;
+    const st = bad ? "bad" : warn ? "warn" : "ok";
+    const ex = S.ex, ls = d.listen || [], rk = riskList(d);
+    const checks = [];
+    if ((ex.firewall || []).length && (ex.firewall || []).every((q) => q.on)) checks.push(x("home.c.fw"));
+    if (!ls.some((k) => k.exposed)) checks.push(x("home.c.ports"));
+    if (!rk.some((r) => r.p >= 1)) checks.push(x("home.c.conn"));
+    if (!d.disks.some((k) => k.percent >= 90)) checks.push(x("home.c.disk"));
+    if (d.cpu.total < 85 && d.mem.percent < 85) checks.push(x("home.c.perf"));
+    if ((ex.disks_health || []).length && (ex.disks_health || []).every((k) => /healthy/i.test(k.health || ""))) checks.push(x("home.c.smart"));
+    const head = "<div class=\"hm-status " + st + "\"><span class=\"hm-led\"></span><div><b>" + esc(x("home.s." + st)) + "</b><p>" + esc(x("home.sp." + st, { n: bad + warn })) + "</p></div></div>";
+    const attn = f.length ? f.slice(0, 7).map((q) => "<div class=\"hm-item " + q.lvl + "\"><i></i><p>" + esc(q.text) + "</p><button class=\"chip\" type=\"button\" data-go=\"" + q.view + "\">" + esc(x("home.more")) + "</button></div>").join("") : "<p class=\"muted\">" + esc(x("home.none")) + "</p>";
+    const okl = checks.length ? "<ul class=\"hm-ok\">" + checks.map((c) => "<li>" + esc(c) + "</li>").join("") + "</ul>" : "";
+    const tiles = [[x("m.cpu"), Math.round(d.cpu.total) + "%", d.cpu.total >= 85], [x("m.mem"), Math.round(d.mem.percent) + "%", d.mem.percent >= 85], [x("m.dl"), V().fmtRate(d.net.down), false], [x("m.ul"), V().fmtRate(d.net.up), false]]
+      .map((q) => "<div class=\"hm-tile" + (q[2] ? " hot" : "") + "\"><small>" + esc(q[0]) + "</small><b>" + esc(q[1]) + "</b></div>").join("");
+    const top = (d.top3 || []).filter((p) => p.pid).slice(0, 3);
+    const talk = top.length ? top.map((p) => "<div class=\"top3\"><b>•</b><span>" + esc(p.name) + "</span><em>" + x("live.conns", { n: p.count }) + "</em></div>").join("") : "<p class=\"muted\">" + esc(x("none")) + "</p>";
+    setHTML("x-home", "<div class=\"hm\"><div class=\"hm-main\">" + head + "<div class=\"card xc\"><h3><span>" + esc(x("home.attn")) + "</span></h3>" + attn + "</div>" +
+      (okl ? "<div class=\"card xc\"><h3><span>" + esc(x("home.checked")) + "</span></h3>" + okl + "</div>" : "") + "</div>" +
+      "<div class=\"hm-side\"><div class=\"card xc\"><h3><span>" + esc(x("home.now")) + "</span></h3><div class=\"hm-tiles\">" + tiles + "</div></div>" +
+      "<div class=\"card xc\"><h3><span>" + esc(x("home.talk")) + "</span></h3>" + talk + "</div>" +
+      "<div class=\"card xc hm-adv\"><p class=\"muted\">" + esc(x("home.adv.h")) + "</p><button class=\"chip on\" type=\"button\" data-mode=\"adv\">" + esc(x("mode.adv")) + "</button></div></div></div>");
   }
   function renderSec(d) {
     // θύρες (#1, #2, #11, #22, #23)
@@ -285,7 +337,7 @@
   /* ---------- κύκλος ζωής ---------- */
   function renderView(v) {
     const d = V().d; if (!d) return;
-    if (v === "sec") renderSec(d); else if (v === "live") renderLive(d); else if (v === "lan") renderLan(d); else if (v === "hw") renderHw(d);
+    if (v === "home") renderHome(d); else if (v === "sec") renderSec(d); else if (v === "live") renderLive(d); else if (v === "lan") renderLan(d); else if (v === "hw") renderHw(d);
   }
   const API = (p) => fetch(p, { cache: "no-store" }).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
   function pullExtra() { API("api/extra").then((j) => { const first = !S._init; S._init = true; S.ex = j; if (first || !!j.demo !== S._demo) { S._demo = !!j.demo; buildViews(); } if (VIEWS.includes(V().view)) renderView(V().view); }).catch(() => {}); }
@@ -370,8 +422,15 @@
     window.addEventListener("afterprint", done); setTimeout(() => window.print(), 50);
   }
   /* ---------- εμφάνιση / προτιμήσεις ---------- */
+  function setMode(adv) {
+    S.prefs.adv = !!adv; savePrefs(); applyPrefs();
+    const v = V().view, simpleOk = ["home", "procs", "net", "tools", "guide", "about", "sec", "live", "lan", "hw"];
+    if (!adv && !simpleOk.includes(v)) V().go("home"); else if (adv && v === "home") V().go("dash");
+    if (VIEWS.includes(V().view) && V().d) renderView(V().view);
+  }
   function applyPrefs() {
-    document.documentElement.classList.toggle("xl", !!S.prefs.big); document.body.classList.toggle("simple", !!S.prefs.simple);
+    document.documentElement.classList.toggle("xl", !!S.prefs.big); document.body.classList.toggle("simple", !S.prefs.adv);
+    document.querySelectorAll("#modesw button").forEach((b) => b.classList.toggle("on", (b.dataset.mode === "adv") === !!S.prefs.adv));
     const dash = document.querySelector("#v-dash .dash"); if (dash) dash.dataset.hide = S.prefs.hide.join(" ");
   }
   /* ---------- οδηγός πρώτης χρήσης (#51) ---------- */
@@ -391,7 +450,7 @@
   /* ---------- σύνδεση γεγονότων ---------- */
   function wire() {
     document.addEventListener("click", (e) => {
-      const tg = e.target.closest("[data-help],[data-path],[data-scan],[data-ping],[data-ab],[data-q],.sw,[data-tour],[data-closepop],[data-dh],button[id]"); if (!tg) { const p = $("helppop"); if (p && !e.target.closest("#helppop")) p.remove(); return; }
+      const tg = e.target.closest("[data-help],[data-path],[data-scan],[data-ping],[data-ab],[data-q],.sw,[data-tour],[data-closepop],[data-dh],[data-mode],[data-go],button[id]"); if (!tg) { const p = $("helppop"); if (p && !e.target.closest("#helppop")) p.remove(); return; }
       const ds = tg.dataset;
       if (ds.help) { const hb = tg.closest(".card").querySelector(".helpbox"); if (hb) hb.classList.toggle("hide"); }
       else if (ds.dh) helpPop(ds.dh, tg);
@@ -401,6 +460,8 @@
       else if (ds.ping) { if (S.pingBusy) return; S.pingBusy = true; renderView("lan"); API("api/ping").then((j) => { S.ping = j; }).catch(() => { S.ping = { error: "x" }; }).finally(() => { S.pingBusy = false; renderView("lan"); }); }
       else if (ds.ab) { if (ds.ab === "a") S.snapA = snap(); else if (ds.ab === "b") S.snapB = snap(); else { S.snapA = S.snapB = null; } renderAB(); }
       else if (ds.q) { const q = S.quiz, it = QUIZ[q.i]; if (ds.q === "next") { q.i = Math.floor(Math.random() * QUIZ.length); q.done = false; } else { q.n++; const ok = (ds.q === "ok") === it[1]; if (ok) q.a++; q.done = true; q.msg = ok ? "ok" : "bad"; } quizRender(); }
+      else if (ds.mode) { setMode(ds.mode === "adv"); }
+      else if (ds.go) { V().go(ds.go); }
       else if (ds.theme) { V().setTheme(ds.theme, true); markTheme(); }
       else if (ds.tour) tour(+ds.tour);
       else if (tg.id === "b-tour") tour(0);
@@ -408,13 +469,12 @@
       else if (tg.id === "b-pip") pipOpen();
       else if (tg.id === "b-beep") beep(660, 120);
       else if (tg.id === "b-csv") exportCSV(); else if (tg.id === "b-png") exportPNG(); else if (tg.id === "b-print") printReport();
-      else if (tg.id === "b-reset") { S.prefs = { big: false, simple: false, hide: [] }; savePrefs(); V().setTheme("classic", true); applyPrefs(); buildTools(); }
+      else if (tg.id === "b-reset") { S.prefs = { big: false, simple: false, hide: [], adv: false }; savePrefs(); V().setTheme("classic", true); applyPrefs(); buildTools(); }
     });
     document.addEventListener("change", (e) => {
       const el = e.target, id = el.id;
       if (id === "cb-names") { S.names = el.checked; if (!S.names) S.rdns = {}; renderView("sec"); }
       else if (id === "cb-big") { S.prefs.big = el.checked; savePrefs(); applyPrefs(); }
-      else if (id === "cb-simple") { S.prefs.simple = el.checked; savePrefs(); applyPrefs(); }
       else if (id === "cb-sc") { S.soundConn = el.checked; if (el.checked) beep(660, 90); }
       else if (id === "cb-sp") { S.soundCpu = el.checked; if (el.checked) beep(330, 150); }
       else if (el.dataset && el.dataset.card) { const k = el.dataset.card, i = S.prefs.hide.indexOf(k); if (!el.checked && i < 0) S.prefs.hide.push(k); if (el.checked && i >= 0) S.prefs.hide.splice(i, 1); savePrefs(); applyPrefs(); }

@@ -38,7 +38,7 @@ from urllib.parse import parse_qs, urlparse
 import psutil
 
 APP_NAME = "Veagle Eye"
-APP_VERSION = "21.11 · 23:13"
+APP_VERSION = "2211 2205"
 HOST = "127.0.0.1"          # ΜΟΝΟ αυτός ο υπολογιστής. Κανείς άλλος στο δίκτυο δεν το βλέπει.
 DEFAULT_PORT = 8765
 SAMPLE_SECONDS = 1.0         # κάθε πότε διαβάζονται τα στοιχεία

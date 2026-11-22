@@ -2,6 +2,15 @@
 /* Κείμενα για τις νέες οθόνες (Ασφάλεια, Ζωντανά, Δίκτυό μου, Υλικό, Εργαλεία, Οδηγός). Ελληνικά + English. */
 (function () {
   const EL = {
+    "nav.home": "Σύνοψη", "mode.simple": "Απλή", "mode.adv": "Προχωρημένη",
+    "home.s.ok": "Όλα καλά", "home.s.warn": "Υπάρχουν μερικά πράγματα να δεις", "home.s.bad": "Χρειάζεται προσοχή",
+    "home.sp.ok": "Δεν βρήκα κάτι που να ανησυχεί. Ο υπολογιστής σου φαίνεται υγιής αυτή τη στιγμή.", "home.sp.warn": "{n} πράγματα αξίζει να τα δεις. Τίποτα επείγον.", "home.sp.bad": "{n} πράγματα θέλουν προσοχή. Δες τα παρακάτω.",
+    "home.attn": "Τι να προσέξεις", "home.none": "Τίποτα προς το παρόν.", "home.more": "Δείξε μου", "home.checked": "Τι ελέγχθηκε και είναι εντάξει",
+    "home.now": "Τώρα", "home.talk": "Ποιοι μιλούν με το internet", "home.adv.h": "Θέλεις περισσότερες λεπτομέρειες και όλες τις οθόνες;",
+    "home.f.red": "{n} σύνδεση/συνδέσεις στο internet φαίνονται ύποπτες (π.χ. {p}). Δες ποιες.", "home.f.yel": "{n} συνδέσεις είναι ασυνήθιστες, αλλά όχι απαραίτητα επικίνδυνες.",
+    "home.f.exp": "{n} πόρτες είναι ανοιχτές προς το δίκτυο. Δες αν τις ξέρεις.", "home.f.disk": "Ο δίσκος «{n}» δεν δηλώνει καλή υγεία. Κάνε αντίγραφα ασφαλείας.",
+    "home.c.fw": "Το τείχος προστασίας είναι ανοιχτό", "home.c.ports": "Καμία πόρτα δεν είναι ανοιχτή προς το δίκτυο", "home.c.conn": "Καμία ύποπτη σύνδεση στο internet",
+    "home.c.disk": "Οι δίσκοι έχουν χώρο", "home.c.perf": "Επεξεργαστής και μνήμη δεν πιέζονται", "home.c.smart": "Οι δίσκοι δηλώνουν καλή υγεία",
     "nav.sec": "Ασφάλεια", "nav.live": "Ζωντανά", "nav.lan": "Το δίκτυό μου", "nav.hw": "Υλικό", "nav.tools": "Εργαλεία", "nav.guide": "Οδηγός",
     "help": "Τι σημαίνει αυτό;", "close": "Κλείσιμο", "none": "Δεν υπάρχουν δεδομένα.", "na": "Δεν διαβάστηκε σε αυτόν τον υπολογιστή (ή δεν υποστηρίζεται).",
     "demo.note": "ΔΟΚΙΜΑΣΤΙΚΑ ΔΕΔΟΜΕΝΑ: αυτή είναι δοκιμαστική εκτέλεση, τα στοιχεία υλικού είναι φανταστικά.",
@@ -113,6 +122,15 @@
     "th.classic": "Classic", "th.hud": "HUD (Jarvis)", "th.matrix": "Matrix", "th.amber": "Amber", "th.synth": "Synthwave", "th.daylight": "Daylight (ανοιχτό)", "th.ice": "Ice (πάγος)", "th.forest": "Forest (δάσος)"
   };
   const EN = {
+    "nav.home": "Overview", "mode.simple": "Simple", "mode.adv": "Advanced",
+    "home.s.ok": "All good", "home.s.warn": "A few things to look at", "home.s.bad": "Needs attention",
+    "home.sp.ok": "I found nothing worrying. Your computer looks healthy right now.", "home.sp.warn": "{n} things are worth a look. Nothing urgent.", "home.sp.bad": "{n} things need attention. See below.",
+    "home.attn": "What to watch", "home.none": "Nothing for now.", "home.more": "Show me", "home.checked": "Checked and fine",
+    "home.now": "Right now", "home.talk": "Who is talking to the internet", "home.adv.h": "Want more detail and all the screens?",
+    "home.f.red": "{n} internet connection(s) look suspicious (e.g. {p}). See which ones.", "home.f.yel": "{n} connections are unusual, but not necessarily dangerous.",
+    "home.f.exp": "{n} ports are open to the network. Check that you know them.", "home.f.disk": "Disk «{n}» does not report good health. Make a backup.",
+    "home.c.fw": "Firewall is on", "home.c.ports": "No port is open to the network", "home.c.conn": "No suspicious internet connection",
+    "home.c.disk": "Disks have free space", "home.c.perf": "Processor and memory are not under pressure", "home.c.smart": "Disks report good health",
     "nav.sec": "Security", "nav.live": "Live", "nav.lan": "My network", "nav.hw": "Hardware", "nav.tools": "Tools", "nav.guide": "Guide",
     "help": "What does this mean?", "close": "Close", "none": "No data.", "na": "Not readable on this computer (or not supported).",
     "demo.note": "SAMPLE DATA: this is a test run, the hardware details are made up.",

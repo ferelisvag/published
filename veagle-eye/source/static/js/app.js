@@ -8,7 +8,7 @@
   const HIST = 120;
   const MODE_VIEWS = ["world", "cyber", "orbit", "mindmap"];
   const ORDER = ["dash", "world", "cyber", "orbit", "wall", "mindmap"];
-  const PAGES = ["dash", "procs", "net", "sys", "about", "sec", "live", "lan", "hw", "tools", "guide"];
+  const PAGES = ["home", "dash", "procs", "net", "sys", "about", "sec", "live", "lan", "hw", "tools", "guide"];
 
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
   function fmtBytes(n) {
@@ -283,8 +283,10 @@
     const b = document.querySelector("#modes button[data-view=\"" + view + "\"]");
     $("mode-name").textContent = b ? b.textContent : view; $("mode-info").textContent = t("m." + view);
   }
+  function isAdv() { try { return !!JSON.parse(localStorage.getItem("veagleeye.prefs") || "{}").adv; } catch (_) { return false; } }
+  function startView() { return isAdv() ? "dash" : "home"; }
   function go(v, noHash) {
-    if (!ORDER.includes(v) && !PAGES.includes(v)) v = "dash";
+    if (!ORDER.includes(v) && !PAGES.includes(v)) v = startView();
     view = v;
     document.querySelectorAll(".view").forEach((s) => s.classList.add("hide"));
     $(MODE_VIEWS.includes(v) ? "v-mode" : "v-" + v).classList.remove("hide");
@@ -366,8 +368,8 @@
   setLang(LANG); applyLang(LANG);
   setLiveState("conn");
   boot();
-  go(location.hash.slice(1) || "dash", true);
   if (window.Extra) window.Extra.init();
+  go(location.hash.slice(1) || startView(), true);
   connect();
   requestAnimationFrame(modeFrame);
   window.addEventListener("resize", () => { if (d) render(); });

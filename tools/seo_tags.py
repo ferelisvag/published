@@ -17,6 +17,7 @@ APPS={
  'veaglefinancecalc':('FinanceApplication','Any (web browser)','el_GR','en_US',['el']),
  'veagle-eye':('UtilitiesApplication','Windows 10, Windows 11','en_US','el_GR',['en','el']),
  'veagle-argos':('MultimediaApplication','Windows 10, Windows 11','en_US','el_GR',['en','el']),
+ 'veagle-ping-monitor':('UtilitiesApplication','Windows 10, Windows 11','en_US','el_GR',['en','el']),
  'veagleos':('UtilitiesApplication','Any (web browser)','el_GR','en_US',['el','en']),
  'veagleontheroad':('TravelApplication','Any (web browser)','el_GR','en_US',['el']),
  'veaglesurvivalbook':('LifestyleApplication','Any (web browser)','el_GR','en_US',['el']),

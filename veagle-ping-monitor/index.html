@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VEAGLE Ping Monitor · Up to six pings on one screen</title>
+<meta name="description" content="Free portable Windows ping monitor: 1, 2, 4 or 6 targets on one screen with live graphs and statistics. Local network and internet, no install. Δωρεάν, χωρίς εγκατάσταση.">
+<meta name="theme-color" content="#050708">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="../veagleos/fonts/fonts.css">
+<style>
+:root{--bg:#050708;--panel:#0a0d10;--line:#191d22;--line2:#262c34;--text:#e7ecf3;--dim:#8a95a6;--red:#ff4d5e;--ok:#2ee6a6;--disp:'Space Grotesk',system-ui,sans-serif;--body:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 var(--body)}
+a{color:var(--red)}
+.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+header.top{display:flex;align-items:center;gap:14px;padding:14px 0}
+header.top .brand{display:flex;align-items:center;gap:10px;font:700 14px var(--disp);letter-spacing:.18em}
+header.top .brand img{width:22px;height:23px}
+header.top .brand b{color:var(--red)}
+header.top .brand small{font:500 9px var(--mono);letter-spacing:.2em;color:var(--dim);margin-left:2px}
+.sp{flex:1}
+.langbtn{font:600 12px var(--mono);background:none;color:var(--text);border:1px solid var(--line2);border-radius:999px;padding:5px 12px;cursor:pointer}
+.langbtn:hover{border-color:var(--red)}
+.hero{padding:40px 0 28px;text-align:center}
+.hero .eagle{width:74px;height:auto;margin-bottom:6px;filter:drop-shadow(0 8px 30px rgba(255,30,56,.35))}
+.hero h1{font:700 clamp(36px,7.5vw,68px)/1.02 var(--disp);letter-spacing:.04em;margin:0}
+.hero h1 b{color:var(--red)}
+.hero .tag{font:500 12px var(--mono);letter-spacing:.42em;color:var(--dim);margin:8px 0 18px}
+.hero p.lead{max-width:660px;margin:0 auto 26px;color:var(--dim);font-size:18px}
+.btn{display:inline-block;background:var(--red);color:#fff;text-decoration:none;font:600 16px var(--disp);padding:14px 26px;border-radius:10px;margin:4px}
+.btn.ghost{background:none;border:1px solid var(--line2);color:var(--text)}
+.btn:hover{filter:brightness(1.12)}
+.meta{color:var(--dim);font:12px var(--mono);margin-top:12px}
+.beta{display:inline-flex;align-items:center;gap:6px;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#ffc65c;border:1px solid #4a3a14;border-radius:999px;padding:3px 10px;margin-bottom:16px}
+.beta.live{color:#3dff9a;border-color:#14573f}.beta.live i{background:#3dff9a;box-shadow:0 0 8px #3dff9a}
+.beta i{width:7px;height:7px;border-radius:50%;background:#ffc65c;box-shadow:0 0 8px #ffc65c}
+.shot{border:1px solid var(--line2);border-radius:12px;overflow:hidden;box-shadow:0 30px 80px -40px var(--red);background:#000}
+.shot img{display:block;width:100%;height:auto}
+.cap{color:var(--dim);font-size:13.5px;margin:8px 2px 0}
+section{padding:34px 0;border-top:1px solid var(--line)}
+h2{font:700 24px var(--disp);letter-spacing:.04em;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h3{font:600 16px var(--disp);margin:0 0 6px}.card p{margin:0;color:var(--dim);font-size:14.5px}
+.card .ic{font-size:20px;line-height:1;margin-bottom:8px;display:block}
+.priv{border-color:#14573f;background:rgba(46,230,166,.06)}
+.priv p{color:var(--text)}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:18px;align-items:start}
+ol.steps{padding-left:22px}ol.steps li{margin:8px 0}
+code,.mono{font-family:var(--mono);font-size:.9em;background:#10151a;border:1px solid var(--line);border-radius:5px;padding:1px 6px;word-break:break-all}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0}summary{cursor:pointer;font-weight:600}
+details p,details li{color:var(--dim)}
+table.keys{border-collapse:collapse;width:100%;font-size:14.5px}
+table.keys td{border-top:1px solid var(--line);padding:7px 8px;vertical-align:top;color:var(--dim)}
+table.keys td:first-child{white-space:nowrap;color:var(--text);font-family:var(--mono);font-size:13px;width:1%}
+.myth{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
+.myth .eye{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#2a0a10 0,#0a0d10 70%);border:1px solid var(--line2);font:700 30px var(--disp);color:var(--red)}
+.terms p{color:var(--dim);font-size:14.5px;margin:0 0 10px}
+.sha{font:12px var(--mono);color:var(--dim);word-break:break-all}
+footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--dim);font:12px var(--mono);text-align:center}
+footer a{color:var(--dim)}
+@media (max-width:560px){.myth{grid-template-columns:1fr}.myth .eye{margin:0 auto}header.top .brand small{display:none}}
+html[lang=en] .el,html[lang=el] .en{display:none!important}
+</style>
+<!-- SEO -->
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://ferelisvag.github.io/published/veagle-ping-monitor/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ferelis.gr">
+<meta property="og:title" content="VEAGLE Ping Monitor · Up to six pings on one screen">
+<meta property="og:description" content="Free portable Windows ping monitor: 1, 2, 4 or 6 targets on one screen with live graphs and statistics. Local network and internet, no install. Δωρεάν, χωρίς εγκατάσταση.">
+<meta property="og:url" content="https://ferelisvag.github.io/published/veagle-ping-monitor/">
+<meta property="og:image" content="https://ferelisvag.github.io/published/veagle-ping-monitor/icon-512.png">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="el_GR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="VEAGLE Ping Monitor · Up to six pings on one screen">
+<meta name="twitter:description" content="Free portable Windows ping monitor: 1, 2, 4 or 6 targets on one screen with live graphs and statistics. Local network and internet, no install. Δωρεάν, χωρίς εγκατάσταση.">
+<meta name="twitter:image" content="https://ferelisvag.github.io/published/veagle-ping-monitor/icon-512.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "VEAGLE Ping Monitor · Up to six pings on one screen", "url": "https://ferelisvag.github.io/published/veagle-ping-monitor/", "description": "Free portable Windows ping monitor: 1, 2, 4 or 6 targets on one screen with live graphs and statistics. Local network and internet, no install. Δωρεάν, χωρίς εγκατάσταση.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Windows 10, Windows 11", "inLanguage": ["en", "el"], "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "image": "https://ferelisvag.github.io/published/veagle-ping-monitor/icon-512.png", "publisher": {"@type": "Person", "name": "Vagelis Ferelis", "url": "https://ferelis.gr/"}}</script>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><img src="eagle-white.png" alt=""><span>VEAGLE <b>PING</b></span><small>MONITOR</small></div>
+  <div class="sp"></div>
+  <a href="https://ferelis.gr/ferelisapps.html" class="en">All apps</a><a href="https://ferelis.gr/el/ferelisapps.html" class="el">Όλες οι εφαρμογές</a>
+  <button class="langbtn" id="lang" type="button" aria-label="Switch language">EL</button>
+</header>
+<div class="hero">
+  <img class="eagle" src="eagle-white.png" alt="">
+  <h1>VEAGLE <b>PING</b></h1>
+  <div class="tag">MONITOR</div>
+  <div class="beta"><i></i> Beta</div>
+  <p class="lead en">Is it answering, and how fast? Watch up to six addresses on one screen. A free Windows program in one file: no install, no account.</p><p class="lead el">Απαντάει, και πόσο γρήγορα; Παρακολούθησε έως έξι διευθύνσεις σε μία οθόνη. Δωρεάν πρόγραμμα για Windows σε ένα αρχείο: χωρίς εγκατάσταση, χωρίς λογαριασμό.</p>
+  <a class="btn" href="download/VeaglePingMonitor.exe" download><span class="en">Download for Windows</span><span class="el">Λήψη για Windows</span></a>
+  <a class="btn ghost" href="#how"><span class="en">How to use it</span><span class="el">Πώς το χρησιμοποιώ</span></a>
+  <div class="meta"><span class="en">Windows 10 / 11 (64-bit) · free · one file, 6.3 MB · the program's screens are in Greek</span><span class="el">Windows 10 / 11 (64-bit) · δωρεάν · ένα αρχείο, 6.3 MB · χωρίς εγκατάσταση</span></div>
+</div>
+<div class="shot"><img src="shots/grid6.webp" alt="Six ping targets with graphs and statistics" width="1440" height="900"></div>
+<p class="cap en">Six targets together. The numbers in the pictures are simulated demo data.</p><p class="cap el">Έξι στόχοι μαζί. Οι αριθμοί στις εικόνες είναι δοκιμαστικά (προσομοιωμένα) δεδομένα.</p>
+<section>
+  <h2><span class="en">What it does</span><span class="el">Τι κάνει</span></h2>
+  <div class="grid"><div class="card"><span class="ic">▦</span><h3><span class="en">1, 2, 4 or 6</span><span class="el">1, 2, 4 ή 6</span></h3><p><span class="en">Choose how many targets you see at once. Hidden ones keep running.</span><span class="el">Διαλέγεις πόσους στόχους βλέπεις μαζί. Όσοι δεν φαίνονται συνεχίζουν.</span></p></div><div class="card"><span class="ic">📈</span><h3><span class="en">Live statistics</span><span class="el">Ζωντανά στατιστικά</span></h3><p><span class="en">Current time, average, minimum, maximum, jitter, loss and outages, with a graph.</span><span class="el">Τρέχων χρόνος, μέσος, ελάχιστο, μέγιστο, διακύμανση, απώλεια και διακοπές, με γράφημα.</span></p></div><div class="card"><span class="ic">🔍</span><h3><span class="en">Detailed single view</span><span class="el">Αναλυτική προβολή</span></h3><p><span class="en">With one target: median, 95%, availability, longest outage and the list of failures.</span><span class="el">Με έναν στόχο: διάμεσος, 95%, διαθεσιμότητα, μεγαλύτερη διακοπή και λίστα αποτυχιών.</span></p></div><div class="card"><span class="ic">🏠</span><h3><span class="en">Your local network</span><span class="el">Το τοπικό σου δίκτυο</span></h3><p><span class="en">Real ping to your router, computers, printers or cameras, and to internet addresses.</span><span class="el">Πραγματικό ping σε router, υπολογιστές, εκτυπωτές ή κάμερες, και σε διευθύνσεις στο internet.</span></p></div><div class="card"><span class="ic">⬇</span><h3><span class="en">Export to Excel</span><span class="el">Εξαγωγή για Excel</span></h3><p><span class="en">Save the results of each target as a CSV file.</span><span class="el">Αποθηκεύεις τα αποτελέσματα κάθε στόχου σε αρχείο CSV.</span></p></div><div class="card"><span class="ic">✋</span><h3><span class="en">Nothing by itself</span><span class="el">Τίποτα από μόνο του</span></h3><p><span class="en">No ping starts until you press Start. Settings are saved only if you ask.</span><span class="el">Κανένα ping δεν ξεκινά πριν πατήσεις «Έναρξη». Οι ρυθμίσεις σώζονται μόνο αν το ζητήσεις.</span></p></div></div>
+  <div class="shots"><div><div class="shot"><img src="shots/single.webp" alt="One target with detailed statistics" loading="lazy" width="1440" height="900"></div><p class="cap en">One target with detailed statistics</p><p class="cap el">Ένας στόχος με αναλυτικά στατιστικά</p></div><div><div class="shot"><img src="shots/grid4.webp" alt="Four targets" loading="lazy" width="1440" height="900"></div><p class="cap en">Four targets</p><p class="cap el">Τέσσερις στόχοι</p></div></div>
+</section>
+<section>
+  <div class="card priv">
+    <h2><span class="en">Your results stay with you</span><span class="el">Τα αποτελέσματα μένουν σε σένα</span></h2>
+    <p class="en">The program pings only the addresses you type. It sends no results anywhere and has no tracking. Its screen is served only to your own computer. It reads your router's address just to suggest it in the list.</p><p class="el">Το πρόγραμμα κάνει ping μόνο στις διευθύνσεις που γράφεις εσύ. Δεν στέλνει αποτελέσματα πουθενά και δεν έχει παρακολούθηση. Η οθόνη του ανοίγει μόνο στον δικό σου υπολογιστή. Διαβάζει τη διεύθυνση του router μόνο για να σου την προτείνει στη λίστα.</p>
+  </div>
+</section>
+<section id="how">
+  <h2><span class="en">How to use it</span><span class="el">Πώς το χρησιμοποιείς</span></h2>
+  <ol class="steps en"><li>Click <b>Download for Windows</b>. One file, nothing to install.</li><li>Double-click <span class="mono">VeaglePingMonitor.exe</span>. A black window opens, and the app appears in your browser.</li><li>Type an address, for example <span class="mono">192.168.1.1</span> or <span class="mono">google.com</span>.</li><li>Press <b>▶ Έναρξη</b> (Start) and choose the view: <b>1, 2, 4</b> or <b>6</b>.</li><li>When you finish, press <b>⏻ Τερματισμός</b> (Quit) or close the black window.</li></ol><ol class="steps el"><li>Πάτα <b>Λήψη για Windows</b>. Ένα αρχείο, χωρίς εγκατάσταση.</li><li>Κάνε διπλό κλικ στο <span class="mono">VeaglePingMonitor.exe</span>. Ανοίγει ένα μαύρο παράθυρο και η εφαρμογή εμφανίζεται στον browser σου.</li><li>Γράψε μια διεύθυνση, π.χ. <span class="mono">192.168.1.1</span> ή <span class="mono">google.com</span>.</li><li>Πάτα <b>▶ Έναρξη</b> και διάλεξε προβολή: <b>1, 2, 4</b> ή <b>6</b>.</li><li>Όταν τελειώσεις, πάτα <b>⏻ Τερματισμός</b> ή κλείσε το μαύρο παράθυρο.</li></ol>
+  <details><summary><span class="en">Windows shows a blue “Windows protected your PC” warning</span><span class="el">Τα Windows δείχνουν μπλε προειδοποίηση «Τα Windows προστάτευσαν τον υπολογιστή σου»</span></summary><p class="en">This is expected for a new program without a paid code-signing certificate. If you downloaded it from this page and you trust it, click <b>More info</b>, then <b>Run anyway</b>. The source code is public, linked below.</p><p class="el">Είναι αναμενόμενο για νέο πρόγραμμα χωρίς πληρωμένη ψηφιακή υπογραφή. Αν το κατέβασες από αυτή τη σελίδα και το εμπιστεύεσαι, πάτα <b>Περισσότερες πληροφορίες</b> και μετά <b>Εκτέλεση ούτως ή άλλως</b>. Ο κώδικας είναι δημόσιος, με σύνδεσμο πιο κάτω.</p></details>
+  <details><summary><span class="en">A device shows ✖ but it works</span><span class="el">Μια συσκευή δείχνει ✖ ενώ δουλεύει</span></summary><p class="en">Many devices and websites are set not to answer ping. A Windows PC often blocks it with its firewall.</p><p class="el">Πολλές συσκευές και ιστοσελίδες είναι ρυθμισμένες να μην απαντούν σε ping. Ένας υπολογιστής με Windows συχνά το μπλοκάρει με το Firewall.</p></details>
+  <details><summary><span class="en">Limits</span><span class="el">Περιορισμοί</span></summary><p class="en">IPv4 only, up to six targets. Statistics are lost when you close or reload the page, unless you export them.</p><p class="el">Μόνο IPv4, έως έξι στόχους. Τα στατιστικά χάνονται όταν κλείσεις ή ανανεώσεις τη σελίδα, εκτός αν τα εξαγάγεις.</p></details>
+  <p class="sha">SHA-256 (VeaglePingMonitor.exe 2711 2335): 0be867624f2561974ceab862f39ed24083ccdd8e15d2f84731dec8bb61102c54</p>
+</section>
+<section class="terms">
+  <h2><span class="en">Terms of use</span><span class="el">Όροι χρήσης</span></h2>
+  <p class="en">Provided “as is”, free of charge and without any warranty. Use it on networks and devices you are allowed to check. It does not replace a professional monitoring system.</p><p class="el">Παρέχεται «ως έχει», δωρεάν και χωρίς καμία εγγύηση. Χρησιμοποίησέ το σε δίκτυα και συσκευές που επιτρέπεται να ελέγχεις. Δεν αντικαθιστά επαγγελματικό σύστημα παρακολούθησης.</p>
+  <p><a href="https://github.com/ferelisvag/published/tree/main/veagle-ping-monitor/source"><span class="en">Source code</span><span class="el">Κώδικας</span></a></p>
+</section>
+</div>
+<footer>VEAGLE Ping Monitor · <a href="https://ferelis.gr">ferelis.gr</a> · <span class="en">Version</span><span class="el">Έκδοση</span> 2711 2335</footer>
+<script>
+(function(){var k='veagleping.page.lang',l=null;try{l=localStorage.getItem(k)}catch(e){}
+if(l!=='el'&&l!=='en')l=String(navigator.language||'en').toLowerCase().indexOf('el')===0?'el':'en';
+function set(v){document.documentElement.lang=v;var b=document.getElementById('lang');b.textContent=v==='en'?'EL':'EN';b.setAttribute('aria-label',v==='en'?'Αλλαγή σε ελληνικά':'Switch to English');
+document.title=v==='en'?'VEAGLE Ping Monitor · Up to six pings on one screen':'VEAGLE Ping Monitor · Έως έξι ping σε μία οθόνη'}
+set(l);document.getElementById('lang').addEventListener('click',function(){l=l==='en'?'el':'en';try{localStorage.setItem(k,l)}catch(e){}set(l)});})();
+</script>
+</body>
+</html>
